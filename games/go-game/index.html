@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>围棋游戏 - 在线免费玩经典黑白对弈策略游戏 | 人机对战</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线围棋游戏，经典黑白对弈策略游戏，支持人机对战和双人对战，多个难度等级，扁平化设计界面。体验千年围棋文化！">
+    <meta name="keywords" content="围棋游戏,围棋在线,黑白棋,策略游戏,棋类游戏,在线游戏,免费游戏,人机对战,围棋文化">
+    <meta name="author" content="游戏工具箱">
+    <meta name="robots" content="index, follow">
+    
+    <!-- 主题颜色 -->
+    <meta name="theme-color" content="#2196F3">
+    
+    <link rel="stylesheet" href="css/go-game.css">
+</head>
+<body>
+    <main class="game-container" role="main">
+        <header class="game-header">
+            <h1>⚫ 围棋对弈 ⚪</h1>
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-label">黑棋</div>
+                    <div class="stat-value" id="blackCaptured">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">白棋</div>  
+                    <div class="stat-value" id="whiteCaptured">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">手数</div>
+                    <div class="stat-value" id="moveCount">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">当前</div>
+                    <div class="stat-value" id="currentPlayer">黑棋</div>
+                </div>
+            </div>
+        </header>
+
+        <section class="game-mode" aria-labelledby="mode-title">
+            <h3 id="mode-title">🎮 游戏模式</h3>
+            <div class="mode-buttons">
+                <button class="mode-btn active" onclick="goGame.setMode('pvp')">
+                    <span>👥</span>
+                    <div>双人对战</div>
+                </button>
+                <button class="mode-btn" onclick="goGame.setMode('ai')">
+                    <span>🤖</span>
+                    <div>人机对战</div>
+                </button>
+            </div>
+        </section>
+
+        <section class="board-size" aria-labelledby="size-title">
+            <h3 id="size-title">📐 棋盘大小</h3>
+            <div class="size-buttons">
+                <button class="size-btn" onclick="goGame.setBoardSize(9)">9×9</button>
+                <button class="size-btn" onclick="goGame.setBoardSize(13)">13×13</button>
+                <button class="size-btn active" onclick="goGame.setBoardSize(19)">19×19</button>
+            </div>
+        </section>
+
+        <section class="game-controls" aria-label="游戏控制">
+            <button class="btn" onclick="goGame.startNewGame()">🆕 新对局</button>
+            <button class="btn" onclick="goGame.pass()">⏭️ 停一手</button>
+            <button class="btn" onclick="goGame.undo()">↩️ 悔棋</button>
+            <button class="btn secondary" onclick="goGame.resign()">🏳️ 认输</button>
+        </section>
+
+        <section class="game-board-container" aria-label="围棋棋盘">
+            <div class="board-wrapper">
+                <canvas id="goBoard" width="600" height="600"></canvas>
+                <div class="coordinates">
+                    <div class="coord-numbers"></div>
+                    <div class="coord-letters"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="game-info">
+            <div class="captured-stones">
+                <h4>🪨 提子</h4>
+                <div class="captured-display">
+                    <div class="captured-group">
+                        <span class="stone black-stone"></span>
+                        <span id="blackCapturedStones">0</span>
+                    </div>
+                    <div class="captured-group">
+                        <span class="stone white-stone"></span>
+                        <span id="whiteCapturedStones">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-status">
+                <h4>📊 对局状态</h4>
+                <div class="status-display">
+                    <div class="status-item">
+                        <span class="status-label">当前回合:</span>
+                        <span id="turnDisplay">黑棋先行</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">对局时间:</span>
+                        <span id="gameTime">00:00</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 游戏结束弹窗 -->
+        <div class="game-over-popup" id="gameOverPopup" style="display: none;" role="dialog">
+            <div class="popup-content">
+                <h2 id="gameOverTitle">🎉 对局结束</h2>
+                <div class="game-result" id="gameResult">黑棋获胜！</div>
+                <div class="final-score">
+                    <div class="score-item">
+                        <span class="stone black-stone"></span>
+                        <span>黑棋: <span id="finalBlackScore">0</span>子</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="stone white-stone"></span>
+                        <span>白棋: <span id="finalWhiteScore">0</span>子</span>
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="goGame.closeGameOver(); goGame.startNewGame();">再来一局</button>
+                    <button class="btn secondary" onclick="goGame.closeGameOver();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帮助模态框 -->
+        <div class="help-modal" id="helpModal" style="display: none;" role="dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>⚫ 围棋游戏指南</h2>
+                    <button class="close-btn" onclick="goGame.closeHelp()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="help-section">
+                        <h3>🎯 游戏目标</h3>
+                        <p>通过在棋盘上放置黑白棋子，围取更多的地盘。提取对方的棋子也能获得分数。</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>📏 基本规则</h3>
+                        <ul>
+                            <li>黑棋先行，双方轮流落子</li>
+                            <li>棋子放在线的交叉点上</li>
+                            <li>被完全围住且无气的棋子会被提取</li>
+                            <li>禁止全局同形再现（劫争规则）</li>
+                            <li>双方连续停一手时对局结束</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 操作方式</h3>
+                        <ul>
+                            <li>点击交叉点放置棋子</li>
+                            <li>点击"停一手"跳过当前回合</li>
+                            <li>点击"悔棋"撤销上一步</li>
+                            <li>点击"认输"结束对局</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🏆 胜负判定</h3>
+                        <ul>
+                            <li>围取地盘多的一方获胜</li>
+                            <li>提取对方棋子可获得额外分数</li>
+                            <li>一方认输则对方获胜</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="help-btn" onclick="goGame.showHelp()">❓</button>
+    </main>
+
+    <script src="js/go-game.js"></script>
+</body>
+</html>

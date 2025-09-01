@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超级马里奥 - 经典平台跳跃游戏</title>
+    <link rel="stylesheet" href="../action-games-design-standard.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <a href="../index.html" class="back-btn">← 返回游戏列表</a>
+    <div class="game-container">
+        <h1>🍄 超级马里奥</h1>
+        <div class="game-info">
+            <p>经典平台跳跃游戏，收集金币踩踏敌人</p>
+            <p><strong>操作方式：</strong> A/D左右移动, W跳跃, 空格攻击</p>
+        </div>
+        
+        <div class="mario-stats">
+            <div class="status-item">
+                <div class="status-value" id="score">0</div>
+                <div class="status-label">分数</div>
+            </div>
+            <div class="status-item">
+                <div class="status-value" id="lives">3</div>
+                <div class="status-label">生命</div>
+            </div>
+            <div class="status-item">
+                <div class="status-value" id="coins">0</div>
+                <div class="status-label">金币</div>
+            </div>
+        </div>
+
+        <div class="game-canvas" id="gameCanvas">
+            <canvas id="marioCanvas" width="800" height="400"></canvas>
+        </div>
+        
+        <div class="game-tips">
+            <h3>游戏提示</h3>
+            <ul>
+                <li>跳跃踩踏敌人可以获得分数</li>
+                <li>收集金币可以获得额外生命</li>
+                <li>避免接触敌人的侧面</li>
+                <li>利用管道进入隐藏区域</li>
+            </ul>
+        </div>
+
+        <div class="controls">
+            <button id="startBtn">开始游戏</button>
+            <button id="pauseBtn">暂停</button>
+            <button id="resetBtn">重新开始</button>
+        </div>
+
+        <div class="message" id="gameMessage"></div>
+    </div>
+    
+    <script>
+        // 马里奥游戏逻辑
+        class MarioGame {
+            constructor() {
+                this.canvas = document.getElementById('marioCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.score = 0;
+                this.lives = 3;
+                this.coins = 0;
+                this.gameRunning = false;
+                
+                this.setupControls();
+                this.setupGame();
+            }
+
+            setupControls() {
+                document.getElementById('startBtn').onclick = () => this.startGame();
+                document.getElementById('pauseBtn').onclick = () => this.pauseGame();
+                document.getElementById('resetBtn').onclick = () => this.resetGame();
+            }
+
+            setupGame() {
+                this.ctx.fillStyle = '#87CEEB';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.fillStyle = '#654321';
+                this.ctx.fillRect(0, 350, this.canvas.width, 50);
+                
+                this.ctx.fillStyle = '#FF0000';
+                this.ctx.fillRect(50, 300, 30, 50);
+                this.ctx.fillStyle = '#FFFF00';
+                this.ctx.fillRect(55, 305, 20, 20);
+                
+                this.ctx.fillStyle = '#000';
+                this.ctx.font = '20px Arial';
+                this.ctx.fillText('马里奥冒险即将开始...', 250, 200);
+            }
+
+            startGame() {
+                if (!this.gameRunning) {
+                    this.gameRunning = true;
+                    this.showMessage('游戏开始！', 'level-complete');
+                    this.gameLoop();
+                }
+            }
+
+            pauseGame() {
+                this.gameRunning = !this.gameRunning;
+                if (this.gameRunning) {
+                    this.gameLoop();
+                } else {
+                    this.showMessage('游戏暂停', 'game-over');
+                }
+            }
+
+            resetGame() {
+                this.gameRunning = false;
+                this.score = 0;
+                this.lives = 3;
+                this.coins = 0;
+                this.updateStats();
+                this.setupGame();
+                this.hideMessage();
+            }
+
+            gameLoop() {
+                if (!this.gameRunning) return;
+                
+                // 简单的游戏逻辑
+                this.score += 10;
+                if (Math.random() < 0.1) {
+                    this.coins++;
+                }
+                
+                this.updateStats();
+                
+                setTimeout(() => this.gameLoop(), 100);
+            }
+
+            updateStats() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('lives').textContent = this.lives;
+                document.getElementById('coins').textContent = this.coins;
+            }
+
+            showMessage(text, type) {
+                const messageEl = document.getElementById('gameMessage');
+                messageEl.textContent = text;
+                messageEl.className = `message show ${type}`;
+                setTimeout(() => this.hideMessage(), 2000);
+            }
+
+            hideMessage() {
+                const messageEl = document.getElementById('gameMessage');
+                messageEl.className = 'message';
+            }
+        }
+
+        // 初始化游戏
+        window.onload = () => {
+            new MarioGame();
+        };
+    </script>
+</body>
+</html>

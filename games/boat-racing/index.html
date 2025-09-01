@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚤 赛艇游戏 - 扁平化竞速游戏</title>
+    <link rel="stylesheet" href="css/boat-racing.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- 游戏头部 -->
+        <div class="game-header">
+            <h1>🚤 赛艇游戏</h1>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <span class="stat-label">速度</span>
+                    <span class="stat-value" id="speed">0</span>
+                    <span class="stat-unit">节</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">燃油</span>
+                    <span class="stat-value" id="fuel">100</span>
+                    <span class="stat-unit">%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">航行</span>
+                    <span class="stat-value" id="distance">0</span>
+                    <span class="stat-unit">海里</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">排名</span>
+                    <span class="stat-value" id="rank">1</span>
+                    <span class="stat-unit">/6</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏控制面板 -->
+        <div class="game-controls">
+            <button class="btn btn-primary" id="startBtn">开始比赛</button>
+            <button class="btn btn-secondary" id="pauseBtn">暂停</button>
+            <button class="btn btn-secondary" id="resetBtn">重置</button>
+            <div class="difficulty-selector">
+                <label>水域:</label>
+                <select id="waterSelect">
+                    <option value="calm">平静海面</option>
+                    <option value="waves" selected>波浪海面</option>
+                    <option value="storm">风暴海面</option>
+                    <option value="rapids">急流水道</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 游戏画布区域 -->
+        <div class="game-canvas-container">
+            <canvas id="gameCanvas" width="800" height="500"></canvas>
+            <div class="wind-indicator">
+                <div class="wind-arrow" id="windArrow">🧭</div>
+                <div class="wind-info">
+                    <span id="windDirection">N</span>
+                    <span id="windSpeed">5</span>节
+                </div>
+            </div>
+            <div class="fuel-gauge">
+                <div class="fuel-bar">
+                    <div class="fuel-fill" id="fuelFill"></div>
+                </div>
+                <span>燃油表</span>
+            </div>
+        </div>
+
+        <!-- 操控面板 -->
+        <div class="control-panel">
+            <div class="control-instructions">
+                <h3>🎮 操控说明</h3>
+                <div class="control-grid">
+                    <div class="control-item">
+                        <kbd>↑</kbd>
+                        <span>加速</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>↓</kbd>
+                        <span>减速</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>←</kbd>
+                        <span>左舵</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>→</kbd>
+                        <span>右舵</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>Space</kbd>
+                        <span>涡轮</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 虚拟方向盘 -->
+            <div class="steering-wheel">
+                <h3>🎚️ 虚拟方向盘</h3>
+                <div class="wheel-container">
+                    <div class="wheel" id="steeringWheel">
+                        <div class="wheel-center">🚤</div>
+                    </div>
+                    <div class="throttle-slider">
+                        <input type="range" id="throttleSlider" min="0" max="100" value="0" orient="vertical">
+                        <span>油门</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 触屏控制按钮 -->
+            <div class="touch-controls" id="touchControls">
+                <div class="touch-row">
+                    <button class="touch-btn" id="accelerateBtn">▲</button>
+                    <button class="touch-btn" id="turboBtn">🚀</button>
+                </div>
+                <div class="touch-row">
+                    <button class="touch-btn" id="leftBtn">◀</button>
+                    <button class="touch-btn" id="brakeBtn">▼</button>
+                    <button class="touch-btn" id="rightBtn">▶</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 航海信息 -->
+        <div class="navigation-info">
+            <div class="nav-section">
+                <h3>🌊 航海特色</h3>
+                <ul>
+                    <li>方向舵精确控制</li>
+                    <li>浪花阻力模拟</li>
+                    <li>风向影响航行</li>
+                    <li>燃油消耗管理</li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <h3>🏆 获胜条件</h3>
+                <ul>
+                    <li>第一个到达终点</li>
+                    <li>避免触礁搁浅</li>
+                    <li>合理管理燃油</li>
+                    <li>利用风向加速</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 航行数据 -->
+        <div class="performance-panel">
+            <h3>📊 航行数据</h3>
+            <div class="performance-grid">
+                <div class="performance-item">
+                    <span class="performance-label">平均航速</span>
+                    <span class="performance-value" id="avgSpeed">0 节</span>
+                </div>
+                <div class="performance-item">
+                    <span class="performance-label">最高航速</span>
+                    <span class="performance-value" id="maxSpeed">0 节</span>
+                </div>
+                <div class="performance-item">
+                    <span class="performance-label">燃油效率</span>
+                    <span class="performance-value" id="fuelEfficiency">0 海里/升</span>
+                </div>
+                <div class="performance-item">
+                    <span class="performance-label">航线优化</span>
+                    <span class="performance-value" id="routeOptimization">100%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 天气系统 -->
+        <div class="weather-system">
+            <h3>🌤️ 天气系统</h3>
+            <div class="weather-grid">
+                <div class="weather-item">
+                    <span class="weather-icon" id="weatherIcon">☀️</span>
+                    <span class="weather-desc" id="weatherDesc">晴朗</span>
+                </div>
+                <div class="weather-item">
+                    <span class="weather-label">能见度</span>
+                    <span class="weather-value" id="visibility">10km</span>
+                </div>
+                <div class="weather-item">
+                    <span class="weather-label">海浪高度</span>
+                    <span class="weather-value" id="waveHeight">0.5m</span>
+                </div>
+                <div class="weather-item">
+                    <span class="weather-label">水温</span>
+                    <span class="weather-value" id="waterTemp">22°C</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏结果弹窗 -->
+        <div class="game-modal" id="gameModal">
+            <div class="modal-content">
+                <h2 id="resultTitle">🚤 比赛结束</h2>
+                <div class="result-stats">
+                    <div class="result-item">
+                        <span class="result-label">最终排名</span>
+                        <span class="result-value" id="finalRank">1st</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">完成时间</span>
+                        <span class="result-value" id="finalTime">00:00:00</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">平均航速</span>
+                        <span class="result-value" id="finalAvgSpeed">0 节</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">剩余燃油</span>
+                        <span class="result-value" id="finalFuel">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">评级</span>
+                        <span class="result-value" id="finalRating">⭐⭐⭐</span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="playAgainBtn">再来一局</button>
+                    <button class="btn btn-secondary" id="backToMenuBtn">返回菜单</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 返回链接 -->
+        <div class="back-link">
+            <a href="../index.html" class="btn btn-link">← 返回游戏大厅</a>
+        </div>
+    </div>
+
+    <script src="js/boat-racing.js"></script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太空射击游戏 - 经典街机射击游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="经典太空射击游戏，操控战舰消灭外星人，扁平化设计界面，多种武器升级，挑战你的反应速度和策略思维！">
+    <meta name="keywords" content="太空射击,射击游戏,街机游戏,在线游戏,免费游戏,飞行射击,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#4A90E2">
+    
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main class="game-container">
+        <h1>🚀 太空射击</h1>
+        
+        <section class="game-info">
+            <div class="info-item">
+                <div class="info-label">得分</div>
+                <div class="info-value" id="score">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">生命</div>
+                <div class="info-value" id="lives">3</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">等级</div>
+                <div class="info-value" id="level">1</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">敌人</div>
+                <div class="info-value" id="enemies">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">最高分</div>
+                <div class="info-value" id="highScore">0</div>
+            </div>
+        </section>
+
+        <section class="controls">
+            <button class="btn" id="startBtn" onclick="spaceShooter.startGame()">🎮 开始游戏</button>
+            <button class="btn" id="pauseBtn" onclick="spaceShooter.togglePause()" disabled>⏸️ 暂停</button>
+            <button class="btn" id="restartBtn" onclick="spaceShooter.restartGame()">🔄 重新开始</button>
+            <button class="btn" id="upgradeBtn" onclick="spaceShooter.showUpgrades()">⬆️ 升级</button>
+        </section>
+
+        <section class="game-area">
+            <canvas class="game-canvas" id="gameCanvas" width="600" height="500"></canvas>
+        </section>
+
+        <section class="instructions">
+            <h3>🎮 游戏操作</h3>
+            <div class="instruction-grid">
+                <div class="instruction-item">
+                    <div class="instruction-icon">🎯</div>
+                    <div class="instruction-text">
+                        <h4>移动战舰</h4>
+                        <p>使用方向键或WASD键控制战舰移动</p>
+                    </div>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-icon">💥</div>
+                    <div class="instruction-text">
+                        <h4>发射子弹</h4>
+                        <p>按空格键或点击屏幕发射子弹攻击敌人</p>
+                    </div>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-icon">🛡️</div>
+                    <div class="instruction-text">
+                        <h4>躲避攻击</h4>
+                        <p>灵活移动躲避敌人子弹，保护自己的战舰</p>
+                    </div>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-icon">⭐</div>
+                    <div class="instruction-text">
+                        <h4>收集道具</h4>
+                        <p>收集掉落的道具获得武器升级和生命恢复</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="power-ups">
+            <h3>💎 道具系统</h3>
+            <div class="powerup-grid">
+                <div class="powerup-item">
+                    <div class="powerup-icon" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">🔫</div>
+                    <div class="powerup-desc">
+                        <h4>双重射击</h4>
+                        <p>同时发射两发子弹，提高攻击效率</p>
+                    </div>
+                </div>
+                <div class="powerup-item">
+                    <div class="powerup-icon" style="background: linear-gradient(135deg, #f39c12, #e67e22);">⚡</div>
+                    <div class="powerup-desc">
+                        <h4>快速射击</h4>
+                        <p>大幅提升射击速度，连续火力输出</p>
+                    </div>
+                </div>
+                <div class="powerup-item">
+                    <div class="powerup-icon" style="background: linear-gradient(135deg, #27ae60, #229954);">❤️</div>
+                    <div class="powerup-desc">
+                        <h4>生命恢复</h4>
+                        <p>恢复一点生命值，让你更持久战斗</p>
+                    </div>
+                </div>
+                <div class="powerup-item">
+                    <div class="powerup-icon" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">🛡️</div>
+                    <div class="powerup-desc">
+                        <h4>护盾防护</h4>
+                        <p>临时获得护盾，抵挡敌人攻击</p>
+                    </div>
+                </div>
+                <div class="powerup-item">
+                    <div class="powerup-icon" style="background: linear-gradient(135deg, #3498db, #2980b9);">💣</div>
+                    <div class="powerup-desc">
+                        <h4>超级炸弹</h4>
+                        <p>清除屏幕上所有敌人，获得大量分数</p>
+                    </div>
+                </div>
+                <div class="powerup-item">
+                    <div class="powerup-icon" style="background: linear-gradient(135deg, #e91e63, #ad1457);">🌟</div>
+                    <div class="powerup-desc">
+                        <h4>分数加倍</h4>
+                        <p>短时间内击败敌人获得双倍分数</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 游戏结束弹窗 -->
+        <div class="game-over-overlay" id="gameOverOverlay">
+            <div class="game-over-content">
+                <h2 id="gameOverTitle">💥 游戏结束</h2>
+                <div class="final-stats">
+                    <p>最终得分: <span id="finalScore">0</span></p>
+                    <p>击败敌人: <span id="enemiesKilled">0</span></p>
+                    <p>最高等级: <span id="maxLevel">1</span></p>
+                    <p>存活时间: <span id="survivalTime">0</span>秒</p>
+                </div>
+                <div class="star-rating" id="starRating">⭐⭐⭐</div>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button class="btn" onclick="spaceShooter.restartGame()">重新开始</button>
+                    <button class="btn" onclick="spaceShooter.closeGameOver()">返回菜单</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    
+    <script src="js/game.js"></script>
+</body>
+</html>

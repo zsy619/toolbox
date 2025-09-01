@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>滑动数字拼图 - 在线免费玩经典数字排序益智游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线滑动数字拼图游戏，经典15拼图数字排序游戏，多种难度等级，扁平化设计界面，挑战你的逻辑思维！">
+    <meta name="keywords" content="滑动拼图,数字拼图,15拼图,益智游戏,在线游戏,免费游戏,数字排序,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#795548">
+    
+    <link rel="stylesheet" href="css/sliding-puzzle.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>🧩 滑动数字拼图</h1>
+            <div class="game-subtitle">经典15拼图数字排序游戏</div>
+        </header>
+
+        <section class="difficulty-selector">
+            <h3>🎯 选择难度</h3>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn" onclick="slidingPuzzle.setSize(3)">
+                    <span>😊</span>
+                    <div>简单</div>
+                    <small>3×3 网格</small>
+                </button>
+                <button class="difficulty-btn active" onclick="slidingPuzzle.setSize(4)">
+                    <span>🤔</span>
+                    <div>经典</div>
+                    <small>4×4 网格</small>
+                </button>
+                <button class="difficulty-btn" onclick="slidingPuzzle.setSize(5)">
+                    <span>😅</span>
+                    <div>困难</div>
+                    <small>5×5 网格</small>
+                </button>
+            </div>
+        </section>
+
+        <section class="game-stats">
+            <div class="stat-item">
+                <span class="stat-label">步数</span>
+                <span class="stat-value" id="moveCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">时间</span>
+                <span class="stat-value" id="timeCount">00:00</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">最佳</span>
+                <span class="stat-value" id="bestScore">--</span>
+            </div>
+        </section>
+
+        <section class="game-board-container">
+            <div class="game-board" id="gameBoard">
+                <!-- 拼图块将通过JavaScript动态生成 -->
+            </div>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn start-btn" onclick="slidingPuzzle.shuffle()">🎲 打乱</button>
+            <button class="btn" onclick="slidingPuzzle.solve()" id="solveBtn">🔧 求解</button>
+            <button class="btn secondary" onclick="slidingPuzzle.showHint()">💡 提示</button>
+            <button class="btn secondary" onclick="slidingPuzzle.showHelp()">❓ 帮助</button>
+        </section>
+
+        <!-- 胜利弹窗 -->
+        <div class="victory-popup" id="victoryPopup">
+            <div class="popup-content">
+                <h2>🎉 恭喜完成！</h2>
+                <div class="victory-stats">
+                    <div class="stat-display">
+                        <div class="stat-icon">👑</div>
+                        <div>
+                            <div class="stat-label">完成步数</div>
+                            <div class="stat-value" id="finalMoves">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">⏱️</div>
+                        <div>
+                            <div class="stat-label">用时</div>
+                            <div class="stat-value" id="finalTime">00:00</div>
+                        </div>
+                    </div>
+                    <div class="star-rating" id="starRating">
+                        <span class="star">⭐</span>
+                        <span class="star">⭐</span>
+                        <span class="star">⭐</span>
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="slidingPuzzle.closeVictory(); slidingPuzzle.shuffle();">再来一次</button>
+                    <button class="btn secondary" onclick="slidingPuzzle.closeVictory();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帮助弹窗 -->
+        <div class="help-popup" id="helpPopup">
+            <div class="popup-content help-content">
+                <h2>🧩 游戏说明</h2>
+                
+                <div class="help-section">
+                    <h3>🎯 游戏目标</h3>
+                    <p>通过滑动数字块，将所有数字按顺序排列（1, 2, 3...），空格位于右下角。</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🎮 操作方式</h3>
+                    <ul>
+                        <li>点击空格旁边的数字块进行滑动</li>
+                        <li>使用键盘方向键控制空格移动</li>
+                        <li>只有与空格相邻的数字块才能移动</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🏆 评分标准</h3>
+                    <ul>
+                        <li>⭐⭐⭐ 三星：步数少于理论最小值的2倍</li>
+                        <li>⭐⭐ 二星：步数少于理论最小值的3倍</li>
+                        <li>⭐ 一星：完成拼图</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>💡 解题技巧</h3>
+                    <ul>
+                        <li>先完成第一行，再完成第一列</li>
+                        <li>逐行逐列地解决问题</li>
+                        <li>注意保持已完成部分不被打乱</li>
+                        <li>最后处理右下角的2×2区域</li>
+                    </ul>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="slidingPuzzle.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/sliding-puzzle.js"></script>
+</body>
+</html>

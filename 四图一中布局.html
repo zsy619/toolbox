@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四图一中混合布局</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f0f0f0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .preview-wrapper {
+            width: 100vw;
+            height: 100vh;
+            overflow: auto;
+            background: #e0e0e0;
+            position: relative;
+        }
+
+        .previewCanvas {
+            width: 600px;
+            height: 600px;
+            margin: 50px;
+            position: relative;
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            background: #f5f5f5;
+        }
+
+        .image-container {
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #666;
+            border: 2px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+
+        /* 上图 - 第一行，跨2列(66.666%宽) */
+        .top-image {
+            grid-column: 1 / 3;
+            grid-row: 1;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            z-index: 1;
+        }
+
+        /* 下图 - 第三行，第二、三列(66.666%宽) */
+        .bottom-image {
+            grid-column: 2 / 4;
+            grid-row: 3;
+            background: linear-gradient(135deg, #4ecdc4, #7ed6cc);
+            z-index: 1;
+        }
+
+        /* 左图 - 第一列，第二、三行(66.666%高) */
+        .left-image {
+            grid-column: 1;
+            grid-row: 2 / 4;
+            background: linear-gradient(135deg, #45b7d1, #6cc5dc);
+            z-index: 2;
+        }
+
+        /* 右图 - 第一、二行第三列(33.333%宽×66.666%高) */
+        .right-image {
+            grid-column: 3;
+            grid-row: 1 / 3;
+            background: linear-gradient(135deg, #f9ca24, #f6d55c);
+            z-index: 2;
+        }
+
+        /* 中心图 - 第二行第二列(33.333%×33.333%) */
+        .center-image {
+            grid-column: 2;
+            grid-row: 2;
+            background: linear-gradient(135deg, #a55eea, #c27ce0);
+            border: 3px solid #fff;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        /* 输出尺寸同步控制 */
+        .size-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .size-control label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .size-control input {
+            width: 80px;
+            padding: 5px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* 滚动条样式 */
+        .preview-wrapper::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        .preview-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .preview-wrapper::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 6px;
+        }
+
+        .preview-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <div class="size-control">
+        <label>输出尺寸:</label>
+        <input type="number" id="width-input" value="600" min="100" max="2000">
+        <span>×</span>
+        <input type="number" id="height-input" value="600" min="100" max="2000">
+        <span>px</span>
+    </div>
+    
+    <div class="preview-wrapper">
+        <div class="previewCanvas">
+            <div class="container">
+        <div class="image-container top-image">
+            上图 (2:1)
+        </div>
+        
+        <div class="image-container right-image">
+            右图 (1:2)
+        </div>
+        
+        <div class="image-container left-image">
+            左图 (1:2)
+        </div>
+        
+        <div class="image-container center-image">
+            中心 (1:1)
+        </div>
+        
+        <div class="image-container bottom-image">
+            下图 (2:1)
+        </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const widthInput = document.getElementById('width-input');
+        const heightInput = document.getElementById('height-input');
+        const previewCanvas = document.querySelector('.previewCanvas');
+        
+        function updateSize() {
+            const width = widthInput.value + 'px';
+            const height = heightInput.value + 'px';
+            previewCanvas.style.width = width;
+            previewCanvas.style.height = height;
+        }
+        
+        widthInput.addEventListener('input', updateSize);
+        heightInput.addEventListener('input', updateSize);
+    </script>
+</body>
+</html>

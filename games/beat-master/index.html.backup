@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐节拍大师 - 专业节奏感训练游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="专业音乐节拍大师游戏，训练节奏感和音乐感知能力，扁平化设计界面，多种难度等级和音乐模式！">
+    <meta name="keywords" content="音乐游戏,节拍大师,节奏训练,音乐感知,在线游戏,免费游戏,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#9B59B6">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'SF Pro Display', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.8rem;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #9B59B6, #8E44AD);
+            color: white;
+            padding: 15px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(155, 89, 182, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .mode-selector {
+            margin-bottom: 25px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .mode-selector h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .mode-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            background: white;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .mode-btn:hover {
+            background: #f8fafc;
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #9B59B6, #8E44AD);
+            color: white;
+            border-color: #9B59B6;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .btn.secondary:hover {
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn.success:hover {
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .beat-display {
+            background: #34495e;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .bpm-display {
+            color: white;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .beat-indicator {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+        }
+
+        .beat-indicator.active {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(39, 174, 96, 0.5);
+        }
+
+        .beat-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .beat-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .beat-btn.primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .beat-btn.secondary {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .beat-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .beat-btn:active {
+            transform: scale(0.95);
+        }
+
+        .rhythm-pattern {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .rhythm-pattern h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        .pattern-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .pattern-beat {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #bdc3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .pattern-beat.strong {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .pattern-beat.weak {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .pattern-beat.current {
+            transform: scale(1.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .accuracy-meter {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .accuracy-bar {
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .accuracy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #27ae60);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .accuracy-text {
+            text-align: center;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .game-complete-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .complete-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            margin: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .complete-content h2 {
+            color: #27ae60;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .complete-stats {
+            margin-bottom: 25px;
+        }
+
+        .complete-stats p {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .celebration {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        .instruction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .instruction-item {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .instruction-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #9B59B6, #8E44AD);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .instruction-text {
+            flex: 1;
+        }
+
+        .instruction-text h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+
+        .instruction-text p {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .game-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .mode-buttons, .game-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn, .mode-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .beat-buttons {
+                gap: 15px;
+            }
+
+            .beat-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.2rem;
+            }
+
+            .bpm-display {
+                font-size: 2.5rem;
+            }
+
+            .beat-indicator {
+                width: 100px;
+                height: 100px;
+                font-size: 1.5rem;
+            }
+
+            .instruction-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .complete-content {
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .pattern-display {
+                gap: 5px;
+            }
+
+            .pattern-beat {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="game-container">
+        <h1>🎵 音乐节拍大师</h1>
+        
+        <section class="game-stats">
+            <div class="stat-item">
+                <div class="stat-label">分数</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">准确率</div>
+                <div class="stat-value" id="accuracy">100%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">连击</div>
+                <div class="stat-value" id="combo">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">节拍数</div>
+                <div class="stat-value" id="beatCount">0</div>
+            </div>
+        </section>
+
+        <section class="mode-selector">
+            <h3>🎯 游戏模式</h3>
+            <div class="mode-buttons">
+                <button class="mode-btn active" data-mode="training">🎓 训练模式</button>
+                <button class="mode-btn" data-mode="challenge">⚡ 挑战模式</button>
+                <button class="mode-btn" data-mode="rhythm">🎼 节奏模式</button>
+                <button class="mode-btn" data-mode="freestyle">🎨 自由模式</button>
+            </div>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn success" id="startBtn" onclick="beatMaster.startGame()">🎮 开始游戏</button>
+            <button class="btn secondary" id="pauseBtn" onclick="beatMaster.pauseGame()">⏸️ 暂停</button>
+            <button class="btn" id="resetBtn" onclick="beatMaster.resetGame()">🔄 重置</button>
+            <button class="btn secondary" id="settingsBtn" onclick="beatMaster.showSettings()">⚙️ 设置</button>
+        </section>
+
+        <section class="beat-display">
+            <div class="bpm-display" id="bpmDisplay">120 BPM</div>
+            <div class="beat-indicator" id="beatIndicator">♪</div>
+            <div class="beat-buttons">
+                <button class="beat-btn primary" id="primaryBeat" onclick="beatMaster.tapBeat('primary')">主</button>
+                <button class="beat-btn secondary" id="secondaryBeat" onclick="beatMaster.tapBeat('secondary')">副</button>
+            </div>
+        </section>
+
+        <section class="rhythm-pattern">
+            <h3>🎼 节奏模式</h3>
+            <div class="pattern-display" id="patternDisplay">
+                <!-- 节奏模式将通过JavaScript生成 -->
+            </div>
+        </section>
+
+        <section class="accuracy-meter">
+            <div class="accuracy-bar">
+                <div class="accuracy-fill" id="accuracyFill"></div>
+            </div>
+            <div class="accuracy-text" id="accuracyText">准确率: 100%</div>
+        </section>
+
+        <section class="instructions">
+            <h3>🎮 游戏说明</h3>
+            <div class="instruction-grid">
+                <div class="instruction-item">
+                    <div class="instruction-icon">🎓</div>
+                    <div class="instruction-text">
+                        <h4>训练模式</h4>
+                        <p>跟随节拍器练习，提升基础节奏感和时间感知能力</p>
+                    </div>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-icon">⚡</div>
+                    <div class="instruction-text">
+                        <h4>挑战模式</h4>
+                        <p>逐级递增的BPM挑战，测试你的极限节奏反应速度</p>
+                    </div>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-icon">🎼</div>
+                    <div class="instruction-text">
+                        <h4>节奏模式</h4>
+                        <p>复杂节奏型练习，包含强拍弱拍的音乐理论训练</p>
+                    </div>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-icon">🎨</div>
+                    <div class="instruction-text">
+                        <h4>自由模式</h4>
+                        <p>自定义BPM和节拍模式，创造属于你的节奏训练</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 游戏完成弹窗 -->
+        <div class="game-complete-overlay" id="completeOverlay">
+            <div class="complete-content">
+                <div class="celebration">🎉</div>
+                <h2>训练完成！</h2>
+                <div class="complete-stats">
+                    <p>最终分数: <span id="finalScore">0</span></p>
+                    <p>平均准确率: <span id="finalAccuracy">0%</span></p>
+                    <p>最高连击: <span id="finalCombo">0</span></p>
+                    <p>总节拍数: <span id="finalBeatCount">0</span></p>
+                </div>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button class="btn success" onclick="beatMaster.startGame()">再次训练</button>
+                    <button class="btn secondary" onclick="beatMaster.closeComplete()">返回</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        class BeatMaster {
+            constructor() {
+                this.gameActive = false;
+                this.gamePaused = false;
+                this.currentMode = 'training';
+                this.bpm = 120;
+                this.score = 0;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.beatCount = 0;
+                this.accurateBeats = 0;
+                this.totalBeats = 0;
+                this.currentBeat = 0;
+                this.gameStartTime = 0;
+                this.gameInterval = null;
+                this.beatInterval = null;
+                this.lastBeatTime = 0;
+                this.tolerance = 150; // 毫秒容错
+                this.currentPattern = [];
+                this.patternIndex = 0;
+                
+                this.modes = {
+                    training: { 
+                        name: '训练模式', 
+                        bpm: 120, 
+                        duration: 60,
+                        pattern: [1, 0, 1, 0] // 简单4/4拍
+                    },
+                    challenge: { 
+                        name: '挑战模式', 
+                        bpm: 80, 
+                        duration: 90,
+                        pattern: [1, 0, 1, 0, 1, 0, 1, 0]
+                    },
+                    rhythm: { 
+                        name: '节奏模式', 
+                        bpm: 100, 
+                        duration: 120,
+                        pattern: [2, 1, 0, 1, 2, 0, 1, 0] // 复杂节奏型
+                    },
+                    freestyle: { 
+                        name: '自由模式', 
+                        bpm: 120, 
+                        duration: 180,
+                        pattern: [1, 1, 1, 1]
+                    }
+                };
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.setupAudio();
+                this.updateDisplay();
+                this.createPattern();
+            }
+
+            setupEventListeners() {
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (this.gameActive && !this.gamePaused) return;
+                        
+                        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentMode = e.target.dataset.mode;
+                        this.bpm = this.modes[this.currentMode].bpm;
+                        this.createPattern();
+                        this.updateDisplay();
+                    });
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === ' ') {
+                        e.preventDefault();
+                        if (this.gameActive) {
+                            this.tapBeat('primary');
+                        } else {
+                            this.startGame();
+                        }
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.tapBeat('secondary');
+                    }
+                });
+
+                // 阻止按钮的默认行为以获得更精确的时间
+                document.getElementById('primaryBeat').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.tapBeat('primary');
+                });
+
+                document.getElementById('secondaryBeat').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.tapBeat('secondary');
+                });
+            }
+
+            setupAudio() {
+                if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            startGame() {
+                if (this.gameActive) return;
+                
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                
+                this.gameActive = true;
+                this.gamePaused = false;
+                this.score = 0;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.beatCount = 0;
+                this.accurateBeats = 0;
+                this.totalBeats = 0;
+                this.currentBeat = 0;
+                this.patternIndex = 0;
+                this.gameStartTime = Date.now();
+                
+                const mode = this.modes[this.currentMode];
+                this.bpm = mode.bpm;
+                this.currentPattern = mode.pattern;
+                this.gameDuration = mode.duration * 1000;
+                
+                this.startBeats();
+                this.updateDisplay();
+                this.createPattern();
+                
+                document.getElementById('pauseBtn').textContent = '⏸️ 暂停';
+                document.getElementById('completeOverlay').style.display = 'none';
+                
+                // 游戏计时器
+                this.gameInterval = setInterval(() => {
+                    const elapsed = Date.now() - this.gameStartTime;
+                    if (elapsed >= this.gameDuration) {
+                        this.endGame();
+                    }
+                }, 100);
+            }
+
+            startBeats() {
+                const beatDuration = 60000 / this.bpm; // 毫秒
+                this.lastBeatTime = Date.now();
+                
+                this.beatInterval = setInterval(() => {
+                    if (!this.gamePaused) {
+                        this.playBeat();
+                        this.currentBeat++;
+                        this.updateBeatDisplay();
+                        this.lastBeatTime = Date.now();
+                    }
+                }, beatDuration);
+            }
+
+            playBeat() {
+                if (!this.audioContext) return;
+                
+                const patternValue = this.currentPattern[this.patternIndex % this.currentPattern.length];
+                this.patternIndex++;
+                
+                // 根据节拍类型播放不同音调
+                let frequency = 800; // 默认频率
+                if (patternValue === 2) frequency = 1000; // 强拍
+                else if (patternValue === 1) frequency = 800;  // 中拍
+                else if (patternValue === 0) frequency = 600;  // 弱拍或休止
+                
+                if (patternValue > 0) {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                    oscillator.type = 'sine';
+                    
+                    const volume = patternValue === 2 ? 0.3 : 0.2;
+                    gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.1);
+                }
+            }
+
+            tapBeat(type) {
+                if (!this.gameActive || this.gamePaused) return;
+                
+                const now = Date.now();
+                const timeSinceLastBeat = now - this.lastBeatTime;
+                const beatDuration = 60000 / this.bpm;
+                const nextBeatTime = beatDuration - timeSinceLastBeat;
+                
+                // 计算准确性
+                let accuracy = 0;
+                if (timeSinceLastBeat < this.tolerance) {
+                    // 太早了
+                    accuracy = Math.max(0, 100 - (this.tolerance - timeSinceLastBeat) / this.tolerance * 100);
+                } else if (nextBeatTime < this.tolerance) {
+                    // 接近下一拍
+                    accuracy = Math.max(0, 100 - nextBeatTime / this.tolerance * 100);
+                }
+                
+                this.totalBeats++;
+                
+                if (accuracy > 70) {
+                    this.accurateBeats++;
+                    this.combo++;
+                    this.score += Math.floor(accuracy * (1 + this.combo * 0.1));
+                    
+                    if (this.combo > this.maxCombo) {
+                        this.maxCombo = this.combo;
+                    }
+                    
+                    // 视觉反馈
+                    this.showAccuracyFeedback(accuracy);
+                } else {
+                    this.combo = 0;
+                    this.showAccuracyFeedback(0);
+                }
+                
+                this.beatCount++;
+                this.updateDisplay();
+                
+                // 按钮反馈
+                const button = document.getElementById(type + 'Beat');
+                button.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    button.style.transform = '';
+                }, 100);
+                
+                // 挑战模式增速
+                if (this.currentMode === 'challenge' && this.beatCount % 16 === 0) {
+                    this.bpm += 5;
+                    this.restartBeats();
+                }
+            }
+
+            showAccuracyFeedback(accuracy) {
+                const indicator = document.getElementById('beatIndicator');
+                
+                if (accuracy > 90) {
+                    indicator.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+                    indicator.textContent = '🎯';
+                } else if (accuracy > 70) {
+                    indicator.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
+                    indicator.textContent = '♪';
+                } else {
+                    indicator.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+                    indicator.textContent = '✗';
+                }
+                
+                setTimeout(() => {
+                    indicator.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
+                    indicator.textContent = '♪';
+                }, 300);
+            }
+
+            restartBeats() {
+                if (this.beatInterval) {
+                    clearInterval(this.beatInterval);
+                }
+                this.startBeats();
+                this.updateDisplay();
+            }
+
+            updateBeatDisplay() {
+                const indicator = document.getElementById('beatIndicator');
+                indicator.classList.add('active');
+                
+                setTimeout(() => {
+                    indicator.classList.remove('active');
+                }, 100);
+                
+                this.updatePatternDisplay();
+            }
+
+            pauseGame() {
+                if (!this.gameActive) return;
+                
+                if (this.gamePaused) {
+                    // 继续游戏
+                    this.gamePaused = false;
+                    this.gameStartTime = Date.now() - (this.gameStartTime - this.gamePauseTime);
+                    document.getElementById('pauseBtn').textContent = '⏸️ 暂停';
+                } else {
+                    // 暂停游戏
+                    this.gamePaused = true;
+                    this.gamePauseTime = Date.now() - this.gameStartTime;
+                    document.getElementById('pauseBtn').textContent = '▶️ 继续';
+                }
+            }
+
+            resetGame() {
+                this.gameActive = false;
+                this.gamePaused = false;
+                
+                if (this.beatInterval) {
+                    clearInterval(this.beatInterval);
+                    this.beatInterval = null;
+                }
+                
+                if (this.gameInterval) {
+                    clearInterval(this.gameInterval);
+                    this.gameInterval = null;
+                }
+                
+                this.score = 0;
+                this.combo = 0;
+                this.beatCount = 0;
+                this.accurateBeats = 0;
+                this.totalBeats = 0;
+                this.currentBeat = 0;
+                this.patternIndex = 0;
+                
+                this.bpm = this.modes[this.currentMode].bpm;
+                
+                document.getElementById('pauseBtn').textContent = '⏸️ 暂停';
+                this.updateDisplay();
+                this.createPattern();
+            }
+
+            endGame() {
+                this.gameActive = false;
+                
+                if (this.beatInterval) {
+                    clearInterval(this.beatInterval);
+                    this.beatInterval = null;
+                }
+                
+                if (this.gameInterval) {
+                    clearInterval(this.gameInterval);
+                    this.gameInterval = null;
+                }
+                
+                const finalAccuracy = this.totalBeats > 0 ? Math.round((this.accurateBeats / this.totalBeats) * 100) : 0;
+                
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('finalAccuracy').textContent = finalAccuracy + '%';
+                document.getElementById('finalCombo').textContent = this.maxCombo;
+                document.getElementById('finalBeatCount').textContent = this.beatCount;
+                document.getElementById('completeOverlay').style.display = 'flex';
+                
+                this.updateDisplay();
+            }
+
+            createPattern() {
+                const patternDisplay = document.getElementById('patternDisplay');
+                const pattern = this.modes[this.currentMode].pattern;
+                
+                patternDisplay.innerHTML = '';
+                
+                pattern.forEach((beat, index) => {
+                    const beatElement = document.createElement('div');
+                    beatElement.className = 'pattern-beat';
+                    
+                    if (beat === 2) {
+                        beatElement.classList.add('strong');
+                        beatElement.textContent = '●';
+                    } else if (beat === 1) {
+                        beatElement.classList.add('weak');
+                        beatElement.textContent = '○';
+                    } else {
+                        beatElement.textContent = '◦';
+                    }
+                    
+                    patternDisplay.appendChild(beatElement);
+                });
+            }
+
+            updatePatternDisplay() {
+                const patternBeats = document.querySelectorAll('.pattern-beat');
+                const currentIndex = this.patternIndex % patternBeats.length;
+                
+                patternBeats.forEach((beat, index) => {
+                    beat.classList.remove('current');
+                    if (index === currentIndex) {
+                        beat.classList.add('current');
+                    }
+                });
+            }
+
+            showSettings() {
+                const newBpm = prompt('设置BPM (60-200):', this.bpm);
+                if (newBpm && newBpm >= 60 && newBpm <= 200) {
+                    this.bpm = parseInt(newBpm);
+                    if (this.gameActive) {
+                        this.restartBeats();
+                    }
+                    this.updateDisplay();
+                }
+            }
+
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('combo').textContent = this.combo;
+                document.getElementById('beatCount').textContent = this.beatCount;
+                document.getElementById('bpmDisplay').textContent = this.bpm + ' BPM';
+                
+                const accuracy = this.totalBeats > 0 ? Math.round((this.accurateBeats / this.totalBeats) * 100) : 100;
+                document.getElementById('accuracy').textContent = accuracy + '%';
+                document.getElementById('accuracyText').textContent = `准确率: ${accuracy}%`;
+                document.getElementById('accuracyFill').style.width = accuracy + '%';
+            }
+
+            closeComplete() {
+                document.getElementById('completeOverlay').style.display = 'none';
+            }
+        }
+
+        // 全局游戏实例
+        let beatMaster;
+
+        // 初始化游戏
+        document.addEventListener('DOMContentLoaded', () => {
+            beatMaster = new BeatMaster();
+        });
+    </script>
+</body>
+</html>

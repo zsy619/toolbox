@@ -1,0 +1,677 @@
+class WerewolfGame {
+            constructor() {
+                this.players = [];
+                this.currentPhase = 'waiting'; // waiting, night, day, voting, end
+                this.dayCount = 0;
+                this.gameStarted = false;
+                this.nightActions = {};
+                this.votes = {};
+                this.discussionTime = 60; // 讨论时间(秒)
+                this.timerInterval = null;
+                
+                this.roles = [
+                    { name: 'werewolf', displayName: '狼人', count: 2, description: '夜晚可以杀死一名村民，目标是杀死所有村民' },
+                    { name: 'seer', displayName: '预言家', count: 1, description: '夜晚可以查看一名玩家的身份' },
+                    { name: 'doctor', displayName: '医生', count: 1, description: '夜晚可以拯救一名玩家（包括自己）' },
+                    { name: 'villager', displayName: '村民', count: 4, description: '白天参与讨论和投票，目标是找出所有狼人' }
+                ];
+                
+                this.gameStats = JSON.parse(localStorage.getItem('werewolfStats') || '{}');
+                
+                this.init();
+            }
+
+            init() {
+                this.updateDisplay();
+                this.addLogEntry('狼人杀游戏准备就绪，点击新游戏开始');
+            }
+
+            newGame() {
+                this.gameStarted = false;
+                this.currentPhase = 'waiting';
+                this.dayCount = 0;
+                this.nightActions = {};
+                this.votes = {};
+                this.clearTimer();
+                
+                this.createPlayers();
+                this.assignRoles();
+                this.gameStarted = true;
+                
+                this.addLogEntry('新游戏开始！', 'important');
+                this.revealPlayerRole();
+                
+                document.getElementById('winnerModal').style.display = 'none';
+            }
+
+            createPlayers() {
+                this.players = [];
+                const playerNames = ['你', '艾丽娅', '鲍勃', '卡拉', '大卫', '伊娃', '弗兰克', '格蕾丝'];
+                
+                for (let i = 0; i < 8; i++) {
+                    this.players.push({
+                        id: i,
+                        name: playerNames[i],
+                        role: null,
+                        alive: true,
+                        isPlayer: i === 0, // 第一个是真实玩家
+                        votes: 0,
+                        votedFor: null
+                    });
+                }
+            }
+
+            assignRoles() {
+                let rolePool = [];
+                
+                // 根据角色配置创建角色池
+                this.roles.forEach(roleConfig => {
+                    for (let i = 0; i < roleConfig.count; i++) {
+                        rolePool.push(roleConfig.name);
+                    }
+                });
+                
+                // 打乱角色池
+                rolePool = this.shuffleArray(rolePool);
+                
+                // 分配角色
+                this.players.forEach((player, index) => {
+                    player.role = rolePool[index];
+                });
+            }
+
+            revealPlayerRole() {
+                const player = this.players[0]; // 玩家自己
+                const roleConfig = this.roles.find(r => r.name === player.role);
+                
+                document.getElementById('playerRole').innerHTML = 
+                    `<div class="player-role role-${player.role}">${roleConfig.displayName}</div>`;
+                document.getElementById('roleDescription').textContent = roleConfig.description;
+                
+                document.getElementById('roleReveal').style.display = 'block';
+                document.getElementById('nightActions').style.display = 'none';
+                document.getElementById('dayDiscussion').style.display = 'none';
+                
+                this.updateDisplay();
+            }
+
+            confirmRole() {
+                document.getElementById('roleReveal').style.display = 'none';
+                this.currentPhase = 'night';
+                this.dayCount = 1;
+                this.startNightPhase();
+            }
+
+            startNightPhase() {
+                this.currentPhase = 'night';
+                this.nightActions = {};
+                
+                document.getElementById('nightActions').style.display = 'block';
+                document.getElementById('dayDiscussion').style.display = 'none';
+                
+                this.addLogEntry(`第${this.dayCount}夜开始，所有玩家请闭眼`, 'night');
+                
+                this.updateDisplay();
+                this.performNightActions();
+            }
+
+            performNightActions() {
+                const nightActionContainer = document.getElementById('nightActionBtns');
+                nightActionContainer.innerHTML = '';
+                
+                const player = this.players[0];
+                
+                if (!player.alive) {
+                    this.processNightActions();
+                    return;
+                }
+                
+                switch (player.role) {
+                    case 'werewolf':
+                        this.showWerewolfAction();
+                        break;
+                    case 'seer':
+                        this.showSeerAction();
+                        break;
+                    case 'doctor':
+                        this.showDoctorAction();
+                        break;
+                    default:
+                        // 普通村民只能等待
+                        document.getElementById('nightInstructions').textContent = '你是村民，夜晚请安静等待...';
+                        setTimeout(() => this.processNightActions(), 3000);
+                        break;
+                }
+            }
+
+            showWerewolfAction() {
+                document.getElementById('nightTitle').textContent = '狼人请睁眼';
+                document.getElementById('nightInstructions').textContent = '选择一名村民杀死：';
+                
+                const alivePlayers = this.players.filter(p => p.alive && p.role !== 'werewolf');
+                const actionContainer = document.getElementById('nightActionBtns');
+                
+                alivePlayers.forEach(player => {
+                    const btn = document.createElement('button');
+                    btn.className = 'action-btn';
+                    btn.textContent = `杀死 ${player.name}`;
+                    btn.onclick = () => this.werewolfKill(player.id);
+                    actionContainer.appendChild(btn);
+                });
+            }
+
+            showSeerAction() {
+                document.getElementById('nightTitle').textContent = '预言家请睁眼';
+                document.getElementById('nightInstructions').textContent = '选择一名玩家查看身份：';
+                
+                const otherPlayers = this.players.filter(p => p.alive && p.id !== 0);
+                const actionContainer = document.getElementById('nightActionBtns');
+                
+                otherPlayers.forEach(player => {
+                    const btn = document.createElement('button');
+                    btn.className = 'action-btn';
+                    btn.textContent = `查看 ${player.name}`;
+                    btn.onclick = () => this.seerCheck(player.id);
+                    actionContainer.appendChild(btn);
+                });
+            }
+
+            showDoctorAction() {
+                document.getElementById('nightTitle').textContent = '医生请睁眼';
+                document.getElementById('nightInstructions').textContent = '选择一名玩家救治：';
+                
+                const alivePlayers = this.players.filter(p => p.alive);
+                const actionContainer = document.getElementById('nightActionBtns');
+                
+                alivePlayers.forEach(player => {
+                    const btn = document.createElement('button');
+                    btn.className = 'action-btn';
+                    btn.textContent = `救治 ${player.name}`;
+                    btn.onclick = () => this.doctorSave(player.id);
+                    actionContainer.appendChild(btn);
+                });
+            }
+
+            werewolfKill(targetId) {
+                this.nightActions.werewolfKill = targetId;
+                this.addLogEntry('狼人已选择目标');
+                this.processNightActions();
+            }
+
+            seerCheck(targetId) {
+                const target = this.players[targetId];
+                const roleConfig = this.roles.find(r => r.name === target.role);
+                
+                this.nightActions.seerCheck = targetId;
+                this.addLogEntry(`预言家查看：${target.name} 是 ${roleConfig.displayName}`);
+                
+                alert(`${target.name} 的身份是：${roleConfig.displayName}`);
+                this.processNightActions();
+            }
+
+            doctorSave(targetId) {
+                this.nightActions.doctorSave = targetId;
+                this.addLogEntry('医生已选择救治目标');
+                this.processNightActions();
+            }
+
+            processNightActions() {
+                // AI玩家执行夜间行动
+                this.performAINightActions();
+                
+                // 处理夜间行动结果
+                let killedPlayer = null;
+                
+                if (this.nightActions.werewolfKill !== undefined) {
+                    const targetId = this.nightActions.werewolfKill;
+                    const savedId = this.nightActions.doctorSave;
+                    
+                    if (targetId !== savedId) {
+                        killedPlayer = this.players[targetId];
+                        killedPlayer.alive = false;
+                    }
+                }
+                
+                setTimeout(() => {
+                    this.startDayPhase(killedPlayer);
+                }, 2000);
+            }
+
+            performAINightActions() {
+                const aliveWerewolves = this.players.filter(p => p.alive && p.role === 'werewolf' && !p.isPlayer);
+                const aliveSeer = this.players.find(p => p.alive && p.role === 'seer' && !p.isPlayer);
+                const aliveDoctor = this.players.find(p => p.alive && p.role === 'doctor' && !p.isPlayer);
+                
+                // AI狼人选择击杀目标
+                if (aliveWerewolves.length > 0 && this.nightActions.werewolfKill === undefined) {
+                    const targets = this.players.filter(p => p.alive && p.role !== 'werewolf');
+                    if (targets.length > 0) {
+                        const target = targets[Math.floor(Math.random() * targets.length)];
+                        this.nightActions.werewolfKill = target.id;
+                    }
+                }
+                
+                // AI预言家选择查看目标
+                if (aliveSeer && this.nightActions.seerCheck === undefined) {
+                    const targets = this.players.filter(p => p.alive && p.id !== aliveSeer.id);
+                    if (targets.length > 0) {
+                        const target = targets[Math.floor(Math.random() * targets.length)];
+                        this.nightActions.seerCheck = target.id;
+                    }
+                }
+                
+                // AI医生选择救治目标
+                if (aliveDoctor && this.nightActions.doctorSave === undefined) {
+                    const targets = this.players.filter(p => p.alive);
+                    if (targets.length > 0) {
+                        const target = targets[Math.floor(Math.random() * targets.length)];
+                        this.nightActions.doctorSave = target.id;
+                    }
+                }
+            }
+
+            startDayPhase(killedPlayer) {
+                this.currentPhase = 'day';
+                
+                document.getElementById('nightActions').style.display = 'none';
+                document.getElementById('dayDiscussion').style.display = 'block';
+                
+                if (killedPlayer) {
+                    this.addLogEntry(`天亮了，${killedPlayer.name} 昨夜被狼人杀死了`, 'important');
+                } else {
+                    this.addLogEntry('天亮了，昨夜是平安夜，没有人死亡', 'day');
+                }
+                
+                // 检查游戏结束条件
+                if (this.checkWinCondition()) {
+                    return;
+                }
+                
+                this.setupVoting();
+                this.startDiscussionTimer();
+                this.updateDisplay();
+            }
+
+            setupVoting() {
+                this.votes = {};
+                const voteContainer = document.getElementById('voteButtons');
+                voteContainer.innerHTML = '';
+                
+                const alivePlayers = this.players.filter(p => p.alive);
+                
+                alivePlayers.forEach(player => {
+                    const btn = document.createElement('button');
+                    btn.className = 'vote-btn';
+                    btn.textContent = player.name;
+                    btn.onclick = () => this.vote(player.id);
+                    voteContainer.appendChild(btn);
+                });
+                
+                // 添加跳过投票选项
+                const skipBtn = document.createElement('button');
+                skipBtn.className = 'vote-btn';
+                skipBtn.textContent = '弃权';
+                skipBtn.onclick = () => this.vote(-1);
+                voteContainer.appendChild(skipBtn);
+            }
+
+            vote(playerId) {
+                if (this.votes[0] !== undefined) {
+                    return; // 已经投过票了
+                }
+                
+                this.votes[0] = playerId;
+                
+                // 更新按钮样式
+                document.querySelectorAll('.vote-btn').forEach(btn => {
+                    btn.classList.remove('voted');
+                });
+                
+                if (playerId >= 0) {
+                    const player = this.players[playerId];
+                    event.target.classList.add('voted');
+                    this.addLogEntry(`你投票给了 ${player.name}`);
+                } else {
+                    event.target.classList.add('voted');
+                    this.addLogEntry('你选择了弃权');
+                }
+                
+                // AI投票
+                this.performAIVoting();
+                
+                // 处理投票结果
+                setTimeout(() => this.processVotes(), 1000);
+            }
+
+            performAIVoting() {
+                const alivePlayers = this.players.filter((p, index) => p.alive && index > 0);
+                
+                alivePlayers.forEach(player => {
+                    if (this.votes[player.id] === undefined) {
+                        const possibleTargets = this.players.filter(p => p.alive);
+                        
+                        let targetId;
+                        if (player.role === 'werewolf') {
+                            // 狼人倾向于投票给非狼人
+                            const nonWerewolves = possibleTargets.filter(p => p.role !== 'werewolf');
+                            targetId = nonWerewolves.length > 0 ? 
+                                nonWerewolves[Math.floor(Math.random() * nonWerewolves.length)].id :
+                                possibleTargets[Math.floor(Math.random() * possibleTargets.length)].id;
+                        } else {
+                            // 其他角色随机投票
+                            if (Math.random() < 0.2) {
+                                targetId = -1; // 20%概率弃权
+                            } else {
+                                targetId = possibleTargets[Math.floor(Math.random() * possibleTargets.length)].id;
+                            }
+                        }
+                        
+                        this.votes[player.id] = targetId;
+                    }
+                });
+            }
+
+            processVotes() {
+                const voteCount = {};
+                let abstentions = 0;
+                
+                // 统计投票
+                Object.values(this.votes).forEach(vote => {
+                    if (vote === -1) {
+                        abstentions++;
+                    } else {
+                        voteCount[vote] = (voteCount[vote] || 0) + 1;
+                    }
+                });
+                
+                // 显示投票结果
+                let resultText = '投票结果：\n';
+                Object.entries(voteCount).forEach(([playerId, count]) => {
+                    const player = this.players[playerId];
+                    resultText += `${player.name}: ${count}票\n`;
+                });
+                if (abstentions > 0) {
+                    resultText += `弃权: ${abstentions}票\n`;
+                }
+                
+                document.getElementById('voteResults').innerHTML = resultText.replace(/\n/g, '<br>');
+                
+                // 找出得票最多的玩家
+                let maxVotes = 0;
+                let eliminatedPlayers = [];
+                
+                Object.entries(voteCount).forEach(([playerId, count]) => {
+                    if (count > maxVotes) {
+                        maxVotes = count;
+                        eliminatedPlayers = [parseInt(playerId)];
+                    } else if (count === maxVotes) {
+                        eliminatedPlayers.push(parseInt(playerId));
+                    }
+                });
+                
+                if (eliminatedPlayers.length === 1 && maxVotes > 0) {
+                    const eliminatedPlayer = this.players[eliminatedPlayers[0]];
+                    eliminatedPlayer.alive = false;
+                    this.addLogEntry(`${eliminatedPlayer.name} 被投票淘汰了`, 'important');
+                    
+                    // 揭示被淘汰玩家的身份
+                    const roleConfig = this.roles.find(r => r.name === eliminatedPlayer.role);
+                    this.addLogEntry(`${eliminatedPlayer.name} 的身份是 ${roleConfig.displayName}`, 'important');
+                } else {
+                    this.addLogEntry('投票结果平票或无人得票，今天没有人被淘汰', 'day');
+                }
+                
+                // 检查游戏结束条件
+                if (this.checkWinCondition()) {
+                    return;
+                }
+                
+                // 开始下一个夜晚
+                setTimeout(() => {
+                    this.dayCount++;
+                    this.startNightPhase();
+                }, 3000);
+            }
+
+            startDiscussionTimer() {
+                this.discussionTime = 60;
+                this.updateTimer();
+                
+                this.timerInterval = setInterval(() => {
+                    this.discussionTime--;
+                    this.updateTimer();
+                    
+                    if (this.discussionTime <= 0) {
+                        this.clearTimer();
+                        // 如果还没投票，自动弃权
+                        if (this.votes[0] === undefined) {
+                            this.vote(-1);
+                        }
+                    }
+                }, 1000);
+            }
+
+            updateTimer() {
+                const timerElement = document.getElementById('discussionTimer');
+                timerElement.textContent = `剩余时间: ${this.discussionTime}秒`;
+                
+                if (this.discussionTime <= 10) {
+                    timerElement.style.color = '#e74c3c';
+                } else if (this.discussionTime <= 30) {
+                    timerElement.style.color = '#f39c12';
+                } else {
+                    timerElement.style.color = '#27ae60';
+                }
+            }
+
+            clearTimer() {
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+            }
+
+            checkWinCondition() {
+                const aliveWerewolves = this.players.filter(p => p.alive && p.role === 'werewolf').length;
+                const aliveVillagers = this.players.filter(p => p.alive && p.role !== 'werewolf').length;
+                
+                if (aliveWerewolves === 0) {
+                    this.endGame('villagers', '村民获胜！所有狼人都被淘汰了！');
+                    return true;
+                } else if (aliveWerewolves >= aliveVillagers) {
+                    this.endGame('werewolves', '狼人获胜！狼人数量达到或超过村民！');
+                    return true;
+                }
+                
+                return false;
+            }
+
+            endGame(winner, message) {
+                this.gameStarted = false;
+                this.clearTimer();
+                
+                // 更新统计
+                if (!this.gameStats[winner]) {
+                    this.gameStats[winner] = 0;
+                }
+                this.gameStats[winner]++;
+                localStorage.setItem('werewolfStats', JSON.stringify(this.gameStats));
+                
+                // 显示所有玩家的身份
+                let rolesText = '所有玩家身份：\n';
+                this.players.forEach(player => {
+                    const roleConfig = this.roles.find(r => r.name === player.role);
+                    const status = player.alive ? '存活' : '死亡';
+                    rolesText += `${player.name}: ${roleConfig.displayName} (${status})\n`;
+                });
+                
+                document.getElementById('winnerTitle').textContent = '🎉 游戏结束 🎉';
+                document.getElementById('winnerText').textContent = message;
+                document.getElementById('finalRoles').innerHTML = rolesText.replace(/\n/g, '<br>');
+                document.getElementById('winnerModal').style.display = 'flex';
+                
+                this.addLogEntry(message, 'important');
+            }
+
+            closeWinnerModal() {
+                document.getElementById('winnerModal').style.display = 'none';
+                this.newGame();
+            }
+
+            nextPhase() {
+                // 手动进入下一阶段（开发用）
+                if (this.currentPhase === 'night') {
+                    this.processNightActions();
+                } else if (this.currentPhase === 'day') {
+                    this.processVotes();
+                }
+            }
+
+            showRules() {
+                alert(`狼人杀游戏规则：
+
+角色介绍：
+• 狼人(2人)：夜晚杀死村民，目标是杀死所有村民
+• 预言家(1人)：夜晚可以查看一名玩家的身份
+• 医生(1人)：夜晚可以救治一名玩家
+• 村民(4人)：白天讨论投票，目标是找出所有狼人
+
+游戏流程：
+1. 夜晚阶段：
+   - 狼人选择杀死一名村民
+   - 预言家选择查看一名玩家身份
+   - 医生选择救治一名玩家
+
+2. 白天阶段：
+   - 公布夜晚死亡情况
+   - 所有玩家讨论(60秒)
+   - 投票淘汰一名玩家
+   - 公布被淘汰玩家身份
+
+获胜条件：
+• 村民胜利：淘汰所有狼人
+• 狼人胜利：狼人数量≥村民数量
+
+游戏技巧：
+• 观察其他玩家的发言和投票行为
+• 合理利用身份技能
+• 注意逻辑推理和信息收集`);
+            }
+
+            showStats() {
+                let statsText = '游戏统计：\n\n';
+                const teamNames = { 'villagers': '村民阵营', 'werewolves': '狼人阵营' };
+                
+                Object.entries(this.gameStats).forEach(([team, wins]) => {
+                    statsText += `${teamNames[team] || team}：${wins}次获胜\n`;
+                });
+                
+                if (Object.keys(this.gameStats).length === 0) {
+                    statsText += '暂无统计数据';
+                }
+                
+                alert(statsText);
+            }
+
+            updateDisplay() {
+                const phaseNames = {
+                    'waiting': '等待开始',
+                    'night': '夜晚',
+                    'day': '白天',
+                    'voting': '投票',
+                    'end': '游戏结束'
+                };
+                
+                document.getElementById('currentPhase').textContent = phaseNames[this.currentPhase] || '未知';
+                document.getElementById('dayCount').textContent = this.dayCount;
+                
+                const aliveCount = this.players.filter(p => p.alive).length;
+                const werewolfCount = this.players.filter(p => p.alive && p.role === 'werewolf').length;
+                const villagerCount = this.players.filter(p => p.alive && p.role !== 'werewolf').length;
+                
+                document.getElementById('aliveCount').textContent = aliveCount;
+                document.getElementById('werewolfCount').textContent = werewolfCount;
+                document.getElementById('villagerCount').textContent = villagerCount;
+                
+                // 更新阶段指示器
+                const phaseIndicator = document.getElementById('phaseIndicator');
+                if (this.currentPhase === 'night') {
+                    phaseIndicator.className = 'phase-indicator phase-night';
+                    phaseIndicator.textContent = `第${this.dayCount}夜 - 夜晚降临`;
+                } else if (this.currentPhase === 'day') {
+                    phaseIndicator.className = 'phase-indicator phase-day';
+                    phaseIndicator.textContent = `第${this.dayCount}天 - 白天讨论`;
+                } else {
+                    phaseIndicator.className = 'phase-indicator';
+                    phaseIndicator.textContent = '准备开始游戏';
+                }
+                
+                // 更新玩家列表
+                this.updatePlayersDisplay();
+                
+                // 更新按钮状态
+                document.getElementById('nextPhaseBtn').disabled = !this.gameStarted;
+            }
+
+            updatePlayersDisplay() {
+                const container = document.getElementById('playersContainer');
+                container.innerHTML = '';
+                
+                this.players.forEach((player, index) => {
+                    const playerCard = document.createElement('div');
+                    let cardClass = 'player-card';
+                    
+                    if (!player.alive) {
+                        cardClass += ' dead';
+                    }
+                    
+                    // 只有玩家自己才能看到身份
+                    if (player.isPlayer && player.role) {
+                        cardClass += ` ${player.role}`;
+                    }
+                    
+                    playerCard.className = cardClass;
+                    
+                    let roleDisplay = '未知身份';
+                    if (player.isPlayer && player.role) {
+                        const roleConfig = this.roles.find(r => r.name === player.role);
+                        roleDisplay = roleConfig.displayName;
+                    }
+                    
+                    playerCard.innerHTML = `
+                        <div class="player-name">${player.name}</div>
+                        <div class="player-role role-${player.role || 'unknown'}">${player.isPlayer ? roleDisplay : '未知身份'}</div>
+                        <div class="player-status">${player.alive ? '存活' : '死亡'}</div>
+                    `;
+                    
+                    container.appendChild(playerCard);
+                });
+            }
+
+            addLogEntry(message, type = 'normal') {
+                const logContainer = document.getElementById('gameLog');
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry ${type}`;
+                logEntry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                
+                logContainer.appendChild(logEntry);
+                logContainer.scrollTop = logContainer.scrollHeight;
+                
+                // 限制日志条目数量
+                while (logContainer.children.length > 50) {
+                    logContainer.removeChild(logContainer.firstChild);
+                }
+            }
+
+            shuffleArray(array) {
+                const shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            }
+        }
+
+        // 初始化游戏
+        const werewolfGame = new WerewolfGame();

@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>双色球号码生成器</title>
+    <!-- 基础SEO -->
+    <meta name="description" content="免费在线双色球号码生成器，智能随机生成符合规则的双色球号码，提供历史记录收藏功能，助您轻松选号。">
+    <meta name="keywords" content="双色球,号码生成器,彩票选号,随机选号,双色球工具,彩票分析">
+    <meta name="author" content="双色球分析工具">
+    <!-- Open Graph -->
+    <meta property="og:title" content="双色球号码生成器 - 智能随机选号工具">
+    <meta property="og:description" content="免费在线双色球号码生成器，智能随机生成符合规则的双色球号码">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://example.com/double_ball.html">
+    <meta property="og:image" content="https://example.com/images/double-ball-og.jpg">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="双色球号码生成器">
+    <meta name="twitter:description" content="智能生成双色球号码的在线工具">
+    <link rel="stylesheet" href="../assets/css/layui.min.css">
+    <link rel="stylesheet" href="../assets/css/fontawesome.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-light: #5dade2;
+            --primary-dark: #2980b9;
+            --secondary: #2ecc71;
+            --accent: #27ae60;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --error: #e74c3c;
+            --danger: #e74c3c;
+            --info: #3498db;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --text-disabled: #bdc3c7;
+            --border: #e0e0e0;
+            --border-light: #f8f9fa;
+            --bg-white: #ffffff;
+            --bg-light: #f8f9fa;
+            --bg-gray: #ecf0f1;
+            --light-bg: #f8f9fa;
+            --dark-text: #2c3e50;
+            --light-text: #7f8c8d;
+            --card-bg: #ffffff;
+            --shadow-none: none;
+            --radius-none: 0;
+            --radius-sm: 2px;
+            --radius-md: 4px;
+            --radius-lg: 6px;
+            --transition: all 0.2s ease;
+        }
+
+        /* 主题配色方案 */
+        [data-theme="orange"] {
+            --primary: #e67e22;
+            --primary-light: #eb984e;
+            --primary-dark: #d35400;
+        }
+        
+        [data-theme="blue"] {
+            --primary: #3498db;
+            --primary-light: #5dade2;
+            --primary-dark: #2980b9;
+        }
+        
+        [data-theme="green"] {
+            --primary: #27ae60;
+            --primary-light: #58d68d;
+            --primary-dark: #229954;
+        }
+        
+        [data-theme="purple"] {
+            --primary: #9b59b6;
+            --primary-light: #bb8fce;
+            --primary-dark: #8e44ad;
+        }
+        
+        [data-theme="red"] {
+            --primary: #e74c3c;
+            --primary-light: #ec7063;
+            --primary-dark: #c0392b;
+        }
+        
+        [data-theme="yellow"] {
+            --primary: #f1c40f;
+            --primary-light: #f4d03f;
+            --primary-dark: #d4ac0d;
+        }
+        
+        [data-theme="contrast-dark"] {
+            --primary: #2c3e50;
+            --primary-light: #566573;
+            --primary-dark: #1b2631;
+        }
+        
+        [data-theme="contrast-light"] {
+            --primary: #ecf0f1;
+            --primary-light: #f8f9fa;
+            --primary-dark: #d5dbdb;
+            --text-primary: #2c3e50;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 40px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 25px 0;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1rem;
+            max-width: 90%;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* 颜色选择器样式 */
+        .theme-selector {
+            background: var(--bg-white);
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+        }
+
+        .theme-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+            background: none;
+            position: relative;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+            border-color: var(--text-primary);
+        }
+
+        .color-option.active {
+            border-color: var(--text-primary);
+            transform: scale(1.1);
+        }
+
+        .color-option.active::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--bg-white);
+            font-weight: bold;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 0;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            padding: 18px 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            height: 50px;
+            min-width: 100px;
+            padding: 0 20px;
+            border-radius: 0;
+            font-size: 1rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-generate {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .ball {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border-radius: 50%;
+            margin: 0 5px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .red-ball {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .blue-ball {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .batch-results {
+            margin-top: 20px;
+        }
+
+        .batch-item {
+            background-color: white;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .batch-balls {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .batch-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 0;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .save-btn {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .copy-btn {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .history-list {
+            margin-top: 20px;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+        }
+
+        .history-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: white;
+        }
+
+        .history-balls {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .history-time {
+            color: var(--light-text);
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .history-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .delete-btn {
+            background-color: var(--warning);
+            color: white;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: var(--light-text);
+            padding: 20px;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 20px 0;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .ball {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                font-size: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>双色球号码AI生成器</h1>
+        <p>智能生成符合规则的双色球号码</p>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-lottery"></i> 号码生成
+            </div>
+            <div class="card-body">
+                <!-- 主题颜色选择器 -->
+                <div class="theme-selector">
+                    <div class="theme-title">
+                        <i class="fas fa-palette"></i> 选择主题颜色
+                    </div>
+                    <div class="color-options">
+                        <button class="color-option" data-color="orange" style="background-color: #e67e22;" title="橙色主题"></button>
+                        <button class="color-option active" data-color="blue" style="background-color: #3498db;" title="蓝色主题"></button>
+                        <button class="color-option" data-color="green" style="background-color: #27ae60;" title="绿色主题"></button>
+                        <button class="color-option" data-color="purple" style="background-color: #9b59b6;" title="紫色主题"></button>
+                        <button class="color-option" data-color="red" style="background-color: #e74c3c;" title="红色主题"></button>
+                        <button class="color-option" data-color="yellow" style="background-color: #f1c40f;" title="黄色主题"></button>
+                        <button class="color-option" data-color="contrast-dark" style="background-color: #2c3e50;" title="深色对比主题"></button>
+                        <button class="color-option" data-color="contrast-light" style="background-color: #ecf0f1;" title="浅色对比主题"></button>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-generate" id="generateBtn">
+                        <i class="fas fa-sync-alt"></i> 生成5组号码
+                    </button>
+                    <button class="btn btn-reset" id="resetBtn">
+                        <i class="fas fa-undo"></i> 重置
+                    </button>
+                </div>
+                
+                <div id="batchResults" class="batch-results">
+                    <!-- 批量生成结果将在这里显示 -->
+                </div>
+                
+                <div class="history-list">
+                    <h3><i class="fas fa-history"></i> 历史记录</h3>
+                    <div id="historyList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/layui.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            layui.use(['layer'], function(){
+                var layer = layui.layer;
+                var historyData = JSON.parse(localStorage.getItem('doubleBallHistory')) || [];
+                
+                // 生成随机号码
+                function generateBallSet() {
+                    var redBalls = [];
+                    while(redBalls.length < 6) {
+                        var num = Math.floor(Math.random() * 33) + 1;
+                        num = num < 10 ? '0' + num : num.toString();
+                        if(redBalls.indexOf(num) === -1) {
+                            redBalls.push(num);
+                        }
+                    }
+                    redBalls.sort(function(a, b) { return a - b; });
+                    
+                    var blueBall = Math.floor(Math.random() * 16) + 1;
+                    blueBall = blueBall < 10 ? '0' + blueBall : blueBall.toString();
+                    
+                    return {
+                        redBalls: redBalls,
+                        blueBall: blueBall,
+                        time: new Date().toISOString()
+                    };
+                }
+                
+                // 复制号码到剪贴板
+                function copyToClipboard(text) {
+                    navigator.clipboard.writeText(text).then(function() {
+                        layer.msg('已复制到剪贴板', {icon: 1});
+                    }, function(err) {
+                        layer.msg('复制失败', {icon: 2});
+                        console.error('复制失败:', err);
+                    });
+                }
+                
+                // 渲染批量生成结果
+                function renderBatchResults(results) {
+                    var html = '';
+                    results.forEach(function(item, index) {
+                        var numbers = item.redBalls.join(' ') + ' + ' + item.blueBall;
+                        
+                        // 检查是否已收藏
+                        var isCollected = isDuplicateNumbers(item);
+                        var saveButtonHtml = isCollected ? 
+                            '<button class="action-btn save-btn" style="background-color: var(--text-disabled); cursor: not-allowed;"><i class="fas fa-check"></i> 已收藏</button>' :
+                            '<button class="action-btn save-btn" onclick="saveSingleSet(' + index + ')"><i class="fas fa-star"></i> 收藏</button>';
+                        
+                        html += '<div class="batch-item">' +
+                            '<div class="batch-balls">' +
+                                '<span class="ball red-ball">' + item.redBalls[0] + '</span>' +
+                                '<span class="ball red-ball">' + item.redBalls[1] + '</span>' +
+                                '<span class="ball red-ball">' + item.redBalls[2] + '</span>' +
+                                '<span class="ball red-ball">' + item.redBalls[3] + '</span>' +
+                                '<span class="ball red-ball">' + item.redBalls[4] + '</span>' +
+                                '<span class="ball red-ball">' + item.redBalls[5] + '</span>' +
+                                '<span>+</span>' +
+                                '<span class="ball blue-ball">' + item.blueBall + '</span>' +
+                            '</div>' +
+                            '<div class="batch-actions">' +
+                                saveButtonHtml +
+                                '<button class="action-btn copy-btn" onclick="copyNumbers(\'' + numbers + '\')">' +
+                                    '<i class="fas fa-copy"></i> 复制' +
+                                '</button>' +
+                            '</div>' +
+                        '</div>';
+                    });
+                    document.getElementById('batchResults').innerHTML = html;
+                }
+                
+                // 渲染历史记录
+                function renderHistory() {
+                    var html = '';
+                    historyData.forEach(function(item, index) {
+                        var date = new Date(item.time);
+                        var year = date.getFullYear();
+                        var month = (date.getMonth() + 1).toString().padStart(2, '0');
+                        var day = date.getDate().toString().padStart(2, '0');
+                        var hours = date.getHours().toString().padStart(2, '0');
+                        var minutes = date.getMinutes().toString().padStart(2, '0');
+                        var timeStr = year + '/' + month + '/' + day + ' ' + hours + ':' + minutes;
+                        var numbers = item.redBalls.join(' ') + ' + ' + item.blueBall;
+                        
+                        html += '<div class="history-item">' +
+                            '<div class="history-balls">' +
+                                '<span class="ball red-ball">' + item.redBalls[0] + '</span>' +
+                                '<span class="ball red-ball">' + item.redBalls[1] + '</span>' +
+                                '<span class="ball red-ball">' + item.redBalls[2] + '</span>' +
+                                '<span class="ball red-ball">' + item.redBalls[3] + '</span>' +
+                                '<span class="ball red-ball">' + item.redBalls[4] + '</span>' +
+                                '<span class="ball red-ball">' + item.redBalls[5] + '</span>' +
+                                '<span>+</span>' +
+                                '<span class="ball blue-ball">' + item.blueBall + '</span>' +
+                            '</div>' +
+                            '<div class="history-time">' + timeStr + '</div>' +
+                            '<div class="history-actions">' +
+                                '<button class="action-btn copy-btn" onclick="copyNumbers(\'' + numbers + '\')">' +
+                                    '<i class="fas fa-copy"></i> 复制' +
+                                '</button>' +
+                                '<button class="action-btn delete-btn" data-index="' + index + '">' +
+                                    '<i class="fas fa-trash"></i> 删除' +
+                                '</button>' +
+                            '</div>' +
+                        '</div>';
+                    });
+                    
+                    document.getElementById('historyList').innerHTML = html || 
+                        '<div class="empty-history">暂无历史记录</div>';
+                    
+                    // 绑定删除事件
+                    document.querySelectorAll('.delete-btn').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            var index = parseInt(this.getAttribute('data-index'));
+                            historyData.splice(index, 1);
+                            localStorage.setItem('doubleBallHistory', JSON.stringify(historyData));
+                            renderHistory();
+                            
+                            // 更新当前页面所有批量结果的按钮状态
+                            var batchItems = document.querySelectorAll('.batch-item');
+                            batchItems.forEach(function(item, idx) {
+                                updateCollectButtonState(item, idx);
+                            });
+                            
+                            layer.msg('删除成功', {icon: 1});
+                        });
+                    });
+                }
+                
+                // 检查号码组合是否已存在
+                function isDuplicateNumbers(newBalls) {
+                    return historyData.some(function(existingBalls) {
+                        var redMatch = newBalls.redBalls.length === existingBalls.redBalls.length &&
+                                      newBalls.redBalls.every(function(ball, index) {
+                                          return ball === existingBalls.redBalls[index];
+                                      });
+                        var blueMatch = newBalls.blueBall === existingBalls.blueBall;
+                        return redMatch && blueMatch;
+                    });
+                }
+
+                // 更新收藏按钮状态
+                function updateCollectButtonState(item, index) {
+                    var balls = {
+                        redBalls: [
+                            item.querySelector('.red-ball:nth-child(1)').textContent,
+                            item.querySelector('.red-ball:nth-child(2)').textContent,
+                            item.querySelector('.red-ball:nth-child(3)').textContent,
+                            item.querySelector('.red-ball:nth-child(4)').textContent,
+                            item.querySelector('.red-ball:nth-child(5)').textContent,
+                            item.querySelector('.red-ball:nth-child(6)').textContent
+                        ],
+                        blueBall: item.querySelector('.blue-ball').textContent
+                    };
+                    
+                    var saveBtn = item.querySelector('.save-btn');
+                    if (isDuplicateNumbers(balls)) {
+                        saveBtn.innerHTML = '<i class="fas fa-check"></i> 已收藏';
+                        saveBtn.style.backgroundColor = 'var(--text-disabled)';
+                        saveBtn.style.cursor = 'not-allowed';
+                        saveBtn.onclick = null;
+                    } else {
+                        saveBtn.innerHTML = '<i class="fas fa-star"></i> 收藏';
+                        saveBtn.style.backgroundColor = '';
+                        saveBtn.style.cursor = 'pointer';
+                        saveBtn.onclick = function() { saveSingleSet(index); };
+                    }
+                }
+
+                // 收藏单组号码（改进版）
+                window.saveSingleSet = function(index) {
+                    var batchItems = document.querySelectorAll('.batch-item');
+                    if (index >= 0 && index < batchItems.length) {
+                        var item = batchItems[index];
+                        var balls = {
+                            redBalls: [
+                                item.querySelector('.red-ball:nth-child(1)').textContent,
+                                item.querySelector('.red-ball:nth-child(2)').textContent,
+                                item.querySelector('.red-ball:nth-child(3)').textContent,
+                                item.querySelector('.red-ball:nth-child(4)').textContent,
+                                item.querySelector('.red-ball:nth-child(5)').textContent,
+                                item.querySelector('.red-ball:nth-child(6)').textContent
+                            ],
+                            blueBall: item.querySelector('.blue-ball').textContent,
+                            time: new Date().toISOString()
+                        };
+                        
+                        // 检查是否重复
+                        if (isDuplicateNumbers(balls)) {
+                            layer.msg('该号码组合已收藏过了', {icon: 2});
+                            return;
+                        }
+                        
+                        historyData.unshift(balls);
+                        if(historyData.length > 50) {
+                            historyData = historyData.slice(0, 50);
+                        }
+                        
+                        localStorage.setItem('doubleBallHistory', JSON.stringify(historyData));
+                        renderHistory();
+                        
+                        // 更新当前页面所有按钮状态
+                        batchItems.forEach(function(batchItem, idx) {
+                            updateCollectButtonState(batchItem, idx);
+                        });
+                        
+                        layer.msg('收藏成功', {icon: 1});
+                    }
+                };
+                
+                // 复制号码
+                window.copyNumbers = function(numbers) {
+                    copyToClipboard(numbers);
+                };
+                
+                // 绑定事件
+                document.getElementById('generateBtn').addEventListener('click', function() {
+                    var results = [];
+                    for(var i = 0; i < 5; i++) {
+                        results.push(generateBallSet());
+                    }
+                    renderBatchResults(results);
+                    layer.msg('已生成5组号码', {icon: 1});
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', function() {
+                    document.getElementById('batchResults').innerHTML = '';
+                    layer.msg('已重置', {icon: 1});
+                });
+                
+                // 颜色主题切换功能
+                function initThemeSelector() {
+                    var colorOptions = document.querySelectorAll('.color-option');
+                    
+                    if (colorOptions.length === 0) {
+                        console.log('未找到颜色选择器');
+                        return;
+                    }
+                    
+                    var savedTheme = localStorage.getItem('doubleBallTheme') || 'blue';
+                    
+                    // 设置初始主题
+                    document.documentElement.setAttribute('data-theme', savedTheme);
+                    colorOptions.forEach(function(option) {
+                        option.classList.toggle('active', option.dataset.color === savedTheme);
+                    });
+                    
+                    // 绑定颜色选择事件
+                    colorOptions.forEach(function(option) {
+                        option.addEventListener('click', function() {
+                            var selectedColor = this.dataset.color;
+                            
+                            // 更新活动状态
+                            colorOptions.forEach(function(opt) { opt.classList.remove('active'); });
+                            this.classList.add('active');
+                            
+                            // 应用主题
+                            document.documentElement.setAttribute('data-theme', selectedColor);
+                            
+                            // 保存到本地存储
+                            localStorage.setItem('doubleBallTheme', selectedColor);
+                            
+                            layer.msg('主题已切换', {icon: 1, time: 1000});
+                        });
+                    });
+                }
+                
+                // 初始化
+                renderHistory();
+                initThemeSelector();
+            });
+        });
+    </script>
+    <!-- 结构化数据 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "双色球号码生成器",
+      "description": "智能生成双色球号码的在线工具",
+      "url": "https://tools.hn24365.com/double_ball.html",
+      "applicationCategory": "ToolApplication"
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>禅意花园游戏 - 在线免费放松冥想互动体验 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线禅意花园游戏，创造美丽的禅宗花园，放置石头、沙纹、植物，放松心情，冥想体验，扁平化设计界面！">
+    <meta name="keywords" content="禅意花园,冥想游戏,放松游戏,禅宗,花园设计,心理治疗,减压游戏,在线游戏,免费游戏,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#8D6E63">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #A1887F 0%, #8D6E63 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .game-header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .game-header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+
+        .main-interface {
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            gap: 20px;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .panel-section h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 300;
+            font-size: 1.2rem;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .tool-btn {
+            padding: 15px 10px;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .tool-btn.selected {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .tool-icon {
+            font-size: 1.5rem;
+        }
+
+        .tool-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .garden-area {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #gardenCanvas {
+            background: linear-gradient(135deg, #F5DEB3 0%, #DEB887 100%);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            cursor: crosshair;
+            display: block;
+            margin: 0 auto;
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1);
+        }
+
+        .patterns-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .pattern-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pattern-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .pattern-btn.selected {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .pattern-preview {
+            width: 30px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .elements-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .element-btn {
+            padding: 15px 10px;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .element-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .element-btn.selected {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .presets-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .preset-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .settings-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .setting-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .setting-slider {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            outline: none;
+            appearance: none;
+        }
+
+        .setting-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .meditation-panel {
+            text-align: center;
+        }
+
+        .breathing-circle {
+            width: 120px;
+            height: 120px;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            margin: 20px auto;
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .breathing-circle.breathing {
+            animation: breathe 8s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .meditation-text {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: #6D4C41;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(109, 76, 65, 0.3);
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            background: #5D4037;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(109, 76, 65, 0.4);
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 弹窗样式 */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .popup.show {
+            display: flex;
+        }
+
+        .popup-content {
+            background: linear-gradient(135deg, #A1887F 0%, #8D6E63 100%);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .popup-content h2 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+
+        .popup-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .main-interface {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .side-panel {
+                flex-direction: row;
+                overflow-x: auto;
+            }
+            
+            .panel-section {
+                flex: 0 0 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .game-header h1 {
+                font-size: 2rem;
+            }
+            
+            #gardenCanvas {
+                width: 100% !important;
+                height: 400px !important;
+            }
+            
+            .tools-grid, .elements-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .side-panel {
+                flex-direction: column;
+            }
+            
+            .panel-section {
+                flex: none;
+            }
+        }
+
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple 1s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .zen-quote {
+            text-align: center;
+            font-style: italic;
+            opacity: 0.8;
+            margin: 10px 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>🧘 禅意花园</h1>
+            <div class="game-subtitle">创造宁静的心灵空间</div>
+        </header>
+
+        <section class="main-interface">
+            <div class="side-panel">
+                <div class="panel-section">
+                    <h3>🛠️ 创作工具</h3>
+                    <div class="tools-grid">
+                        <button class="tool-btn selected" onclick="zenGarden.selectTool('rake')">
+                            <div class="tool-icon">🌾</div>
+                            <div class="tool-name">耙子</div>
+                        </button>
+                        <button class="tool-btn" onclick="zenGarden.selectTool('stone')">
+                            <div class="tool-icon">🪨</div>
+                            <div class="tool-name">石头</div>
+                        </button>
+                        <button class="tool-btn" onclick="zenGarden.selectTool('plant')">
+                            <div class="tool-icon">🌱</div>
+                            <div class="tool-name">植物</div>
+                        </button>
+                        <button class="tool-btn" onclick="zenGarden.selectTool('water')">
+                            <div class="tool-icon">💧</div>
+                            <div class="tool-name">水滴</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🎨 沙纹图案</h3>
+                    <div class="patterns-list">
+                        <button class="pattern-btn selected" onclick="zenGarden.selectPattern('circles')">
+                            <div class="pattern-preview">○○○</div>
+                            <span>同心圆</span>
+                        </button>
+                        <button class="pattern-btn" onclick="zenGarden.selectPattern('waves')">
+                            <div class="pattern-preview">~~~</div>
+                            <span>波浪纹</span>
+                        </button>
+                        <button class="pattern-btn" onclick="zenGarden.selectPattern('lines')">
+                            <div class="pattern-preview">|||</div>
+                            <span>直线纹</span>
+                        </button>
+                        <button class="pattern-btn" onclick="zenGarden.selectPattern('spiral')">
+                            <div class="pattern-preview">@</div>
+                            <span>螺旋纹</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>⚙️ 设置</h3>
+                    <div class="settings-panel">
+                        <div class="setting-group">
+                            <label class="setting-label">画笔大小</label>
+                            <input type="range" class="setting-slider" id="brushSize" 
+                                   min="5" max="30" value="15" onchange="zenGarden.setBrushSize(this.value)">
+                        </div>
+                        <div class="setting-group">
+                            <label class="setting-label">透明度</label>
+                            <input type="range" class="setting-slider" id="opacity" 
+                                   min="0.1" max="1" step="0.1" value="0.8" onchange="zenGarden.setOpacity(this.value)">
+                        </div>
+                        <div class="setting-group">
+                            <label class="setting-label">动画速度</label>
+                            <input type="range" class="setting-slider" id="animSpeed" 
+                                   min="0.5" max="3" step="0.1" value="1" onchange="zenGarden.setAnimSpeed(this.value)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="garden-area">
+                <canvas id="gardenCanvas" width="600" height="500"></canvas>
+            </div>
+
+            <div class="side-panel">
+                <div class="panel-section">
+                    <h3>🌸 元素库</h3>
+                    <div class="elements-grid">
+                        <button class="element-btn" onclick="zenGarden.addElement('lotus')">
+                            <div class="tool-icon">🪷</div>
+                            <div class="tool-name">莲花</div>
+                        </button>
+                        <button class="element-btn" onclick="zenGarden.addElement('bamboo')">
+                            <div class="tool-icon">🎋</div>
+                            <div class="tool-name">竹子</div>
+                        </button>
+                        <button class="element-btn" onclick="zenGarden.addElement('bridge')">
+                            <div class="tool-icon">🌉</div>
+                            <div class="tool-name">小桥</div>
+                        </button>
+                        <button class="element-btn" onclick="zenGarden.addElement('lantern')">
+                            <div class="tool-icon">🏮</div>
+                            <div class="tool-name">灯笼</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🎭 预设场景</h3>
+                    <div class="presets-list">
+                        <button class="preset-btn" onclick="zenGarden.loadPreset('minimal')">
+                            极简禅境
+                        </button>
+                        <button class="preset-btn" onclick="zenGarden.loadPreset('traditional')">
+                            传统庭院
+                        </button>
+                        <button class="preset-btn" onclick="zenGarden.loadPreset('modern')">
+                            现代简约
+                        </button>
+                        <button class="preset-btn" onclick="zenGarden.loadPreset('nature')">
+                            自然野趣
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🧘 冥想空间</h3>
+                    <div class="meditation-panel">
+                        <div class="breathing-circle" id="breathingCircle"></div>
+                        <div class="meditation-text" id="meditationText">
+                            点击圆圈开始呼吸练习
+                        </div>
+                        <div class="zen-quote" id="zenQuote">
+                            "静观万物，心如止水"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn" onclick="zenGarden.clearGarden()">🗑️ 清空花园</button>
+            <button class="btn secondary" onclick="zenGarden.saveGarden()">💾 保存作品</button>
+            <button class="btn secondary" onclick="zenGarden.loadGarden()">📁 加载作品</button>
+            <button class="btn secondary" onclick="zenGarden.showHelp()">❓ 使用指南</button>
+        </section>
+
+        <!-- 帮助弹窗 -->
+        <div class="popup" id="helpPopup">
+            <div class="popup-content">
+                <h2>🧘 禅意花园指南</h2>
+                
+                <div style="text-align: left; margin-bottom: 20px;">
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎯 创作理念</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        禅意花园是一个放松身心的创作空间。通过简单的操作创造美丽的庭院景观，在创作过程中获得内心的宁静。
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🛠️ 工具使用</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>耙子：</strong>在沙地上绘制各种纹理图案<br>
+                        • <strong>石头：</strong>放置大小不同的石块<br>
+                        • <strong>植物：</strong>添加绿色生机<br>
+                        • <strong>水滴：</strong>创造水波涟漪效果
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎨 沙纹图案</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>同心圆：</strong>围绕中心点绘制圆形纹理<br>
+                        • <strong>波浪纹：</strong>流畅的波浪状图案<br>
+                        • <strong>直线纹：</strong>规整的平行线条<br>
+                        • <strong>螺旋纹：</strong>优雅的螺旋状纹理
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🧘 冥想功能</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        点击呼吸圆圈可以开始简单的呼吸练习，帮助您放松身心，进入冥想状态。
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">💡 创作建议</h3>
+                    <p style="line-height: 1.6;">
+                        • 从简单的元素开始，逐步添加细节<br>
+                        • 注重空间的平衡与和谐<br>
+                        • 不追求完美，享受创作过程<br>
+                        • 让直觉引导你的创作<br>
+                        • 定期保存你喜欢的作品
+                    </p>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="zenGarden.closeHelp();">开始创作</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        class ZenGarden {
+            constructor() {
+                this.canvas = document.getElementById('gardenCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                // 当前工具和设置
+                this.currentTool = 'rake';
+                this.currentPattern = 'circles';
+                this.brushSize = 15;
+                this.opacity = 0.8;
+                this.animSpeed = 1;
+                
+                // 绘制状态
+                this.isDrawing = false;
+                this.lastX = 0;
+                this.lastY = 0;
+                
+                // 花园元素
+                this.elements = [];
+                this.sandTextures = [];
+                
+                // 禅语库
+                this.zenQuotes = [
+                    "静观万物，心如止水",
+                    "一花一世界，一叶一如来",
+                    "心静自然凉，意诚则灵",
+                    "万物皆空，唯心不空",
+                    "行到水穷处，坐看云起时",
+                    "采菊东篱下，悠然见南山",
+                    "明月松间照，清泉石上流",
+                    "空山新雨后，天气晚来秋"
+                ];
+                
+                // 预设场景
+                this.presets = {
+                    minimal: {
+                        elements: [
+                            {type: 'stone', x: 300, y: 250, size: 30},
+                            {type: 'circles', x: 300, y: 250, radius: 80}
+                        ]
+                    },
+                    traditional: {
+                        elements: [
+                            {type: 'stone', x: 200, y: 200, size: 25},
+                            {type: 'stone', x: 400, y: 300, size: 35},
+                            {type: 'lotus', x: 150, y: 350},
+                            {type: 'bamboo', x: 500, y: 150},
+                            {type: 'waves', x: 300, y: 400}
+                        ]
+                    },
+                    modern: {
+                        elements: [
+                            {type: 'lines', x: 100, y: 100, length: 400},
+                            {type: 'stone', x: 300, y: 250, size: 40},
+                            {type: 'plant', x: 500, y: 400}
+                        ]
+                    },
+                    nature: {
+                        elements: [
+                            {type: 'bamboo', x: 100, y: 100},
+                            {type: 'lotus', x: 300, y: 300},
+                            {type: 'bridge', x: 400, y: 200},
+                            {type: 'water', x: 350, y: 350}
+                        ]
+                    }
+                };
+                
+                this.meditationActive = false;
+                this.bindEvents();
+                this.initializeGarden();
+            }
+            
+            bindEvents() {
+                // 画布事件
+                this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
+                this.canvas.addEventListener('mousemove', (e) => this.draw(e));
+                this.canvas.addEventListener('mouseup', () => this.stopDrawing());
+                this.canvas.addEventListener('mouseout', () => this.stopDrawing());
+                
+                // 触摸事件
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const mouseEvent = new MouseEvent('mousedown', {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+                    this.canvas.dispatchEvent(mouseEvent);
+                });
+                
+                this.canvas.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const mouseEvent = new MouseEvent('mousemove', {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+                    this.canvas.dispatchEvent(mouseEvent);
+                });
+                
+                this.canvas.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    const mouseEvent = new MouseEvent('mouseup', {});
+                    this.canvas.dispatchEvent(mouseEvent);
+                });
+                
+                // 呼吸练习
+                document.getElementById('breathingCircle').addEventListener('click', () => {
+                    this.toggleMeditation();
+                });
+                
+                // 定期更换禅语
+                setInterval(() => {
+                    this.updateZenQuote();
+                }, 30000);
+            }
+            
+            initializeGarden() {
+                this.clearCanvas();
+                this.updateZenQuote();
+            }
+            
+            clearCanvas() {
+                // 绘制沙地背景
+                const gradient = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
+                gradient.addColorStop(0, '#F5DEB3');
+                gradient.addColorStop(0.5, '#DEB887');
+                gradient.addColorStop(1, '#D2B48C');
+                
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 添加细微的纹理
+                this.ctx.globalAlpha = 0.1;
+                for (let i = 0; i < 1000; i++) {
+                    const x = Math.random() * this.canvas.width;
+                    const y = Math.random() * this.canvas.height;
+                    this.ctx.fillStyle = Math.random() > 0.5 ? '#DDD' : '#BBB';
+                    this.ctx.fillRect(x, y, 1, 1);
+                }
+                this.ctx.globalAlpha = 1;
+            }
+            
+            getMousePos(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            }
+            
+            startDrawing(e) {
+                this.isDrawing = true;
+                const pos = this.getMousePos(e);
+                this.lastX = pos.x;
+                this.lastY = pos.y;
+                
+                this.createRippleEffect(pos.x, pos.y);
+            }
+            
+            draw(e) {
+                if (!this.isDrawing) return;
+                
+                const pos = this.getMousePos(e);
+                
+                switch (this.currentTool) {
+                    case 'rake':
+                        this.drawSandPattern(pos.x, pos.y);
+                        break;
+                    case 'stone':
+                        this.placeStone(pos.x, pos.y);
+                        this.stopDrawing();
+                        break;
+                    case 'plant':
+                        this.placePlant(pos.x, pos.y);
+                        this.stopDrawing();
+                        break;
+                    case 'water':
+                        this.createWaterRipple(pos.x, pos.y);
+                        this.stopDrawing();
+                        break;
+                }
+                
+                this.lastX = pos.x;
+                this.lastY = pos.y;
+            }
+            
+            stopDrawing() {
+                this.isDrawing = false;
+            }
+            
+            drawSandPattern(x, y) {
+                this.ctx.save();
+                this.ctx.globalAlpha = this.opacity;
+                this.ctx.strokeStyle = '#8B7355';
+                this.ctx.lineWidth = 2;
+                this.ctx.lineCap = 'round';
+                
+                switch (this.currentPattern) {
+                    case 'circles':
+                        this.drawCircles(x, y);
+                        break;
+                    case 'waves':
+                        this.drawWaves(x, y);
+                        break;
+                    case 'lines':
+                        this.drawLines(x, y);
+                        break;
+                    case 'spiral':
+                        this.drawSpiral(x, y);
+                        break;
+                }
+                
+                this.ctx.restore();
+            }
+            
+            drawCircles(x, y) {
+                for (let r = 5; r < this.brushSize * 2; r += 3) {
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, r, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
+            }
+            
+            drawWaves(x, y) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.lastX, this.lastY);
+                
+                const dx = x - this.lastX;
+                const dy = y - this.lastY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                for (let i = 0; i < distance; i += 5) {
+                    const progress = i / distance;
+                    const currentX = this.lastX + dx * progress;
+                    const currentY = this.lastY + dy * progress;
+                    const offset = Math.sin(i * 0.3) * 5;
+                    
+                    this.ctx.lineTo(currentX + offset, currentY);
+                }
+                
+                this.ctx.stroke();
+            }
+            
+            drawLines(x, y) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.lastX, this.lastY);
+                this.ctx.lineTo(x, y);
+                this.ctx.stroke();
+                
+                // 平行线
+                const angle = Math.atan2(y - this.lastY, x - this.lastX);
+                const perpAngle = angle + Math.PI / 2;
+                
+                for (let i = -10; i <= 10; i += 5) {
+                    const offsetX = Math.cos(perpAngle) * i;
+                    const offsetY = Math.sin(perpAngle) * i;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.lastX + offsetX, this.lastY + offsetY);
+                    this.ctx.lineTo(x + offsetX, y + offsetY);
+                    this.ctx.stroke();
+                }
+            }
+            
+            drawSpiral(x, y) {
+                this.ctx.beginPath();
+                for (let angle = 0; angle < Math.PI * 4; angle += 0.1) {
+                    const radius = angle * 2;
+                    const spiralX = x + Math.cos(angle) * radius;
+                    const spiralY = y + Math.sin(angle) * radius;
+                    
+                    if (angle === 0) {
+                        this.ctx.moveTo(spiralX, spiralY);
+                    } else {
+                        this.ctx.lineTo(spiralX, spiralY);
+                    }
+                }
+                this.ctx.stroke();
+            }
+            
+            placeStone(x, y) {
+                const size = this.brushSize + Math.random() * 20;
+                const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, size);
+                gradient.addColorStop(0, '#696969');
+                gradient.addColorStop(0.7, '#4A4A4A');
+                gradient.addColorStop(1, '#2F2F2F');
+                
+                this.ctx.save();
+                this.ctx.globalAlpha = this.opacity;
+                this.ctx.fillStyle = gradient;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, size, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // 添加高光
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                this.ctx.beginPath();
+                this.ctx.arc(x - size * 0.3, y - size * 0.3, size * 0.3, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.restore();
+                
+                this.elements.push({type: 'stone', x, y, size});
+            }
+            
+            placePlant(x, y) {
+                this.ctx.save();
+                this.ctx.globalAlpha = this.opacity;
+                
+                // 绘制植物
+                const plants = ['🌱', '🌿', '🍀', '🌾'];
+                const plant = plants[Math.floor(Math.random() * plants.length)];
+                
+                this.ctx.font = `${this.brushSize * 2}px serif`;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText(plant, x, y);
+                
+                this.ctx.restore();
+                
+                this.elements.push({type: 'plant', x, y, emoji: plant});
+            }
+            
+            createWaterRipple(x, y) {
+                this.animateRipple(x, y, 0);
+                this.elements.push({type: 'water', x, y});
+            }
+            
+            animateRipple(x, y, radius) {
+                if (radius > 50) return;
+                
+                this.ctx.save();
+                this.ctx.globalAlpha = 0.3 * (1 - radius / 50);
+                this.ctx.strokeStyle = '#4FC3F7';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+                this.ctx.restore();
+                
+                setTimeout(() => {
+                    this.animateRipple(x, y, radius + 2);
+                }, 50 / this.animSpeed);
+            }
+            
+            createRippleEffect(x, y) {
+                const ripple = document.createElement('div');
+                ripple.className = 'ripple-effect';
+                ripple.style.left = (x - 10) + 'px';
+                ripple.style.top = (y - 10) + 'px';
+                ripple.style.width = '20px';
+                ripple.style.height = '20px';
+                
+                this.canvas.parentNode.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 1000);
+            }
+            
+            selectTool(tool) {
+                this.currentTool = tool;
+                this.updateToolSelection();
+            }
+            
+            selectPattern(pattern) {
+                this.currentPattern = pattern;
+                this.updatePatternSelection();
+            }
+            
+            updateToolSelection() {
+                document.querySelectorAll('.tool-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                document.querySelector(`[onclick="zenGarden.selectTool('${this.currentTool}')"]`)
+                    ?.classList.add('selected');
+            }
+            
+            updatePatternSelection() {
+                document.querySelectorAll('.pattern-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                document.querySelector(`[onclick="zenGarden.selectPattern('${this.currentPattern}')"]`)
+                    ?.classList.add('selected');
+            }
+            
+            setBrushSize(size) {
+                this.brushSize = parseInt(size);
+            }
+            
+            setOpacity(opacity) {
+                this.opacity = parseFloat(opacity);
+            }
+            
+            setAnimSpeed(speed) {
+                this.animSpeed = parseFloat(speed);
+            }
+            
+            addElement(type) {
+                const x = this.canvas.width / 2 + (Math.random() - 0.5) * 200;
+                const y = this.canvas.height / 2 + (Math.random() - 0.5) * 200;
+                
+                this.ctx.save();
+                this.ctx.font = '40px serif';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                
+                const elements = {
+                    lotus: '🪷',
+                    bamboo: '🎋',
+                    bridge: '🌉',
+                    lantern: '🏮'
+                };
+                
+                this.ctx.fillText(elements[type], x, y);
+                this.ctx.restore();
+                
+                this.elements.push({type, x, y, emoji: elements[type]});
+            }
+            
+            loadPreset(presetName) {
+                this.clearGarden();
+                const preset = this.presets[presetName];
+                
+                if (preset) {
+                    preset.elements.forEach(element => {
+                        switch (element.type) {
+                            case 'stone':
+                                this.placeStone(element.x, element.y);
+                                break;
+                            case 'circles':
+                                this.drawCircles(element.x, element.y);
+                                break;
+                            case 'waves':
+                                this.drawWaves(element.x, element.y);
+                                break;
+                            case 'lines':
+                                this.drawLines(element.x, element.y);
+                                break;
+                            default:
+                                this.addElement(element.type);
+                        }
+                    });
+                }
+            }
+            
+            clearGarden() {
+                this.elements = [];
+                this.sandTextures = [];
+                this.initializeGarden();
+            }
+            
+            saveGarden() {
+                const gardenData = {
+                    elements: this.elements,
+                    imageData: this.canvas.toDataURL()
+                };
+                
+                try {
+                    localStorage.setItem('zenGarden_save', JSON.stringify(gardenData));
+                    alert('花园已保存！');
+                } catch (e) {
+                    alert('保存失败！');
+                }
+            }
+            
+            loadGarden() {
+                try {
+                    const saved = localStorage.getItem('zenGarden_save');
+                    if (!saved) {
+                        alert('没有找到保存的花园！');
+                        return;
+                    }
+                    
+                    const gardenData = JSON.parse(saved);
+                    this.elements = gardenData.elements || [];
+                    
+                    if (gardenData.imageData) {
+                        const img = new Image();
+                        img.onload = () => {
+                            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                            this.ctx.drawImage(img, 0, 0);
+                        };
+                        img.src = gardenData.imageData;
+                    }
+                    
+                    alert('花园已加载！');
+                } catch (e) {
+                    alert('加载失败！');
+                }
+            }
+            
+            toggleMeditation() {
+                const circle = document.getElementById('breathingCircle');
+                const text = document.getElementById('meditationText');
+                
+                this.meditationActive = !this.meditationActive;
+                
+                if (this.meditationActive) {
+                    circle.classList.add('breathing');
+                    text.textContent = '深呼吸...跟随圆圈的节奏';
+                } else {
+                    circle.classList.remove('breathing');
+                    text.textContent = '点击圆圈开始呼吸练习';
+                }
+            }
+            
+            updateZenQuote() {
+                const quote = this.zenQuotes[Math.floor(Math.random() * this.zenQuotes.length)];
+                document.getElementById('zenQuote').textContent = quote;
+            }
+            
+            showHelp() {
+                document.getElementById('helpPopup').classList.add('show');
+            }
+            
+            closeHelp() {
+                document.getElementById('helpPopup').classList.remove('show');
+            }
+        }
+
+        // 全局变量
+        let zenGarden;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            zenGarden = new ZenGarden();
+        });
+    </script>
+</body>
+</html>

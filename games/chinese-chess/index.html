@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国象棋 - 经典策略对弈游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="经典中国象棋游戏，扁平化设计界面，支持人机对战和双人对弈，完整的象棋规则和AI对手！">
+    <meta name="keywords" content="中国象棋,象棋游戏,策略游戏,棋类游戏,在线游戏,免费游戏,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#C0392B">
+    
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main class="game-container">
+        <h1>♞ 中国象棋</h1>
+        
+        <section class="game-info">
+            <div class="player-info red active" id="redPlayer">
+                <div class="player-name">红方</div>
+                <div class="player-status">准备中...</div>
+            </div>
+            <div class="player-info black" id="blackPlayer">
+                <div class="player-name">黑方</div>
+                <div class="player-status">等待中...</div>
+            </div>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn" id="newGameBtn" onclick="chineseChess.newGame()">🎮 新游戏</button>
+            <button class="btn secondary" id="undoBtn" onclick="chineseChess.undoMove()">↶ 悔棋</button>
+            <button class="btn secondary" id="hintBtn" onclick="chineseChess.showHint()">💡 提示</button>
+            <button class="btn" id="aiBtn" onclick="chineseChess.toggleAI()">🤖 人机对战</button>
+            <button class="btn secondary" id="endgameBtn" onclick="chineseChess.loadEndgame()">🏁 象棋残局</button>
+            <button class="btn puzzle-btn" id="chessPuzzleBtn" onclick="chineseChess.startChessPuzzle()">🧩 Chess-Puzzle谜题</button>
+        </section>
+
+        <!-- 残局模式专用导航控制 -->
+        <section class="endgame-controls" id="endgameControls" style="display: none;">
+            <div style="background: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 16px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 15px; text-align: center;">🏁 象棋残局游戏导航</h3>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn secondary" onclick="chineseChess.previousEndgame()">⬅️ 上一局</button>
+                    <button class="btn" onclick="chineseChess.resetCurrentEndgame()">🔄 重置残局</button>
+                    <button class="btn secondary" onclick="chineseChess.nextEndgame()">➡️ 下一局</button>
+                    <button class="btn" onclick="chineseChess.exitEndgameMode()">❌ 退出残局</button>
+                </div>
+                <div id="endgameInfo" style="text-align: center; margin-top: 10px; font-size: 0.9rem; color: #7f8c8d;">
+                    残局 1/8：准备开始
+                </div>
+            </div>
+        </section>
+
+        <!-- Chess-Puzzle象棋残局谜题专用控制 -->
+        <section class="chess-puzzle-controls" id="chessPuzzleControls" style="display: none;">
+            <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 16px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; text-align: center;">🧩 Chess-Puzzle 象棋残局谜题</h3>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
+                    <button class="btn" onclick="chineseChess.previousPuzzle()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">⬅️ 上题</button>
+                    <button class="btn" onclick="chineseChess.resetPuzzle()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">🔄 重置</button>
+                    <button class="btn" onclick="chineseChess.showPuzzleHint()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">💡 谜题提示</button>
+                    <button class="btn" onclick="chineseChess.nextPuzzle()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">➡️ 下题</button>
+                    <button class="btn" onclick="chineseChess.exitPuzzleMode()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">❌ 退出</button>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 10px;">
+                    <button class="btn" onclick="chineseChess.setPuzzleDifficulty('easy')" style="background: rgba(76,175,80,0.3); border: 1px solid rgba(76,175,80,0.5); font-size: 0.8rem;">🟢 简单</button>
+                    <button class="btn" onclick="chineseChess.setPuzzleDifficulty('medium')" style="background: rgba(255,193,7,0.3); border: 1px solid rgba(255,193,7,0.5); font-size: 0.8rem;">🟡 中等</button>
+                    <button class="btn" onclick="chineseChess.setPuzzleDifficulty('hard')" style="background: rgba(244,67,54,0.3); border: 1px solid rgba(244,67,54,0.5); font-size: 0.8rem;">🔴 困难</button>
+                </div>
+                <div id="puzzleInfo" style="text-align: center; font-size: 0.9rem; opacity: 0.9;">
+                    谜题准备中...
+                </div>
+            </div>
+        </section>
+
+        <section class="game-status">
+            <h3>🎯 游戏状态</h3>
+            <div class="status-text" id="statusText">红方先行，请选择棋子</div>
+        </section>
+
+        <section class="chess-board-container">
+            <div class="chess-board">
+                <div class="board-container" id="chessBoardContainer">
+                    <svg class="board-lines" viewBox="0 0 450 500" id="boardLines">
+                        <!-- 传统中国象棋棋盘基础线条 -->
+                        <defs>
+                            <!-- 棋盘纹理渐变 -->
+                            <linearGradient id="boardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#8B4513;stop-opacity:0.1"/>
+                                <stop offset="100%" style="stop-color:#654321;stop-opacity:0.1"/>
+                            </linearGradient>
+                        </defs>
+                        
+                        <!-- 棋盘背景纹理 -->
+                        <rect x="25" y="25" width="400" height="450" fill="url(#boardGradient)" opacity="0.3"/>
+                        
+                        <!-- 横线 - 标准中国象棋规格 -->
+                        <g stroke="#654321" stroke-width="2" fill="none">
+                            <!-- 上半部分横线 (黑方区域) -->
+                            <line x1="25" y1="25" x2="425" y2="25" stroke-width="3"/>
+                            <line x1="25" y1="75" x2="425" y2="75"/>
+                            <line x1="25" y1="125" x2="425" y2="125"/>
+                            <line x1="25" y1="175" x2="425" y2="175"/>
+                            <line x1="25" y1="225" x2="425" y2="225"/>
+                            <!-- 河界中心线（楚河汉界分界） -->
+                            <line x1="25" y1="250" x2="425" y2="250" stroke="#8B4513" stroke-width="1" stroke-dasharray="5,5" opacity="0.6"/>
+                            <!-- 河界边界线（加粗显示） -->
+                            <line x1="25" y1="275" x2="425" y2="275" stroke-width="3"/>
+                            <!-- 下半部分横线 (红方区域) -->
+                            <line x1="25" y1="325" x2="425" y2="325"/>
+                            <line x1="25" y1="375" x2="425" y2="375"/>
+                            <line x1="25" y1="425" x2="425" y2="425"/>
+                            <line x1="25" y1="475" x2="425" y2="475" stroke-width="3"/>
+                        </g>
+                        <!-- 竖线 - 标准中国象棋分段设计 -->
+                        <g stroke="#654321" stroke-width="2" fill="none">
+                            <!-- 左右边界竖线（完整贯通） -->
+                            <line x1="25" y1="25" x2="25" y2="475" stroke-width="3"/>
+                            <line x1="425" y1="25" x2="425" y2="475" stroke-width="3"/>
+                            
+                            <!-- 中间竖线 - 河界分段（上半部：黑方区域） -->
+                            <line x1="75" y1="25" x2="75" y2="225" stroke-width="2"/>
+                            <line x1="125" y1="25" x2="125" y2="225" stroke-width="2"/>
+                            <line x1="175" y1="25" x2="175" y2="225" stroke-width="2"/>
+                            <line x1="225" y1="25" x2="225" y2="225" stroke-width="2.5"/>
+                            <line x1="275" y1="25" x2="275" y2="225" stroke-width="2"/>
+                            <line x1="325" y1="25" x2="325" y2="225" stroke-width="2"/>
+                            <line x1="375" y1="25" x2="375" y2="225" stroke-width="2"/>
+                            
+                            <!-- 中间竖线 - 河界分段（下半部：红方区域） -->
+                            <line x1="75" y1="275" x2="75" y2="475" stroke-width="2"/>
+                            <line x1="125" y1="275" x2="125" y2="475" stroke-width="2"/>
+                            <line x1="175" y1="275" x2="175" y2="475" stroke-width="2"/>
+                            <line x1="225" y1="275" x2="225" y2="475" stroke-width="2.5"/>
+                            <line x1="275" y1="275" x2="275" y2="475" stroke-width="2"/>
+                            <line x1="325" y1="275" x2="325" y2="475" stroke-width="2"/>
+                            <line x1="375" y1="275" x2="375" y2="475" stroke-width="2"/>
+                        </g>
+                        <!-- 士线（九宫格对角线）- Chess-Puzzle增强显示 -->
+                        <g id="palaceLines" stroke="#8B4513" stroke-width="2.5" fill="none" opacity="0.9">
+                            <!-- 黑方九宫格士线（将帅宫内对角线） -->
+                            <line x1="175" y1="25" x2="275" y2="125" stroke-linecap="round" class="palace-line"/>
+                            <line x1="275" y1="25" x2="175" y2="125" stroke-linecap="round" class="palace-line"/>
+                            <!-- 红方九宫格士线（将帅宫内对角线） -->
+                            <line x1="175" y1="375" x2="275" y2="475" stroke-linecap="round" class="palace-line"/>
+                            <line x1="275" y1="375" x2="175" y2="475" stroke-linecap="round" class="palace-line"/>
+                        </g>
+                        
+                        <!-- Chess-Puzzle模式下的士线阴影增强 -->
+                        <g stroke="#654321" stroke-width="3" fill="none" opacity="0.3">
+                            <!-- 士线阴影效果 -->
+                            <line x1="176" y1="26" x2="276" y2="126" stroke-linecap="round"/>
+                            <line x1="276" y1="26" x2="176" y2="126" stroke-linecap="round"/>
+                            <line x1="176" y1="376" x2="276" y2="476" stroke-linecap="round"/>
+                            <line x1="276" y1="376" x2="176" y2="476" stroke-linecap="round"/>
+                        </g>
+                        
+                        <!-- 传统九宫格标记 -->
+                        <g stroke="#654321" stroke-width="1.5" fill="none" opacity="0.6">
+                            <!-- 黑方九宫格边界线 -->
+                            <rect x="175" y="25" width="100" height="100" stroke-dasharray="3,2"/>
+                            <!-- 红方九宫格边界线 -->
+                            <rect x="175" y="375" width="100" height="100" stroke-dasharray="3,2"/>
+                        </g>
+                        
+                        <!-- 炮位标记（传统象棋棋盘特色） -->
+                        <g stroke="#654321" stroke-width="1.2" fill="none" opacity="0.5">
+                            <!-- 黑方炮位标记 -->
+                            <g transform="translate(75,125)">
+                                <line x1="-3" y1="-3" x2="3" y2="-3"/>
+                                <line x1="-3" y1="3" x2="3" y2="3"/>
+                                <line x1="-3" y1="-3" x2="-3" y2="3"/>
+                                <line x1="3" y1="-3" x2="3" y2="3"/>
+                            </g>
+                            <g transform="translate(375,125)">
+                                <line x1="-3" y1="-3" x2="3" y2="-3"/>
+                                <line x1="-3" y1="3" x2="3" y2="3"/>
+                                <line x1="-3" y1="-3" x2="-3" y2="3"/>
+                                <line x1="3" y1="-3" x2="3" y2="3"/>
+                            </g>
+                            <!-- 红方炮位标记 -->
+                            <g transform="translate(75,375)">
+                                <line x1="-3" y1="-3" x2="3" y2="-3"/>
+                                <line x1="-3" y1="3" x2="3" y2="3"/>
+                                <line x1="-3" y1="-3" x2="-3" y2="3"/>
+                                <line x1="3" y1="-3" x2="3" y2="3"/>
+                            </g>
+                            <g transform="translate(375,375)">
+                                <line x1="-3" y1="-3" x2="3" y2="-3"/>
+                                <line x1="-3" y1="3" x2="3" y2="3"/>
+                                <line x1="-3" y1="-3" x2="-3" y2="3"/>
+                                <line x1="3" y1="-3" x2="3" y2="3"/>
+                            </g>
+                        </g>
+                        <!-- 重要交叉点标记 -->
+                        <g fill="#654321" opacity="0.6">
+                            <!-- 九宫格中心点 -->
+                            <circle cx="225" cy="75" r="2" stroke="#8B4513" stroke-width="0.5"/>
+                            <circle cx="225" cy="425" r="2" stroke="#8B4513" stroke-width="0.5"/>
+                            <!-- 九宫格角点 -->
+                            <circle cx="175" cy="25" r="1.5"/>
+                            <circle cx="275" cy="25" r="1.5"/>
+                            <circle cx="175" cy="125" r="1.5"/>
+                            <circle cx="275" cy="125" r="1.5"/>
+                            <circle cx="175" cy="375" r="1.5"/>
+                            <circle cx="275" cy="375" r="1.5"/>
+                            <circle cx="175" cy="475" r="1.5"/>
+                            <circle cx="275" cy="475" r="1.5"/>
+                        </g>
+                        <!-- 传统楚河汉界文字 -->
+                        <g font-family="Microsoft YaHei, KaiTi, serif" font-size="20" font-weight="bold" fill="#654321" text-anchor="middle" opacity="0.9">
+                            <!-- 楚河汉界背景 -->
+                            <rect x="70" y="240" width="60" height="25" fill="rgba(212,176,138,0.8)" rx="3"/>
+                            <rect x="320" y="240" width="60" height="25" fill="rgba(212,176,138,0.8)" rx="3"/>
+                            <!-- 文字内容 -->
+                            <text x="100" y="257" stroke="white" stroke-width="0.8" style="paint-order: stroke fill;">楚河</text>
+                            <text x="350" y="257" stroke="white" stroke-width="0.8" style="paint-order: stroke fill;">汉界</text>
+                        </g>
+                    </svg>
+                    <div id="boardIntersections"></div>
+                    <div id="chessPieces"></div>
+                </div>
+                <div class="river-line">楚河汉界</div>
+            </div>
+        </section>
+
+        <section class="move-history">
+            <h3>📜 走棋记录</h3>
+            <div id="moveList">
+                <div class="move-item">
+                    <span>游戏开始</span>
+                    <span>--</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="instructions">
+            <h3>🎮 游戏规则</h3>
+            <div class="instruction-grid">
+                <div class="instruction-item">
+                    <h4>基本规则</h4>
+                    <p>红方先行，轮流走棋，目标是将死对方的将（帅）</p>
+                </div>
+                <div class="instruction-item">
+                    <h4>棋子走法</h4>
+                    <p>每种棋子都有特定的走法规则，不能越子行走</p>
+                </div>
+                <div class="instruction-item">
+                    <h4>胜负条件</h4>
+                    <p>将死对方或对方无子可走时获胜</p>
+                </div>
+                <div class="instruction-item">
+                    <h4>操作方式</h4>
+                    <p>点击棋子选择，再点击目标位置完成移动</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 游戏结束弹窗 -->
+        <div class="game-over-overlay" id="gameOverOverlay">
+            <div class="game-over-content">
+                <div class="celebration">👑</div>
+                <h2>游戏结束！</h2>
+                <div class="winner-text" id="winnerText">红方获胜！</div>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button class="btn" onclick="chineseChess.newGame()">再来一局</button>
+                    <button class="btn secondary" onclick="chineseChess.closeGameOver()">返回</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    
+    <script src="js/game.js"></script>
+</body>
+</html>

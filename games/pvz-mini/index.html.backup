@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>植物大战僵尸 - 塔防策略游戏</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #90EE90 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-width: 1200px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #228B22;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .info-card {
+            background: #F0FFF0;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #32CD32;
+        }
+        .info-label {
+            color: #228B22;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .info-value {
+            color: #4A4A4A;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #32CD32;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #228B22;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+            min-height: 500px;
+        }
+        .lawn {
+            background: #90EE90;
+            border-radius: 15px;
+            padding: 15px;
+            border: 2px solid #32CD32;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 2px;
+            height: 400px;
+            background: #228B22;
+            border-radius: 10px;
+            padding: 5px;
+        }
+        .cell {
+            background: #90EE90;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 1px solid #32CD32;
+        }
+        .cell:hover {
+            background: #98FB98;
+            transform: scale(1.05);
+        }
+        .cell.selected {
+            border-color: #FFD700;
+            background: #FFFFE0;
+        }
+        .plant, .zombie {
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.2rem;
+        }
+        .plant.peashooter { background: #32CD32; }
+        .plant.sunflower { background: #FFD700; color: black; }
+        .plant.walnut { background: #8B4513; }
+        .plant.cherry { background: #DC143C; }
+        .zombie.basic { background: #696969; }
+        .zombie.cone { background: #8B4513; }
+        .zombie.bucket { background: #2F4F4F; }
+        .control-panel {
+            background: #F0FFF0;
+            border-radius: 15px;
+            padding: 15px;
+            border: 2px solid #32CD32;
+        }
+        .section-title {
+            text-align: center;
+            color: #228B22;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        .plant-menu {
+            margin-bottom: 20px;
+        }
+        .plant-item {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+            border: 2px solid #32CD32;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .plant-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .plant-item.affordable {
+            border-color: #228B22;
+        }
+        .plant-item.expensive {
+            border-color: #DC143C;
+            opacity: 0.7;
+        }
+        .plant-item.selected {
+            border-color: #FFD700;
+            background: #FFFFE0;
+        }
+        .plant-name {
+            font-weight: bold;
+            color: #228B22;
+            margin-bottom: 5px;
+        }
+        .plant-cost {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        .sun-counter {
+            background: #FFD700;
+            color: black;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .wave-info {
+            background: #FFE4E1;
+            border: 2px solid #DC143C;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .projectile {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #32CD32;
+            border-radius: 50%;
+            z-index: 10;
+            transition: all 0.5s linear;
+        }
+        .sun {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #FFD700;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: black;
+            cursor: pointer;
+            animation: sunFall 3s linear;
+            z-index: 20;
+        }
+        @keyframes sunFall {
+            from { top: 0; }
+            to { top: 300px; }
+        }
+        .health-bar {
+            position: absolute;
+            bottom: -5px;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background: rgba(255, 0, 0, 0.5);
+            border-radius: 2px;
+        }
+        .health-fill {
+            background: #32CD32;
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        .victory-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .victory-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            animation: victoryPop 0.5s ease-out;
+            border: 3px solid #32CD32;
+        }
+        @keyframes victoryPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @media (max-width: 768px) {
+            .game-container { padding: 15px; }
+            h1 { font-size: 2rem; }
+            .game-board { grid-template-columns: 1fr; gap: 15px; }
+            .grid { grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(4, 1fr); height: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🌻 植物大战僵尸 🧟</h1>
+        
+        <div class="game-info">
+            <div class="info-card">
+                <div class="info-label">阳光</div>
+                <div class="info-value" id="sunCount">50</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">波数</div>
+                <div class="info-value" id="waveCount">1</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">僵尸</div>
+                <div class="info-value" id="zombieCount">0</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">植物</div>
+                <div class="info-value" id="plantCount">0</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="pvz.newGame()">新游戏</button>
+            <button onclick="pvz.pauseGame()" id="pauseBtn">暂停</button>
+            <button onclick="pvz.nextWave()">下一波</button>
+            <button onclick="pvz.showRules()">游戏规则</button>
+        </div>
+
+        <div class="game-board">
+            <div class="lawn">
+                <div class="section-title">花园战场</div>
+                <div class="grid" id="gameGrid"></div>
+            </div>
+
+            <div class="control-panel">
+                <div class="sun-counter">
+                    ☀️ <span id="sunDisplay">50</span>
+                </div>
+
+                <div class="wave-info">
+                    <div style="color: #DC143C; font-weight: bold;">第 <span id="currentWave">1</span> 波</div>
+                    <div style="font-size: 0.8rem;">僵尸来袭!</div>
+                </div>
+
+                <div class="plant-menu">
+                    <div class="section-title">植物商店</div>
+                    <div id="plantMenu"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="victory-modal" id="victoryModal">
+        <div class="victory-content">
+            <h2 id="victoryTitle">🎉 胜利 🎉</h2>
+            <p id="victoryText"></p>
+            <button onclick="pvz.closeVictoryModal()">再来一局</button>
+        </div>
+    </div>
+
+    <script>
+        class PVZGame {
+            constructor() {
+                this.sun = 50;
+                this.wave = 1;
+                this.gameStarted = false;
+                this.gamePaused = false;
+                this.selectedPlant = null;
+                this.grid = [];
+                this.plants = [];
+                this.zombies = [];
+                this.projectiles = [];
+                this.suns = [];
+                
+                this.plantTypes = [
+                    { id: 'peashooter', name: '豌豆射手', cost: 100, hp: 300, damage: 20, description: '发射豌豆攻击僵尸' },
+                    { id: 'sunflower', name: '向日葵', cost: 50, hp: 200, sunProduction: 25, description: '产生阳光' },
+                    { id: 'walnut', name: '坚果墙', cost: 50, hp: 4000, description: '阻挡僵尸前进' },
+                    { id: 'cherry', name: '樱桃炸弹', cost: 150, hp: 300, damage: 1800, description: '爆炸伤害周围僵尸' }
+                ];
+                
+                this.zombieTypes = [
+                    { id: 'basic', name: '普通僵尸', hp: 200, speed: 1, damage: 100 },
+                    { id: 'cone', name: '路障僵尸', hp: 640, speed: 1, damage: 100 },
+                    { id: 'bucket', name: '铁桶僵尸', hp: 1370, speed: 1, damage: 100 }
+                ];
+                
+                this.init();
+            }
+
+            init() {
+                this.generateGrid();
+                this.updatePlantMenu();
+                this.updateDisplay();
+                this.startGameLoop();
+                this.startSunProduction();
+            }
+
+            generateGrid() {
+                const grid = document.getElementById('gameGrid');
+                grid.innerHTML = '';
+                this.grid = [];
+                
+                for (let row = 0; row < 5; row++) {
+                    this.grid[row] = [];
+                    for (let col = 0; col < 9; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        cell.onclick = () => this.plantSeed(row, col);
+                        
+                        this.grid[row][col] = { plant: null, zombies: [] };
+                        grid.appendChild(cell);
+                    }
+                }
+            }
+
+            updatePlantMenu() {
+                const menu = document.getElementById('plantMenu');
+                menu.innerHTML = '';
+                
+                this.plantTypes.forEach(plantType => {
+                    const plantItem = document.createElement('div');
+                    const canAfford = this.sun >= plantType.cost;
+                    plantItem.className = `plant-item ${canAfford ? 'affordable' : 'expensive'} ${this.selectedPlant === plantType.id ? 'selected' : ''}`;
+                    plantItem.onclick = () => this.selectPlant(plantType.id);
+                    
+                    plantItem.innerHTML = `
+                        <div class="plant-name">${plantType.name}</div>
+                        <div class="plant-cost">阳光: ${plantType.cost}</div>
+                    `;
+                    
+                    menu.appendChild(plantItem);
+                });
+            }
+
+            selectPlant(plantId) {
+                this.selectedPlant = this.selectedPlant === plantId ? null : plantId;
+                this.updatePlantMenu();
+            }
+
+            plantSeed(row, col) {
+                if (!this.selectedPlant || this.grid[row][col].plant) return;
+                
+                const plantType = this.plantTypes.find(p => p.id === this.selectedPlant);
+                if (!plantType || this.sun < plantType.cost) return;
+                
+                this.sun -= plantType.cost;
+                
+                const plant = {
+                    id: Date.now(),
+                    type: this.selectedPlant,
+                    row: row,
+                    col: col,
+                    hp: plantType.hp,
+                    maxHp: plantType.hp,
+                    lastShot: 0,
+                    lastSun: 0
+                };
+                
+                this.plants.push(plant);
+                this.grid[row][col].plant = plant;
+                this.renderPlant(plant);
+                this.updateDisplay();
+                this.updatePlantMenu();
+            }
+
+            renderPlant(plant) {
+                const cell = document.querySelector(`[data-row="${plant.row}"][data-col="${plant.col}"]`);
+                const plantElement = document.createElement('div');
+                plantElement.className = `plant ${plant.type}`;
+                plantElement.dataset.plantId = plant.id;
+                
+                const plantIcons = {
+                    peashooter: '🌱',
+                    sunflower: '🌻',
+                    walnut: '🥜',
+                    cherry: '🍒'
+                };
+                plantElement.textContent = plantIcons[plant.type];
+                
+                const healthBar = document.createElement('div');
+                healthBar.className = 'health-bar';
+                const healthFill = document.createElement('div');
+                healthFill.className = 'health-fill';
+                healthFill.style.width = `${(plant.hp / plant.maxHp) * 100}%`;
+                healthBar.appendChild(healthFill);
+                plantElement.appendChild(healthBar);
+                
+                cell.appendChild(plantElement);
+            }
+
+            spawnZombie() {
+                const row = Math.floor(Math.random() * 5);
+                const zombieType = this.zombieTypes[Math.floor(Math.random() * Math.min(this.zombieTypes.length, Math.ceil(this.wave / 2)))];
+                
+                const zombie = {
+                    id: Date.now() + Math.random(),
+                    type: zombieType.id,
+                    row: row,
+                    position: 8.5,
+                    hp: zombieType.hp,
+                    maxHp: zombieType.hp,
+                    speed: zombieType.speed * 0.01,
+                    damage: zombieType.damage,
+                    lastAttack: 0
+                };
+                
+                this.zombies.push(zombie);
+                this.renderZombie(zombie);
+            }
+
+            renderZombie(zombie) {
+                const existingZombie = document.querySelector(`[data-zombie-id="${zombie.id}"]`);
+                if (existingZombie) existingZombie.remove();
+                
+                const zombieElement = document.createElement('div');
+                zombieElement.className = `zombie ${zombie.type}`;
+                zombieElement.dataset.zombieId = zombie.id;
+                zombieElement.style.position = 'absolute';
+                zombieElement.style.left = `${zombie.position * 11.11}%`;
+                zombieElement.style.top = `${zombie.row * 20}%`;
+                
+                const zombieIcons = {
+                    basic: '🧟',
+                    cone: '🧟‍♂️',
+                    bucket: '🧟‍♀️'
+                };
+                zombieElement.textContent = zombieIcons[zombie.type];
+                
+                const healthBar = document.createElement('div');
+                healthBar.className = 'health-bar';
+                const healthFill = document.createElement('div');
+                healthFill.className = 'health-fill';
+                healthFill.style.width = `${(zombie.hp / zombie.maxHp) * 100}%`;
+                if (zombie.hp < zombie.maxHp * 0.3) healthFill.style.background = '#DC143C';
+                healthBar.appendChild(healthFill);
+                zombieElement.appendChild(healthBar);
+                
+                document.getElementById('gameGrid').appendChild(zombieElement);
+            }
+
+            updateZombies() {
+                this.zombies.forEach(zombie => {
+                    const col = Math.floor(zombie.position);
+                    
+                    if (col >= 0 && this.grid[zombie.row] && this.grid[zombie.row][col] && this.grid[zombie.row][col].plant) {
+                        // 攻击植物
+                        const plant = this.grid[zombie.row][col].plant;
+                        const currentTime = Date.now();
+                        
+                        if (currentTime - zombie.lastAttack > 1000) {
+                            plant.hp -= zombie.damage;
+                            zombie.lastAttack = currentTime;
+                            
+                            if (plant.hp <= 0) {
+                                this.removePlant(plant);
+                            }
+                        }
+                    } else {
+                        // 移动
+                        zombie.position -= zombie.speed;
+                        
+                        if (zombie.position < -0.5) {
+                            this.endGame(false, '僵尸突破了防线！');
+                            return;
+                        }
+                    }
+                    
+                    this.renderZombie(zombie);
+                });
+            }
+
+            updatePlants() {
+                this.plants.forEach(plant => {
+                    const currentTime = Date.now();
+                    
+                    if (plant.type === 'peashooter' && currentTime - plant.lastShot > 1500) {
+                        // 寻找同行的僵尸
+                        const targetZombie = this.zombies.find(z => 
+                            z.row === plant.row && z.position > plant.col
+                        );
+                        
+                        if (targetZombie) {
+                            this.createProjectile(plant.row, plant.col, targetZombie);
+                            plant.lastShot = currentTime;
+                        }
+                    } else if (plant.type === 'sunflower' && currentTime - plant.lastSun > 10000) {
+                        this.createSun(plant.row, plant.col);
+                        plant.lastSun = currentTime;
+                    } else if (plant.type === 'cherry' && plant.hp < plant.maxHp) {
+                        // 樱桃炸弹被攻击后爆炸
+                        this.explodeCherry(plant);
+                    }
+                    
+                    // 更新植物显示
+                    const plantElement = document.querySelector(`[data-plant-id="${plant.id}"]`);
+                    if (plantElement) {
+                        const healthFill = plantElement.querySelector('.health-fill');
+                        if (healthFill) {
+                            healthFill.style.width = `${(plant.hp / plant.maxHp) * 100}%`;
+                        }
+                    }
+                });
+            }
+
+            createProjectile(row, col, target) {
+                const projectile = {
+                    id: Date.now(),
+                    row: row,
+                    startCol: col,
+                    target: target,
+                    damage: 20
+                };
+                
+                this.projectiles.push(projectile);
+                
+                const projectileElement = document.createElement('div');
+                projectileElement.className = 'projectile';
+                projectileElement.dataset.projectileId = projectile.id;
+                projectileElement.style.position = 'absolute';
+                projectileElement.style.left = `${col * 11.11}%`;
+                projectileElement.style.top = `${row * 20 + 10}%`;
+                
+                document.getElementById('gameGrid').appendChild(projectileElement);
+                
+                // 动画移动到目标
+                setTimeout(() => {
+                    projectileElement.style.left = `${target.position * 11.11}%`;
+                }, 50);
+                
+                // 500ms后命中
+                setTimeout(() => {
+                    this.hitTarget(projectile);
+                }, 500);
+            }
+
+            hitTarget(projectile) {
+                const projectileElement = document.querySelector(`[data-projectile-id="${projectile.id}"]`);
+                if (projectileElement) projectileElement.remove();
+                
+                if (projectile.target && projectile.target.hp > 0) {
+                    projectile.target.hp -= projectile.damage;
+                    
+                    if (projectile.target.hp <= 0) {
+                        this.removeZombie(projectile.target);
+                    }
+                }
+                
+                this.projectiles = this.projectiles.filter(p => p.id !== projectile.id);
+            }
+
+            createSun(row, col) {
+                const sunElement = document.createElement('div');
+                sunElement.className = 'sun';
+                sunElement.textContent = '25';
+                sunElement.style.position = 'absolute';
+                sunElement.style.left = `${col * 11.11}%`;
+                sunElement.style.top = '0px';
+                sunElement.onclick = () => this.collectSun(sunElement, 25);
+                
+                document.getElementById('gameGrid').appendChild(sunElement);
+                
+                setTimeout(() => {
+                    if (sunElement.parentNode) {
+                        sunElement.remove();
+                    }
+                }, 3000);
+            }
+
+            collectSun(sunElement, amount) {
+                this.sun += amount;
+                sunElement.remove();
+                this.updateDisplay();
+                this.updatePlantMenu();
+            }
+
+            explodeCherry(cherry) {
+                // 移除樱桃炸弹
+                this.removePlant(cherry);
+                
+                // 伤害周围的僵尸
+                this.zombies.forEach(zombie => {
+                    const distance = Math.abs(zombie.row - cherry.row) + Math.abs(Math.floor(zombie.position) - cherry.col);
+                    if (distance <= 2) {
+                        zombie.hp -= 1800;
+                        if (zombie.hp <= 0) {
+                            this.removeZombie(zombie);
+                        }
+                    }
+                });
+            }
+
+            removePlant(plant) {
+                this.plants = this.plants.filter(p => p.id !== plant.id);
+                this.grid[plant.row][plant.col].plant = null;
+                
+                const plantElement = document.querySelector(`[data-plant-id="${plant.id}"]`);
+                if (plantElement) plantElement.remove();
+            }
+
+            removeZombie(zombie) {
+                this.zombies = this.zombies.filter(z => z.id !== zombie.id);
+                
+                const zombieElement = document.querySelector(`[data-zombie-id="${zombie.id}"]`);
+                if (zombieElement) zombieElement.remove();
+            }
+
+            nextWave() {
+                this.wave++;
+                
+                // 增加僵尸数量
+                const zombieCount = Math.min(10, 2 + this.wave);
+                for (let i = 0; i < zombieCount; i++) {
+                    setTimeout(() => {
+                        if (this.gameStarted && !this.gamePaused) {
+                            this.spawnZombie();
+                        }
+                    }, i * 2000);
+                }
+                
+                this.updateDisplay();
+            }
+
+            startGameLoop() {
+                this.gameStarted = true;
+                
+                setInterval(() => {
+                    if (!this.gamePaused && this.gameStarted) {
+                        this.updateZombies();
+                        this.updatePlants();
+                        this.updateDisplay();
+                        
+                        // 检查胜利条件
+                        if (this.zombies.length === 0 && this.wave >= 5) {
+                            this.endGame(true, '恭喜！你成功防守了所有波次的僵尸！');
+                        }
+                    }
+                }, 100);
+            }
+
+            startSunProduction() {
+                setInterval(() => {
+                    if (!this.gamePaused && this.gameStarted) {
+                        // 天空掉落阳光
+                        if (Math.random() < 0.3) {
+                            const sunElement = document.createElement('div');
+                            sunElement.className = 'sun';
+                            sunElement.textContent = '25';
+                            sunElement.style.position = 'absolute';
+                            sunElement.style.left = `${Math.random() * 80}%`;
+                            sunElement.style.top = '0px';
+                            sunElement.onclick = () => this.collectSun(sunElement, 25);
+                            
+                            document.getElementById('gameGrid').appendChild(sunElement);
+                            
+                            setTimeout(() => {
+                                if (sunElement.parentNode) {
+                                    sunElement.remove();
+                                }
+                            }, 3000);
+                        }
+                    }
+                }, 5000);
+            }
+
+            updateDisplay() {
+                document.getElementById('sunCount').textContent = this.sun;
+                document.getElementById('sunDisplay').textContent = this.sun;
+                document.getElementById('waveCount').textContent = this.wave;
+                document.getElementById('currentWave').textContent = this.wave;
+                document.getElementById('zombieCount').textContent = this.zombies.length;
+                document.getElementById('plantCount').textContent = this.plants.length;
+            }
+
+            pauseGame() {
+                this.gamePaused = !this.gamePaused;
+                const btn = document.getElementById('pauseBtn');
+                btn.textContent = this.gamePaused ? '继续' : '暂停';
+            }
+
+            newGame() {
+                location.reload();
+            }
+
+            endGame(victory, message) {
+                this.gameStarted = false;
+                
+                document.getElementById('victoryTitle').textContent = victory ? '🎉 胜利 🎉' : '💀 失败 💀';
+                document.getElementById('victoryText').textContent = message;
+                document.getElementById('victoryModal').style.display = 'flex';
+            }
+
+            closeVictoryModal() {
+                document.getElementById('victoryModal').style.display = 'none';
+                this.newGame();
+            }
+
+            showRules() {
+                alert(`植物大战僵尸游戏规则：
+
+目标：
+• 阻止僵尸进入房屋，坚持到第5波
+
+植物介绍：
+• 豌豆射手：发射豌豆攻击僵尸
+• 向日葵：产生阳光资源
+• 坚果墙：高血量阻挡僵尸
+• 樱桃炸弹：爆炸伤害周围僵尸
+
+僵尸类型：
+• 普通僵尸：基础血量
+• 路障僵尸：中等血量
+• 铁桶僵尸：高血量
+
+游戏技巧：
+• 合理搭配不同植物
+• 及时收集阳光
+• 在僵尸密集时使用炸弹
+• 用坚果墙保护射手植物`);
+            }
+        }
+
+        // 初始化游戏
+        const pvz = new PVZGame();
+    </script>
+</body>
+</html>

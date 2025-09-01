@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>图片处理工具 - LayUI优化版</title>
+    <link rel="stylesheet" href="../assets/css/layui.min.css">
+    <link rel="stylesheet" href="../assets/css/fontawesome.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --accent: #e74c3c;
+            --light: #f8f9fa;
+            --dark: #2c3e50;
+            --gray: #95a5a6;
+            --light-gray: #ecf0f1;
+            --card-bg: #ffffff;
+            --border: #e0e0e0;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px 0 100px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            overflow: hidden;
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            padding: 20px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            background: var(--light);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        .upload-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: var(--primary);
+            font-size: 36px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover .upload-icon {
+            transform: scale(1.1);
+            background: rgba(52, 152, 219, 0.2);
+        }
+
+        .upload-area h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-size: 1.4rem;
+        }
+
+        .upload-area p {
+            color: var(--gray);
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .image-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .image-item {
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+            border: 2px solid transparent;
+        }
+
+        .image-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .image-item.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-info {
+            padding: 15px;
+        }
+
+        .image-name {
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .image-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .tool-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+            background: var(--light);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tool-section {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .tool-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--dark);
+            gap: 10px;
+        }
+
+        .preview-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            padding: 25px;
+        }
+
+        .preview-container {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .preview-header {
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--dark);
+        }
+
+        .preview-box {
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--light);
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .preview-box img {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .edit-tools {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .edit-section {
+            margin-bottom: 30px;
+        }
+
+        .edit-header {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .slider-container {
+            padding: 0 10px;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 25px;
+            background: var(--light);
+            border-top: 1px solid var(--border);
+        }
+
+        .progress-container {
+            padding: 25px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+
+        .empty-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+            opacity: 0.7;
+        }
+
+        .empty-state h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .format-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+        }
+
+        .mobile-toolbar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            z-index: 1000;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .mobile-toolbar .btn-group {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .mobile-toolbar .layui-btn {
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        .image-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 90px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .image-list {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 15px;
+            }
+
+            .tool-bar {
+                flex-direction: column;
+                gap: 25px;
+            }
+
+            .preview-area {
+                flex-direction: column;
+                gap: 25px;
+            }
+
+            .preview-box {
+                height: 280px;
+            }
+
+            .action-bar {
+                flex-wrap: wrap;
+            }
+
+            .action-bar .layui-btn {
+                flex: 1;
+                min-width: 45%;
+            }
+
+            .mobile-toolbar {
+                display: block;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .image-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .preview-box {
+                height: 250px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+        }
+
+        /* LayUI 组件定制 */
+        .layui-btn {
+            border-radius: 10px;
+            transition: all 0.2s;
+            font-weight: 600;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .layui-btn i {
+            margin-right: 8px;
+        }
+
+        .layui-btn-primary {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .layui-btn-normal {
+            background: var(--primary);
+        }
+
+        .layui-btn-danger {
+            background: var(--accent);
+        }
+
+        .layui-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .layui-btn:active {
+            transform: translateY(0);
+        }
+
+        .layui-progress {
+            border-radius: 10px;
+            height: 12px;
+        }
+
+        .layui-progress-bar {
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        }
+
+        .layui-slider {
+            margin-top: 8px;
+        }
+
+        .layui-slider-bar {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .layui-slider-btn {
+            border: 2px solid var(--primary);
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .layui-slider-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* 自定义开关 */
+        .format-switch {
+            display: flex;
+            background: var(--light);
+            border-radius: 30px;
+            padding: 5px;
+            margin-top: 10px;
+        }
+
+        .format-option {
+            flex: 1;
+            text-align: center;
+            padding: 8px 5px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .format-option.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .image-count {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .tool-tip {
+            font-size: 12px;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-image"></i>
+                图片处理工具
+            </h1>
+            <p>批量压缩图片 | 格式转换 | 裁剪旋转 | 优化版</p>
+        </div>
+        <!-- 上传区域 -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>上传图片</span>
+            </div>
+            <div class="card-body">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3>拖放图片到此处或点击上传</h3>
+                    <p>支持PNG、JPG、GIF格式，单张图片最大5MB</p>
+                    <button class="layui-btn layui-btn-normal layui-btn-lg" id="uploadBtn">
+                        <i class="fas fa-folder-open"></i> 选择图片
+                    </button>
+                </div>
+                <div class="image-list" id="imageList">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-images"></i>
+                        </div>
+                        <h3>暂无图片</h3>
+                        <p>上传图片后，它们将显示在这里</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 工具区域 -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-sliders-h"></i>
+                <span>处理工具</span>
+            </div>
+            <div class="tool-bar">
+                <div class="tool-section">
+                    <div class="tool-label">
+                        <i class="fas fa-compress-arrows-alt"></i>
+                        <span>压缩质量</span>
+                    </div>
+                    <div id="qualitySlider"></div>
+                    <div class="slider-value">
+                        <span id="qualityValue">80%</span>
+                    </div>
+                    <div class="tool-tip">数值越小，压缩率越高，文件越小</div>
+                </div>
+                <div class="tool-section">
+                    <div class="tool-label">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>输出格式</span>
+                    </div>
+                    <div class="format-switch" id="formatSwitch">
+                        <div class="format-option active" data-format="jpg">JPG</div>
+                        <div class="format-option" data-format="png">PNG</div>
+                        <div class="format-option" data-format="gif">GIF</div>
+                    </div>
+                    <div class="tool-tip">设置处理后图片的输出格式</div>
+                </div>
+                <div class="tool-section">
+                    <div class="tool-label">
+                        <i class="fas fa-crop-alt"></i>
+                        <span>裁剪模式</span>
+                    </div>
+                    <div class="btn-group">
+                        <button class="layui-btn layui-btn-primary crop-btn" data-ratio="free">自由</button>
+                        <button class="layui-btn layui-btn-primary crop-btn" data-ratio="1:1">1:1</button>
+                        <button class="layui-btn layui-btn-primary crop-btn" data-ratio="4:3">4:3</button>
+                        <button class="layui-btn layui-btn-primary crop-btn" data-ratio="16:9">16:9</button>
+                    </div>
+                    <div class="tool-tip">选择裁剪比例</div>
+                </div>
+            </div>
+            <div class="preview-area">
+                <div class="preview-container">
+                    <div class="preview-header">
+                        <i class="fas fa-eye"></i>
+                        <span>图片预览</span>
+                        <div class="image-count" id="imageCount">0张图片</div>
+                    </div>
+                    <div class="preview-box" id="previewBox">
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            <h3>选择一张图片进行预览</h3>
+                            <p>在左侧图片列表中点击图片进行预览</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="edit-tools">
+                    <div class="preview-header">
+                        <i class="fas fa-edit"></i>
+                        <span>编辑工具</span>
+                    </div>
+                    <div class="edit-section">
+                        <div class="edit-header">
+                            <i class="fas fa-cut"></i>
+                            <span>裁剪工具</span>
+                        </div>
+                        <div class="btn-group">
+                            <button class="layui-btn layui-btn-normal" id="applyCrop">
+                                <i class="fas fa-crop"></i> 应用裁剪
+                            </button>
+                            <button class="layui-btn" id="resetCrop">
+                                <i class="fas fa-undo"></i> 重置
+                            </button>
+                        </div>
+                    </div>
+                    <div class="edit-section">
+                        <div class="edit-header">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>旋转工具</span>
+                        </div>
+                        <div class="btn-group">
+                            <button class="layui-btn rotate-btn" data-deg="-90">
+                                <i class="fas fa-undo"></i> 左旋转
+                            </button>
+                            <button class="layui-btn rotate-btn" data-deg="90">
+                                <i class="fas fa-redo"></i> 右旋转
+                            </button>
+                            <button class="layui-btn" id="flipV">
+                                <i class="fas fa-arrows-alt-v"></i> 垂直翻转
+                            </button>
+                            <button class="layui-btn" id="flipH">
+                                <i class="fas fa-arrows-alt-h"></i> 水平翻转
+                            </button>
+                        </div>
+                    </div>
+                    <div class="edit-section">
+                        <div class="edit-header">
+                            <i class="fas fa-adjust"></i>
+                            <span>调整工具</span>
+                        </div>
+                        <div class="slider-container">
+                            <div class="tool-label">
+                                <i class="fas fa-sun"></i>
+                                <span>亮度</span>
+                                <span id="brightnessValue">0%</span>
+                            </div>
+                            <div class="layui-slider" id="brightnessSlider"></div>
+                            <div class="tool-label" style="margin-top: 25px;">
+                                <i class="fas fa-circle-half-stroke"></i>
+                                <span>对比度</span>
+                                <span id="contrastValue">0%</span>
+                            </div>
+                            <div class="layui-slider" id="contrastSlider"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 操作按钮 -->
+        <div class="action-bar">
+            <button class="layui-btn layui-btn-lg layui-btn-normal" id="processAll">
+                <i class="fas fa-bolt"></i> 批量处理图片
+            </button>
+            <button class="layui-btn layui-btn-lg" id="downloadAll">
+                <i class="fas fa-download"></i> 下载全部
+            </button>
+        </div>
+        <!-- 处理进度 -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-tasks"></i>
+                <span>处理进度</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-info">
+                    <span>总进度: <span id="progressText">0%</span></span>
+                    <span>已处理: <span id="processedText">0</span>/<span id="totalText">0</span></span>
+                </div>
+                <div class="layui-progress" lay-filter="progressBar">
+                    <div class="layui-progress-bar" lay-percent="0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 移动端工具栏 -->
+    <div class="mobile-toolbar">
+        <div class="btn-group">
+            <button class="layui-btn layui-btn-normal" id="mobileProcess">
+                <i class="fas fa-bolt"></i> 处理
+            </button>
+            <button class="layui-btn" id="mobileCrop">
+                <i class="fas fa-crop"></i> 裁剪
+            </button>
+            <button class="layui-btn" id="mobileRotate">
+                <i class="fas fa-sync"></i> 旋转
+            </button>
+            <button class="layui-btn" id="mobileDownload">
+                <i class="fas fa-download"></i> 下载
+            </button>
+        </div>
+    </div>
+    <script src="../assets/js/layui.min.js"></script>
+    <script>
+        layui.use(['slider', 'upload', 'element', 'layer'], function () {
+            var slider = layui.slider;
+            var upload = layui.upload;
+            var element = layui.element;
+            var layer = layui.layer;
+
+            // 当前选中的图片
+            var currentImage = null;
+            // 图片列表
+            var images = [];
+            // 当前输出格式
+            var outputFormat = 'jpg';
+
+            // 初始化压缩质量滑块
+            slider.render({
+                elem: '#qualitySlider',
+                value: 80,
+                min: 10,
+                max: 100,
+                step: 5,
+                theme: '#3498db',
+                change: function (value) {
+                    document.getElementById('qualityValue').textContent = value + '%';
+                    if (currentImage) {
+                        currentImage.quality = value;
+                        updatePreview();
+                    }
+                }
+            });
+
+            // 初始化亮度滑块
+            slider.render({
+                elem: '#brightnessSlider',
+                value: 0,
+                min: -100,
+                max: 100,
+                step: 5,
+                theme: '#3498db',
+                change: function (value) {
+                    document.getElementById('brightnessValue').textContent = value + '%';
+                    if (currentImage) {
+                        currentImage.brightness = value;
+                        updatePreview();
+                    }
+                }
+            });
+
+            // 初始化对比度滑块
+            slider.render({
+                elem: '#contrastSlider',
+                value: 0,
+                min: -100,
+                max: 100,
+                step: 5,
+                theme: '#3498db',
+                change: function (value) {
+                    document.getElementById('contrastValue').textContent = value + '%';
+                    if (currentImage) {
+                        currentImage.contrast = value;
+                        updatePreview();
+                    }
+                }
+            });
+
+            // 上传功能
+            upload.render({
+                elem: '#uploadBtn',
+                url: '/upload/',
+                accept: 'images',
+                multiple: true,
+                size: 5120, // 5MB
+                drag: true,
+                choose: function (obj) {
+                    // 模拟文件预览
+                    var files = obj.pushFile();
+                    var imageList = document.getElementById('imageList');
+
+                    // 移除空状态
+                    if (imageList.querySelector('.empty-state')) {
+                        imageList.innerHTML = '';
+                    }
+
+                    files.forEach(function (file, index) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            var imgInfo = {
+                                id: 'img_' + Date.now() + index,
+                                name: file.name,
+                                size: (file.size / 1024).toFixed(1) + 'KB',
+                                url: e.target.result,
+                                file: file,
+                                index: index,
+                                quality: 80,
+                                format: outputFormat,
+                                rotation: 0,
+                                flipH: 1,
+                                flipV: 1,
+                                brightness: 0,
+                                contrast: 0
+                            };
+
+                            images.push(imgInfo);
+
+                            var itemHTML = `
+                                <div class="image-item" data-id="${imgInfo.id}">
+                                    <div class="image-actions">
+                                        <button class="layui-btn layui-btn-sm layui-btn-danger remove-btn" title="删除">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                    <img src="${imgInfo.url}" alt="${imgInfo.name}">
+                                    <div class="image-info">
+                                        <div class="image-name">${imgInfo.name}</div>
+                                        <div class="image-meta">
+                                            <span>${imgInfo.size}</span>
+                                            <span class="format">${imgInfo.format.toUpperCase()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+
+                            imageList.innerHTML += itemHTML;
+
+                            // 更新图片计数
+                            updateImageCount();
+
+                            // 绑定图片点击事件
+                            document.querySelectorAll('.image-item').forEach(item => {
+                                item.addEventListener('click', function (e) {
+                                    if (e.target.closest('.remove-btn')) {
+                                        return;
+                                    }
+
+                                    // 设置当前选中图片
+                                    var id = this.getAttribute('data-id');
+                                    selectImage(id);
+                                });
+                            });
+
+                            // 绑定删除按钮
+                            document.querySelectorAll('.remove-btn').forEach(btn => {
+                                btn.addEventListener('click', function (e) {
+                                    e.stopPropagation();
+                                    var id = this.closest('.image-item').getAttribute('data-id');
+                                    removeImage(id);
+                                });
+                            });
+                        };
+                        reader.readAsDataURL(file);
+                    });
+
+                    document.getElementById('totalText').textContent = images.length;
+                },
+                done: function (res) {
+                    // 上传完成
+                }
+            });
+
+            // 更新图片计数
+            function updateImageCount() {
+                document.getElementById('imageCount').textContent = images.length + '张图片';
+                document.getElementById('totalText').textContent = images.length;
+            }
+
+            // 选择图片
+            function selectImage(id) {
+                // 移除所有active类
+                document.querySelectorAll('.image-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // 添加active类到当前选中项
+                document.querySelector(`.image-item[data-id="${id}"]`).classList.add('active');
+
+                // 查找图片数据
+                currentImage = images.find(img => img.id === id);
+
+                // 更新预览
+                updatePreview();
+
+                // 更新滑块值
+                slider.render({
+                    elem: '#qualitySlider',
+                    value: currentImage.quality,
+                    min: 10,
+                    max: 100,
+                    step: 5,
+                    theme: '#3498db'
+                });
+
+                slider.render({
+                    elem: '#brightnessSlider',
+                    value: currentImage.brightness,
+                    min: -100,
+                    max: 100,
+                    step: 5,
+                    theme: '#3498db'
+                });
+
+                slider.render({
+                    elem: '#contrastSlider',
+                    value: currentImage.contrast,
+                    min: -100,
+                    max: 100,
+                    step: 5,
+                    theme: '#3498db'
+                });
+
+                // 更新显示值
+                document.getElementById('qualityValue').textContent = currentImage.quality + '%';
+                document.getElementById('brightnessValue').textContent = currentImage.brightness + '%';
+                document.getElementById('contrastValue').textContent = currentImage.contrast + '%';
+
+                // 更新格式显示
+                updateFormatDisplay();
+            }
+
+            // 移除图片
+            function removeImage(id) {
+                // 从DOM中移除
+                document.querySelector(`.image-item[data-id="${id}"]`).remove();
+
+                // 从数组中移除
+                images = images.filter(img => img.id !== id);
+
+                // 更新总数
+                updateImageCount();
+
+                // 如果没有图片了，显示空状态
+                if (images.length === 0) {
+                    document.getElementById('imageList').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <h3>暂无图片</h3>
+                            <p>上传图片后，它们将显示在这里</p>
+                        </div>
+                    `;
+                    currentImage = null;
+                    document.getElementById('previewBox').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            <h3>选择一张图片进行预览</h3>
+                            <p>在左侧图片列表中点击图片进行预览</p>
+                        </div>
+                    `;
+                    document.getElementById('imageCount').textContent = '0张图片';
+                } else if (currentImage && currentImage.id === id) {
+                    // 如果删除的是当前选中的图片，选择第一张
+                    selectImage(images[0].id);
+                }
+            }
+
+            // 更新预览
+            function updatePreview() {
+                if (!currentImage) return;
+
+                var previewBox = document.getElementById('previewBox');
+                previewBox.innerHTML = `
+                    <img src="${currentImage.url}" 
+                         alt="${currentImage.name}"
+                         style="transform: scaleX(${currentImage.flipH}) scaleY(${currentImage.flipV}) rotate(${currentImage.rotation}deg); 
+                                filter: brightness(${100 + currentImage.brightness}%) contrast(${100 + currentImage.contrast}%)">
+                    <div class="format-badge">${currentImage.format.toUpperCase()}</div>
+                `;
+            }
+
+            // 更新格式显示
+            function updateFormatDisplay() {
+                if (!currentImage) return;
+
+                // 更新格式切换器
+                document.querySelectorAll('.format-option').forEach(option => {
+                    option.classList.remove('active');
+                    if (option.getAttribute('data-format') === currentImage.format) {
+                        option.classList.add('active');
+                    }
+                });
+
+                // 更新图片项中的格式显示
+                document.querySelectorAll('.image-item .format').forEach(span => {
+                    if (span.closest('.image-item').getAttribute('data-id') === currentImage.id) {
+                        span.textContent = currentImage.format.toUpperCase();
+                    }
+                });
+            }
+
+            // 格式切换
+            document.querySelectorAll('.format-option').forEach(option => {
+                option.addEventListener('click', function () {
+                    if (!currentImage) {
+                        layer.msg('请先选择一张图片', { icon: 2, time: 1500 });
+                        return;
+                    }
+
+                    // 更新按钮状态
+                    document.querySelectorAll('.format-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    this.classList.add('active');
+
+                    // 更新格式
+                    currentImage.format = this.getAttribute('data-format');
+
+                    // 更新预览
+                    updatePreview();
+
+                    // 更新图片项中的格式显示
+                    updateFormatDisplay();
+
+                    // 提示用户
+                    layer.msg(`已设置为输出 ${currentImage.format.toUpperCase()} 格式`, { icon: 1, time: 1500 });
+                });
+            });
+
+            // 旋转按钮
+            document.querySelectorAll('.rotate-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (!currentImage) return;
+
+                    var deg = parseInt(this.getAttribute('data-deg'));
+                    currentImage.rotation += deg;
+
+                    // 限制在0-360度之间
+                    if (currentImage.rotation >= 360) currentImage.rotation -= 360;
+                    if (currentImage.rotation < 0) currentImage.rotation += 360;
+
+                    updatePreview();
+
+                    layer.msg(`已旋转 ${deg > 0 ? '向右' : '向左'} 90度`, { icon: 1, time: 1500 });
+                });
+            });
+
+            // 垂直翻转
+            document.getElementById('flipV').addEventListener('click', function () {
+                if (!currentImage) return;
+
+                currentImage.flipV = currentImage.flipV === 1 ? -1 : 1;
+                updatePreview();
+
+                layer.msg('已垂直翻转', { icon: 1, time: 1500 });
+            });
+
+            // 水平翻转
+            document.getElementById('flipH').addEventListener('click', function () {
+                if (!currentImage) return;
+
+                currentImage.flipH = currentImage.flipH === 1 ? -1 : 1;
+                updatePreview();
+
+                layer.msg('已水平翻转', { icon: 1, time: 1500 });
+            });
+
+            // 应用裁剪
+            document.getElementById('applyCrop').addEventListener('click', function () {
+                if (!currentImage) return;
+
+                layer.msg('裁剪已应用', { icon: 1, time: 1500 });
+            });
+
+            // 重置裁剪
+            document.getElementById('resetCrop').addEventListener('click', function () {
+                if (!currentImage) return;
+
+                // 重置所有编辑
+                currentImage.rotation = 0;
+                currentImage.flipH = 1;
+                currentImage.flipV = 1;
+                currentImage.brightness = 0;
+                currentImage.contrast = 0;
+
+                // 更新滑块
+                slider.render({
+                    elem: '#brightnessSlider',
+                    value: 0,
+                    min: -100,
+                    max: 100,
+                    step: 5,
+                    theme: '#3498db'
+                });
+
+                slider.render({
+                    elem: '#contrastSlider',
+                    value: 0,
+                    min: -100,
+                    max: 100,
+                    step: 5,
+                    theme: '#3498db'
+                });
+
+                // 更新显示值
+                document.getElementById('brightnessValue').textContent = '0%';
+                document.getElementById('contrastValue').textContent = '0%';
+
+                updatePreview();
+
+                layer.msg('已重置所有编辑', { icon: 1, time: 1500 });
+            });
+
+            // 模拟处理进度
+            function simulateProcessing() {
+                if (images.length === 0) {
+                    layer.msg('请先上传图片', { icon: 2, time: 2000 });
+                    return;
+                }
+
+                var processed = 0;
+                var total = images.length;
+
+                document.getElementById('processedText').textContent = '0';
+                document.getElementById('progressText').textContent = '0%';
+                document.getElementById('totalText').textContent = total;
+
+                var progressBar = document.querySelector('.layui-progress-bar');
+                progressBar.style.width = '0%';
+                progressBar.setAttribute('lay-percent', '0%');
+
+                var interval = setInterval(function () {
+                    processed++;
+                    var percent = Math.round((processed / total) * 100);
+
+                    document.getElementById('processedText').textContent = processed;
+                    document.getElementById('progressText').textContent = percent + '%';
+                    progressBar.style.width = percent + '%';
+                    progressBar.setAttribute('lay-percent', percent + '%');
+
+                    if (processed >= total) {
+                        clearInterval(interval);
+
+                        // 显示完成消息
+                        layer.msg(`处理完成！共处理 ${total} 张图片`, {
+                            icon: 1,
+                            time: 3000
+                        });
+                    }
+                }, 300);
+            }
+
+            // 下载全部
+            document.getElementById('downloadAll').addEventListener('click', function () {
+                if (images.length === 0) {
+                    layer.msg('请先上传图片', { icon: 2, time: 2000 });
+                    return;
+                }
+
+                layer.msg('开始打包下载处理后的图片', { icon: 1, time: 2000 });
+
+                // 模拟下载进度
+                setTimeout(function () {
+                    layer.msg('下载完成！', { icon: 1, time: 2000 });
+                }, 2000);
+            });
+
+            // 绑定处理按钮
+            document.getElementById('processAll').addEventListener('click', simulateProcessing);
+
+            // 移动端按钮绑定
+            document.getElementById('mobileProcess').addEventListener('click', simulateProcessing);
+            document.getElementById('mobileDownload').addEventListener('click', function () {
+                document.getElementById('downloadAll').click();
+            });
+            document.getElementById('mobileCrop').addEventListener('click', function () {
+                if (!currentImage) {
+                    layer.msg('请先选择一张图片', { icon: 2, time: 1500 });
+                    return;
+                }
+                document.getElementById('applyCrop').click();
+            });
+            document.getElementById('mobileRotate').addEventListener('click', function () {
+                if (!currentImage) {
+                    layer.msg('请先选择一张图片', { icon: 2, time: 1500 });
+                    return;
+                }
+                // 默认向右旋转
+                document.querySelector('.rotate-btn[data-deg="90"]').click();
+            });
+
+            // 裁剪按钮事件
+            document.querySelectorAll('.crop-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // 更新按钮状态
+                    document.querySelectorAll('.crop-btn').forEach(b => {
+                        b.classList.remove('layui-btn-normal');
+                    });
+                    this.classList.add('layui-btn-normal');
+
+                    // 获取裁剪比例
+                    var ratio = this.getAttribute('data-ratio');
+
+                    // 提示用户
+                    layer.msg(`已设置为 ${ratio === 'free' ? '自由裁剪' : ratio + '比例裁剪'}`, { icon: 1, time: 1500 });
+                });
+            });
+
+            // 拖放功能
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+
+                if (e.dataTransfer.files.length) {
+                    // 模拟点击上传按钮
+                    document.getElementById('uploadBtn').click();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

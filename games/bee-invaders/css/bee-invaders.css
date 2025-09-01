@@ -1,0 +1,324 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    overflow: hidden;
+}
+
+.game-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    padding: 20px;
+    text-align: center;
+    max-width: 900px;
+    width: 95%;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 2.2em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.game-info {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 15px 0;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    color: white;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+}
+
+.info-label {
+    font-size: 0.8em;
+    opacity: 0.9;
+    margin-bottom: 3px;
+}
+
+.info-value {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.controls {
+    margin: 15px 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.game-board {
+    margin: 15px auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    background: #000;
+}
+
+#gameCanvas {
+    display: block;
+    background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 30%, #16213e 100%);
+    cursor: crosshair;
+}
+
+.instructions {
+    margin-top: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-radius: 15px;
+    color: white;
+    text-align: left;
+}
+
+.instructions h3 {
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    text-align: center;
+}
+
+.instructions ul {
+    margin-left: 20px;
+    line-height: 1.6;
+}
+
+.instructions li {
+    margin: 5px 0;
+}
+
+.instructions kbd {
+    background: rgba(255,255,255,0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    z-index: 1000;
+    animation: gameOverAppear 0.5s ease;
+}
+
+@keyframes gameOverAppear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.game-over h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    animation: gameOverText 2s infinite;
+}
+
+@keyframes gameOverText {
+    0%, 100% { color: #FFD700; }
+    50% { color: #FFA500; }
+}
+
+.game-over-stats {
+    margin: 20px 0;
+    font-size: 1.1em;
+}
+
+.game-over-stats div {
+    margin: 8px 0;
+}
+
+.level-complete {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    z-index: 1000;
+    animation: levelCompleteAppear 0.5s ease;
+}
+
+@keyframes levelCompleteAppear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.level-complete h2 {
+    font-size: 1.8em;
+    margin-bottom: 15px;
+    animation: levelCompleteText 1s infinite;
+}
+
+@keyframes levelCompleteText {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@media (max-width: 768px) {
+    .game-container {
+        padding: 15px;
+        width: 98%;
+    }
+    
+    h1 {
+        font-size: 1.8em;
+    }
+    
+    #gameCanvas {
+        width: 100%;
+        height: auto;
+        max-width: 400px;
+        max-height: 300px;
+    }
+    
+    .game-info {
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 5px;
+    }
+    
+    .info-item {
+        min-width: 60px;
+    }
+    
+    .info-label {
+        font-size: 0.7em;
+    }
+    
+    .info-value {
+        font-size: 1em;
+    }
+    
+    .controls {
+        flex-direction: row;
+        gap: 8px;
+    }
+    
+    button {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+    
+    .instructions {
+        text-align: center;
+        padding: 12px;
+    }
+    
+    .instructions ul {
+        margin-left: 0;
+        list-style-position: inside;
+    }
+    
+    .instructions li {
+        font-size: 0.9em;
+    }
+    
+    .game-over,
+    .level-complete {
+        width: 90%;
+        padding: 30px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    #gameCanvas {
+        max-width: 320px;
+        max-height: 240px;
+    }
+    
+    .info-item {
+        min-width: 50px;
+    }
+    
+    .info-label {
+        font-size: 0.6em;
+    }
+    
+    .info-value {
+        font-size: 0.9em;
+    }
+    
+    button {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+}

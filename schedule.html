@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务项管理系统 - 优化版</title>
+    <meta name="description" content="支持实时同步、多任务优先级算法、团队协作的智能调度平台，覆盖Windows/macOS/Android/iOS系统，API开放日历数据对接【1†source】">
+    <meta name="keywords" content="任务调度,日程管理,团队协作,API对接,跨平台同步,智能提醒,甘特图,看板视图">
+    <link href="assets/css/layui.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --card-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f8f9fb 0%, #eef2f6 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .app-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
+            /* 防止标题换行 */
+        }
+
+        .app-subtitle {
+            font-size: 1.1rem;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .current-time-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .time-label {
+            font-size: 0.9rem;
+            opacity: 0.85;
+        }
+
+        .time-display {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        .shift-indicator {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .shift-morning {
+            background: linear-gradient(to right, #ffd54f, #ffb300);
+        }
+
+        .shift-middle {
+            background: linear-gradient(to right, #4fc3f7, #0288d1);
+        }
+
+        .shift-night {
+            background: linear-gradient(to right, #5c6bc0, #283593);
+        }
+
+        .shift-off {
+            background: linear-gradient(to right, #95a5a6, #7f8c8d);
+        }
+
+        .tenant-section {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 20px 12px 48px;
+            border: none;
+            border-radius: 30px;
+            background: #f5f9ff;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            box-shadow: 0 2px 12px rgba(30, 136, 229, 0.25);
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7a8ca5;
+            font-size: 1.1rem;
+        }
+
+        .tenant-select {
+            min-width: 220px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .shift-column {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .shift-column.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .shift-column .column-header {
+            padding: 20px;
+            border-bottom: 1px solid #f0f4f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .shift-column.active .column-header {
+            background: linear-gradient(to right, rgba(52, 152, 219, 0.05), rgba(41, 128, 185, 0.05));
+        }
+
+        .column-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+            /* 防止标题换行 */
+        }
+
+        .task-count {
+            background: #f0f4f9;
+            color: #5a6b87;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .task-list {
+            padding: 15px;
+            flex: 1;
+            min-height: 450px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            background: white;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-item.high-priority {
+            border-left-color: var(--danger-color);
+        }
+
+        .task-item.medium-priority {
+            border-left-color: var(--warning-color);
+        }
+
+        .task-item.low-priority {
+            border-left-color: var(--success-color);
+        }
+
+        .task-time {
+            background: #e3f2fd;
+            color: var(--secondary-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .task-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            white-space: nowrap;
+            /* 防止标题换行 */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .task-description {
+            color: #5a6b87;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .task-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .task-tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #ffecb3;
+            color: #ff9800;
+        }
+
+        .status-inprogress {
+            background: #bbdefb;
+            color: #2196f3;
+        }
+
+        .status-completed {
+            background: #c8e6c9;
+            color: #4caf50;
+        }
+
+        .status-cancelled {
+            background: #ffcdd2;
+            color: #f44336;
+        }
+
+        .priority-tag {
+            background: #f5f7fa;
+        }
+
+        .priority-high {
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        .priority-medium {
+            color: var(--warning-color);
+            border: 1px solid var(--warning-color);
+        }
+
+        .priority-low {
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .shift-tag {
+            background: #f0f4f9;
+            color: #5a6b87;
+        }
+
+        .task-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            gap: 8px;
+        }
+
+        .task-item:hover .task-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .edit-btn {
+            color: var(--primary-color);
+            border: 1px solid rgba(30, 136, 229, 0.3);
+        }
+
+        .edit-btn:hover {
+            background: rgba(30, 136, 229, 0.1);
+        }
+
+        .delete-btn {
+            color: var(--danger-color);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .delete-btn:hover {
+            background: rgba(244, 67, 54, 0.1);
+        }
+
+        .color-picker-btn {
+            color: #9c27b0;
+            border: 1px solid rgba(156, 39, 176, 0.3);
+        }
+
+        .color-picker-btn:hover {
+            background: rgba(156, 39, 176, 0.1);
+        }
+
+        .add-task-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 16px rgba(30, 136, 229, 0.4);
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .add-task-btn:hover {
+            transform: scale(1.05) rotate(90deg);
+            box-shadow: 0 8px 20px rgba(30, 136, 229, 0.6);
+        }
+
+        .add-icon {
+            font-size: 1.8rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #a3b1c6;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            opacity: 0.3;
+            margin-bottom: 15px;
+        }
+
+        .empty-text {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .color-palette {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            padding: 10px;
+            z-index: 10;
+            width: 140px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+        }
+
+        .color-option {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.2);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #7a8ca5;
+            font-size: 0.9rem;
+        }
+
+        /* 扁平化弹出框样式 */
+        .layui-layer {
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+            border: none !important;
+            min-width: 600px;
+            /* 加大编辑框宽度 */
+        }
+
+        .layui-layer-title {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color)) !important;
+            color: white !important;
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            border: none !important;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 0px 20px !important;
+            white-space: nowrap;
+            /* 防止标题换行 */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .layui-layer-content {
+            padding: 25px !important;
+            background: #f8fafd !important;
+            border-radius: 0 0 12px 12px !important;
+            font-size: 15px !important;
+        }
+
+        .layui-layer-btn {
+            padding: 15px 20px !important;
+            background: #f8fafd !important;
+            border-top: 1px solid #eee !important;
+            border-radius: 0 0 12px 12px !important;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .layui-layer-btn a {
+            border-radius: 8px !important;
+            padding: 0px 25px !important;
+            font-weight: 500 !important;
+            transition: all 0.2s !important;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        /* 扁平化保存按钮 */
+        .layui-layer-btn .layui-layer-btn0 {
+            background: var(--primary-color) !important;
+            border: none !important;
+            color: white !important;
+            box-shadow: 0 3px 8px rgba(52, 152, 219, 0.3) !important;
+        }
+
+        .layui-layer-btn .layui-layer-btn0:hover {
+            background: #2980b9 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(52, 152, 219, 0.4) !important;
+        }
+
+        /* 扁平化重置按钮 */
+        .layui-layer-btn .layui-layer-btn1 {
+            background: white !important;
+            border: 1px solid #e0e6ed !important;
+            color: #5a6b87 !important;
+        }
+
+        .layui-layer-btn .layui-layer-btn1:hover {
+            background: #f5f9ff !important;
+            border-color: #3498db !important;
+            color: #3498db !important;
+        }
+
+        .layui-layer-setwin .layui-layer-close1 {
+            background: none !important;
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-size: 22px !important;
+            top: 0px !important;
+            right: 15px !important;
+            width: 30px !important;
+            height: 30px !important;
+        }
+
+        .layui-layer-setwin .layui-layer-close1:hover {
+            color: white !important;
+        }
+
+        .layui-layer-content .layui-form-label {
+            font-weight: 500;
+            color: #5a6b87;
+            width: 120px;
+        }
+
+        .layui-layer-content .layui-input-block {
+            margin-left: 140px;
+        }
+
+        .layui-layer-content .layui-input {
+            border-radius: 8px;
+            border: 1px solid #e0e6ed;
+            padding: 10px 15px;
+            transition: all 0.3s;
+            height: 42px;
+        }
+
+        .layui-layer-content .layui-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+
+        .layui-layer-content .layui-form-select dl {
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e6ed;
+        }
+
+        .layui-layer-content .layui-form-select dl dd:hover {
+            background: #f5f9ff;
+        }
+
+        .layui-layer-content .layui-form-select dl dd.layui-this {
+            background: #e3f2fd;
+            color: var(--primary-color);
+        }
+
+        .shift-info {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* 时间选择器样式 */
+        .layui-laydate .layui-this {
+            background-color: var(--primary-color) !important;
+        }
+
+        .layui-laydate-content table td.laydate-selected {
+            background-color: rgba(52, 152, 219, 0.2) !important;
+        }
+
+        .time-picker-container {
+            position: relative;
+        }
+
+        .time-picker-container .layui-icon {
+            position: absolute;
+            right: 10px;
+            top: 12px;
+            color: #7a8ca5;
+        }
+
+        @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+
+            .header-controls {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .layui-layer {
+                min-width: 90% !important;
+                width: 90% !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .layui-layer-content .layui-form-label {
+                width: auto;
+                float: none;
+                text-align: left;
+            }
+
+            .layui-layer-content .layui-input-block {
+                margin-left: 0;
+                margin-top: 5px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .app-header {
+                padding: 20px;
+            }
+
+            .app-title {
+                font-size: 1.8rem;
+            }
+
+            .tenant-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-container {
+                max-width: 100%;
+            }
+
+            .layui-layer {
+                min-width: 95% !important;
+                width: 95% !important;
+                left: 2.5% !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <div>
+                    <h1 class="app-title">任务项管理系统</h1>
+                    <p class="app-subtitle">规范化工作流程，提升任务执行效率</p>
+                </div>
+                <div class="header-controls">
+                    <div class="current-time-box">
+                        <div class="time-label">当前时间</div>
+                        <div class="time-display" id="currentTime">2025-07-08 10:45:22</div>
+                        <div class="shift-info" id="shiftInfo">早班: 07:40 - 15:50</div>
+                    </div>
+                    <div class="shift-indicator shift-morning" id="shiftIndicator">
+                        <i class="fas fa-sun"></i>
+                        <span>早班进行中</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <section class="tenant-section">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-box" id="searchInput" placeholder="搜索任务名称、描述或时间...">
+            </div>
+            <div class="tenant-select">
+                <select class="layui-select" id="tenantSelect">
+                    <option value="tenant1">总部办公区</option>
+                    <option value="tenant2">东区办公点</option>
+                    <option value="tenant3">西区办公点</option>
+                </select>
+            </div>
+        </section>
+        <main class="dashboard">
+            <div class="shift-column" id="morningColumn">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-sun" style="color: #ffb300;"></i>
+                        <span>早班任务 (07:40-15:50)</span>
+                    </div>
+                    <div class="task-count" id="morningCount">5 项任务</div>
+                </div>
+                <div class="task-list" id="morningTasks">
+                    <!-- 任务列表将通过JS动态生成 -->
+                </div>
+            </div>
+            <div class="shift-column" id="middleColumn">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-cloud-sun" style="color: #0288d1;"></i>
+                        <span>中班任务 (15:50-23:00)</span>
+                    </div>
+                    <div class="task-count" id="middleCount">3 项任务</div>
+                </div>
+                <div class="task-list" id="middleTasks">
+                    <!-- 任务列表将通过JS动态生成 -->
+                </div>
+            </div>
+            <div class="shift-column" id="nightColumn">
+                <div class="column-header">
+                    <div class="column-title">
+                        <i class="fas fa-moon" style="color: #283593;"></i>
+                        <span>夜班任务 (23:00-07:40)</span>
+                    </div>
+                    <div class="task-count" id="nightCount">3 项任务</div>
+                </div>
+                <div class="task-list" id="nightTasks">
+                    <!-- 任务列表将通过JS动态生成 -->
+                </div>
+            </div>
+        </main>
+        <div class="add-task-btn" id="addTaskBtn">
+            <i class="fas fa-plus add-icon"></i>
+        </div>
+        <footer class="footer">
+            <p>任务项管理系统 &copy; 2025 | 专业信息化工作流程解决方案</p>
+        </footer>
+    </div>
+    <!-- 任务表单模板（隐藏） -->
+    <div id="taskFormTemplate" style="display:none;">
+        <form class="layui-form" id="taskForm" style="padding:20px;">
+            <input type="hidden" name="id">
+            <div class="layui-form-item">
+                <label class="layui-form-label">任务名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="title" required lay-verify="required" placeholder="请输入任务名称" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">任务描述</label>
+                <div class="layui-input-block">
+                    <textarea name="description" placeholder="请输入任务描述" class="layui-textarea" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">任务时间</label>
+                <div class="layui-input-block">
+                    <div class="time-picker-container">
+                        <input type="text" name="time" id="taskTime" required lay-verify="required" placeholder="请选择时间" autocomplete="off" class="layui-input">
+                        <i class="layui-icon layui-icon-time"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">班次</label>
+                <div class="layui-input-block">
+                    <select name="shift" lay-verify="required">
+                        <option value="morning">早班</option>
+                        <option value="middle">中班</option>
+                        <option value="night">夜班</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">优先级</label>
+                <div class="layui-input-block">
+                    <select name="priority" lay-verify="required">
+                        <option value="high">高</option>
+                        <option value="medium">中</option>
+                        <option value="low">低</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-block">
+                    <select name="status" lay-verify="required">
+                        <option value="pending">待处理</option>
+                        <option value="inprogress">处理中</option>
+                        <option value="completed">已完成</option>
+                        <option value="cancelled">已取消</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">任务颜色</label>
+                <div class="layui-input-block">
+                    <input type="color" name="color" value="#3498db" class="layui-input">
+                </div>
+            </div>
+        </form>
+    </div>
+    <script src="assets/js/layui.min.js"></script>
+    <script>
+        // 初始化测试数据
+        const initTasks = [
+            {
+                id: 1,
+                title: "整理桌边和检查会议手机",
+                description: "提前10分钟接班，整理工作区域并检查会议手机状态",
+                time: "07:50",
+                shift: "morning",
+                priority: "high",
+                status: "pending",
+                color: "#3498db"
+            },
+            {
+                id: 2,
+                title: "检查会议电话",
+                description: "检查两部会议电话是否无异常，监控外围乱停车辆，超过5分钟通知到位",
+                time: "08:00",
+                shift: "morning",
+                priority: "high",
+                status: "inprogress",
+                color: "#2ecc71"
+            },
+            {
+                id: 3,
+                title: "检查会议本",
+                description: "检查会议本是否有会议重复情况",
+                time: "08:10",
+                shift: "morning",
+                priority: "medium",
+                status: "pending",
+                color: "#9b59b6"
+            },
+            {
+                id: 4,
+                title: "早高峰车辆协调",
+                description: "早高峰车辆多，跟外围协调好交通秩序",
+                time: "08:30",
+                shift: "morning",
+                priority: "medium",
+                status: "pending",
+                color: "#f39c12"
+            },
+            {
+                id: 5,
+                title: "交接班准备",
+                description: "提前10分钟做好交接班准备",
+                time: "15:40",
+                shift: "middle",
+                priority: "high",
+                status: "pending",
+                color: "#3498db"
+            },
+            {
+                id: 6,
+                title: "打扫卫生和交接班",
+                description: "打扫卫生，与下一班次进行工作交接",
+                time: "15:50",
+                shift: "middle",
+                priority: "high",
+                status: "pending",
+                color: "#2ecc71"
+            },
+            {
+                id: 7,
+                title: "重要点位检查",
+                description: "检查重要点位是否存在异常情况",
+                time: "16:00",
+                shift: "middle",
+                priority: "high",
+                status: "pending",
+                color: "#9b59b6"
+            },
+            {
+                id: 8,
+                title: "切换电子屏幕",
+                description: "按照要求切换电子屏幕内容",
+                time: "20:00",
+                shift: "middle",
+                priority: "medium",
+                status: "pending",
+                color: "#f39c12"
+            },
+            {
+                id: 9,
+                title: "检查会议手机和对讲机",
+                description: "接班后及时查看会议手机、对讲机是否有电，及时充电",
+                time: "23:10",
+                shift: "night",
+                priority: "high",
+                status: "pending",
+                color: "#3498db"
+            },
+            {
+                id: 10,
+                title: "监控重要点位",
+                description: "定时抬头看监控重要点位是否存在异常",
+                time: "00:00",
+                shift: "night",
+                priority: "high",
+                status: "pending",
+                color: "#2ecc71"
+            },
+            {
+                id: 11,
+                title: "保安巡逻",
+                description: "按时跟保安进行巡逻，确保安全",
+                time: "02:00",
+                shift: "night",
+                priority: "medium",
+                status: "pending",
+                color: "#9b59b6"
+            }
+        ];
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', function () {
+            // 使用layui模块
+            layui.use(['layer', 'form', 'util', 'laydate'], function () {
+                const layer = layui.layer;
+                const form = layui.form;
+                const util = layui.util;
+                const laydate = layui.laydate;
+
+                // 初始化任务数据
+                let tasks = JSON.parse(localStorage.getItem('tasks')) || initTasks;
+
+                // 更新时间显示和班次判断
+                function updateTime() {
+                    const now = new Date();
+                    const timeStr = util.toDateString(now, "yyyy-MM-dd HH:mm:ss");
+                    document.getElementById('currentTime').textContent = timeStr;
+
+                    // 获取当前小时和分钟
+                    const hours = now.getHours();
+                    const minutes = now.getMinutes();
+                    const totalMinutes = hours * 60 + minutes;
+
+                    // 判断当前班次
+                    let shift = "off";
+                    let shiftName = "非工作时间";
+
+                    // 早班: 7:40 - 15:50 (460 - 950分钟)
+                    // 中班: 15:50 - 23:00 (950 - 1380分钟)
+                    // 夜班: 23:00 - 7:40 (1380 - 1440 + 460分钟)
+                    if (totalMinutes >= 460 && totalMinutes < 950) {
+                        shift = "morning";
+                        shiftName = "早班进行中";
+                    } else if (totalMinutes >= 950 && totalMinutes < 1380) {
+                        shift = "middle";
+                        shiftName = "中班进行中";
+                    } else if (totalMinutes >= 1380 || totalMinutes < 460) {
+                        shift = "night";
+                        shiftName = "夜班进行中";
+                    }
+
+                    // 更新班次指示器
+                    const shiftIndicator = document.getElementById('shiftIndicator');
+                    shiftIndicator.className = "shift-indicator shift-" + shift;
+
+                    const icon = shiftIndicator.querySelector('i');
+                    if (shift === "morning") {
+                        icon.className = "fas fa-sun";
+                        shiftIndicator.querySelector('span').textContent = shiftName;
+                    } else if (shift === "middle") {
+                        icon.className = "fas fa-cloud-sun";
+                        shiftIndicator.querySelector('span').textContent = shiftName;
+                    } else if (shift === "night") {
+                        icon.className = "fas fa-moon";
+                        shiftIndicator.querySelector('span').textContent = shiftName;
+                    } else {
+                        icon.className = "fas fa-clock";
+                        shiftIndicator.querySelector('span').textContent = shiftName;
+                    }
+
+                    // 高亮当前班次列
+                    document.querySelectorAll('.shift-column').forEach(column => {
+                        column.classList.remove('active');
+                    });
+
+                    if (shift !== "off") {
+                        document.getElementById(shift + 'Column').classList.add('active');
+                    }
+
+                    // 每分钟检查一次提醒
+                    if (now.getSeconds() === 0) {
+                        checkReminders(now);
+                    }
+                }
+
+                // 检查提醒
+                function checkReminders(now) {
+                    const hours = now.getHours().toString().padStart(2, '0');
+                    const minutes = now.getMinutes().toString().padStart(2, '0');
+                    const currentTime = `${hours}:${minutes}`;
+
+                    tasks.forEach(task => {
+                        if (task.time === currentTime && task.status === 'pending') {
+                            layer.msg(`任务提醒：${task.title}`, {
+                                icon: 1,
+                                time: 10000,
+                                btn: ['知道了']
+                            });
+                        }
+                    });
+                }
+
+                // 渲染任务列表
+                function renderTasks() {
+                    // 清空任务列表
+                    document.getElementById('morningTasks').innerHTML = '';
+                    document.getElementById('middleTasks').innerHTML = '';
+                    document.getElementById('nightTasks').innerHTML = '';
+
+                    // 按班次分组
+                    const morningTasks = tasks.filter(task => task.shift === 'morning');
+                    const middleTasks = tasks.filter(task => task.shift === 'middle');
+                    const nightTasks = tasks.filter(task => task.shift === 'night');
+
+                    // 更新任务数量
+                    document.getElementById('morningCount').textContent = `${morningTasks.length} 项任务`;
+                    document.getElementById('middleCount').textContent = `${middleTasks.length} 项任务`;
+                    document.getElementById('nightCount').textContent = `${nightTasks.length} 项任务`;
+
+                    // 渲染早班任务
+                    if (morningTasks.length > 0) {
+                        morningTasks.forEach(task => renderTask(task, 'morningTasks'));
+                    } else {
+                        document.getElementById('morningTasks').innerHTML = emptyStateHTML();
+                    }
+
+                    // 渲染中班任务
+                    if (middleTasks.length > 0) {
+                        middleTasks.forEach(task => renderTask(task, 'middleTasks'));
+                    } else {
+                        document.getElementById('middleTasks').innerHTML = emptyStateHTML();
+                    }
+
+                    // 渲染晚班任务
+                    if (nightTasks.length > 0) {
+                        nightTasks.forEach(task => renderTask(task, 'nightTasks'));
+                    } else {
+                        document.getElementById('nightTasks').innerHTML = emptyStateHTML();
+                    }
+
+                    // 渲染表单（解决下拉框不能选择的问题）
+                    form.render();
+                }
+
+                // 空状态模板
+                function emptyStateHTML() {
+                    return `
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <div class="empty-text">暂无任务</div>
+                            <div>点击右下角按钮添加新任务</div>
+                        </div>
+                    `;
+                }
+
+                // 渲染单个任务
+                function renderTask(task, containerId) {
+                    const priorityClass = {
+                        high: 'high-priority',
+                        medium: 'medium-priority',
+                        low: 'low-priority'
+                    }[task.priority];
+
+                    const priorityText = {
+                        high: '高',
+                        medium: '中',
+                        low: '低'
+                    }[task.priority];
+
+                    const statusClass = {
+                        pending: 'status-pending',
+                        inprogress: 'status-inprogress',
+                        completed: 'status-completed',
+                        cancelled: 'status-cancelled'
+                    }[task.status];
+
+                    const statusText = {
+                        pending: '待处理',
+                        inprogress: '处理中',
+                        completed: '已完成',
+                        cancelled: '已取消'
+                    }[task.status];
+
+                    const shiftText = {
+                        morning: '早班',
+                        middle: '中班',
+                        night: '夜班'
+                    }[task.shift];
+
+                    // 应用自定义颜色
+                    const customStyle = task.color ? `border-left-color: ${task.color};` : '';
+
+                    const taskHtml = `
+                        <div class="task-item ${priorityClass}" data-id="${task.id}" style="${customStyle}">
+                            <div class="task-time">${task.time}</div>
+                            <div class="task-title">${task.title}</div>
+                            <div class="task-description">${task.description}</div>
+                            
+                            <div class="task-meta">
+                                <div class="task-tag ${statusClass}">${statusText}</div>
+                                <div class="task-tag priority-tag priority-${task.priority}">优先级: ${priorityText}</div>
+                                <div class="task-tag shift-tag">${shiftText}</div>
+                            </div>
+                            
+                            <div class="task-actions">
+                                <div class="action-btn edit-btn" data-id="${task.id}">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="action-btn delete-btn" data-id="${task.id}">
+                                    <i class="fas fa-trash"></i>
+                                </div>
+                                <div class="action-btn color-picker-btn" data-id="${task.id}">
+                                    <i class="fas fa-palette"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    document.getElementById(containerId).innerHTML += taskHtml;
+                }
+
+                // 保存任务数据
+                function saveTasks() {
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                }
+
+                // 初始化时间选择器
+                function initTimePicker() {
+                    laydate.render({
+                        elem: '#taskTime',
+                        type: 'time',
+                        format: 'HH:mm',
+                        theme: '#3498db',
+                        done: function (value, date) {
+                            console.log('选择的时间:', value);
+                        }
+                    });
+                }
+
+                // 添加任务按钮事件
+                document.getElementById('addTaskBtn').addEventListener('click', function () {
+                    form.val('taskForm', {
+                        id: '',
+                        title: '',
+                        description: '',
+                        time: '',
+                        shift: 'morning',
+                        priority: 'high',
+                        status: 'pending',
+                        color: '#3498db'
+                    });
+
+                    // 打开弹出框
+                    const index = layer.open({
+                        type: 1,
+                        title: '添加新任务',
+                        area: ['650px', 'auto'],
+                        content: document.getElementById('taskFormTemplate').innerHTML,
+                        btn: ['保存任务', '重置'],
+                        btnAlign: 'c',
+                        success: function (layero, index) {
+                            // 初始化时间选择器
+                            initTimePicker();
+
+                            // 渲染表单（解决下拉框不能选择的问题）
+                            form.render();
+
+                            // 绑定表单提交
+                            form.on('submit(submitTask)', function (data) {
+                                submitTaskForm(data, index);
+                            });
+                        },
+                        yes: function (index, layero) {
+                            // 触发表单提交
+                            $('#taskForm').find('button[lay-submit]').click();
+                            return false;
+                        },
+                        btn2: function (index, layero) {
+                            // 重置表单
+                            $('#taskForm')[0].reset();
+                            form.render();
+                            return false;
+                        }
+                    });
+                });
+
+                // 状态切换事件
+                document.addEventListener('click', function (e) {
+                    if (e.target.closest('.task-tag.status-pending, .task-tag.status-inprogress, .task-tag.status-completed, .task-tag.status-cancelled')) {
+                        const taskItem = e.target.closest('.task-item');
+                        if (taskItem) {
+                            const taskId = taskItem.dataset.id;
+                            const task = tasks.find(t => t.id == taskId);
+
+                            if (task) {
+                                // 状态循环：待处理 -> 处理中 -> 已完成 -> 已取消 -> 待处理
+                                const statusOrder = ['pending', 'inprogress', 'completed', 'cancelled'];
+                                const currentIndex = statusOrder.indexOf(task.status);
+                                const nextIndex = (currentIndex + 1) % statusOrder.length;
+
+                                task.status = statusOrder[nextIndex];
+                                saveTasks();
+                                renderTasks();
+
+                                layer.msg(`任务状态已更新为：${{
+                                    pending: '待处理',
+                                    inprogress: '处理中',
+                                    completed: '已完成',
+                                    cancelled: '已取消'
+                                }[task.status]}`, { icon: 1, time: 1500 });
+                            }
+                        }
+                    }
+                });
+
+                // 编辑任务事件
+                document.addEventListener('click', function (e) {
+                    if (e.target.closest('.edit-btn')) {
+                        const taskItem = e.target.closest('.task-item');
+                        if (taskItem) {
+                            const taskId = taskItem.dataset.id;
+                            const task = tasks.find(t => t.id == taskId);
+
+                            if (task) {
+                                form.val('taskForm', task);
+
+                                // 打开弹出框
+                                const index = layer.open({
+                                    type: 1,
+                                    title: '编辑任务: ' + task.title,
+                                    area: ['650px', 'auto'],
+                                    content: document.getElementById('taskFormTemplate').innerHTML,
+                                    btn: ['保存任务', '重置'],
+                                    btnAlign: 'c',
+                                    success: function (layero, index) {
+                                        // 初始化时间选择器
+                                        initTimePicker();
+
+                                        // 渲染表单（解决下拉框不能选择的问题）
+                                        form.render();
+
+                                        // 绑定表单提交
+                                        form.on('submit(submitTask)', function (data) {
+                                            submitTaskForm(data, index);
+                                        });
+                                    },
+                                    yes: function (index, layero) {
+                                        // 触发表单提交
+                                        $('#taskForm').find('button[lay-submit]').click();
+                                        return false;
+                                    },
+                                    btn2: function (index, layero) {
+                                        // 重置表单
+                                        $('#taskForm')[0].reset();
+                                        form.val('taskForm', task); // 重置回原始值
+                                        form.render();
+                                        return false;
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+
+                // 表单提交处理
+                function submitTaskForm(data, index) {
+                    const taskData = data.field;
+
+                    // 转换ID为数字
+                    taskData.id = taskData.id ? parseInt(taskData.id) : null;
+
+                    if (taskData.id) {
+                        // 更新现有任务
+                        const taskIndex = tasks.findIndex(t => t.id === taskData.id);
+                        if (taskIndex !== -1) {
+                            tasks[taskIndex] = {
+                                ...tasks[taskIndex],
+                                ...taskData
+                            };
+                        }
+                    } else {
+                        // 添加新任务
+                        taskData.id = Date.now(); // 生成唯一ID
+                        tasks.push(taskData);
+                    }
+
+                    saveTasks();
+                    renderTasks();
+                    layer.close(index);
+                    layer.msg('任务已保存', { icon: 1, time: 1500 });
+                    return false;
+                }
+
+                // 删除任务事件
+                document.addEventListener('click', function (e) {
+                    if (e.target.closest('.delete-btn')) {
+                        const taskItem = e.target.closest('.task-item');
+                        if (taskItem) {
+                            const taskId = taskItem.dataset.id;
+
+                            layer.confirm('确定要删除这个任务吗？', {
+                                title: '删除确认',
+                                icon: 3,
+                                skin: 'layui-layer-molv',
+                                btn: ['确定删除', '取消']
+                            }, function (index) {
+                                tasks = tasks.filter(t => t.id != taskId);
+                                saveTasks();
+                                renderTasks();
+                                layer.close(index);
+                                layer.msg('任务已删除', { icon: 1, time: 1500 });
+                            });
+                        }
+                    }
+                });
+
+                // 颜色选择事件
+                document.addEventListener('click', function (e) {
+                    if (e.target.closest('.color-picker-btn')) {
+                        const taskItem = e.target.closest('.task-item');
+                        if (taskItem) {
+                            const taskId = taskItem.dataset.id;
+                            const task = tasks.find(t => t.id == taskId);
+
+                            if (task) {
+                                const colorPalette = document.createElement('div');
+                                colorPalette.className = 'color-palette';
+                                colorPalette.innerHTML = `
+                                    <div class="color-option" style="background:#3498db;" data-color="#3498db"></div>
+                                    <div class="color-option" style="background:#2ecc71;" data-color="#2ecc71"></div>
+                                    <div class="color-option" style="background:#9b59b6;" data-color="#9b59b6"></div>
+                                    <div class="color-option" style="background:#f39c12;" data-color="#f39c12"></div>
+                                    <div class="color-option" style="background:#e74c3c;" data-color="#e74c3c"></div>
+                                    <div class="color-option" style="background:#1abc9c;" data-color="#1abc9c"></div>
+                                    <div class="color-option" style="background:#34495e;" data-color="#34495e"></div>
+                                    <div class="color-option" style="background:#7f8c8d;" data-color="#7f8c8d"></div>
+                                `;
+
+                                taskItem.appendChild(colorPalette);
+                                colorPalette.style.display = 'grid';
+
+                                // 点击颜色选项
+                                colorPalette.querySelectorAll('.color-option').forEach(option => {
+                                    option.addEventListener('click', function () {
+                                        task.color = this.dataset.color;
+                                        saveTasks();
+                                        renderTasks();
+                                        colorPalette.remove();
+                                    });
+                                });
+
+                                // 点击其他地方关闭调色板
+                                document.addEventListener('click', function closePalette(e) {
+                                    if (!colorPalette.contains(e.target) && !e.target.closest('.color-picker-btn')) {
+                                        colorPalette.remove();
+                                        document.removeEventListener('click', closePalette);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+
+                // 搜索功能
+                document.getElementById('searchInput').addEventListener('input', function () {
+                    const keyword = this.value.toLowerCase();
+
+                    document.querySelectorAll('.task-item').forEach(item => {
+                        const taskText = item.textContent.toLowerCase();
+                        if (taskText.includes(keyword)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+
+                // 租户切换
+                document.getElementById('tenantSelect').addEventListener('change', function () {
+                    layer.msg(`已切换到: ${this.options[this.selectedIndex].text}`, { icon: 1, time: 1500 });
+                });
+
+                // 初始化
+                updateTime();
+                setInterval(updateTime, 1000);
+                renderTasks();
+                form.render();
+            });
+        });
+    </script>
+</body>
+
+</html>

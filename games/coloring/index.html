@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>填色游戏 - 创意涂鸦乐园</title>
+    <link rel="stylesheet" href="css/coloring.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎨 填色游戏 🖌️</h1>
+        
+        <div class="game-info">
+            <div class="info-item">
+                <div class="info-label">当前图案</div>
+                <div class="info-value" id="currentPattern">花朵</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">完成度</div>
+                <div class="info-value" id="completion">0%</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">已用颜色</div>
+                <div class="info-value" id="colorsUsed">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">创作时间</div>
+                <div class="info-value" id="drawingTime">00:00</div>
+            </div>
+        </div>
+
+        <div class="pattern-selector">
+            <label>选择图案：</label>
+            <button class="pattern-btn active" onclick="coloringGame.selectPattern('flower')">🌸 花朵</button>
+            <button class="pattern-btn" onclick="coloringGame.selectPattern('butterfly')">🦋 蝴蝶</button>
+            <button class="pattern-btn" onclick="coloringGame.selectPattern('house')">🏠 房子</button>
+            <button class="pattern-btn" onclick="coloringGame.selectPattern('tree')">🌳 大树</button>
+            <button class="pattern-btn" onclick="coloringGame.selectPattern('heart')">💖 爱心</button>
+            <button class="pattern-btn" onclick="coloringGame.selectPattern('star')">⭐ 星星</button>
+        </div>
+
+        <div class="tools-panel">
+            <div class="color-palette">
+                <h3>🎨 调色板</h3>
+                <div class="color-grid" id="colorGrid">
+                    <!-- 颜色将通过JavaScript生成 -->
+                </div>
+                <div class="color-controls">
+                    <label for="customColor">自定义颜色：</label>
+                    <input type="color" id="customColor" value="#ff0000" onchange="coloringGame.addCustomColor(this.value)">
+                </div>
+            </div>
+            
+            <div class="brush-tools">
+                <h3>🖌️ 画笔工具</h3>
+                <div class="tool-group">
+                    <label>画笔大小：</label>
+                    <input type="range" id="brushSize" min="1" max="20" value="8" onchange="coloringGame.setBrushSize(this.value)">
+                    <span id="brushSizeDisplay">8px</span>
+                </div>
+                <div class="tool-group">
+                    <button class="tool-btn" onclick="coloringGame.setTool('brush')">🖌️ 画笔</button>
+                    <button class="tool-btn" onclick="coloringGame.setTool('fill')">🪣 填充</button>
+                    <button class="tool-btn" onclick="coloringGame.setTool('eraser')">🧹 橡皮</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="coloringGame.clearCanvas()">🗑️ 清空</button>
+            <button onclick="coloringGame.undo()">↶ 撤销</button>
+            <button onclick="coloringGame.redo()">↷ 重做</button>
+            <button onclick="coloringGame.saveImage()">💾 保存</button>
+            <button onclick="coloringGame.showGallery()">🖼️ 作品集</button>
+            <button onclick="coloringGame.randomColors()">🎲 随机配色</button>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="coloringCanvas" width="600" height="600"></canvas>
+            <canvas id="patternCanvas" width="600" height="600"></canvas>
+            <div class="canvas-overlay" id="canvasOverlay"></div>
+        </div>
+
+        <div class="progress-panel">
+            <div class="progress-info">
+                <span>填色进度</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span id="progressPercent">0%</span>
+            </div>
+        </div>
+
+        <div class="gallery-modal" id="galleryModal" style="display: none;">
+            <div class="gallery-content">
+                <h2>🎨 我的作品集</h2>
+                <div class="gallery-grid" id="galleryGrid">
+                    <!-- 作品将通过JavaScript生成 -->
+                </div>
+                <div class="gallery-actions">
+                    <button onclick="coloringGame.closeGallery()">关闭</button>
+                    <button onclick="coloringGame.clearGallery()">清空作品集</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="completion-popup" id="completionPopup" style="display: none;">
+            <div class="completion-content">
+                <h2>🎉 作品完成！</h2>
+                <div class="completion-stats">
+                    <div>使用颜色: <span id="finalColors">0</span> 种</div>
+                    <div>创作时间: <span id="finalTime">00:00</span></div>
+                    <div>完成度: <span id="finalCompletion">100%</span></div>
+                </div>
+                <div class="completion-preview" id="completionPreview"></div>
+                <div class="completion-actions">
+                    <button onclick="coloringGame.saveToGallery()">💾 保存到作品集</button>
+                    <button onclick="coloringGame.shareImage()">📱 分享作品</button>
+                    <button onclick="coloringGame.closeCompletion()">继续创作</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>🎮 使用说明</h3>
+            <ul>
+                <li>🎯 <strong>选择图案</strong>：点击上方按钮选择喜欢的图案</li>
+                <li>🎨 <strong>选择颜色</strong>：从调色板选择颜色或自定义颜色</li>
+                <li>🖌️ <strong>填色工具</strong>：画笔绘制、填充大面积、橡皮擦除</li>
+                <li>✋ <strong>操作方式</strong>：鼠标点击/拖拽填色，触屏设备用手指</li>
+                <li>🎲 <strong>随机配色</strong>：一键生成和谐的色彩搭配</li>
+                <li>💾 <strong>保存作品</strong>：完成后可保存到作品集或下载</li>
+                <li>📱 <strong>分享功能</strong>：支持分享创作的美丽作品</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="js/coloring.js"></script>
+</body>
+</html>

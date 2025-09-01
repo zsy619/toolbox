@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>连续数字生成器</title>
+    <meta name="description" content="免费在线连续数字生成工具，支持自定义前缀、后缀、补零位数，可生成Golang和Python代码">
+    <meta name="keywords" content="数字生成器,连续数字,序列生成,在线工具,Golang代码,Python代码,补零数字">
+    <link href="assets/css/layui.min.css" rel="stylesheet">
+    <script src="assets/js/layui.min.js"></script>
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+    <style>
+        :root {
+            --primary-color: #1E9FFF;
+            --primary-light: #e8f4ff;
+            --secondary-color: #5FB878;
+            --dark-color: #393D49;
+            --light-color: #f8f9fa;
+            --border-color: #e6e6e6;
+            --text-dark: #333;
+            --text-light: #777;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .flat-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .header-content h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.8rem;
+            font-weight: 700;
+        }
+
+        .header-content p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .flat-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .flat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 1.25rem;
+            background-color: var(--light-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .card-body {
+            padding: 1.8rem;
+        }
+
+        .flat-input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .input-item {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .input-item label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .flat-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .flat-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 159, 255, 0.15);
+        }
+
+        .flat-select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1rem;
+        }
+
+        .btn-flat {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.9rem 1.8rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(30, 159, 255, 0.2);
+        }
+
+        .btn-flat i {
+            margin-right: 8px;
+        }
+
+        .btn-flat:hover {
+            background-color: #0d8ae3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(30, 159, 255, 0.25);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            box-shadow: 0 4px 6px rgba(95, 184, 120, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background-color: #4dac6a;
+            box-shadow: 0 6px 12px rgba(95, 184, 120, 0.25);
+        }
+
+        .result-container {
+            min-height: 280px;
+            max-height: 380px;
+            overflow-y: auto;
+            background-color: var(--light-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: var(--dark-color);
+        }
+
+        .result-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .result-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .result-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .result-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        .code-container {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .code-container pre {
+            margin: 0;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .tab-header {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2.5rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.8rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary-light);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1.2rem;
+        }
+
+        .feature-title {
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            font-size: 1.25rem;
+            color: var(--dark-color);
+        }
+
+        .feature-desc {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2.5rem 0;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-top: 3rem;
+            background: white;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer p {
+            max-width: 800px;
+            margin: 0.5rem auto;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .flat-input-group {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-content h1 {
+                font-size: 2.2rem;
+            }
+
+            .header-content p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="flat-header">
+        <div class="header-content">
+            <h1><i class="fas fa-sort-numeric-up-alt"></i> 连续数字生成器</h1>
+            <p>快速生成自定义格式的连续数字序列，支持补零、前后缀，并导出Golang和Python代码</p>
+        </div>
+    </header>
+    <div class="container">
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-list-ol"></i>
+                </div>
+                <div class="feature-title">连续数字生成</div>
+                <p class="feature-desc">生成指定范围的连续数字序列，支持大范围数字</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-expand-alt"></i>
+                </div>
+                <div class="feature-title">智能补零</div>
+                <p class="feature-desc">支持前置补零（0-10位），自动计算所需位数</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <div class="feature-title">代码导出</div>
+                <p class="feature-desc">一键生成Golang和Python代码，方便开发使用</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-copy"></i>
+                </div>
+                <div class="feature-title">一键复制</div>
+                <p class="feature-desc">轻松复制结果或代码，提高工作效率</p>
+            </div>
+        </div>
+        <div class="flat-card">
+            <div class="card-header">
+                <i class="fas fa-sliders-h"></i> 生成参数设置
+            </div>
+            <div class="card-body">
+                <div class="flat-input-group">
+                    <div class="input-item">
+                        <label><i class="fas fa-play"></i> 开始数字</label>
+                        <input type="number" id="startNum" class="flat-input" value="1" min="0">
+                    </div>
+                    <div class="input-item">
+                        <label><i class="fas fa-stop"></i> 结束数字</label>
+                        <input type="number" id="endNum" class="flat-input" value="10" min="1">
+                    </div>
+                    <div class="input-item">
+                        <label><i class="fas fa-align-left"></i> 前置补零（位数）</label>
+                        <select id="zeroPad" class="flat-select">
+                            <option value="0">无补零</option>
+                            <option value="1">1位（0-9）</option>
+                            <option value="2">2位（00-99）</option>
+                            <option value="3" selected>3位（000-999）</option>
+                            <option value="4">4位（0000-9999）</option>
+                            <option value="5">5位（00000-99999）</option>
+                            <option value="6">6位（000000-999999）</option>
+                            <option value="7">7位（0000000-9999999）</option>
+                            <option value="8">8位（00000000-99999999）</option>
+                            <option value="9">9位（000000000-999999999）</option>
+                            <option value="10">10位（0000000000-9999999999）</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flat-input-group">
+                    <div class="input-item">
+                        <label><i class="fas fa-prefix"></i> 前缀（可选）</label>
+                        <input type="text" id="prefix" class="flat-input" placeholder="例如: item_">
+                    </div>
+                    <div class="input-item">
+                        <label><i class="fas fa-suffix"></i> 后缀（可选）</label>
+                        <input type="text" id="suffix" class="flat-input" placeholder="例如: .jpg">
+                    </div>
+                    <div class="input-item" style="align-self: flex-end;">
+                        <button id="generateBtn" class="btn-flat">
+                            <i class="fas fa-bolt"></i> 生成数字序列
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flat-card">
+            <div class="card-header">
+                <i class="fas fa-list"></i> 生成结果
+            </div>
+            <div class="card-body">
+                <div class="result-container" id="resultContainer">
+                    <p style="text-align:center; color:#999; padding-top:120px;">
+                        <i class="fas fa-magic" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i><br>
+                        设置参数后点击"生成数字序列"按钮查看结果
+                    </p>
+                </div>
+                <div class="action-bar">
+                    <div>
+                        <span id="resultCount">0</span> 条结果生成
+                    </div>
+                    <button id="copyResultBtn" class="btn-flat btn-secondary">
+                        <i class="fas fa-copy"></i> 复制全部结果
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="flat-card">
+            <div class="card-header">
+                <i class="fas fa-code"></i> 代码生成
+            </div>
+            <div class="card-body">
+                <div class="tab-header">
+                    <button class="tab-btn active" data-tab="golang">
+                        <i class="fab fa-golang"></i> Golang 代码
+                    </button>
+                    <button class="tab-btn" data-tab="python">
+                        <i class="fab fa-python"></i> Python 代码
+                    </button>
+                </div>
+                <div class="tab-content active" id="golangTab">
+                    <div class="code-container">
+                        <button class="copy-btn" data-clipboard-target="#golangCode">
+                            <i class="fas fa-copy"></i> 复制代码
+                        </button>
+                        <pre id="golangCode">package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    start := 1
+    end := 10
+    
+    for i := start; i <= end; i++ {
+        // 使用 %03d 格式进行补零，3表示位数
+        fmt.Printf("item_%03d.jpg\n", i)
+    }
+}</pre>
+                    </div>
+                </div>
+                <div class="tab-content" id="pythonTab">
+                    <div class="code-container">
+                        <button class="copy-btn" data-clipboard-target="#pythonCode">
+                            <i class="fas fa-copy"></i> 复制代码
+                        </button>
+                        <pre id="pythonCode">def generate_sequence(start, end, digits=3, prefix="", suffix=""):
+    for i in range(start, end+1):
+        # 格式化数字，补零
+        formatted_num = str(i).zfill(digits)
+        print(f"{prefix}{formatted_num}{suffix}")
+
+if __name__ == "__main__":
+    # 示例：生成从1到10的数字，补3位零
+    generate_sequence(1, 10, 3, "item_", ".jpg")</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 连续数字生成器 | 扁平化设计 | 开发者友好 | 免费使用</p>
+            <p>本工具生成结果可用于测试数据、批量文件名生成、序列号生成等多种场景</p>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 初始化标签页
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // 移除所有活动状态
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(tab => {
+                        tab.classList.remove('active');
+                    });
+
+                    // 添加当前活动状态
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+
+            // 生成按钮点击事件
+            document.getElementById('generateBtn').addEventListener('click', generateSequence);
+
+            // 复制结果按钮
+            document.getElementById('copyResultBtn').addEventListener('click', function () {
+                copyToClipboard(document.getElementById('resultContainer'));
+                showNotification('结果已复制到剪贴板', 'success');
+            });
+
+            // 绑定复制代码按钮事件
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const target = this.getAttribute('data-clipboard-target');
+                    copyToClipboard(document.querySelector(target));
+                    showNotification('代码已复制到剪贴板', 'success');
+                });
+            });
+
+            // 输入变化时实时生成
+            document.querySelectorAll('#startNum, #endNum, #zeroPad, #prefix, #suffix').forEach(input => {
+                input.addEventListener('input', generateSequence);
+            });
+
+            // 初始化生成
+            generateSequence();
+
+            function generateSequence() {
+                const start = parseInt(document.getElementById('startNum').value) || 1;
+                const end = parseInt(document.getElementById('endNum').value) || 10;
+                const zeroPad = parseInt(document.getElementById('zeroPad').value) || 0;
+                const prefix = document.getElementById('prefix').value || '';
+                const suffix = document.getElementById('suffix').value || '';
+
+                let resultHTML = '';
+                let count = 0;
+
+                // 限制范围防止过大数字导致性能问题
+                const safeEnd = Math.min(end, start + 1000);
+
+                for (let i = start; i <= safeEnd; i++) {
+                    // 格式化为字符串并补零
+                    let numStr = i.toString();
+                    if (zeroPad > 0) {
+                        numStr = numStr.padStart(zeroPad, '0');
+                    }
+
+                    resultHTML += prefix + numStr + suffix + '<br>';
+                    count++;
+                }
+
+                if (end > safeEnd) {
+                    resultHTML += `<br><div style="color:#ff6b6b; text-align:center;">仅显示前1000条结果</div>`;
+                }
+
+                document.getElementById('resultContainer').innerHTML = resultHTML ||
+                    '<p style="color:#999; text-align:center;">请输入有效参数</p>';
+
+                document.getElementById('resultCount').textContent = count;
+                generateCode();
+            }
+
+            function generateCode() {
+                const start = parseInt(document.getElementById('startNum').value) || 1;
+                const end = parseInt(document.getElementById('endNum').value) || 10;
+                const zeroPad = parseInt(document.getElementById('zeroPad').value) || 0;
+                const prefix = document.getElementById('prefix').value || '';
+                const suffix = document.getElementById('suffix').value || '';
+
+                // Golang 代码
+                let goCode = `package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    start := ${start}
+    end := ${end}
+    
+    for i := start; i <= end; i++ {
+        // 使用 %0${zeroPad}d 格式进行补零
+        fmt.Printf("${prefix}%0${zeroPad}d${suffix}\\n", i)
+    }
+}`;
+
+                document.getElementById('golangCode').textContent = goCode;
+
+                // Python 代码
+                let pyCode = `def generate_sequence(start, end, digits=${zeroPad}, prefix="${prefix}", suffix="${suffix}"):
+    for i in range(start, end+1):
+        # 格式化数字，补零
+        formatted_num = str(i).zfill(digits)
+        print(f"{prefix}{formatted_num}{suffix}")
+
+if __name__ == "__main__":
+    # 调用生成函数
+    generate_sequence(${start}, ${end}, ${zeroPad}, "${prefix}", "${suffix}")`;
+
+                document.getElementById('pythonCode').textContent = pyCode;
+            }
+
+            function copyToClipboard(element) {
+                const textarea = document.createElement('textarea');
+                textarea.value = element.textContent || element.innerText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+
+            function showNotification(message, type) {
+                // 简单通知效果
+                const notification = document.createElement('div');
+                notification.textContent = message;
+                notification.style.position = 'fixed';
+                notification.style.bottom = '20px';
+                notification.style.right = '20px';
+                notification.style.padding = '12px 24px';
+                notification.style.background = type === 'success' ? '#5FB878' : '#FF5722';
+                notification.style.color = 'white';
+                notification.style.borderRadius = '8px';
+                notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                notification.style.zIndex = '1000';
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s';
+
+                document.body.appendChild(notification);
+
+                // 显示通知
+                setTimeout(() => {
+                    notification.style.opacity = '1';
+                }, 10);
+
+                // 3秒后移除
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+
+</html>

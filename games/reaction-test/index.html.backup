@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反应测试游戏 - 在线免费反应速度训练游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线反应测试游戏，测试并训练你的反应速度，多种测试模式，科学评估反应能力，扁平化设计界面！">
+    <meta name="keywords" content="反应测试,反应速度,反应训练,在线测试,反应能力,免费游戏,扁平化设计,反应时间">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#FF5722">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #FF8A65 0%, #FF5722 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .game-header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .game-header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+
+        .test-mode-selector {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .test-mode-selector h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 300;
+            font-size: 1.3rem;
+        }
+
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+        }
+
+        .mode-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mode-btn span {
+            font-size: 2rem;
+        }
+
+        .mode-btn div {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .mode-btn small {
+            opacity: 0.7;
+            font-size: 0.8rem;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .reaction-area {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reaction-area.waiting {
+            background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+            animation: pulse 2s infinite;
+        }
+
+        .reaction-area.ready {
+            background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+        }
+
+        .reaction-area.clicked {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .reaction-text {
+            font-size: 2rem;
+            font-weight: 300;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        .reaction-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            z-index: 2;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: #E64A19;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(230, 74, 25, 0.3);
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            background: #D84315;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(230, 74, 25, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.start-btn {
+            background: #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn.start-btn:hover {
+            background: #43A047;
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .results-history {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .results-history h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 300;
+            font-size: 1.2rem;
+        }
+
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        .result-time {
+            font-weight: 600;
+            color: #FFD54F;
+        }
+
+        .result-rating {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .empty-results {
+            text-align: center;
+            opacity: 0.6;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        /* 弹窗样式 */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .popup.show {
+            display: flex;
+        }
+
+        .popup-content {
+            background: linear-gradient(135deg, #FF8A65 0%, #FF5722 100%);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .popup-content h2 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+
+        .popup-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .game-header h1 {
+                font-size: 2rem;
+            }
+            
+            .mode-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .reaction-area {
+                min-height: 250px;
+                padding: 30px;
+            }
+            
+            .reaction-text {
+                font-size: 1.5rem;
+            }
+            
+            .reaction-icon {
+                font-size: 3rem;
+            }
+            
+            .game-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                min-width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mode-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>⚡ 反应测试</h1>
+            <div class="game-subtitle">测试你的反应速度</div>
+        </header>
+
+        <section class="test-mode-selector">
+            <h3>🎯 测试模式</h3>
+            <div class="mode-buttons">
+                <button class="mode-btn active" onclick="reactionTest.setMode('simple')">
+                    <span>👆</span>
+                    <div>简单模式</div>
+                    <small>绿色时点击</small>
+                </button>
+                <button class="mode-btn" onclick="reactionTest.setMode('visual')">
+                    <span>👁️</span>
+                    <div>视觉模式</div>
+                    <small>图形变化时点击</small>
+                </button>
+                <button class="mode-btn" onclick="reactionTest.setMode('audio')">
+                    <span>🔊</span>
+                    <div>听觉模式</div>
+                    <small>听到声音时点击</small>
+                </button>
+                <button class="mode-btn" onclick="reactionTest.setMode('multiple')">
+                    <span>🎯</span>
+                    <div>连续模式</div>
+                    <small>5次测试取平均</small>
+                </button>
+            </div>
+        </section>
+
+        <section class="game-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="lastTime">--</div>
+                <div class="stat-label">最近反应</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgTime">--</div>
+                <div class="stat-label">平均时间</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="bestTime">--</div>
+                <div class="stat-label">最佳记录</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="testCount">0</div>
+                <div class="stat-label">测试次数</div>
+            </div>
+        </section>
+
+        <section class="reaction-area" id="reactionArea" onclick="reactionTest.handleClick()">
+            <div class="reaction-icon" id="reactionIcon">⚡</div>
+            <div class="reaction-text" id="reactionText">点击开始测试你的反应速度</div>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn start-btn" onclick="reactionTest.startTest()" id="startBtn">🚀 开始测试</button>
+            <button class="btn" onclick="reactionTest.resetStats()" id="resetBtn">🔄 重置统计</button>
+            <button class="btn secondary" onclick="reactionTest.showHelp()">❓ 使用说明</button>
+        </section>
+
+        <section class="results-history">
+            <h3>📊 最近测试结果</h3>
+            <div class="results-list" id="resultsList">
+                <div class="empty-results">开始测试后将显示结果</div>
+            </div>
+        </section>
+
+        <!-- 帮助弹窗 -->
+        <div class="popup" id="helpPopup">
+            <div class="popup-content">
+                <h2>⚡ 使用说明</h2>
+                
+                <div style="text-align: left; margin-bottom: 20px;">
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎯 测试方法</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        1. 选择测试模式<br>
+                        2. 点击"开始测试"<br>
+                        3. 等待信号出现<br>
+                        4. 立即点击反应区域
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🏆 评分标准</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • &lt;200ms: 闪电般反应<br>
+                        • 200-250ms: 优秀<br>
+                        • 250-300ms: 良好<br>
+                        • 300-400ms: 一般<br>
+                        • &gt;400ms: 需要练习
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">💡 提示</h3>
+                    <p style="line-height: 1.6;">
+                        • 保持专注，放松心态<br>
+                        • 多次测试获得准确结果<br>
+                        • 避免抢跑（提前点击）
+                    </p>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="reactionTest.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        class ReactionTest {
+            constructor() {
+                this.mode = 'simple';
+                this.isWaiting = false;
+                this.isReady = false;
+                this.startTime = 0;
+                this.results = [];
+                this.timeoutId = null;
+                this.multipleTestCount = 0;
+                this.multipleResults = [];
+                
+                this.loadStats();
+            }
+            
+            setMode(mode) {
+                if (this.isWaiting || this.isReady) return;
+                
+                this.mode = mode;
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+                
+                this.resetArea();
+            }
+            
+            startTest() {
+                if (this.isWaiting || this.isReady) return;
+                
+                this.resetArea();
+                this.isWaiting = true;
+                this.multipleTestCount = 0;
+                this.multipleResults = [];
+                
+                const area = document.getElementById('reactionArea');
+                const icon = document.getElementById('reactionIcon');
+                const text = document.getElementById('reactionText');
+                
+                area.classList.add('waiting');
+                icon.textContent = '⏳';
+                text.textContent = '等待...准备好后会变绿';
+                
+                // 随机延迟 1-5 秒
+                const delay = Math.random() * 4000 + 1000;
+                
+                this.timeoutId = setTimeout(() => {
+                    this.showReadySignal();
+                }, delay);
+            }
+            
+            showReadySignal() {
+                if (!this.isWaiting) return;
+                
+                this.isWaiting = false;
+                this.isReady = true;
+                this.startTime = performance.now();
+                
+                const area = document.getElementById('reactionArea');
+                const icon = document.getElementById('reactionIcon');
+                const text = document.getElementById('reactionText');
+                
+                area.classList.remove('waiting');
+                area.classList.add('ready');
+                
+                if (this.mode === 'visual') {
+                    icon.textContent = '🎯';
+                    text.textContent = '点击！';
+                } else if (this.mode === 'audio') {
+                    icon.textContent = '🔊';
+                    text.textContent = '听到声音了吗？点击！';
+                    this.playAudioSignal();
+                } else {
+                    icon.textContent = '✅';
+                    text.textContent = '现在点击！';
+                }
+            }
+            
+            playAudioSignal() {
+                // 创建音频信号
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            }
+            
+            handleClick() {
+                if (this.isWaiting) {
+                    // 提前点击
+                    this.handleEarlyClick();
+                } else if (this.isReady) {
+                    // 正确反应
+                    this.recordReaction();
+                } else {
+                    // 开始测试
+                    this.startTest();
+                }
+            }
+            
+            handleEarlyClick() {
+                if (this.timeoutId) {
+                    clearTimeout(this.timeoutId);
+                    this.timeoutId = null;
+                }
+                
+                this.isWaiting = false;
+                
+                const area = document.getElementById('reactionArea');
+                const icon = document.getElementById('reactionIcon');
+                const text = document.getElementById('reactionText');
+                
+                area.classList.remove('waiting');
+                area.classList.add('clicked');
+                icon.textContent = '❌';
+                text.textContent = '太早了！等信号变绿再点击';
+                
+                setTimeout(() => {
+                    this.resetArea();
+                }, 2000);
+            }
+            
+            recordReaction() {
+                const endTime = performance.now();
+                const reactionTime = Math.round(endTime - this.startTime);
+                
+                this.isReady = false;
+                
+                const area = document.getElementById('reactionArea');
+                const icon = document.getElementById('reactionIcon');
+                const text = document.getElementById('reactionText');
+                
+                area.classList.remove('ready');
+                area.classList.add('clicked');
+                
+                const rating = this.getRating(reactionTime);
+                icon.textContent = rating.emoji;
+                text.textContent = `${reactionTime}ms - ${rating.text}`;
+                
+                this.results.push({
+                    time: reactionTime,
+                    mode: this.mode,
+                    timestamp: new Date()
+                });
+                
+                if (this.mode === 'multiple') {
+                    this.multipleResults.push(reactionTime);
+                    this.multipleTestCount++;
+                    
+                    if (this.multipleTestCount < 5) {
+                        setTimeout(() => {
+                            text.textContent += ` (${this.multipleTestCount}/5)`;
+                            setTimeout(() => {
+                                this.startTest();
+                            }, 1500);
+                        }, 1000);
+                        return;
+                    } else {
+                        // 计算平均值
+                        const avgTime = Math.round(
+                            this.multipleResults.reduce((a, b) => a + b, 0) / this.multipleResults.length
+                        );
+                        text.textContent = `完成！平均: ${avgTime}ms`;
+                    }
+                }
+                
+                this.updateStats();
+                this.updateResultsList();
+                this.saveStats();
+                
+                setTimeout(() => {
+                    this.resetArea();
+                }, 3000);
+            }
+            
+            getRating(time) {
+                if (time < 200) {
+                    return { emoji: '⚡', text: '闪电般反应!' };
+                } else if (time < 250) {
+                    return { emoji: '🚀', text: '优秀!' };
+                } else if (time < 300) {
+                    return { emoji: '👍', text: '良好!' };
+                } else if (time < 400) {
+                    return { emoji: '👌', text: '一般' };
+                } else {
+                    return { emoji: '🐌', text: '需要练习' };
+                }
+            }
+            
+            resetArea() {
+                const area = document.getElementById('reactionArea');
+                const icon = document.getElementById('reactionIcon');
+                const text = document.getElementById('reactionText');
+                
+                area.className = 'reaction-area';
+                icon.textContent = '⚡';
+                text.textContent = '点击开始测试你的反应速度';
+                
+                this.isWaiting = false;
+                this.isReady = false;
+                
+                if (this.timeoutId) {
+                    clearTimeout(this.timeoutId);
+                    this.timeoutId = null;
+                }
+            }
+            
+            updateStats() {
+                const lastResult = this.results[this.results.length - 1];
+                
+                document.getElementById('lastTime').textContent = lastResult.time + 'ms';
+                document.getElementById('testCount').textContent = this.results.length;
+                
+                if (this.results.length > 0) {
+                    const avgTime = Math.round(
+                        this.results.reduce((sum, result) => sum + result.time, 0) / this.results.length
+                    );
+                    document.getElementById('avgTime').textContent = avgTime + 'ms';
+                    
+                    const bestTime = Math.min(...this.results.map(r => r.time));
+                    document.getElementById('bestTime').textContent = bestTime + 'ms';
+                }
+            }
+            
+            updateResultsList() {
+                const container = document.getElementById('resultsList');
+                
+                if (this.results.length === 0) {
+                    container.innerHTML = '<div class="empty-results">开始测试后将显示结果</div>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                // 显示最近10次结果
+                const recentResults = this.results.slice(-10).reverse();
+                
+                recentResults.forEach((result, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'result-item';
+                    
+                    const rating = this.getRating(result.time);
+                    
+                    item.innerHTML = `
+                        <div>
+                            <span>测试 ${this.results.length - index}</span>
+                            <span class="result-rating">(${result.mode})</span>
+                        </div>
+                        <div class="result-time">${result.time}ms ${rating.emoji}</div>
+                    `;
+                    
+                    container.appendChild(item);
+                });
+            }
+            
+            resetStats() {
+                if (confirm('确定要重置所有统计数据吗？')) {
+                    this.results = [];
+                    
+                    document.getElementById('lastTime').textContent = '--';
+                    document.getElementById('avgTime').textContent = '--';
+                    document.getElementById('bestTime').textContent = '--';
+                    document.getElementById('testCount').textContent = '0';
+                    
+                    this.updateResultsList();
+                    this.saveStats();
+                }
+            }
+            
+            saveStats() {
+                try {
+                    localStorage.setItem('reactionTest_results', JSON.stringify(this.results));
+                } catch (e) {
+                    console.warn('无法保存统计数据');
+                }
+            }
+            
+            loadStats() {
+                try {
+                    const saved = localStorage.getItem('reactionTest_results');
+                    if (saved) {
+                        this.results = JSON.parse(saved);
+                        this.updateStats();
+                        this.updateResultsList();
+                    }
+                } catch (e) {
+                    console.warn('无法加载统计数据');
+                }
+            }
+            
+            showHelp() {
+                document.getElementById('helpPopup').classList.add('show');
+            }
+            
+            closeHelp() {
+                document.getElementById('helpPopup').classList.remove('show');
+            }
+        }
+
+        // 全局变量
+        let reactionTest;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            reactionTest = new ReactionTest();
+        });
+
+        // 键盘事件
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                reactionTest.handleClick();
+            }
+        });
+    </script>
+</body>
+</html>

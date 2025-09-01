@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字拼图2048 - 在线免费玩经典合成游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线数字拼图2048游戏，经典数字合成益智游戏，挑战2048目标，扁平化设计界面，支持键盘和触屏操作！">
+    <meta name="keywords" content="2048游戏,数字拼图,合成游戏,益智游戏,在线游戏,免费游戏,数字游戏,扁平化设计,触屏游戏">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#ED6C02">
+    
+    <link rel="stylesheet" href="css/number-puzzle.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>🔢 数字拼图 2048</h1>
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-label">分数</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">最佳</div>
+                    <div class="stat-value" id="bestScore">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">步数</div>
+                    <div class="stat-value" id="moves">0</div>
+                </div>
+            </div>
+        </header>
+
+        <section class="game-description">
+            <p>📱 使用方向键或滑动屏幕合并相同数字，目标是创造2048！</p>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn start-btn" onclick="numberPuzzle.newGame()">🎮 新游戏</button>
+            <button class="btn" onclick="numberPuzzle.undo()" id="undoBtn">↩️ 撤销</button>
+            <button class="btn secondary" onclick="numberPuzzle.showHelp()">❓ 帮助</button>
+        </section>
+
+        <section class="game-board-container">
+            <div class="game-board" id="gameBoard">
+                <!-- 4x4 网格 -->
+                <div class="grid-container">
+                    <div class="grid-row">
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                    </div>
+                    <div class="grid-row">
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                        <div class="grid-cell"></div>
+                    </div>
+                </div>
+                <!-- 数字瓦片容器 -->
+                <div class="tile-container" id="tileContainer"></div>
+            </div>
+        </section>
+
+        <section class="instructions">
+            <div class="instruction-item">
+                <span class="key-hint">↑ ↓ ← →</span>
+                <span>方向键移动</span>
+            </div>
+            <div class="instruction-item">
+                <span class="key-hint">滑动</span>
+                <span>触屏操作</span>
+            </div>
+            <div class="instruction-item">
+                <span class="key-hint">ESC</span>
+                <span>新游戏</span>
+            </div>
+        </section>
+
+        <!-- 游戏结束弹窗 -->
+        <div class="game-over-popup" id="gameOverPopup">
+            <div class="popup-content">
+                <h2 id="gameOverTitle">🎉 游戏结束</h2>
+                <div class="final-score">
+                    <div class="score-display">最终分数: <span id="finalScore">0</span></div>
+                    <div class="move-display">总步数: <span id="finalMoves">0</span></div>
+                    <div class="best-tile-display">最大数字: <span id="bestTile">0</span></div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="numberPuzzle.closeGameOver(); numberPuzzle.newGame();">再来一次</button>
+                    <button class="btn secondary" onclick="numberPuzzle.closeGameOver();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 胜利弹窗 -->
+        <div class="victory-popup" id="victoryPopup">
+            <div class="popup-content">
+                <h2>🎉 恭喜达成2048！</h2>
+                <div class="victory-message">
+                    <p>你成功创造了2048！</p>
+                    <div class="final-score">
+                        <div class="score-display">分数: <span id="victoryScore">0</span></div>
+                        <div class="move-display">步数: <span id="victoryMoves">0</span></div>
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="numberPuzzle.closeVictory(); numberPuzzle.continueGame();">继续游戏</button>
+                    <button class="btn" onclick="numberPuzzle.closeVictory(); numberPuzzle.newGame();">新游戏</button>
+                    <button class="btn secondary" onclick="numberPuzzle.closeVictory();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帮助弹窗 -->
+        <div class="help-popup" id="helpPopup">
+            <div class="popup-content help-content">
+                <h2>🎯 游戏规则</h2>
+                <div class="help-section">
+                    <h3>🎮 游戏目标</h3>
+                    <p>通过合并相同的数字瓦片，最终创造出2048！</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🎲 操作方式</h3>
+                    <ul>
+                        <li>使用方向键（↑↓←→）移动瓦片</li>
+                        <li>在触屏设备上可以滑动操作</li>
+                        <li>相同数字的瓦片会合并为它们的和</li>
+                        <li>每次移动后会随机生成新的数字瓦片</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🏆 胜负规则</h3>
+                    <ul>
+                        <li>创造出2048数字瓦片即可获胜</li>
+                        <li>当棋盘填满且无法合并时游戏结束</li>
+                        <li>达到2048后可以继续游戏追求更高分数</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>💡 游戏技巧</h3>
+                    <ul>
+                        <li>尽量保持大数字在角落</li>
+                        <li>朝一个方向建立数字序列</li>
+                        <li>避免频繁使用某个方向键</li>
+                        <li>为新瓦片预留空间</li>
+                    </ul>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="numberPuzzle.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/number-puzzle.js"></script>
+</body>
+</html>

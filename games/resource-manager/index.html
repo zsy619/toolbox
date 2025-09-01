@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资源管理游戏 - 在线免费模拟经营策略游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线资源管理游戏，收集资源建设城市，管理经济发展，多种建筑和生产链，策略经营游戏，扁平化设计界面！">
+    <meta name="keywords" content="资源管理,模拟经营,策略游戏,城市建设,经济管理,在线游戏,免费游戏,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#FF9800">
+    
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>🏗️ 资源管理</h1>
+            <div class="game-subtitle">收集资源建设繁荣城市</div>
+        </header>
+
+        <section class="main-interface">
+            <div class="left-panel">
+                <div class="panel-section">
+                    <h3>💰 资源状况</h3>
+                    <div class="resources-display">
+                        <div class="resource-item">
+                            <div class="resource-icon">🪙</div>
+                            <div class="resource-info">
+                                <div class="resource-amount" id="gold">1000</div>
+                                <div class="resource-rate" id="goldRate">+0/s</div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-icon">🌾</div>
+                            <div class="resource-info">
+                                <div class="resource-amount" id="food">500</div>
+                                <div class="resource-rate" id="foodRate">+0/s</div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-icon">🪨</div>
+                            <div class="resource-info">
+                                <div class="resource-amount" id="stone">300</div>
+                                <div class="resource-rate" id="stoneRate">+0/s</div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-icon">🪵</div>
+                            <div class="resource-info">
+                                <div class="resource-amount" id="wood">400</div>
+                                <div class="resource-rate" id="woodRate">+0/s</div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-icon">👥</div>
+                            <div class="resource-info">
+                                <div class="resource-amount" id="population">10</div>
+                                <div class="resource-rate" id="populationCap">/50</div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-icon">⚡</div>
+                            <div class="resource-info">
+                                <div class="resource-amount" id="energy">100</div>
+                                <div class="resource-rate" id="energyRate">+0/s</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🏗️ 建筑选择</h3>
+                    <div class="buildings-grid" id="buildingsGrid">
+                        <button class="building-btn" onclick="resourceManager.selectBuilding('house')">
+                            <div class="building-icon">🏠</div>
+                            <div class="building-name">住房</div>
+                            <div class="building-cost">100🪙</div>
+                        </button>
+                        <button class="building-btn" onclick="resourceManager.selectBuilding('farm')">
+                            <div class="building-icon">🚜</div>
+                            <div class="building-name">农场</div>
+                            <div class="building-cost">150🪙</div>
+                        </button>
+                        <button class="building-btn" onclick="resourceManager.selectBuilding('mine')">
+                            <div class="building-icon">⛏️</div>
+                            <div class="building-name">矿场</div>
+                            <div class="building-cost">200🪙</div>
+                        </button>
+                        <button class="building-btn" onclick="resourceManager.selectBuilding('lumber')">
+                            <div class="building-icon">🪓</div>
+                            <div class="building-name">伐木场</div>
+                            <div class="building-cost">120🪙</div>
+                        </button>
+                        <button class="building-btn" onclick="resourceManager.selectBuilding('market')">
+                            <div class="building-icon">🏪</div>
+                            <div class="building-name">市场</div>
+                            <div class="building-cost">300🪙</div>
+                        </button>
+                        <button class="building-btn" onclick="resourceManager.selectBuilding('factory')">
+                            <div class="building-icon">🏭</div>
+                            <div class="building-name">工厂</div>
+                            <div class="building-cost">500🪙</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-area">
+                <div class="city-grid" id="cityGrid">
+                    <!-- 城市网格将通过JavaScript生成 -->
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="panel-section">
+                    <h3>📊 生产概览</h3>
+                    <div class="production-display" id="productionDisplay">
+                        <div style="text-align: center; opacity: 0.6; padding: 20px;">
+                            建造生产建筑后将显示产出信息
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🔬 科技研究</h3>
+                    <div class="research-tree" id="researchTree">
+                        <div class="research-item" onclick="resourceManager.startResearch('efficiency')">
+                            <div class="research-name">生产效率</div>
+                            <div class="research-desc">提升所有建筑产出 +20%</div>
+                            <div class="research-cost">💰500</div>
+                        </div>
+                        <div class="research-item" onclick="resourceManager.startResearch('capacity')">
+                            <div class="research-name">储存容量</div>
+                            <div class="research-desc">增加资源储存上限 +50%</div>
+                            <div class="research-cost">💰300</div>
+                        </div>
+                        <div class="research-item" onclick="resourceManager.startResearch('automation')">
+                            <div class="research-name">自动化</div>
+                            <div class="research-desc">建筑自动升级到2级</div>
+                            <div class="research-cost">💰800</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🏆 成就系统</h3>
+                    <div class="achievements-list" id="achievementsList">
+                        <div class="achievement-item" data-id="first_build">
+                            <div class="achievement-icon">🏗️</div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">建筑师</div>
+                                <div class="achievement-desc">建造第一座建筑</div>
+                            </div>
+                        </div>
+                        <div class="achievement-item" data-id="rich_city">
+                            <div class="achievement-icon">💰</div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">富裕城市</div>
+                                <div class="achievement-desc">累积10000金币</div>
+                            </div>
+                        </div>
+                        <div class="achievement-item" data-id="big_population">
+                            <div class="achievement-icon">👥</div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">人口大市</div>
+                                <div class="achievement-desc">人口达到200</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn start-btn" onclick="resourceManager.startGame()" id="startBtn">🚀 开始游戏</button>
+            <button class="btn" onclick="resourceManager.pauseGame()" id="pauseBtn" disabled>⏸️ 暂停</button>
+            <button class="btn secondary" onclick="resourceManager.saveGame()">💾 保存游戏</button>
+            <button class="btn secondary" onclick="resourceManager.loadGame()">📁 加载游戏</button>
+            <button class="btn secondary" onclick="resourceManager.showHelp()">❓ 帮助</button>
+        </section>
+
+        <!-- 帮助弹窗 -->
+        <div class="popup" id="helpPopup">
+            <div class="popup-content">
+                <h2>🏗️ 游戏说明</h2>
+                
+                <div style="text-align: left; margin-bottom: 20px;">
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎯 游戏目标</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        建设和管理一座繁荣的城市，合理分配资源，发展经济，研究科技，让城市不断发展壮大。
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🏗️ 建筑类型</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>住房：</strong>增加人口容量，提供居住空间<br>
+                        • <strong>农场：</strong>生产食物，维持人口需求<br>
+                        • <strong>矿场：</strong>开采石材，用于建设<br>
+                        • <strong>伐木场：</strong>收集木材，建筑材料<br>
+                        • <strong>市场：</strong>增加金币收入<br>
+                        • <strong>工厂：</strong>消耗资源生产能源
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎮 操作方式</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        1. 选择要建造的建筑类型<br>
+                        2. 点击城市网格中的空地建造<br>
+                        3. 管理资源平衡，确保可持续发展<br>
+                        4. 研究科技提升生产效率
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">💡 策略提示</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • 平衡发展各类建筑<br>
+                        • 优先建造资源生产建筑<br>
+                        • 及时研究科技提升效率<br>
+                        • 关注人口和资源的平衡<br>
+                        • 合理规划城市布局
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🔬 科技系统</h3>
+                    <p style="line-height: 1.6;">
+                        • 研究科技需要消耗金币<br>
+                        • 不同科技提供不同加成<br>
+                        • 科技效果永久生效<br>
+                        • 合理规划研究顺序
+                    </p>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="resourceManager.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 工具提示 -->
+        <div class="tooltip" id="tooltip"></div>
+    </main>
+
+    
+    <script src="js/game.js"></script>
+</body>
+</html>

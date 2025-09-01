@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词拼图游戏 - 在线免费玩英语单词益智游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线单词拼图游戏，拖拽字母组成英语单词，提升词汇量和拼写能力，扁平化设计界面，寓教于乐！">
+    <meta name="keywords" content="单词拼图,英语游戏,词汇游戏,拼写游戏,在线游戏,免费游戏,英语学习,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#4CAF50">
+    
+    <link rel="stylesheet" href="css/word-puzzle.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>📝 单词拼图</h1>
+            <div class="game-subtitle">拖拽字母组成英语单词</div>
+        </header>
+
+        <section class="difficulty-selector">
+            <h3>📚 难度等级</h3>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn active" onclick="wordPuzzle.setDifficulty('easy')">
+                    <span>😊</span>
+                    <div>初级</div>
+                    <small>3-4字母单词</small>
+                </button>
+                <button class="difficulty-btn" onclick="wordPuzzle.setDifficulty('medium')">
+                    <span>🤔</span>
+                    <div>中级</div>
+                    <small>5-6字母单词</small>
+                </button>
+                <button class="difficulty-btn" onclick="wordPuzzle.setDifficulty('hard')">
+                    <span>😅</span>
+                    <div>高级</div>
+                    <small>7-8字母单词</small>
+                </button>
+            </div>
+        </section>
+
+        <section class="game-stats">
+            <div class="stat-item">
+                <span class="stat-label">分数</span>
+                <span class="stat-value" id="score">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">等级</span>
+                <span class="stat-value" id="level">1</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">连击</span>
+                <span class="stat-value" id="combo">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">时间</span>
+                <span class="stat-value" id="timer">02:00</span>
+            </div>
+        </section>
+
+        <section class="word-display">
+            <div class="target-word-container">
+                <h3>🎯 目标单词</h3>
+                <div class="word-clue" id="wordClue">点击开始游戏查看提示</div>
+                <div class="word-slots" id="wordSlots">
+                    <!-- 字母槽位将通过JavaScript生成 -->
+                </div>
+            </div>
+        </section>
+
+        <section class="letter-pool">
+            <h3>🔤 字母池</h3>
+            <div class="letters-container" id="lettersContainer">
+                <!-- 字母将通过JavaScript生成 -->
+            </div>
+            <div class="pool-actions">
+                <button class="btn secondary" onclick="wordPuzzle.shuffleLetters()">🔀 重新打乱</button>
+                <button class="btn secondary" onclick="wordPuzzle.showHint()">💡 提示</button>
+            </div>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn start-btn" onclick="wordPuzzle.startGame()" id="startBtn">🎮 开始游戏</button>
+            <button class="btn" onclick="wordPuzzle.checkWord()" id="checkBtn" disabled>✅ 检查单词</button>
+            <button class="btn" onclick="wordPuzzle.clearWord()" id="clearBtn" disabled>🧹 清空</button>
+            <button class="btn secondary" onclick="wordPuzzle.skipWord()" id="skipBtn" disabled>⏭️ 跳过</button>
+        </section>
+
+        <section class="word-history">
+            <h3>📖 已完成单词</h3>
+            <div class="completed-words" id="completedWords">
+                <div class="empty-state">完成单词后将在这里显示</div>
+            </div>
+        </section>
+
+        <!-- 游戏结束弹窗 -->
+        <div class="game-over-popup" id="gameOverPopup">
+            <div class="popup-content">
+                <h2>🎉 游戏结束</h2>
+                <div class="final-stats">
+                    <div class="stat-display">
+                        <div class="stat-icon">🏆</div>
+                        <div>
+                            <div class="stat-label">最终分数</div>
+                            <div class="stat-value" id="finalScore">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">📝</div>
+                        <div>
+                            <div class="stat-label">完成单词</div>
+                            <div class="stat-value" id="wordsCompleted">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">⚡</div>
+                        <div>
+                            <div class="stat-label">最高连击</div>
+                            <div class="stat-value" id="maxCombo">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">📊</div>
+                        <div>
+                            <div class="stat-label">达到等级</div>
+                            <div class="stat-value" id="maxLevel">1</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="wordPuzzle.closeGameOver(); wordPuzzle.startGame();">再来一次</button>
+                    <button class="btn secondary" onclick="wordPuzzle.closeGameOver();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帮助弹窗 -->
+        <div class="help-popup" id="helpPopup">
+            <div class="popup-content help-content">
+                <h2>📝 游戏说明</h2>
+                
+                <div class="help-section">
+                    <h3>🎯 游戏目标</h3>
+                    <p>根据提示，将字母拖拽到正确位置组成英语单词。在时间限制内完成越多单词，得分越高。</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🎮 操作方式</h3>
+                    <ul>
+                        <li>拖拽字母到单词槽位</li>
+                        <li>点击字母也可以自动放置</li>
+                        <li>点击槽位中的字母可以移除</li>
+                        <li>完成单词后点击"检查单词"</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🏆 评分规则</h3>
+                    <ul>
+                        <li>完成单词获得基础分数</li>
+                        <li>连续完成增加连击奖励</li>
+                        <li>剩余时间转化为额外分数</li>
+                        <li>难度越高分数倍数越大</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>💡 游戏技巧</h3>
+                    <ul>
+                        <li>注意观察单词提示</li>
+                        <li>先确定首字母和末字母</li>
+                        <li>利用词汇联想记忆</li>
+                        <li>合理使用提示功能</li>
+                    </ul>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="wordPuzzle.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/word-puzzle.js"></script>
+</body>
+</html>

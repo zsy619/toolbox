@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资源管理游戏 - 在线免费模拟经营策略游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线资源管理游戏，收集资源建设城市，管理经济发展，多种建筑和生产链，策略经营游戏，扁平化设计界面！">
+    <meta name="keywords" content="资源管理,模拟经营,策略游戏,城市建设,经济管理,在线游戏,免费游戏,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#FF9800">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .game-header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .game-header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+
+        .main-interface {
+            display: grid;
+            grid-template-columns: 300px 1fr 280px;
+            gap: 20px;
+        }
+
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .panel-section h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 300;
+            font-size: 1.2rem;
+        }
+
+        .resources-display {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .resource-icon {
+            font-size: 1.5rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .resource-info {
+            flex: 1;
+        }
+
+        .resource-amount {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .resource-rate {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .buildings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .building-btn {
+            padding: 15px 10px;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .building-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .building-btn.affordable {
+            border-color: rgba(76, 175, 80, 0.5);
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .building-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .building-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .building-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .building-cost {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .game-area {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 500px;
+            position: relative;
+        }
+
+        .city-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 5px;
+            height: 100%;
+            min-height: 480px;
+        }
+
+        .city-tile {
+            background: rgba(139, 195, 74, 0.3);
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .city-tile:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .city-tile.occupied {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: default;
+        }
+
+        .city-tile.occupied:hover {
+            transform: none;
+        }
+
+        .building-sprite {
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .building-level {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(255, 215, 79, 0.9);
+            color: #333;
+            border-radius: 8px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .production-display {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .production-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .production-item:last-child {
+            border-bottom: none;
+        }
+
+        .production-building {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .production-rate {
+            font-weight: 600;
+            color: #81C784;
+        }
+
+        .research-tree {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .research-item {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .research-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .research-item.completed {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: rgba(76, 175, 80, 0.5);
+        }
+
+        .research-item.researching {
+            background: rgba(255, 193, 7, 0.3);
+            border-color: rgba(255, 193, 7, 0.5);
+            animation: research-pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes research-pulse {
+            from { opacity: 0.7; }
+            to { opacity: 1; }
+        }
+
+        .research-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .research-desc {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .research-cost {
+            font-size: 0.7rem;
+            color: #FFD54F;
+        }
+
+        .achievements-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-item.unlocked {
+            background: rgba(255, 215, 79, 0.3);
+            border: 1px solid rgba(255, 215, 79, 0.5);
+        }
+
+        .achievement-icon {
+            font-size: 1.2rem;
+        }
+
+        .achievement-info {
+            flex: 1;
+        }
+
+        .achievement-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .achievement-desc {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background: #F57C00;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(245, 124, 0, 0.3);
+        }
+
+        .btn:hover {
+            background: #EF6C00;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 124, 0, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.start-btn {
+            background: #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn.start-btn:hover {
+            background: #43A047;
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 弹窗样式 */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .popup.show {
+            display: flex;
+        }
+
+        .popup-content {
+            background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .popup-content h2 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+
+        .popup-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .main-interface {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            
+            .left-panel, .right-panel {
+                flex-direction: row;
+                overflow-x: auto;
+            }
+            
+            .panel-section {
+                flex: 0 0 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .game-header h1 {
+                font-size: 2rem;
+            }
+            
+            .city-grid {
+                grid-template-columns: repeat(6, 1fr);
+                grid-template-rows: repeat(8, 1fr);
+            }
+            
+            .resources-display {
+                grid-template-columns: 1fr;
+            }
+            
+            .buildings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .city-grid {
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(12, 1fr);
+            }
+            
+            .building-sprite {
+                font-size: 1.5rem;
+            }
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>🏗️ 资源管理</h1>
+            <div class="game-subtitle">收集资源建设繁荣城市</div>
+        </header>
+
+        <section class="main-interface">
+            <div class="left-panel">
+                <div class="panel-section">
+                    <h3>💰 资源状况</h3>
+                    <div class="resources-display">
+                        <div class="resource-item">
+                            <div class="resource-icon">🪙</div>
+                            <div class="resource-info">
+                                <div class="resource-amount" id="gold">1000</div>
+                                <div class="resource-rate" id="goldRate">+0/s</div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-icon">🌾</div>
+                            <div class="resource-info">
+                                <div class="resource-amount" id="food">500</div>
+                                <div class="resource-rate" id="foodRate">+0/s</div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-icon">🪨</div>
+                            <div class="resource-info">
+                                <div class="resource-amount" id="stone">300</div>
+                                <div class="resource-rate" id="stoneRate">+0/s</div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-icon">🪵</div>
+                            <div class="resource-info">
+                                <div class="resource-amount" id="wood">400</div>
+                                <div class="resource-rate" id="woodRate">+0/s</div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-icon">👥</div>
+                            <div class="resource-info">
+                                <div class="resource-amount" id="population">10</div>
+                                <div class="resource-rate" id="populationCap">/50</div>
+                            </div>
+                        </div>
+                        <div class="resource-item">
+                            <div class="resource-icon">⚡</div>
+                            <div class="resource-info">
+                                <div class="resource-amount" id="energy">100</div>
+                                <div class="resource-rate" id="energyRate">+0/s</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🏗️ 建筑选择</h3>
+                    <div class="buildings-grid" id="buildingsGrid">
+                        <button class="building-btn" onclick="resourceManager.selectBuilding('house')">
+                            <div class="building-icon">🏠</div>
+                            <div class="building-name">住房</div>
+                            <div class="building-cost">100🪙</div>
+                        </button>
+                        <button class="building-btn" onclick="resourceManager.selectBuilding('farm')">
+                            <div class="building-icon">🚜</div>
+                            <div class="building-name">农场</div>
+                            <div class="building-cost">150🪙</div>
+                        </button>
+                        <button class="building-btn" onclick="resourceManager.selectBuilding('mine')">
+                            <div class="building-icon">⛏️</div>
+                            <div class="building-name">矿场</div>
+                            <div class="building-cost">200🪙</div>
+                        </button>
+                        <button class="building-btn" onclick="resourceManager.selectBuilding('lumber')">
+                            <div class="building-icon">🪓</div>
+                            <div class="building-name">伐木场</div>
+                            <div class="building-cost">120🪙</div>
+                        </button>
+                        <button class="building-btn" onclick="resourceManager.selectBuilding('market')">
+                            <div class="building-icon">🏪</div>
+                            <div class="building-name">市场</div>
+                            <div class="building-cost">300🪙</div>
+                        </button>
+                        <button class="building-btn" onclick="resourceManager.selectBuilding('factory')">
+                            <div class="building-icon">🏭</div>
+                            <div class="building-name">工厂</div>
+                            <div class="building-cost">500🪙</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-area">
+                <div class="city-grid" id="cityGrid">
+                    <!-- 城市网格将通过JavaScript生成 -->
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="panel-section">
+                    <h3>📊 生产概览</h3>
+                    <div class="production-display" id="productionDisplay">
+                        <div style="text-align: center; opacity: 0.6; padding: 20px;">
+                            建造生产建筑后将显示产出信息
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🔬 科技研究</h3>
+                    <div class="research-tree" id="researchTree">
+                        <div class="research-item" onclick="resourceManager.startResearch('efficiency')">
+                            <div class="research-name">生产效率</div>
+                            <div class="research-desc">提升所有建筑产出 +20%</div>
+                            <div class="research-cost">💰500</div>
+                        </div>
+                        <div class="research-item" onclick="resourceManager.startResearch('capacity')">
+                            <div class="research-name">储存容量</div>
+                            <div class="research-desc">增加资源储存上限 +50%</div>
+                            <div class="research-cost">💰300</div>
+                        </div>
+                        <div class="research-item" onclick="resourceManager.startResearch('automation')">
+                            <div class="research-name">自动化</div>
+                            <div class="research-desc">建筑自动升级到2级</div>
+                            <div class="research-cost">💰800</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>🏆 成就系统</h3>
+                    <div class="achievements-list" id="achievementsList">
+                        <div class="achievement-item" data-id="first_build">
+                            <div class="achievement-icon">🏗️</div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">建筑师</div>
+                                <div class="achievement-desc">建造第一座建筑</div>
+                            </div>
+                        </div>
+                        <div class="achievement-item" data-id="rich_city">
+                            <div class="achievement-icon">💰</div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">富裕城市</div>
+                                <div class="achievement-desc">累积10000金币</div>
+                            </div>
+                        </div>
+                        <div class="achievement-item" data-id="big_population">
+                            <div class="achievement-icon">👥</div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">人口大市</div>
+                                <div class="achievement-desc">人口达到200</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn start-btn" onclick="resourceManager.startGame()" id="startBtn">🚀 开始游戏</button>
+            <button class="btn" onclick="resourceManager.pauseGame()" id="pauseBtn" disabled>⏸️ 暂停</button>
+            <button class="btn secondary" onclick="resourceManager.saveGame()">💾 保存游戏</button>
+            <button class="btn secondary" onclick="resourceManager.loadGame()">📁 加载游戏</button>
+            <button class="btn secondary" onclick="resourceManager.showHelp()">❓ 帮助</button>
+        </section>
+
+        <!-- 帮助弹窗 -->
+        <div class="popup" id="helpPopup">
+            <div class="popup-content">
+                <h2>🏗️ 游戏说明</h2>
+                
+                <div style="text-align: left; margin-bottom: 20px;">
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎯 游戏目标</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        建设和管理一座繁荣的城市，合理分配资源，发展经济，研究科技，让城市不断发展壮大。
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🏗️ 建筑类型</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>住房：</strong>增加人口容量，提供居住空间<br>
+                        • <strong>农场：</strong>生产食物，维持人口需求<br>
+                        • <strong>矿场：</strong>开采石材，用于建设<br>
+                        • <strong>伐木场：</strong>收集木材，建筑材料<br>
+                        • <strong>市场：</strong>增加金币收入<br>
+                        • <strong>工厂：</strong>消耗资源生产能源
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎮 操作方式</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        1. 选择要建造的建筑类型<br>
+                        2. 点击城市网格中的空地建造<br>
+                        3. 管理资源平衡，确保可持续发展<br>
+                        4. 研究科技提升生产效率
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">💡 策略提示</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • 平衡发展各类建筑<br>
+                        • 优先建造资源生产建筑<br>
+                        • 及时研究科技提升效率<br>
+                        • 关注人口和资源的平衡<br>
+                        • 合理规划城市布局
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🔬 科技系统</h3>
+                    <p style="line-height: 1.6;">
+                        • 研究科技需要消耗金币<br>
+                        • 不同科技提供不同加成<br>
+                        • 科技效果永久生效<br>
+                        • 合理规划研究顺序
+                    </p>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="resourceManager.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 工具提示 -->
+        <div class="tooltip" id="tooltip"></div>
+    </main>
+
+    <script>
+        class ResourceManager {
+            constructor() {
+                this.gameActive = false;
+                this.gamePaused = false;
+                this.selectedBuilding = null;
+                
+                // 资源
+                this.resources = {
+                    gold: 1000,
+                    food: 500,
+                    stone: 300,
+                    wood: 400,
+                    population: 10,
+                    energy: 100
+                };
+                
+                this.resourceRates = {
+                    gold: 0,
+                    food: 0,
+                    stone: 0,
+                    wood: 0,
+                    energy: 0
+                };
+                
+                this.populationCap = 50;
+                
+                // 建筑配置
+                this.buildingTypes = {
+                    house: {
+                        name: '住房',
+                        icon: '🏠',
+                        cost: {gold: 100},
+                        population: 10,
+                        maxLevel: 5
+                    },
+                    farm: {
+                        name: '农场',
+                        icon: '🚜',
+                        cost: {gold: 150, wood: 50},
+                        production: {food: 2},
+                        maxLevel: 3
+                    },
+                    mine: {
+                        name: '矿场',
+                        icon: '⛏️',
+                        cost: {gold: 200, wood: 80},
+                        production: {stone: 1.5},
+                        maxLevel: 3
+                    },
+                    lumber: {
+                        name: '伐木场',
+                        icon: '🪓',
+                        cost: {gold: 120},
+                        production: {wood: 2},
+                        maxLevel: 3
+                    },
+                    market: {
+                        name: '市场',
+                        icon: '🏪',
+                        cost: {gold: 300, stone: 100},
+                        production: {gold: 3},
+                        maxLevel: 4
+                    },
+                    factory: {
+                        name: '工厂',
+                        icon: '🏭',
+                        cost: {gold: 500, stone: 150, wood: 100},
+                        production: {energy: 5},
+                        consumption: {food: 1},
+                        maxLevel: 3
+                    }
+                };
+                
+                // 城市网格
+                this.citySize = {width: 8, height: 6};
+                this.buildings = {};
+                
+                // 科技
+                this.research = {
+                    efficiency: {completed: false, progress: 0, cost: 500, time: 10000},
+                    capacity: {completed: false, progress: 0, cost: 300, time: 8000},
+                    automation: {completed: false, progress: 0, cost: 800, time: 15000}
+                };
+                this.currentResearch = null;
+                
+                // 成就
+                this.achievements = {
+                    first_build: false,
+                    rich_city: false,
+                    big_population: false
+                };
+                
+                this.gameLoop = null;
+                this.lastUpdate = Date.now();
+                this.totalGoldEarned = 0;
+                
+                this.initializeGame();
+            }
+            
+            initializeGame() {
+                this.generateCityGrid();
+                this.updateDisplay();
+                this.updateBuildingButtons();
+                this.loadAchievements();
+            }
+            
+            generateCityGrid() {
+                const grid = document.getElementById('cityGrid');
+                grid.innerHTML = '';
+                
+                for (let y = 0; y < this.citySize.height; y++) {
+                    for (let x = 0; x < this.citySize.width; x++) {
+                        const tile = document.createElement('div');
+                        tile.className = 'city-tile';
+                        tile.dataset.x = x;
+                        tile.dataset.y = y;
+                        tile.addEventListener('click', () => this.handleTileClick(x, y));
+                        grid.appendChild(tile);
+                    }
+                }
+            }
+            
+            selectBuilding(type) {
+                if (!this.gameActive) return;
+                
+                const building = this.buildingTypes[type];
+                if (!this.canAfford(building.cost)) return;
+                
+                this.selectedBuilding = type;
+                this.updateBuildingButtons();
+            }
+            
+            handleTileClick(x, y) {
+                if (!this.gameActive || !this.selectedBuilding) return;
+                
+                const key = `${x},${y}`;
+                if (this.buildings[key]) {
+                    this.upgradeBuilding(x, y);
+                    return;
+                }
+                
+                this.buildBuilding(x, y);
+            }
+            
+            buildBuilding(x, y) {
+                const buildingType = this.buildingTypes[this.selectedBuilding];
+                
+                if (!this.canAfford(buildingType.cost)) return;
+                
+                // 消耗资源
+                Object.keys(buildingType.cost).forEach(resource => {
+                    this.resources[resource] -= buildingType.cost[resource];
+                });
+                
+                // 建造建筑
+                const key = `${x},${y}`;
+                this.buildings[key] = {
+                    type: this.selectedBuilding,
+                    level: 1,
+                    x: x,
+                    y: y
+                };
+                
+                // 更新人口容量
+                if (buildingType.population) {
+                    this.populationCap += buildingType.population;
+                }
+                
+                this.updateTile(x, y);
+                this.calculateProduction();
+                this.updateDisplay();
+                this.updateBuildingButtons();
+                
+                // 检查成就
+                this.checkAchievement('first_build');
+                
+                this.selectedBuilding = null;
+            }
+            
+            upgradeBuilding(x, y) {
+                const key = `${x},${y}`;
+                const building = this.buildings[key];
+                const buildingType = this.buildingTypes[building.type];
+                
+                if (building.level >= buildingType.maxLevel) return;
+                
+                const upgradeCost = this.getUpgradeCost(building.type, building.level);
+                if (!this.canAfford(upgradeCost)) return;
+                
+                // 消耗资源
+                Object.keys(upgradeCost).forEach(resource => {
+                    this.resources[resource] -= upgradeCost[resource];
+                });
+                
+                building.level++;
+                this.updateTile(x, y);
+                this.calculateProduction();
+                this.updateDisplay();
+            }
+            
+            getUpgradeCost(type, level) {
+                const baseCost = this.buildingTypes[type].cost;
+                const multiplier = Math.pow(1.5, level);
+                
+                const cost = {};
+                Object.keys(baseCost).forEach(resource => {
+                    cost[resource] = Math.floor(baseCost[resource] * multiplier);
+                });
+                
+                return cost;
+            }
+            
+            updateTile(x, y) {
+                const tile = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+                const key = `${x},${y}`;
+                const building = this.buildings[key];
+                
+                if (building) {
+                    tile.classList.add('occupied');
+                    tile.innerHTML = `
+                        <div class="building-sprite">${this.buildingTypes[building.type].icon}</div>
+                        <div class="building-level">${building.level}</div>
+                    `;
+                } else {
+                    tile.classList.remove('occupied');
+                    tile.innerHTML = '';
+                }
+            }
+            
+            canAfford(cost) {
+                return Object.keys(cost).every(resource => 
+                    this.resources[resource] >= cost[resource]
+                );
+            }
+            
+            startGame() {
+                this.gameActive = true;
+                this.gamePaused = false;
+                
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('pauseBtn').disabled = false;
+                
+                this.lastUpdate = Date.now();
+                this.startGameLoop();
+            }
+            
+            pauseGame() {
+                this.gamePaused = !this.gamePaused;
+                const pauseBtn = document.getElementById('pauseBtn');
+                
+                if (this.gamePaused) {
+                    pauseBtn.textContent = '▶️ 继续';
+                } else {
+                    pauseBtn.textContent = '⏸️ 暂停';
+                    this.lastUpdate = Date.now();
+                }
+            }
+            
+            startGameLoop() {
+                const loop = () => {
+                    if (this.gameActive) {
+                        if (!this.gamePaused) {
+                            this.update();
+                        }
+                        this.gameLoop = requestAnimationFrame(loop);
+                    }
+                };
+                this.gameLoop = requestAnimationFrame(loop);
+            }
+            
+            update() {
+                const now = Date.now();
+                const deltaTime = now - this.lastUpdate;
+                this.lastUpdate = now;
+                
+                // 更新资源
+                this.updateResources(deltaTime);
+                
+                // 更新研究
+                this.updateResearch(deltaTime);
+                
+                // 检查成就
+                this.checkAchievements();
+                
+                // 更新显示
+                this.updateDisplay();
+            }
+            
+            updateResources(deltaTime) {
+                const seconds = deltaTime / 1000;
+                
+                Object.keys(this.resourceRates).forEach(resource => {
+                    if (this.resourceRates[resource] > 0) {
+                        this.resources[resource] += this.resourceRates[resource] * seconds;
+                        
+                        if (resource === 'gold') {
+                            this.totalGoldEarned += this.resourceRates[resource] * seconds;
+                        }
+                    }
+                });
+                
+                // 限制资源上限
+                const capacity = this.research.capacity.completed ? 1.5 : 1;
+                this.resources.gold = Math.min(this.resources.gold, 10000 * capacity);
+                this.resources.food = Math.min(this.resources.food, 2000 * capacity);
+                this.resources.stone = Math.min(this.resources.stone, 2000 * capacity);
+                this.resources.wood = Math.min(this.resources.wood, 2000 * capacity);
+                this.resources.energy = Math.min(this.resources.energy, 1000 * capacity);
+            }
+            
+            calculateProduction() {
+                // 重置产出率
+                this.resourceRates = {
+                    gold: 0,
+                    food: 0,
+                    stone: 0,
+                    wood: 0,
+                    energy: 0
+                };
+                
+                // 计算建筑产出
+                Object.values(this.buildings).forEach(building => {
+                    const buildingType = this.buildingTypes[building.type];
+                    const efficiency = this.research.efficiency.completed ? 1.2 : 1;
+                    
+                    if (buildingType.production) {
+                        Object.keys(buildingType.production).forEach(resource => {
+                            this.resourceRates[resource] += 
+                                buildingType.production[resource] * building.level * efficiency;
+                        });
+                    }
+                    
+                    if (buildingType.consumption) {
+                        Object.keys(buildingType.consumption).forEach(resource => {
+                            this.resourceRates[resource] -= 
+                                buildingType.consumption[resource] * building.level;
+                        });
+                    }
+                });
+                
+                this.updateProductionDisplay();
+            }
+            
+            updateProductionDisplay() {
+                const display = document.getElementById('productionDisplay');
+                const buildingCounts = {};
+                
+                // 统计建筑数量
+                Object.values(this.buildings).forEach(building => {
+                    if (!buildingCounts[building.type]) {
+                        buildingCounts[building.type] = 0;
+                    }
+                    buildingCounts[building.type]++;
+                });
+                
+                if (Object.keys(buildingCounts).length === 0) {
+                    display.innerHTML = '<div style="text-align: center; opacity: 0.6; padding: 20px;">建造生产建筑后将显示产出信息</div>';
+                    return;
+                }
+                
+                let html = '';
+                Object.keys(buildingCounts).forEach(type => {
+                    const buildingType = this.buildingTypes[type];
+                    const count = buildingCounts[type];
+                    
+                    if (buildingType.production) {
+                        Object.keys(buildingType.production).forEach(resource => {
+                            const rate = this.resourceRates[resource] || 0;
+                            const icon = this.getResourceIcon(resource);
+                            
+                            html += `
+                                <div class="production-item">
+                                    <div class="production-building">
+                                        <span>${buildingType.icon}</span>
+                                        <span>${buildingType.name} x${count}</span>
+                                    </div>
+                                    <div class="production-rate">+${rate.toFixed(1)}${icon}/s</div>
+                                </div>
+                            `;
+                        });
+                    }
+                });
+                
+                display.innerHTML = html;
+            }
+            
+            getResourceIcon(resource) {
+                const icons = {
+                    gold: '🪙',
+                    food: '🌾',
+                    stone: '🪨',
+                    wood: '🪵',
+                    energy: '⚡'
+                };
+                return icons[resource] || '';
+            }
+            
+            startResearch(type) {
+                if (!this.gameActive || this.currentResearch || this.research[type].completed) return;
+                
+                const researchData = this.research[type];
+                if (this.resources.gold < researchData.cost) return;
+                
+                this.resources.gold -= researchData.cost;
+                this.currentResearch = type;
+                this.research[type].progress = 0;
+                
+                this.updateResearchDisplay();
+            }
+            
+            updateResearch(deltaTime) {
+                if (!this.currentResearch) return;
+                
+                const researchData = this.research[this.currentResearch];
+                researchData.progress += deltaTime;
+                
+                if (researchData.progress >= researchData.time) {
+                    researchData.completed = true;
+                    this.currentResearch = null;
+                    this.calculateProduction();
+                }
+                
+                this.updateResearchDisplay();
+            }
+            
+            updateResearchDisplay() {
+                const items = document.querySelectorAll('.research-item');
+                items.forEach((item, index) => {
+                    const types = ['efficiency', 'capacity', 'automation'];
+                    const type = types[index];
+                    const researchData = this.research[type];
+                    
+                    item.classList.remove('completed', 'researching');
+                    
+                    if (researchData.completed) {
+                        item.classList.add('completed');
+                    } else if (this.currentResearch === type) {
+                        item.classList.add('researching');
+                    }
+                });
+            }
+            
+            checkAchievements() {
+                this.checkAchievement('rich_city');
+                this.checkAchievement('big_population');
+            }
+            
+            checkAchievement(id) {
+                if (this.achievements[id]) return;
+                
+                let unlocked = false;
+                
+                switch (id) {
+                    case 'first_build':
+                        unlocked = Object.keys(this.buildings).length > 0;
+                        break;
+                    case 'rich_city':
+                        unlocked = this.totalGoldEarned >= 10000;
+                        break;
+                    case 'big_population':
+                        unlocked = this.populationCap >= 200;
+                        break;
+                }
+                
+                if (unlocked) {
+                    this.achievements[id] = true;
+                    this.unlockAchievement(id);
+                    this.saveAchievements();
+                }
+            }
+            
+            unlockAchievement(id) {
+                const item = document.querySelector(`[data-id="${id}"]`);
+                if (item) {
+                    item.classList.add('unlocked');
+                    item.style.animation = 'achievement-unlock 2s ease';
+                }
+            }
+            
+            updateDisplay() {
+                // 更新资源显示
+                Object.keys(this.resources).forEach(resource => {
+                    const element = document.getElementById(resource);
+                    if (element) {
+                        element.textContent = Math.floor(this.resources[resource]);
+                    }
+                });
+                
+                // 更新资源产出率
+                Object.keys(this.resourceRates).forEach(resource => {
+                    const element = document.getElementById(resource + 'Rate');
+                    if (element && this.resourceRates[resource] !== undefined) {
+                        const rate = this.resourceRates[resource];
+                        element.textContent = `${rate >= 0 ? '+' : ''}${rate.toFixed(1)}/s`;
+                    }
+                });
+                
+                // 更新人口上限
+                document.getElementById('populationCap').textContent = `/${this.populationCap}`;
+            }
+            
+            updateBuildingButtons() {
+                const buttons = document.querySelectorAll('.building-btn');
+                buttons.forEach(button => {
+                    button.classList.remove('affordable', 'disabled');
+                    
+                    const buildingType = button.onclick.toString().match(/selectBuilding\('(\w+)'\)/);
+                    if (buildingType) {
+                        const type = buildingType[1];
+                        const building = this.buildingTypes[type];
+                        
+                        if (this.canAfford(building.cost) && this.gameActive) {
+                            button.classList.add('affordable');
+                        } else {
+                            button.classList.add('disabled');
+                        }
+                    }
+                });
+            }
+            
+            saveGame() {
+                const gameData = {
+                    resources: this.resources,
+                    buildings: this.buildings,
+                    research: this.research,
+                    achievements: this.achievements,
+                    populationCap: this.populationCap,
+                    totalGoldEarned: this.totalGoldEarned
+                };
+                
+                try {
+                    localStorage.setItem('resourceManager_save', JSON.stringify(gameData));
+                    alert('游戏已保存！');
+                } catch (e) {
+                    alert('保存失败！');
+                }
+            }
+            
+            loadGame() {
+                try {
+                    const saved = localStorage.getItem('resourceManager_save');
+                    if (!saved) {
+                        alert('没有找到存档！');
+                        return;
+                    }
+                    
+                    const gameData = JSON.parse(saved);
+                    this.resources = gameData.resources;
+                    this.buildings = gameData.buildings || {};
+                    this.research = gameData.research || {};
+                    this.achievements = gameData.achievements || {};
+                    this.populationCap = gameData.populationCap || 50;
+                    this.totalGoldEarned = gameData.totalGoldEarned || 0;
+                    
+                    // 重新生成城市
+                    Object.keys(this.buildings).forEach(key => {
+                        const building = this.buildings[key];
+                        this.updateTile(building.x, building.y);
+                    });
+                    
+                    this.calculateProduction();
+                    this.updateDisplay();
+                    this.updateAchievementDisplay();
+                    
+                    alert('游戏已加载！');
+                } catch (e) {
+                    alert('加载失败！');
+                }
+            }
+            
+            loadAchievements() {
+                try {
+                    const saved = localStorage.getItem('resourceManager_achievements');
+                    if (saved) {
+                        this.achievements = JSON.parse(saved);
+                        this.updateAchievementDisplay();
+                    }
+                } catch (e) {
+                    console.warn('无法加载成就');
+                }
+            }
+            
+            saveAchievements() {
+                try {
+                    localStorage.setItem('resourceManager_achievements', JSON.stringify(this.achievements));
+                } catch (e) {
+                    console.warn('无法保存成就');
+                }
+            }
+            
+            updateAchievementDisplay() {
+                Object.keys(this.achievements).forEach(id => {
+                    if (this.achievements[id]) {
+                        const item = document.querySelector(`[data-id="${id}"]`);
+                        if (item) {
+                            item.classList.add('unlocked');
+                        }
+                    }
+                });
+            }
+            
+            showHelp() {
+                document.getElementById('helpPopup').classList.add('show');
+            }
+            
+            closeHelp() {
+                document.getElementById('helpPopup').classList.remove('show');
+            }
+        }
+
+        // 全局变量
+        let resourceManager;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            resourceManager = new ResourceManager();
+        });
+
+        // 成就解锁动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes achievement-unlock {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); background: rgba(255, 215, 79, 0.5); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

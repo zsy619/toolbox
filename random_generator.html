@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机字符串生成器 - 在线生成安全随机密码与Golang代码 | 开发者工具</title>
+    <meta name="description" content="免费在线随机字符串生成器，支持自定义字符集、长度和数量，一键复制结果，并提供对应的Golang实现代码。安全可靠，开发者必备工具。">
+    <meta name="keywords" content="随机字符串生成器,密码生成器,随机密码,Golang随机字符串,安全随机数,开发者工具,在线工具">
+    <meta name="author" content="随机字符串生成器">
+    <!-- Open Graph 元数据 -->
+    <meta property="og:title" content="随机字符串生成器 - 在线生成安全随机密码与Golang代码">
+    <meta property="og:description" content="免费在线生成随机字符串，支持自定义字符集、长度和数量，提供Golang代码实现。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://example.com/random-string-generator">
+    <meta property="og:image" content="https://example.com/images/random-string-generator-og.png">
+    <!-- Twitter 卡片 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="随机字符串生成器 - 在线生成安全随机密码与Golang代码">
+    <meta name="twitter:description" content="免费在线生成随机字符串，支持自定义字符集、长度和数量，提供Golang代码实现。">
+    <meta name="twitter:image" content="https://example.com/images/random-string-generator-twitter.png">
+    <!-- 结构化数据 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "随机字符串生成器",
+      "description": "在线生成安全的随机字符串，可自定义字符集、长度和数量，并提供Golang实现代码。",
+      "applicationCategory": "Utility",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0"
+      }
+    }
+    </script>
+    <!-- 图标 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔑</text></svg>">
+    <link href="assets/css/layui.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: linear-gradient(to right, #4776E6, #8E54E9);
+            color: white;
+            padding: 25px;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+
+        .form-group {
+            flex: 1;
+            padding: 0 15px;
+            min-width: 250px;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #555;
+            font-size: 16px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #4776E6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(71, 118, 230, 0.2);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f9f9ff;
+            transition: all 0.2s;
+        }
+
+        .checkbox-item:hover {
+            background: #eef2ff;
+            transform: translateY(-2px);
+        }
+
+        .checkbox-item input {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        .btn-generate {
+            background: linear-gradient(to right, #4776E6, #8E54E9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(71, 118, 230, 0.3);
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(71, 118, 230, 0.4);
+        }
+
+        .btn-generate:active {
+            transform: translateY(1px);
+        }
+
+        .tabs {
+            margin-top: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-header {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #555;
+        }
+
+        .tab-btn.active {
+            background: #4776E6;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: white;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        .result-container {
+            border: 2px dashed #e1e1e1;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f9f9ff;
+            transition: all 0.3s;
+        }
+
+        .result-container:hover {
+            border-color: #8E54E9;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-header h3 {
+            color: #555;
+        }
+
+        .btn-copy {
+            background: #4776E6;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-copy:hover {
+            background: #3a68d2;
+            transform: scale(1.05);
+        }
+
+        .result-content {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-group {
+                flex: 100%;
+            }
+
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .tab-header {
+                flex-direction: column;
+            }
+        }
+
+        .password-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .password-item:hover {
+            background-color: #f0f5ff;
+            padding-left: 10px;
+        }
+
+        .password-item::before {
+            content: "•";
+            color: #4776E6;
+            position: absolute;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            background: #f0f5ff;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4776E6;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(71, 118, 230, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(71, 118, 230, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(71, 118, 230, 0);
+            }
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+
+        .code-keyword {
+            color: #f92672;
+        }
+
+        .code-type {
+            color: #66d9ef;
+        }
+
+        .code-function {
+            color: #a6e22e;
+        }
+
+        .code-string {
+            color: #e6db74;
+        }
+
+        .code-comment {
+            color: #75715e;
+        }
+
+        .code-highlight {
+            background: rgba(249, 38, 114, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .seo-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .seo-section h2 {
+            color: #4776E6;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .seo-section p {
+            margin-bottom: 10px;
+        }
+
+        .seo-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .seo-keyword {
+            background: #eef4ff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-random"></i> 随机字符串生成器</h1>
+            <p>在线生成安全的随机字符串、密码和密钥，支持自定义字符集和长度，并提供对应的Golang实现代码。开发者必备工具，完全免费使用。</p>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-cog"></i> 生成参数设置</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="count"><i class="fas fa-list-ol"></i> 生成数量</label>
+                        <input type="number" id="count" min="1" max="100" value="10">
+                    </div>
+                    <div class="form-group">
+                        <label for="length"><i class="fas fa-ruler"></i> 字符串长度</label>
+                        <input type="number" id="length" min="4" max="64" value="12">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-font"></i> 字符集选择</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="numbers" checked>
+                            <label for="numbers">数字 (0-9)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="lowercase" checked>
+                            <label for="lowercase">小写字母 (a-z)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="uppercase" checked>
+                            <label for="uppercase">大写字母 (A-Z)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="symbols">
+                            <label for="symbols">特殊字符 (!@#$%)</label>
+                        </div>
+                    </div>
+                </div>
+                <button id="generateBtn" class="btn-generate pulse">
+                    <i class="fas fa-bolt"></i> 生成随机字符串
+                </button>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalCount">0</div>
+                        <div class="stat-label">已生成总数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="currentCount">0</div>
+                        <div class="stat-label">本次生成</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="lengthValue">0</div>
+                        <div class="stat-label">字符长度</div>
+                    </div>
+                </div>
+                <div class="tabs">
+                    <div class="tab-header">
+                        <button class="tab-btn active" data-tab="result">生成结果</button>
+                        <button class="tab-btn" data-tab="golang">Golang代码</button>
+                    </div>
+                    <div class="tab-content active" id="result-tab">
+                        <div class="result-container">
+                            <div class="result-header">
+                                <h3><i class="fas fa-lock"></i> 生成的字符串</h3>
+                                <button id="copyBtn" class="btn-copy">
+                                    <i class="fas fa-copy"></i> 复制全部
+                                </button>
+                            </div>
+                            <div class="result-content" id="result">
+                                <div class="password-item">点击上方按钮生成随机字符串</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="golang-tab">
+                        <div class="result-container">
+                            <div class="result-header">
+                                <h3><i class="fab fa-golang"></i> Golang实现代码</h3>
+                                <button id="copyCodeBtn" class="btn-copy">
+                                    <i class="fas fa-copy"></i> 复制代码
+                                </button>
+                            </div>
+                            <div class="code-block" id="golang-code">
+                                <span class="code-keyword">package</span> main<br><br>
+                                <span class="code-keyword">import</span> (<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"crypto/rand"</span><br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"fmt"</span><br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"math/big"</span><br>
+                                )<br><br>
+                                <span class="code-keyword">func</span> <span class="code-function">main</span>() {<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">// 设置生成参数</span><br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;count := <span class="code-highlight">10</span> <span class="code-comment">// 生成数量</span><br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;length := <span class="code-highlight">12</span> <span class="code-comment">// 字符串长度</span><br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;charset := <span class="code-string">"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"</span><br><br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">for</span> i := 0; i < count; i++ {<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fmt.Println(generateRandomString(length, charset))<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                                    }<br><br>
+                                    <span class="code-keyword">func</span> <span class="code-function">generateRandomString</span>(length <span class="code-type">int</span>, charset <span class="code-type">string</span>) <span class="code-type">string</span> {<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;b := make([]<span class="code-type">byte</span>, length)<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">for</span> i := range b {<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b[i] = charset[n.Int64()]<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> string(b)<br>
+                                    }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="seo-section">
+                    <h2>随机字符串生成器 - 安全、高效的在线工具</h2>
+                    <p>随机字符串生成器是一款专为开发者和安全需求用户设计的在线工具，能够快速生成安全可靠的随机字符串、密码和密钥。本工具支持自定义字符集（数字、大小写字母、特殊字符）、字符串长度和生成数量，满足各种场景需求。</p>
+                    <p>作为一款专业的开发者工具，随机字符串生成器不仅提供直观的结果展示和复制功能，还特别为Golang开发者提供了对应的实现代码，帮助开发者快速集成到自己的项目中。</p>
+                    <p>使用场景：</p>
+                    <ul>
+                        <li>生成用户密码和安全令牌</li>
+                        <li>创建API密钥和访问令牌</li>
+                        <li>生成测试数据和唯一标识符</li>
+                        <li>创建加密密钥和初始化向量</li>
+                        <li>生成验证码和一次性密码</li>
+                    </ul>
+                    <div class="seo-keywords">
+                        <div class="seo-keyword">随机密码生成器</div>
+                        <div class="seo-keyword">在线安全工具</div>
+                        <div class="seo-keyword">Golang随机字符串</div>
+                        <div class="seo-keyword">开发者工具</div>
+                        <div class="seo-keyword">API密钥生成</div>
+                        <div class="seo-keyword">安全随机数</div>
+                        <div class="seo-keyword">密码生成工具</div>
+                        <div class="seo-keyword">免费在线工具</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <p>© 2025 随机字符串生成器 | 安全可靠 | 提供Golang代码实现</p>
+            <p>本工具使用安全的随机数生成算法，确保生成的字符串具有高随机性和安全性</p>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var generateBtn = document.getElementById('generateBtn');
+            var copyBtn = document.getElementById('copyBtn');
+            var copyCodeBtn = document.getElementById('copyCodeBtn');
+            var resultDiv = document.getElementById('result');
+            var totalCountElement = document.getElementById('totalCount');
+            var currentCountElement = document.getElementById('currentCount');
+            var lengthValueElement = document.getElementById('lengthValue');
+            var golangCodeElement = document.getElementById('golang-code');
+            var tabBtns = document.querySelectorAll('.tab-btn');
+            var tabContents = document.querySelectorAll('.tab-content');
+
+            var totalGenerated = 0;
+            var currentCharset = '';
+
+            // 标签页切换
+            tabBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var tabId = btn.getAttribute('data-tab');
+
+                    // 更新按钮状态
+                    tabBtns.forEach(function(b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+
+                    // 更新内容显示
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${tabId}-tab`) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // 生成随机字符串
+            function generateRandomString() {
+                const count = parseInt(document.getElementById('count').value) || 10;
+                const length = parseInt(document.getElementById('length').value) || 12;
+
+                // 更新统计信息
+                currentCountElement.textContent = count;
+                lengthValueElement.textContent = length;
+                totalGenerated += count;
+                totalCountElement.textContent = totalGenerated;
+
+                // 获取选中的字符集
+                const charSets = [];
+                if (document.getElementById('numbers').checked) {
+                    charSets.push('0123456789');
+                }
+                if (document.getElementById('lowercase').checked) {
+                    charSets.push('abcdefghijklmnopqrstuvwxyz');
+                }
+                if (document.getElementById('uppercase').checked) {
+                    charSets.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+                }
+                if (document.getElementById('symbols').checked) {
+                    charSets.push('!@#$%^&*()_+-=[]{}|;:,.<>?');
+                }
+
+                // 如果没有选择任何字符集，则使用默认
+                if (charSets.length === 0) {
+                    charSets.push('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
+                }
+
+                currentCharset = charSets.join('');
+                resultDiv.innerHTML = '';
+
+                // 生成指定数量的随机字符串
+                for (let i = 0; i < count; i++) {
+                    let password = '';
+                    for (let j = 0; j < length; j++) {
+                        const randomIndex = Math.floor(Math.random() * currentCharset.length);
+                        password += currentCharset[randomIndex];
+                    }
+
+                    const passwordElement = document.createElement('div');
+                    passwordElement.className = 'password-item';
+                    passwordElement.textContent = password;
+                    resultDiv.appendChild(passwordElement);
+                }
+
+                // 更新Golang代码
+                updateGolangCode(count, length, currentCharset);
+
+                // 添加脉冲动画效果
+                generateBtn.classList.remove('pulse');
+                setTimeout(() => generateBtn.classList.add('pulse'), 10);
+            }
+
+            // 更新Golang代码
+            function updateGolangCode(count, length, charset) {
+                // 转义特殊字符
+                const escapedCharset = charset
+                    .replace(/\\/g, '\\\\')
+                    .replace(/"/g, '\\"');
+
+                const code = `<span class="code-keyword">package</span> main<br><br>
+<span class="code-keyword">import</span> (<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"crypto/rand"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"fmt"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"math/big"</span><br>
+)<br><br>
+<span class="code-keyword">func</span> <span class="code-function">main</span>() {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment">// 设置生成参数</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;count := <span class="code-highlight">${count}</span> <span class="code-comment">// 生成数量</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;length := <span class="code-highlight">${length}</span> <span class="code-comment">// 字符串长度</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;charset := <span class="code-string">"${escapedCharset}"</span><br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">for</span> i := 0; i < count; i++ {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fmt.Println(generateRandomString(length, charset))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+}<br><br>
+<span class="code-keyword">func</span> <span class="code-function">generateRandomString</span>(length <span class="code-type">int</span>, charset <span class="code-type">string</span>) <span class="code-type">string</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;b := make([]<span class="code-type">byte</span>, length)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">for</span> i := range b {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b[i] = charset[n.Int64()]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> string(b)<br>
+}`;
+
+                golangCodeElement.innerHTML = code;
+            }
+
+            // 绑定生成按钮事件
+            generateBtn.addEventListener('click', generateRandomString);
+
+            // 复制功能
+            copyBtn.addEventListener('click', function () {
+                const passwords = Array.from(resultDiv.querySelectorAll('.password-item'))
+                    .map(el => el.textContent)
+                    .join('\n');
+
+                if (passwords) {
+                    navigator.clipboard.writeText(passwords)
+                        .then(() => {
+                            // 显示复制成功提示
+                            copyBtn.innerHTML = '<i class="fas fa-check"></i> 已复制!';
+                            copyBtn.style.background = '#4CAF50';
+
+                            setTimeout(() => {
+                                copyBtn.innerHTML = '<i class="fas fa-copy"></i> 复制全部';
+                                copyBtn.style.background = '#4776E6';
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('复制失败:', err);
+                        });
+                }
+            });
+
+            // 复制代码功能
+            copyCodeBtn.addEventListener('click', function () {
+                const codeText = golangCodeElement.innerText;
+
+                if (codeText) {
+                    navigator.clipboard.writeText(codeText)
+                        .then(() => {
+                            // 显示复制成功提示
+                            copyCodeBtn.innerHTML = '<i class="fas fa-check"></i> 已复制!';
+                            copyCodeBtn.style.background = '#4CAF50';
+
+                            setTimeout(() => {
+                                copyCodeBtn.innerHTML = '<i class="fas fa-copy"></i> 复制代码';
+                                copyCodeBtn.style.background = '#4776E6';
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('复制失败:', err);
+                        });
+                }
+            });
+
+            // 初始生成一些随机字符串
+            generateRandomString();
+        });
+    </script>
+</body>
+
+</html>

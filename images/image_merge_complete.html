@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专业级在线拼图工具</title>
+    <link rel="stylesheet" href="../assets/css/layui.min.css">
+    <link rel="stylesheet" href="../assets/css/fontawesome.min.css">
+    <style>
+        /* CSS保持不变，为了节省空间这里省略了CSS内容 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1e9fff;
+            --primary-hover: #0d8bf2;
+            --secondary-color: #5fb878;
+            --light-bg: #f8f8f8;
+            --dark-text: #333;
+            --light-text: #777;
+            --border-color: #e6e6e6;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --grid-bg: #f5f7fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7f1 100%);
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            color: var(--dark-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #0081ff 100%);
+            color: white;
+            padding: 25px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .logo i {
+            font-size: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .merge-controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .merge-controls button {
+            margin: 0 10px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            background: #fafafa;
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(30, 159, 255, 0.05);
+        }
+
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .image-item {
+            position: relative;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .image-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            color: #ff4757;
+        }
+
+        .settings-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .setting-group {
+            margin-bottom: 15px;
+        }
+
+        .setting-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .setting-group input,
+        .setting-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .result-area {
+            text-align: center;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result-area img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-puzzle-piece"></i>
+                <div>
+                    <h1>专业级在线拼图工具</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="upload-area" id="uploadArea">
+            <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #ccc;"></i>
+            <h3>拖拽图片到这里或点击上传</h3>
+            <p>支持 JPG、PNG、WebP 格式</p>
+            <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+            <button class="layui-btn" onclick="document.getElementById('fileInput').click()">选择图片</button>
+        </div>
+
+        <div class="image-preview" id="imagePreview"></div>
+
+        <div class="settings-panel">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div class="setting-group">
+                    <label>输出宽度</label>
+                    <input type="number" id="outputWidth" value="1200" min="100" max="3000">
+                </div>
+                <div class="setting-group">
+                    <label>输出高度</label>
+                    <input type="number" id="outputHeight" value="800" min="100" max="3000">
+                </div>
+                <div class="setting-group">
+                    <label>图片间距</label>
+                    <input type="range" id="spacing" min="0" max="50" value="10">
+                    <span id="spacingValue">10px</span>
+                </div>
+                <div class="setting-group">
+                    <label>图片质量</label>
+                    <input type="range" id="quality" min="0.1" max="1" step="0.1" value="0.9">
+                    <span id="qualityValue">90%</span>
+                </div>
+                <div class="setting-group">
+                    <label>背景颜色</label>
+                    <input type="color" id="bgColor" value="#ffffff">
+                </div>
+                <div class="setting-group">
+                    <label>输出格式</label>
+                    <select id="outputFormat">
+                        <option value="image/jpeg">JPEG</option>
+                        <option value="image/png">PNG</option>
+                        <option value="image/webp">WebP</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="merge-controls">
+            <button class="layui-btn layui-btn-lg" id="mergeBtn">
+                <i class="fas fa-magic"></i> 合并图片
+            </button>
+            <button class="layui-btn layui-btn-primary" id="clearBtn">
+                <i class="fas fa-trash"></i> 清空
+            </button>
+        </div>
+
+        <div class="result-area" id="resultArea">
+            <h3>合并结果</h3>
+            <img id="resultImage" alt="合并结果">
+            <div style="margin-top: 15px;">
+                <button class="layui-btn" id="downloadBtn">
+                    <i class="fas fa-download"></i> 下载图片
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/layui.min.js"></script>
+    <script>
+        let uploadedImages = [];
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            initEventListeners();
+            updateSliderValues();
+        });
+
+        function initEventListeners() {
+            // 文件选择
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+            // 拖拽上传
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+
+            // 合并按钮
+            document.getElementById('mergeBtn').addEventListener('click', mergeImages);
+
+            // 清空按钮
+            document.getElementById('clearBtn').addEventListener('click', clearImages);
+
+            // 下载按钮
+            document.getElementById('downloadBtn').addEventListener('click', downloadResult);
+
+            // 滑块更新
+            document.getElementById('spacing').addEventListener('input', updateSliderValues);
+            document.getElementById('quality').addEventListener('input', updateSliderValues);
+        }
+
+        function updateSliderValues() {
+            const spacing = document.getElementById('spacing').value;
+            const quality = document.getElementById('quality').value;
+            document.getElementById('spacingValue').textContent = spacing + 'px';
+            document.getElementById('qualityValue').textContent = Math.round(quality * 100) + '%';
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            processFiles(files);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            processFiles(files);
+        }
+
+        function processFiles(files) {
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.onload = function () {
+                            uploadedImages.push({
+                                src: e.target.result,
+                                width: img.width,
+                                height: img.height,
+                                file: file
+                            });
+                            updateImagePreview();
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function updateImagePreview() {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+
+            uploadedImages.forEach((imageData, index) => {
+                const div = document.createElement('div');
+                div.className = 'image-item';
+                div.innerHTML = `
+                    <img src="${imageData.src}" alt="图片 ${index + 1}">
+                    <button class="remove-btn" onclick="removeImage(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                preview.appendChild(div);
+            });
+        }
+
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            updateImagePreview();
+        }
+
+        function clearImages() {
+            uploadedImages = [];
+            updateImagePreview();
+            document.getElementById('resultArea').style.display = 'none';
+        }
+
+        async function mergeImages() {
+            if (uploadedImages.length === 0) {
+                layui.layer.msg('请先上传图片', { icon: 2 });
+                return;
+            }
+
+            const loadingIndex = layui.layer.msg('正在合并图片...', { icon: 16, time: 0 });
+
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // 获取设置
+                const outputWidth = parseInt(document.getElementById('outputWidth').value);
+                const outputHeight = parseInt(document.getElementById('outputHeight').value);
+                const spacing = parseInt(document.getElementById('spacing').value);
+                const bgColor = document.getElementById('bgColor').value;
+                const quality = parseFloat(document.getElementById('quality').value);
+                const format = document.getElementById('outputFormat').value;
+
+                canvas.width = outputWidth;
+                canvas.height = outputHeight;
+
+                // 填充背景色
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // 计算网格布局
+                const cols = Math.ceil(Math.sqrt(uploadedImages.length));
+                const rows = Math.ceil(uploadedImages.length / cols);
+
+                const cellWidth = (outputWidth - spacing * (cols + 1)) / cols;
+                const cellHeight = (outputHeight - spacing * (rows + 1)) / rows;
+
+                // 加载并绘制图片
+                const imagePromises = uploadedImages.map((imageData, index) => {
+                    return new Promise((resolve) => {
+                        const img = new Image();
+                        img.onload = function () {
+                            const row = Math.floor(index / cols);
+                            const col = index % cols;
+
+                            const x = spacing + col * (cellWidth + spacing);
+                            const y = spacing + row * (cellHeight + spacing);
+
+                            // 计算图片缩放比例以保持宽高比
+                            const scaleX = cellWidth / img.width;
+                            const scaleY = cellHeight / img.height;
+                            const scale = Math.min(scaleX, scaleY);
+
+                            const scaledWidth = img.width * scale;
+                            const scaledHeight = img.height * scale;
+
+                            const drawX = x + (cellWidth - scaledWidth) / 2;
+                            const drawY = y + (cellHeight - scaledHeight) / 2;
+
+                            ctx.drawImage(img, drawX, drawY, scaledWidth, scaledHeight);
+                            resolve();
+                        };
+                        img.src = imageData.src;
+                    });
+                });
+
+                await Promise.all(imagePromises);
+
+                // 生成结果
+                const dataURL = canvas.toDataURL(format, quality);
+                document.getElementById('resultImage').src = dataURL;
+                document.getElementById('resultArea').style.display = 'block';
+
+                // 保存结果用于下载
+                window.mergedImageData = dataURL;
+
+                layui.layer.close(loadingIndex);
+                layui.layer.msg('合并完成！', { icon: 1 });
+
+                // 滚动到结果区域
+                document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                layui.layer.close(loadingIndex);
+                layui.layer.msg('合并失败：' + error.message, { icon: 2 });
+            }
+        }
+
+        function downloadResult() {
+            if (!window.mergedImageData) {
+                layui.layer.msg('请先合并图片', { icon: 2 });
+                return;
+            }
+
+            const link = document.createElement('a');
+            const format = document.getElementById('outputFormat').value;
+            const extension = format.split('/')[1];
+            link.download = `merged-image-${Date.now()}.${extension}`;
+            link.href = window.mergedImageData;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            layui.layer.msg('下载已开始', { icon: 1 });
+        }
+    </script>
+</body>
+
+</html>

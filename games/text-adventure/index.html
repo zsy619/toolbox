@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字冒险游戏 - 在线免费玩互动故事探险游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线文字冒险游戏，互动故事探险，多结局剧情，选择决定命运，扁平化设计界面，体验经典文字MUD游戏！">
+    <meta name="keywords" content="文字冒险,文字游戏,互动小说,MUD游戏,角色扮演,多结局,在线游戏,免费游戏,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#3F51B5">
+    
+    <link rel="stylesheet" href="css/text-adventure.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>📖 文字冒险</h1>
+            <div class="game-subtitle">选择决定命运的互动故事</div>
+        </header>
+
+        <section class="story-selector" id="storySelector">
+            <h2>🌟 选择你的冒险</h2>
+            <div class="story-cards">
+                <div class="story-card" data-story="dragon">
+                    <div class="story-icon">🐉</div>
+                    <div class="story-info">
+                        <h3>龙与勇士</h3>
+                        <p>踏上拯救公主的英雄之旅，面对巨龙的挑战</p>
+                        <div class="story-stats">
+                            <span>🎯 难度: 中等</span>
+                            <span>⏱️ 时长: 15分钟</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="story-card" data-story="mystery">
+                    <div class="story-icon">🔍</div>
+                    <div class="story-info">
+                        <h3>神秘侦探</h3>
+                        <p>化身名侦探，调查古堡中的离奇谋杀案</p>
+                        <div class="story-stats">
+                            <span>🎯 难度: 困难</span>
+                            <span>⏱️ 时长: 20分钟</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="story-card" data-story="space">
+                    <div class="story-icon">🚀</div>
+                    <div class="story-info">
+                        <h3>太空漂流</h3>
+                        <p>在外太空中求生，寻找回家的路</p>
+                        <div class="story-stats">
+                            <span>🎯 难度: 简单</span>
+                            <span>⏱️ 时长: 10分钟</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="game-interface" id="gameInterface" style="display: none;">
+            <div class="game-layout">
+                <div class="story-panel">
+                    <div class="location-header">
+                        <div class="location-name" id="locationName">开始</div>
+                        <div class="story-progress">
+                            <span id="chapterInfo">第1章</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="story-content">
+                        <div class="story-text" id="storyText">
+                            欢迎来到文字冒险的世界...
+                        </div>
+                        
+                        <div class="story-image" id="storyImage">
+                            <div class="ascii-art" id="asciiArt">
+                                <pre>
+    ∩───∩
+   (  ◕   ◕ )
+    ∪───∪
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="interaction-panel">
+                    <div class="player-status">
+                        <h3>📊 状态</h3>
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <span class="status-label">生命值</span>
+                                <div class="status-bar">
+                                    <div class="bar-fill health" id="healthBar"></div>
+                                    <span class="bar-text" id="healthText">100/100</span>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">体力值</span>
+                                <div class="status-bar">
+                                    <div class="bar-fill energy" id="energyBar"></div>
+                                    <span class="bar-text" id="energyText">100/100</span>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">金币</span>
+                                <div class="status-value" id="goldValue">0</div>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">经验</span>
+                                <div class="status-value" id="expValue">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="inventory-panel">
+                        <h3>🎒 物品栏</h3>
+                        <div class="inventory-grid" id="inventoryGrid">
+                            <div class="inventory-slot empty">
+                                <span>空</span>
+                            </div>
+                            <div class="inventory-slot empty">
+                                <span>空</span>
+                            </div>
+                            <div class="inventory-slot empty">
+                                <span>空</span>
+                            </div>
+                            <div class="inventory-slot empty">
+                                <span>空</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="choices-panel">
+                        <h3>🎯 选择行动</h3>
+                        <div class="choices-container" id="choicesContainer">
+                            <!-- 选择项将通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-controls">
+                <button class="btn secondary" onclick="textAdventure.showMenu()">📋 菜单</button>
+                <button class="btn secondary" onclick="textAdventure.saveGame()">💾 保存</button>
+                <button class="btn secondary" onclick="textAdventure.loadGame()">📂 读取</button>
+                <button class="btn secondary" onclick="textAdventure.showHelp()">❓ 帮助</button>
+            </div>
+        </section>
+
+        <!-- 游戏结束弹窗 -->
+        <div class="ending-popup" id="endingPopup">
+            <div class="popup-content">
+                <h2 id="endingTitle">🎉 冒险结束</h2>
+                <div class="ending-content">
+                    <div class="ending-image" id="endingImage">
+                        <div class="ascii-art" id="endingAscii"></div>
+                    </div>
+                    <div class="ending-text" id="endingText">
+                        恭喜完成冒险！
+                    </div>
+                    <div class="ending-stats">
+                        <div class="final-stats" id="finalStats">
+                            <div class="stat-row">
+                                <span>冒险时长:</span>
+                                <span id="adventureTime">00:00</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>选择次数:</span>
+                                <span id="choiceCount">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>收集物品:</span>
+                                <span id="itemCount">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>结局类型:</span>
+                                <span id="endingType">完美结局</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="textAdventure.restartStory()">🔄 重新开始</button>
+                    <button class="btn" onclick="textAdventure.selectNewStory()">📚 选择新故事</button>
+                    <button class="btn secondary" onclick="textAdventure.closeEnding()">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏菜单弹窗 -->
+        <div class="menu-popup" id="menuPopup">
+            <div class="popup-content">
+                <h2>📋 游戏菜单</h2>
+                <div class="menu-options">
+                    <button class="menu-btn" onclick="textAdventure.closeMenu()">
+                        <span>▶️</span>
+                        <div>继续游戏</div>
+                    </button>
+                    <button class="menu-btn" onclick="textAdventure.restartStory()">
+                        <span>🔄</span>
+                        <div>重新开始</div>
+                    </button>
+                    <button class="menu-btn" onclick="textAdventure.selectNewStory()">
+                        <span>📚</span>
+                        <div>选择故事</div>
+                    </button>
+                    <button class="menu-btn" onclick="textAdventure.showSettings()">
+                        <span>⚙️</span>
+                        <div>设置</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帮助弹窗 -->
+        <div class="help-popup" id="helpPopup">
+            <div class="popup-content help-content">
+                <h2>📖 游戏说明</h2>
+                
+                <div class="help-section">
+                    <h3>🎯 游戏目标</h3>
+                    <p>通过阅读故事文本并做出选择，推进剧情发展，体验不同的冒险结局。</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🎮 游戏玩法</h3>
+                    <ul>
+                        <li>仔细阅读故事描述和场景设定</li>
+                        <li>根据情况选择合适的行动选项</li>
+                        <li>管理角色的生命值、体力和物品</li>
+                        <li>收集物品和金币来帮助冒险</li>
+                        <li>不同的选择将导致不同的结局</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>📊 状态说明</h3>
+                    <ul>
+                        <li><strong>生命值：</strong>角色的健康状态，为0时游戏结束</li>
+                        <li><strong>体力值：</strong>影响某些行动的成功率</li>
+                        <li><strong>金币：</strong>可用于购买物品或贿赂</li>
+                        <li><strong>经验：</strong>反映冒险的丰富程度</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>💡 游戏技巧</h3>
+                    <ul>
+                        <li>谨慎选择，某些决定不可逆转</li>
+                        <li>合理使用物品，关键时刻很重要</li>
+                        <li>注意观察环境描述中的线索</li>
+                        <li>尝试不同选择探索多种结局</li>
+                    </ul>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="textAdventure.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/text-adventure.js"></script>
+</body>
+</html>

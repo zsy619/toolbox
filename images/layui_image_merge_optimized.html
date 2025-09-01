@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专业级图片拼图工具 - 优化版</title>
+    <link rel="stylesheet" href="../assets/css/layui.min.css">
+    <link rel="stylesheet" href="../assets/css/fontawesome.min.css">
+    <style>
+        :root {
+            --primary: #1890ff;
+            --primary-light: #40a9ff;
+            --primary-dark: #096dd9;
+            --success: #52c41a;
+            --warning: #faad14;
+            --error: #ff4d4f;
+            --text-primary: #262626;
+            --text-secondary: #595959;
+            --text-disabled: #bfbfbf;
+            --border: #d9d9d9;
+            --border-light: #f0f0f0;
+            --bg-white: #ffffff;
+            --bg-light: #fafafa;
+            --bg-gray: #f5f5f5;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-light);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* 扁平化头部 */
+        .header {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .logo i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-flat {
+            border: 1px solid var(--border);
+            background: var(--bg-white);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-flat:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-light);
+            color: white;
+        }
+
+        /* 主容器 */
+        .main-container {
+            max-width: 1400px;
+            margin: 24px auto;
+            padding: 0 24px;
+        }
+
+        .content-wrapper {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            display: flex;
+            min-height: calc(100vh - 140px);
+        }
+
+        /* 左侧布局面板 - 扁平化 */
+        .layout-panel {
+            width: 320px;
+            background: var(--bg-gray);
+            border-right: 1px solid var(--border-light);
+            padding: 24px 16px;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title i {
+            color: var(--primary);
+        }
+
+        .layout-category {
+            margin-bottom: 20px;
+        }
+
+        .category-header {
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .category-header:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .category-title i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .category-arrow {
+            color: var(--text-disabled);
+            font-size: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .category-header.expanded .category-arrow {
+            transform: rotate(90deg);
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 0 4px;
+        }
+
+        .layout-item {
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 12px 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .layout-item:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .layout-item.active {
+            border-color: var(--primary);
+            background: rgba(24, 144, 255, 0.04);
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+        }
+
+        .layout-preview {
+            height: 60px;
+            margin-bottom: 8px;
+            display: grid;
+            gap: 1px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .layout-cell {
+            background: var(--primary);
+            opacity: 0.8;
+        }
+
+        .layout-name {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* 中间预览区域 - 扁平化 */
+        .preview-panel {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-white);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .preview-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .image-counter {
+            background: var(--primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .preview-container {
+            flex: 1;
+            background: var(--bg-light);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 400px;
+            transition: all 0.2s ease;
+        }
+
+        .preview-container.drag-over {
+            border-color: var(--primary);
+            background: rgba(24, 144, 255, 0.04);
+        }
+
+        .preview-grid {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            gap: 12px;
+        }
+
+        .grid-cell {
+            position: relative;
+            background: var(--bg-white);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 120px;
+        }
+
+        .grid-cell:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .grid-cell.has-image {
+            border-style: solid;
+            border-color: var(--success);
+        }
+
+        .grid-cell img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+        }
+
+        .upload-hint {
+            text-align: center;
+            color: var(--text-disabled);
+            padding: 20px;
+        }
+
+        .upload-hint i {
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: block;
+            color: var(--text-disabled);
+        }
+
+        /* 图片操作工具栏 */
+        .image-tools {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .grid-cell:hover .image-tools {
+            opacity: 1;
+        }
+
+        .tool-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-secondary);
+            backdrop-filter: blur(4px);
+        }
+
+        .tool-btn:hover {
+            background: var(--bg-white);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tool-btn.danger {
+            color: var(--error);
+        }
+
+        .tool-btn.danger:hover {
+            background: var(--error);
+            color: white;
+        }
+
+        .cell-index {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* 右侧属性面板 - 扁平化 */
+        .properties-panel {
+            width: 320px;
+            background: var(--bg-gray);
+            border-left: 1px solid var(--border-light);
+            padding: 24px 16px;
+            overflow-y: auto;
+        }
+
+        .property-section {
+            background: var(--bg-white);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-light);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .form-item {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: var(--bg-white);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+            outline: none;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider-value {
+            min-width: 60px;
+            text-align: center;
+            background: var(--bg-light);
+            padding: 6px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+        }
+
+        .ratio-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .ratio-btn {
+            padding: 8px 4px;
+            border: 1px solid var(--border);
+            background: var(--bg-white);
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .ratio-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .ratio-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* 底部操作按钮 */
+        .bottom-actions {
+            padding: 20px 24px;
+            background: var(--bg-white);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .btn-large {
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: var(--radius-md);
+            min-width: 120px;
+        }
+
+        /* 全屏预览模态框 */
+        .fullscreen-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .fullscreen-content {
+            position: relative;
+            max-width: 95%;
+            max-height: 95%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .fullscreen-toolbar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .fullscreen-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .fullscreen-btn:hover {
+            background: var(--bg-white);
+            transform: scale(1.05);
+        }
+
+        .fullscreen-image {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.3s ease;
+        }
+
+        .fullscreen-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px 20px;
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            color: var(--text-primary);
+            backdrop-filter: blur(8px);
+        }
+
+        /* 加载动画 */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            border-radius: var(--radius-md);
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-light);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 预设布局样式 */
+        .layout-2-1 { grid-template-columns: 1fr 1fr; }
+        .layout-2-2 { grid-template-rows: 1fr 1fr; }
+        .layout-3-1 { grid-template-columns: repeat(3, 1fr); }
+        .layout-3-2 { grid-template-rows: repeat(3, 1fr); }
+        .layout-3-3 { grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
+        .layout-4-1 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .layout-4-2 { grid-template-columns: repeat(4, 1fr); }
+        .layout-4-3 { grid-template-rows: repeat(4, 1fr); }
+        .layout-5-1 { grid-template-columns: repeat(5, 1fr); }
+        .layout-5-2 { grid-template-rows: repeat(5, 1fr); }
+        .layout-5-3 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .layout-6-1 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .layout-7-1 { grid-template-columns: repeat(7, 1fr); }
+        .layout-7-2 { grid-template-rows: repeat(7, 1fr); }
+        .layout-7-3 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .layout-8-1 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .layout-8-2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); }
+        .layout-8-3 { grid-template-columns: repeat(8, 1fr); }
+        .layout-9-1 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .layout-10-1 { grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .layout-10-2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(5, 1fr); }
+        .layout-10-3 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .layout-11-1 { grid-template-columns: repeat(11, 1fr); }
+        .layout-11-2 { grid-template-rows: repeat(11, 1fr); }
+        .layout-11-3 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .layout-12-1 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .layout-13-1 { grid-template-columns: repeat(13, 1fr); }
+        .layout-13-2 { grid-template-rows: repeat(13, 1fr); }
+        .layout-13-3 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); }
+        .layout-14-1 { grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .layout-14-2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(7, 1fr); }
+        .layout-14-3 { grid-template-columns: repeat(14, 1fr); }
+        .layout-15-1 { grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            
+            .layout-panel,
+            .properties-panel {
+                width: 100%;
+                max-height: 300px;
+            }
+            
+            .layout-panel {
+                border-right: none;
+                border-bottom: 1px solid var(--border-light);
+            }
+            
+            .properties-panel {
+                border-left: none;
+                border-top: 1px solid var(--border-light);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .layout-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .main-container {
+                padding: 0 16px;
+            }
+            
+            .ratio-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部 -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-puzzle-piece"></i>
+                专业级图片拼图工具
+            </div>
+            <div class="header-actions">
+                <button class="btn-flat">
+                    <i class="fas fa-question-circle"></i> 帮助
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <div class="content-wrapper">
+            <!-- 左侧布局选择 -->
+            <div class="layout-panel">
+                <div class="panel-title">
+                    <i class="fas fa-th"></i> 拼图布局
+                </div>
+                
+                <!-- 2图布局 -->
+                <div class="layout-category">
+                    <div class="category-header expanded" data-target="layout-2">
+                        <div class="category-title">
+                            <i class="fas fa-images"></i> 2图布局
+                        </div>
+                        <i class="fas fa-chevron-right category-arrow"></i>
+                    </div>
+                    <div class="layout-content" id="layout-2">
+                        <div class="layout-grid">
+                            <div class="layout-item active" data-layout="2-1" data-count="2">
+                                <div class="layout-preview layout-2-1">
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                </div>
+                                <div class="layout-name">横向排列</div>
+                            </div>
+                            <div class="layout-item" data-layout="2-2" data-count="2">
+                                <div class="layout-preview layout-2-2">
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                </div>
+                                <div class="layout-name">纵向排列</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3图布局 -->
+                <div class="layout-category">
+                    <div class="category-header expanded" data-target="layout-3">
+                        <div class="category-title">
+                            <i class="fas fa-images"></i> 3图布局
+                        </div>
+                        <i class="fas fa-chevron-right category-arrow"></i>
+                    </div>
+                    <div class="layout-content" id="layout-3">
+                        <div class="layout-grid">
+                            <div class="layout-item" data-layout="3-1" data-count="3">
+                                <div class="layout-preview layout-3-1">
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                </div>
+                                <div class="layout-name">横向排列</div>
+                            </div>
+                            <div class="layout-item" data-layout="3-2" data-count="3">
+                                <div class="layout-preview layout-3-2">
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                </div>
+                                <div class="layout-name">纵向排列</div>
+                            </div>
+                            <div class="layout-item" data-layout="3-3" data-count="3">
+                                <div class="layout-preview layout-3-3">
+                                    <div class="layout-cell" style="grid-row: span 2;"></div>
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                </div>
+                                <div class="layout-name">左大右小</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4图布局 -->
+                <div class="layout-category">
+                    <div class="category-header expanded" data-target="layout-4">
+                        <div class="category-title">
+                            <i class="fas fa-images"></i> 4图布局
+                        </div>
+                        <i class="fas fa-chevron-right category-arrow"></i>
+                    </div>
+                    <div class="layout-content" id="layout-4">
+                        <div class="layout-grid">
+                            <div class="layout-item" data-layout="4-1" data-count="4">
+                                <div class="layout-preview layout-4-1">
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                </div>
+                                <div class="layout-name">2x2网格</div>
+                            </div>
+                            <div class="layout-item" data-layout="4-2" data-count="4">
+                                <div class="layout-preview layout-4-2">
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                </div>
+                                <div class="layout-name">横向排列</div>
+                            </div>
+                            <div class="layout-item" data-layout="4-3" data-count="4">
+                                <div class="layout-preview layout-4-3">
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                    <div class="layout-cell"></div>
+                                </div>
+                                <div class="layout-name">纵向排列</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 其他布局可以继续添加... -->
+            </div>
+
+            <!-- 中间预览区域 -->
+            <div class="preview-panel">
+                <div class="preview-header">
+                    <div class="preview-title">
+                        <i class="fas fa-eye"></i> 拼图预览
+                    </div>
+                    <div class="image-counter">
+                        已选择 <span id="imageCount">0</span> 张图片
+                    </div>
+                </div>
+                
+                <div class="preview-container" id="previewContainer">
+                    <div class="preview-grid layout-2-1" id="previewGrid">
+                        <div class="grid-cell" data-index="0">
+                            <div class="upload-hint">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div>点击上传图片</div>
+                                <div style="font-size: 12px; margin-top: 4px;">或拖拽图片到此处</div>
+                            </div>
+                            <div class="cell-index">1</div>
+                        </div>
+                        <div class="grid-cell" data-index="1">
+                            <div class="upload-hint">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div>点击上传图片</div>
+                                <div style="font-size: 12px; margin-top: 4px;">或拖拽图片到此处</div>
+                            </div>
+                            <div class="cell-index">2</div>
+                        </div>
+                    </div>
+                    
+                    <div class="loading-overlay" id="loadingOverlay">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+
+                <div class="bottom-actions">
+                    <button class="btn-flat btn-large" id="resetBtn">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
+                    <button class="btn-primary btn-large" id="mergeBtn">
+                        <i class="fas fa-magic"></i> 开始合并
+                    </button>
+                    <button class="btn-flat btn-large" id="downloadBtn" style="display: none;">
+                        <i class="fas fa-download"></i> 下载图片
+                    </button>
+                </div>
+            </div>
+
+            <!-- 右侧属性设置 -->
+            <div class="properties-panel">
+                <!-- 画布设置 -->
+                <div class="property-section">
+                    <div class="section-title">
+                        <i class="fas fa-cog"></i> 画布设置
+                    </div>
+                    
+                    <div class="form-item">
+                        <label class="form-label">输出尺寸</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="number" class="form-input" id="canvasWidth" value="1200" placeholder="宽度">
+                            <span style="color: var(--text-disabled);">×</span>
+                            <input type="number" class="form-input" id="canvasHeight" value="800" placeholder="高度">
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">宽高比例</label>
+                        <div class="ratio-buttons">
+                            <button class="ratio-btn active" data-ratio="16:9">16:9</button>
+                            <button class="ratio-btn" data-ratio="4:3">4:3</button>
+                            <button class="ratio-btn" data-ratio="1:1">1:1</button>
+                            <button class="ratio-btn" data-ratio="9:16">9:16</button>
+                            <button class="ratio-btn" data-ratio="3:4">3:4</button>
+                            <button class="ratio-btn" data-ratio="free">自由</button>
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">背景颜色</label>
+                        <input type="color" class="form-input" id="bgColor" value="#ffffff">
+                    </div>
+                </div>
+
+                <!-- 间距设置 -->
+                <div class="property-section">
+                    <div class="section-title">
+                        <i class="fas fa-arrows-alt"></i> 间距设置
+                    </div>
+                    
+                    <div class="form-item">
+                        <label class="form-label">图片间距</label>
+                        <div class="slider-group">
+                            <input type="range" class="form-input" id="imageSpacing" min="0" max="50" value="10" style="flex: 1;">
+                            <span class="slider-value" id="spacingValue">10px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 导出设置 -->
+                <div class="property-section">
+                    <div class="section-title">
+                        <i class="fas fa-download"></i> 导出设置
+                    </div>
+                    
+                    <div class="form-item">
+                        <label class="form-label">图片格式</label>
+                        <select class="form-input" id="outputFormat">
+                            <option value="image/jpeg">JPEG (高压缩)</option>
+                            <option value="image/png">PNG (支持透明)</option>
+                            <option value="image/webp">WebP (高质量)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">图片质量</label>
+                        <div class="slider-group">
+                            <input type="range" class="form-input" id="imageQuality" min="0.1" max="1" step="0.1" value="0.9" style="flex: 1;">
+                            <span class="slider-value" id="qualityValue">90%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全屏预览模态框 -->
+    <div class="fullscreen-modal" id="fullscreenModal">
+        <div class="fullscreen-content">
+            <div class="fullscreen-toolbar">
+                <button class="fullscreen-btn" id="zoomInBtn" title="放大">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button class="fullscreen-btn" id="zoomOutBtn" title="缩小">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <button class="fullscreen-btn" id="resetZoomBtn" title="重置">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </button>
+                <button class="fullscreen-btn" id="downloadFullBtn" title="下载">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="fullscreen-btn" id="closeFullBtn" title="关闭">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <img id="fullscreenImage" class="fullscreen-image" alt="合并结果">
+            <div class="fullscreen-info" id="fullscreenInfo">
+                点击工具栏进行缩放操作
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+
+    <script src="../assets/js/layui.min.js"></script>
+    <script>
+        // 应用程序状态
+        let currentLayout = '2-1';
+        let currentCount = 2;
+        let uploadedImages = [];
+        let mergedImageData = null;
+        let zoomLevel = 1;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            initEventListeners();
+            updateSliderValues();
+            updatePreviewGrid();
+            // 默认展开所有布局
+            expandAllLayouts();
+        }
+
+        function initEventListeners() {
+            // 布局分类折叠
+            document.querySelectorAll('.category-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    toggleCategory(this);
+                });
+            });
+
+            // 布局选择
+            document.querySelectorAll('.layout-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    selectLayout(this);
+                });
+            });
+
+            // 比例按钮
+            document.querySelectorAll('.ratio-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    selectRatio(this);
+                });
+            });
+
+            // 滑块变化
+            document.getElementById('imageSpacing').addEventListener('input', updateSliderValues);
+            document.getElementById('imageQuality').addEventListener('input', updateSliderValues);
+
+            // 文件选择
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+            // 按钮事件
+            document.getElementById('mergeBtn').addEventListener('click', mergeImages);
+            document.getElementById('resetBtn').addEventListener('click', resetAll);
+            document.getElementById('downloadBtn').addEventListener('click', downloadImage);
+
+            // 全屏预览事件
+            document.getElementById('zoomInBtn').addEventListener('click', () => zoomImage(1.2));
+            document.getElementById('zoomOutBtn').addEventListener('click', () => zoomImage(0.8));
+            document.getElementById('resetZoomBtn').addEventListener('click', resetZoom);
+            document.getElementById('downloadFullBtn').addEventListener('click', downloadImage);
+            document.getElementById('closeFullBtn').addEventListener('click', closeFullscreen);
+
+            // 拖拽事件
+            document.addEventListener('dragover', handleDragOver);
+            document.addEventListener('drop', handleDrop);
+        }
+
+        function expandAllLayouts() {
+            document.querySelectorAll('.category-header').forEach(header => {
+                header.classList.add('expanded');
+                const target = header.dataset.target;
+                const content = document.getElementById(target);
+                if (content) {
+                    content.style.display = 'block';
+                }
+            });
+        }
+
+        function toggleCategory(header) {
+            const isExpanded = header.classList.contains('expanded');
+            const target = header.dataset.target;
+            const content = document.getElementById(target);
+            
+            if (isExpanded) {
+                header.classList.remove('expanded');
+                content.style.display = 'none';
+            } else {
+                header.classList.add('expanded');
+                content.style.display = 'block';
+            }
+        }
+
+        function selectLayout(item) {
+            document.querySelectorAll('.layout-item').forEach(el => el.classList.remove('active'));
+            item.classList.add('active');
+            
+            currentLayout = item.dataset.layout;
+            currentCount = parseInt(item.dataset.count);
+            
+            updatePreviewGrid();
+        }
+
+        function selectRatio(btn) {
+            document.querySelectorAll('.ratio-btn').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const ratio = btn.dataset.ratio;
+            const width = document.getElementById('canvasWidth');
+            const height = document.getElementById('canvasHeight');
+            
+            if (ratio === '16:9') {
+                width.value = 1600; height.value = 900;
+            } else if (ratio === '4:3') {
+                width.value = 1200; height.value = 900;
+            } else if (ratio === '1:1') {
+                width.value = 1000; height.value = 1000;
+            } else if (ratio === '9:16') {
+                width.value = 900; height.value = 1600;
+            } else if (ratio === '3:4') {
+                width.value = 900; height.value = 1200;
+            }
+        }
+
+        function updateSliderValues() {
+            const spacing = document.getElementById('imageSpacing');
+            const quality = document.getElementById('imageQuality');
+            
+            document.getElementById('spacingValue').textContent = spacing.value + 'px';
+            document.getElementById('qualityValue').textContent = Math.round(quality.value * 100) + '%';
+            
+            applySpacingToPreview();
+        }
+
+        function applySpacingToPreview() {
+            const spacing = document.getElementById('imageSpacing').value;
+            document.getElementById('previewGrid').style.gap = spacing + 'px';
+        }
+
+        function updatePreviewGrid() {
+            const grid = document.getElementById('previewGrid');
+            grid.className = `preview-grid layout-${currentLayout}`;
+            grid.innerHTML = '';
+
+            for (let i = 0; i < currentCount; i++) {
+                const cell = createGridCell(i);
+                grid.appendChild(cell);
+            }
+
+            applySpacingToPreview();
+            updateImageCounter();
+        }
+
+        function createGridCell(index) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            cell.dataset.index = index;
+            
+            const existingImage = uploadedImages[index];
+            
+            if (existingImage) {
+                cell.classList.add('has-image');
+                cell.innerHTML = `
+                    <img src="${existingImage.src}" alt="图片 ${index + 1}">
+                    <div class="image-tools">
+                        <button class="tool-btn" onclick="zoomImageInCell(${index}, 1.2)" title="放大">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button class="tool-btn" onclick="zoomImageInCell(${index}, 0.8)" title="缩小">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button class="tool-btn" onclick="resetImageInCell(${index})" title="还原">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                        </button>
+                        <button class="tool-btn" onclick="replaceImage(${index})" title="替换">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                        <button class="tool-btn danger" onclick="removeImage(${index})" title="删除">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="cell-index">${index + 1}</div>
+                `;
+            } else {
+                cell.innerHTML = `
+                    <div class="upload-hint">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <div>点击上传图片</div>
+                        <div style="font-size: 12px; margin-top: 4px;">或拖拽图片到此处</div>
+                    </div>
+                    <div class="cell-index">${index + 1}</div>
+                `;
+            }
+            
+            // 点击上传
+            cell.addEventListener('click', function(e) {
+                if (!e.target.closest('.tool-btn')) {
+                    uploadToCell(index);
+                }
+            });
+            
+            // 拖拽处理
+            cell.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--primary)';
+            });
+            
+            cell.addEventListener('dragleave', function(e) {
+                this.style.borderColor = '';
+            });
+            
+            cell.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '';
+                handleCellDrop(e, index);
+            });
+            
+            return cell;
+        }
+
+        function zoomImageInCell(index, factor) {
+            const cell = document.querySelector(`[data-index="${index}"]`);
+            const img = cell.querySelector('img');
+            if (img) {
+                const currentScale = img.style.transform ? 
+                    parseFloat(img.style.transform.match(/scale\(([^)]+)\)/)?.[1] || 1) : 1;
+                const newScale = Math.max(0.5, Math.min(3, currentScale * factor));
+                img.style.transform = `scale(${newScale})`;
+                img.style.transformOrigin = 'center';
+            }
+        }
+
+        function resetImageInCell(index) {
+            const cell = document.querySelector(`[data-index="${index}"]`);
+            const img = cell.querySelector('img');
+            if (img) {
+                img.style.transform = 'scale(1)';
+            }
+        }
+
+        function uploadToCell(index) {
+            const input = document.getElementById('fileInput');
+            input.dataset.targetIndex = index;
+            input.click();
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            const targetIndex = parseInt(e.target.dataset.targetIndex || 0);
+            
+            if (files.length > 0) {
+                processImageFile(files[0], targetIndex);
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+        }
+
+        function handleCellDrop(e, index) {
+            const files = Array.from(e.dataTransfer.files);
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                processImageFile(files[0], index);
+            }
+        }
+
+        function processImageFile(file, index) {
+            if (!file.type.startsWith('image/')) {
+                alert('请选择图片文件');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    uploadedImages[index] = {
+                        src: e.target.result,
+                        width: img.width,
+                        height: img.height,
+                        file: file,
+                        scale: 1
+                    };
+                    
+                    updatePreviewGrid();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function replaceImage(index) {
+            uploadToCell(index);
+        }
+
+        function removeImage(index) {
+            uploadedImages[index] = null;
+            updatePreviewGrid();
+        }
+
+        function updateImageCounter() {
+            const count = uploadedImages.filter(img => img !== null && img !== undefined).length;
+            document.getElementById('imageCount').textContent = count;
+        }
+
+        async function mergeImages() {
+            const validImages = uploadedImages.filter(img => img !== null && img !== undefined);
+            
+            if (validImages.length === 0) {
+                alert('请至少上传一张图片');
+                return;
+            }
+
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.add('show');
+
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                const canvasWidth = parseInt(document.getElementById('canvasWidth').value) || 1200;
+                const canvasHeight = parseInt(document.getElementById('canvasHeight').value) || 800;
+                const spacing = parseInt(document.getElementById('imageSpacing').value) || 10;
+                const bgColor = document.getElementById('bgColor').value;
+                const quality = parseFloat(document.getElementById('imageQuality').value) || 0.9;
+                const format = document.getElementById('outputFormat').value;
+
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
+
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+                const layout = calculateLayout(currentLayout, canvasWidth, canvasHeight, spacing);
+
+                const imagePromises = [];
+                for (let i = 0; i < currentCount; i++) {
+                    if (uploadedImages[i]) {
+                        const promise = new Promise((resolve) => {
+                            const img = new Image();
+                            img.onload = function() {
+                                const pos = layout.positions[i];
+                                if (pos) {
+                                    const scale = uploadedImages[i].scale || 1;
+                                    drawImageToCell(ctx, img, pos, scale);
+                                }
+                                resolve();
+                            };
+                            img.src = uploadedImages[i].src;
+                        });
+                        imagePromises.push(promise);
+                    }
+                }
+
+                await Promise.all(imagePromises);
+
+                const dataURL = canvas.toDataURL(format, quality);
+                mergedImageData = dataURL;
+
+                showFullscreenPreview(dataURL);
+
+            } catch (error) {
+                console.error('合并失败:', error);
+                alert('合并失败: ' + error.message);
+            } finally {
+                loadingOverlay.classList.remove('show');
+            }
+        }
+
+        function calculateLayout(layoutType, width, height, spacing) {
+            const positions = [];
+            
+            switch(layoutType) {
+                case '2-1':
+                    const w2h = (width - spacing) / 2;
+                    positions.push({x: 0, y: 0, width: w2h, height: height});
+                    positions.push({x: w2h + spacing, y: 0, width: w2h, height: height});
+                    break;
+                case '2-2':
+                    const h2v = (height - spacing) / 2;
+                    positions.push({x: 0, y: 0, width: width, height: h2v});
+                    positions.push({x: 0, y: h2v + spacing, width: width, height: h2v});
+                    break;
+                case '3-1':
+                    const w3 = (width - spacing * 2) / 3;
+                    for (let i = 0; i < 3; i++) {
+                        positions.push({x: i * (w3 + spacing), y: 0, width: w3, height: height});
+                    }
+                    break;
+                case '4-1':
+                    const w4 = (width - spacing) / 2;
+                    const h4 = (height - spacing) / 2;
+                    positions.push({x: 0, y: 0, width: w4, height: h4});
+                    positions.push({x: w4 + spacing, y: 0, width: w4, height: h4});
+                    positions.push({x: 0, y: h4 + spacing, width: w4, height: h4});
+                    positions.push({x: w4 + spacing, y: h4 + spacing, width: w4, height: h4});
+                    break;
+                default:
+                    const cols = Math.ceil(Math.sqrt(currentCount));
+                    const rows = Math.ceil(currentCount / cols);
+                    const cellW = (width - spacing * (cols - 1)) / cols;
+                    const cellH = (height - spacing * (rows - 1)) / rows;
+                    
+                    for (let i = 0; i < currentCount; i++) {
+                        const row = Math.floor(i / cols);
+                        const col = i % cols;
+                        positions.push({
+                            x: col * (cellW + spacing),
+                            y: row * (cellH + spacing),
+                            width: cellW,
+                            height: cellH
+                        });
+                    }
+            }
+            
+            return { positions };
+        }
+
+        function drawImageToCell(ctx, img, pos, scale = 1) {
+            ctx.save();
+            
+            const scaleX = pos.width / img.width;
+            const scaleY = pos.height / img.height;
+            const finalScale = Math.min(scaleX, scaleY) * scale;
+            
+            const scaledW = img.width * finalScale;
+            const scaledH = img.height * finalScale;
+            
+            const x = pos.x + (pos.width - scaledW) / 2;
+            const y = pos.y + (pos.height - scaledH) / 2;
+            
+            ctx.drawImage(img, x, y, scaledW, scaledH);
+            ctx.restore();
+        }
+
+        function showFullscreenPreview(dataURL) {
+            document.getElementById('fullscreenImage').src = dataURL;
+            document.getElementById('fullscreenModal').style.display = 'flex';
+            document.getElementById('downloadBtn').style.display = 'inline-flex';
+            resetZoom();
+        }
+
+        function closeFullscreen() {
+            document.getElementById('fullscreenModal').style.display = 'none';
+        }
+
+        function zoomImage(factor) {
+            zoomLevel *= factor;
+            zoomLevel = Math.max(0.2, Math.min(5, zoomLevel));
+            const img = document.getElementById('fullscreenImage');
+            img.style.transform = `scale(${zoomLevel})`;
+            updateZoomInfo();
+        }
+
+        function resetZoom() {
+            zoomLevel = 1;
+            const img = document.getElementById('fullscreenImage');
+            img.style.transform = 'scale(1)';
+            updateZoomInfo();
+        }
+
+        function updateZoomInfo() {
+            const info = document.getElementById('fullscreenInfo');
+            info.textContent = `缩放: ${Math.round(zoomLevel * 100)}%`;
+        }
+
+        function downloadImage() {
+            if (!mergedImageData) {
+                alert('请先合并图片');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            const format = document.getElementById('outputFormat').value;
+            const extension = format.split('/')[1];
+            
+            link.download = `merged-image-${Date.now()}.${extension}`;
+            link.href = mergedImageData;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function resetAll() {
+            if (confirm('确定要重置所有设置吗？')) {
+                uploadedImages = [];
+                mergedImageData = null;
+                document.getElementById('downloadBtn').style.display = 'none';
+                updatePreviewGrid();
+                closeFullscreen();
+            }
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('fullscreenModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeFullscreen();
+            }
+        });
+    </script>
+</body>
+</html>

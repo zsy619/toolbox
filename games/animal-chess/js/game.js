@@ -1,0 +1,522 @@
+class AnimalChess {
+            constructor() {
+                this.board = [];
+                this.currentPlayer = 'red';
+                this.selectedPiece = null;
+                this.gameStarted = false;
+                this.gameEnded = false;
+                
+                // 动物棋子定义
+                this.animals = {
+                    1: { name: '鼠', emoji: '🐭', canSwim: true },
+                    2: { name: '猫', emoji: '🐱', canSwim: false },
+                    3: { name: '狗', emoji: '🐕', canSwim: false },
+                    4: { name: '狼', emoji: '🐺', canSwim: false },
+                    5: { name: '豹', emoji: '🐆', canSwim: false },
+                    6: { name: '虎', emoji: '🐅', canJump: true },
+                    7: { name: '狮', emoji: '🦁', canJump: true },
+                    8: { name: '象', emoji: '🐘', canSwim: false }
+                };
+                
+                this.initBoard();
+                this.bindEvents();
+                this.renderBoard();
+                this.updatePieceCount();
+            }
+
+            initBoard() {
+                // 初始化9x7的棋盘
+                this.board = Array(9).fill(null).map(() => Array(7).fill(null));
+                
+                // 设置地形
+                this.setupTerrain();
+                
+                // 放置动物
+                this.setupAnimals();
+            }
+
+            setupTerrain() {
+                // 河流（中间3行中间3列）
+                for (let row = 3; row <= 5; row++) {
+                    for (let col = 1; col <= 2; col++) {
+                        this.board[row][col] = { type: 'water' };
+                    }
+                    for (let col = 4; col <= 5; col++) {
+                        this.board[row][col] = { type: 'water' };
+                    }
+                }
+                
+                // 陷阱 - 红方陷阱（上方）
+                this.board[0][2] = { type: 'trap', camp: 'red' };
+                this.board[0][4] = { type: 'trap', camp: 'red' };
+                this.board[1][3] = { type: 'trap', camp: 'red' };
+                
+                // 陷阱 - 蓝方陷阱（下方）
+                this.board[8][2] = { type: 'trap', camp: 'blue' };
+                this.board[8][4] = { type: 'trap', camp: 'blue' };
+                this.board[7][3] = { type: 'trap', camp: 'blue' };
+                
+                // 兽穴
+                this.board[0][3] = { type: 'den', camp: 'red' };
+                this.board[8][3] = { type: 'den', camp: 'blue' };
+            }
+
+            setupAnimals() {
+                // 红方动物（上方）
+                this.board[2][0] = { animal: { rank: 1, color: 'red', ...this.animals[1] } };
+                this.board[1][1] = { animal: { rank: 2, color: 'red', ...this.animals[2] } };
+                this.board[2][2] = { animal: { rank: 3, color: 'red', ...this.animals[3] } };
+                this.board[1][5] = { animal: { rank: 4, color: 'red', ...this.animals[4] } };
+                this.board[2][4] = { animal: { rank: 5, color: 'red', ...this.animals[5] } };
+                this.board[0][0] = { animal: { rank: 6, color: 'red', ...this.animals[6] } };
+                this.board[0][6] = { animal: { rank: 7, color: 'red', ...this.animals[7] } };
+                this.board[2][6] = { animal: { rank: 8, color: 'red', ...this.animals[8] } };
+                
+                // 蓝方动物（下方）
+                this.board[6][6] = { animal: { rank: 1, color: 'blue', ...this.animals[1] } };
+                this.board[7][5] = { animal: { rank: 2, color: 'blue', ...this.animals[2] } };
+                this.board[6][4] = { animal: { rank: 3, color: 'blue', ...this.animals[3] } };
+                this.board[7][1] = { animal: { rank: 4, color: 'blue', ...this.animals[4] } };
+                this.board[6][2] = { animal: { rank: 5, color: 'blue', ...this.animals[5] } };
+                this.board[8][6] = { animal: { rank: 6, color: 'blue', ...this.animals[6] } };
+                this.board[8][0] = { animal: { rank: 7, color: 'blue', ...this.animals[7] } };
+                this.board[6][0] = { animal: { rank: 8, color: 'blue', ...this.animals[8] } };
+            }
+
+            bindEvents() {
+                document.getElementById('startButton').addEventListener('click', () => {
+                    this.startGame();
+                });
+
+                document.getElementById('resetButton').addEventListener('click', () => {
+                    this.resetGame();
+                });
+
+                document.getElementById('rulesButton').addEventListener('click', () => {
+                    this.showRules();
+                });
+
+                document.getElementById('chessBoard').addEventListener('click', (e) => {
+                    if (e.target.closest('.chess-cell')) {
+                        const cell = e.target.closest('.chess-cell');
+                        const row = parseInt(cell.dataset.row);
+                        const col = parseInt(cell.dataset.col);
+                        this.handleCellClick(row, col);
+                    }
+                });
+            }
+
+            startGame() {
+                this.gameStarted = true;
+                this.gameEnded = false;
+                this.currentPlayer = 'red';
+                document.getElementById('startButton').style.display = 'none';
+                this.showMessage('游戏开始！红方先行', 'info');
+                this.renderBoard();
+            }
+
+            resetGame() {
+                this.gameStarted = false;
+                this.gameEnded = false;
+                this.selectedPiece = null;
+                this.currentPlayer = 'red';
+                this.initBoard();
+                this.renderBoard();
+                this.updatePieceCount();
+                document.getElementById('startButton').style.display = 'inline-block';
+                this.hideMessage();
+            }
+
+            handleCellClick(row, col) {
+                if (!this.gameStarted || this.gameEnded) return;
+
+                const cell = this.board[row][col];
+                
+                if (this.selectedPiece) {
+                    // 尝试移动
+                    this.attemptMove(this.selectedPiece.row, this.selectedPiece.col, row, col);
+                } else if (cell?.animal && cell.animal.color === this.currentPlayer) {
+                    // 选择动物
+                    this.selectPiece(row, col);
+                }
+            }
+
+            selectPiece(row, col) {
+                this.selectedPiece = { row, col };
+                this.renderBoard();
+                this.showPossibleMoves(row, col);
+            }
+
+            showPossibleMoves(row, col) {
+                const moves = this.getPossibleMoves(row, col);
+                moves.forEach(([r, c]) => {
+                    const cell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                    if (cell) {
+                        cell.classList.add('possible-move');
+                    }
+                });
+            }
+
+            getPossibleMoves(row, col) {
+                const animal = this.board[row][col]?.animal;
+                if (!animal) return [];
+
+                const moves = [];
+                const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]; // 上下左右
+
+                // 虎和狮可以跳过河流
+                if (animal.canJump) {
+                    moves.push(...this.getJumpMoves(row, col));
+                }
+
+                // 普通移动
+                directions.forEach(([dr, dc]) => {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    
+                    if (this.isValidPosition(newRow, newCol)) {
+                        const targetCell = this.board[newRow][newCol];
+                        
+                        // 检查是否可以移动到目标位置
+                        if (this.canMoveTo(animal, targetCell, newRow, newCol)) {
+                            moves.push([newRow, newCol]);
+                        }
+                    }
+                });
+
+                return moves;
+            }
+
+            getJumpMoves(row, col) {
+                const moves = [];
+                const animal = this.board[row][col]?.animal;
+                
+                if (!animal || !animal.canJump) return moves;
+
+                // 检查垂直跳跃
+                if (col >= 1 && col <= 2) { // 左侧河边
+                    const landRow = row;
+                    const landCol = 4; // 跳到右侧河边
+                    if (this.isValidPosition(landRow, landCol)) {
+                        const targetCell = this.board[landRow][landCol];
+                        if (this.canMoveTo(animal, targetCell, landRow, landCol)) {
+                            moves.push([landRow, landCol]);
+                        }
+                    }
+                } else if (col >= 4 && col <= 5) { // 右侧河边
+                    const landRow = row;
+                    const landCol = 1; // 跳到左侧河边
+                    if (this.isValidPosition(landRow, landCol)) {
+                        const targetCell = this.board[landRow][landCol];
+                        if (this.canMoveTo(animal, targetCell, landRow, landCol)) {
+                            moves.push([landRow, landCol]);
+                        }
+                    }
+                }
+
+                // 检查水平跳跃
+                if (row === 2) { // 上方河边
+                    const landRow = 6; // 跳到下方河边
+                    const landCol = col;
+                    if (this.isValidPosition(landRow, landCol)) {
+                        const targetCell = this.board[landRow][landCol];
+                        if (this.canMoveTo(animal, targetCell, landRow, landCol)) {
+                            moves.push([landRow, landCol]);
+                        }
+                    }
+                } else if (row === 6) { // 下方河边
+                    const landRow = 2; // 跳到上方河边
+                    const landCol = col;
+                    if (this.isValidPosition(landRow, landCol)) {
+                        const targetCell = this.board[landRow][landCol];
+                        if (this.canMoveTo(animal, targetCell, landRow, landCol)) {
+                            moves.push([landRow, landCol]);
+                        }
+                    }
+                }
+
+                return moves;
+            }
+
+            canMoveTo(animal, targetCell, row, col) {
+                // 不能进入己方兽穴
+                if (targetCell?.type === 'den' && targetCell.camp === animal.color) {
+                    return false;
+                }
+
+                // 只有能游泳的动物可以进入水中
+                if (targetCell?.type === 'water' && !animal.canSwim) {
+                    return false;
+                }
+
+                // 可以移动到空位
+                if (!targetCell?.animal) {
+                    return true;
+                }
+
+                // 不能攻击己方动物
+                if (targetCell.animal.color === animal.color) {
+                    return false;
+                }
+
+                // 检查是否可以攻击对方动物
+                return this.canAttack(animal, targetCell.animal, targetCell);
+            }
+
+            canAttack(attacker, defender, defenderCell) {
+                // 在陷阱中的动物可以被任何动物攻击
+                if (defenderCell?.type === 'trap' && defenderCell.camp !== defender.color) {
+                    return true;
+                }
+
+                // 鼠可以攻击象
+                if (attacker.rank === 1 && defender.rank === 8) {
+                    return true;
+                }
+
+                // 象不能攻击鼠
+                if (attacker.rank === 8 && defender.rank === 1) {
+                    return false;
+                }
+
+                // 水中的动物只能被水中的动物攻击
+                if (defenderCell?.type === 'water' && !attacker.canSwim) {
+                    return false;
+                }
+
+                // 正常情况：等级高的攻击等级低的
+                return attacker.rank >= defender.rank;
+            }
+
+            attemptMove(fromRow, fromCol, toRow, toCol) {
+                const animal = this.board[fromRow][fromCol]?.animal;
+                const target = this.board[toRow][toCol];
+
+                if (!animal) return;
+
+                const possibleMoves = this.getPossibleMoves(fromRow, fromCol);
+                const isValidMove = possibleMoves.some(([r, c]) => r === toRow && c === toCol);
+
+                if (!isValidMove) {
+                    this.showMessage('无效移动！', 'error');
+                    this.clearSelection();
+                    return;
+                }
+
+                // 检查是否攻击敌方兽穴
+                if (target?.type === 'den' && target.camp !== animal.color) {
+                    this.endGame(`${animal.color === 'red' ? '红方' : '蓝方'}胜利！成功占领敌方兽穴！`);
+                    return;
+                }
+
+                // 处理战斗
+                if (target?.animal) {
+                    const battleResult = this.resolveBattle(animal, target.animal, target);
+                    this.showMessage(battleResult.message, battleResult.type);
+                    
+                    if (battleResult.winner === animal) {
+                        this.movePiece(fromRow, fromCol, toRow, toCol);
+                    } else {
+                        this.clearSelection();
+                        this.switchPlayer();
+                        return;
+                    }
+                } else {
+                    this.movePiece(fromRow, fromCol, toRow, toCol);
+                    this.showMessage(`${animal.emoji}${animal.name}移动到新位置`, 'info');
+                }
+
+                this.clearSelection();
+                this.checkGameEnd();
+                this.switchPlayer();
+                this.updatePieceCount();
+                this.renderBoard();
+            }
+
+            movePiece(fromRow, fromCol, toRow, toCol) {
+                const animal = this.board[fromRow][fromCol].animal;
+                const targetTerrain = this.board[toRow][toCol];
+                
+                this.board[toRow][toCol] = {
+                    ...targetTerrain,
+                    animal
+                };
+                
+                // 保留原位置的地形信息
+                this.board[fromRow][fromCol] = {
+                    ...this.board[fromRow][fromCol],
+                    animal: null
+                };
+            }
+
+            resolveBattle(attacker, defender, defenderCell) {
+                const attackerName = `${attacker.emoji}${attacker.name}`;
+                const defenderName = `${defender.emoji}${defender.name}`;
+
+                if (this.canAttack(attacker, defender, defenderCell)) {
+                    return {
+                        winner: attacker,
+                        message: `${attackerName}击败了${defenderName}！`,
+                        type: 'success'
+                    };
+                } else {
+                    return {
+                        winner: defender,
+                        message: `${defenderName}击退了${attackerName}！`,
+                        type: 'error'
+                    };
+                }
+            }
+
+            clearSelection() {
+                this.selectedPiece = null;
+                this.renderBoard();
+            }
+
+            switchPlayer() {
+                this.currentPlayer = this.currentPlayer === 'red' ? 'blue' : 'red';
+                document.getElementById('currentTurn').textContent = 
+                    this.currentPlayer === 'red' ? '红方' : '蓝方';
+            }
+
+            checkGameEnd() {
+                let redAnimals = 0, blueAnimals = 0;
+
+                for (let row = 0; row < 9; row++) {
+                    for (let col = 0; col < 7; col++) {
+                        const animal = this.board[row][col]?.animal;
+                        if (animal) {
+                            if (animal.color === 'red') {
+                                redAnimals++;
+                            } else {
+                                blueAnimals++;
+                            }
+                        }
+                    }
+                }
+
+                if (redAnimals === 0) {
+                    this.endGame('蓝方胜利！红方动物全部阵亡！');
+                } else if (blueAnimals === 0) {
+                    this.endGame('红方胜利！蓝方动物全部阵亡！');
+                }
+            }
+
+            endGame(message) {
+                this.gameEnded = true;
+                this.showMessage(message, 'success');
+                this.clearSelection();
+            }
+
+            showRules() {
+                const rules = `
+🦁 斗兽棋游戏规则：
+
+📋 基本规则：
+• 红蓝双方各有8只动物
+• 目标：占领敌方兽穴或消灭敌方所有动物
+
+🐾 动物等级（从小到大）：
+1. 鼠 🐭 - 可游泳，唯一能克制象的动物
+2. 猫 🐱 - 克制鼠
+3. 狗 🐕 - 克制猫
+4. 狼 🐺 - 克制狗
+5. 豹 🐆 - 克制狼
+6. 虎 🐅 - 克制豹，可跳过河流
+7. 狮 🦁 - 克制虎，可跳过河流
+8. 象 🐘 - 最强但被鼠克制
+
+🗺️ 地形说明：
+• 🌊 河流：只有鼠可以进入
+• ⚡ 陷阱：敌方动物进入后失去战斗力
+• 🏠 兽穴：敌方占领即获胜
+
+⚔️ 战斗规则：
+• 等级高的动物可以吃掉等级低的动物
+• 同等级动物相遇，攻击方获胜
+• 在陷阱中的动物可被任何敌方动物吃掉
+• 虎和狮可以跳过河流
+                `;
+                
+                this.showMessage(rules, 'info');
+            }
+
+            isValidPosition(row, col) {
+                return row >= 0 && row < 9 && col >= 0 && col < 7;
+            }
+
+            renderBoard() {
+                const board = document.getElementById('chessBoard');
+                board.innerHTML = '';
+
+                for (let row = 0; row < 9; row++) {
+                    for (let col = 0; col < 7; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'chess-cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+
+                        const cellData = this.board[row][col];
+                        
+                        // 设置地形样式
+                        if (cellData?.type) {
+                            cell.classList.add(cellData.type);
+                        }
+
+                        // 显示动物
+                        if (cellData?.animal) {
+                            const animal = cellData.animal;
+                            const animalDiv = document.createElement('div');
+                            animalDiv.className = `chess-piece ${animal.color}-piece`;
+                            animalDiv.textContent = animal.emoji;
+                            cell.appendChild(animalDiv);
+                        }
+
+                        // 高亮选中的动物
+                        if (this.selectedPiece && 
+                            this.selectedPiece.row === row && 
+                            this.selectedPiece.col === col) {
+                            cell.classList.add('selected');
+                        }
+
+                        board.appendChild(cell);
+                    }
+                }
+            }
+
+            updatePieceCount() {
+                let redCount = 0, blueCount = 0;
+
+                for (let row = 0; row < 9; row++) {
+                    for (let col = 0; col < 7; col++) {
+                        const animal = this.board[row][col]?.animal;
+                        if (animal) {
+                            if (animal.color === 'red') {
+                                redCount++;
+                            } else {
+                                blueCount++;
+                            }
+                        }
+                    }
+                }
+
+                document.getElementById('redCount').textContent = redCount;
+                document.getElementById('blueCount').textContent = blueCount;
+            }
+
+            showMessage(text, type) {
+                const message = document.getElementById('message');
+                message.textContent = text;
+                message.className = `message ${type} show`;
+            }
+
+            hideMessage() {
+                const message = document.getElementById('message');
+                message.classList.remove('show');
+            }
+        }
+
+        // 启动游戏
+        window.addEventListener('load', () => {
+            new AnimalChess();
+        });

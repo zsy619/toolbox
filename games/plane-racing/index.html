@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✈️ 飞机竞速 - 扁平化竞速游戏</title>
+    <link rel="stylesheet" href="css/plane-racing.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- 游戏头部 -->
+        <div class="game-header">
+            <h1>✈️ 飞机竞速</h1>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <span class="stat-label">空速</span>
+                    <span class="stat-value" id="airspeed">0</span>
+                    <span class="stat-unit">马赫</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">高度</span>
+                    <span class="stat-value" id="altitude">1000</span>
+                    <span class="stat-unit">m</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">燃料</span>
+                    <span class="stat-value" id="fuel">100</span>
+                    <span class="stat-unit">%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">排名</span>
+                    <span class="stat-value" id="rank">1</span>
+                    <span class="stat-unit">/8</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏控制面板 -->
+        <div class="game-controls">
+            <button class="btn btn-primary" id="startBtn">开始比赛</button>
+            <button class="btn btn-secondary" id="pauseBtn">暂停</button>
+            <button class="btn btn-secondary" id="resetBtn">重置</button>
+            <div class="difficulty-selector">
+                <label>环境:</label>
+                <select id="environmentSelect">
+                    <option value="clear">晴朗天空</option>
+                    <option value="cloudy" selected>多云天空</option>
+                    <option value="storm">雷暴天气</option>
+                    <option value="night">夜间飞行</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 游戏画布区域 -->
+        <div class="game-canvas-container">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="altitude-meter">
+                <div class="altitude-scale" id="altitudeScale">
+                    <div class="altitude-marker" style="top: 50%;">1000m</div>
+                </div>
+                <span>高度表</span>
+            </div>
+            <div class="fuel-indicator">
+                <div class="fuel-bar">
+                    <div class="fuel-fill" id="fuelFill"></div>
+                </div>
+                <span>燃料表</span>
+            </div>
+        </div>
+
+        <!-- 操控面板 -->
+        <div class="control-panel">
+            <div class="control-instructions">
+                <h3>🎮 飞行操控</h3>
+                <div class="control-grid">
+                    <div class="control-item">
+                        <kbd>↑</kbd>
+                        <span>爬升</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>↓</kbd>
+                        <span>俯冲</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>←</kbd>
+                        <span>左转</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>→</kbd>
+                        <span>右转</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>Space</kbd>
+                        <span>加力</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 飞行仪表 -->
+            <div class="flight-instruments">
+                <h3>🛩️ 飞行仪表</h3>
+                <div class="instruments-grid">
+                    <div class="instrument">
+                        <div class="compass" id="compass">
+                            <div class="compass-needle" id="compassNeedle"></div>
+                        </div>
+                        <span>罗盘</span>
+                    </div>
+                    <div class="instrument">
+                        <div class="horizon" id="artificialHorizon">
+                            <div class="horizon-line" id="horizonLine"></div>
+                        </div>
+                        <span>水平仪</span>
+                    </div>
+                    <div class="instrument">
+                        <div class="speed-gauge" id="speedGauge">
+                            <div class="speed-needle" id="speedNeedle"></div>
+                        </div>
+                        <span>空速表</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 触屏控制按钮 -->
+            <div class="touch-controls" id="touchControls">
+                <div class="touch-row">
+                    <button class="touch-btn" id="climbBtn">▲</button>
+                    <button class="touch-btn" id="afterburnerBtn">🔥</button>
+                </div>
+                <div class="touch-row">
+                    <button class="touch-btn" id="leftBtn">◀</button>
+                    <button class="touch-btn" id="diveBtn">▼</button>
+                    <button class="touch-btn" id="rightBtn">▶</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 飞行特色 -->
+        <div class="flight-info">
+            <div class="flight-section">
+                <h3>🌤️ 飞行特色</h3>
+                <ul>
+                    <li>3D空间自由移动</li>
+                    <li>高度气压影响</li>
+                    <li>云层视觉效果</li>
+                    <li>气流湍流模拟</li>
+                </ul>
+            </div>
+            <div class="flight-section">
+                <h3>🏆 获胜条件</h3>
+                <ul>
+                    <li>第一个通过终点</li>
+                    <li>穿越所有检查点</li>
+                    <li>避免失速坠毁</li>
+                    <li>合理管理燃料</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 飞行数据 -->
+        <div class="performance-panel">
+            <h3>📊 飞行数据</h3>
+            <div class="performance-grid">
+                <div class="performance-item">
+                    <span class="performance-label">巡航速度</span>
+                    <span class="performance-value" id="cruiseSpeed">0 马赫</span>
+                </div>
+                <div class="performance-item">
+                    <span class="performance-label">最高速度</span>
+                    <span class="performance-value" id="maxSpeed">0 马赫</span>
+                </div>
+                <div class="performance-item">
+                    <span class="performance-label">服务高度</span>
+                    <span class="performance-value" id="serviceAltitude">0 m</span>
+                </div>
+                <div class="performance-item">
+                    <span class="performance-label">燃料效率</span>
+                    <span class="performance-value" id="fuelEfficiency">0 km/L</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 气象信息 -->
+        <div class="weather-system">
+            <h3>🌩️ 气象信息</h3>
+            <div class="weather-grid">
+                <div class="weather-item">
+                    <span class="weather-icon" id="weatherIcon">☀️</span>
+                    <span class="weather-desc" id="weatherDesc">晴朗</span>
+                </div>
+                <div class="weather-item">
+                    <span class="weather-label">风速</span>
+                    <span class="weather-value" id="windSpeed">15 km/h</span>
+                </div>
+                <div class="weather-item">
+                    <span class="weather-label">能见度</span>
+                    <span class="weather-value" id="visibility">50km</span>
+                </div>
+                <div class="weather-item">
+                    <span class="weather-label">气压</span>
+                    <span class="weather-value" id="pressure">1013 hPa</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 航迹记录 -->
+        <div class="flight-log">
+            <h3>📝 航迹记录</h3>
+            <div class="log-entries" id="flightLog">
+                <div class="log-entry">起飞准备完成</div>
+            </div>
+        </div>
+
+        <!-- 游戏结果弹窗 -->
+        <div class="game-modal" id="gameModal">
+            <div class="modal-content">
+                <h2 id="resultTitle">✈️ 飞行结束</h2>
+                <div class="result-stats">
+                    <div class="result-item">
+                        <span class="result-label">最终排名</span>
+                        <span class="result-value" id="finalRank">1st</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">飞行时间</span>
+                        <span class="result-value" id="finalTime">00:00:00</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">平均空速</span>
+                        <span class="result-value" id="finalAvgSpeed">0 马赫</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">最高高度</span>
+                        <span class="result-value" id="finalMaxAltitude">0 m</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">剩余燃料</span>
+                        <span class="result-value" id="finalFuel">0%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">飞行评级</span>
+                        <span class="result-value" id="finalRating">⭐⭐⭐</span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="playAgainBtn">再次飞行</button>
+                    <button class="btn btn-secondary" id="backToMenuBtn">返回机库</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 返回链接 -->
+        <div class="back-link">
+            <a href="../index.html" class="btn btn-link">← 返回游戏大厅</a>
+        </div>
+    </div>
+
+    <script src="js/plane-racing.js"></script>
+</body>
+</html>

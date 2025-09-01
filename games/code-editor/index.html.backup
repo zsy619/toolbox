@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线代码编辑器 - Code Editor | 多语言编程环境</title>
+    <meta name="description" content="专业的在线代码编辑器！支持多种编程语言、语法高亮、自动补全、实时预览和代码格式化，提供完整的编程开发体验。">
+    <meta name="keywords" content="代码编辑器,Code Editor,在线编程,语法高亮,代码格式化,JavaScript,Python,HTML,CSS,编程工具">
+    <meta name="author" content="Game Creator">
+    <meta property="og:title" content="在线代码编辑器 - Code Editor">
+    <meta property="og:description" content="专业的在线代码编辑器，支持多语言编程和实时预览">
+    <meta property="og:type" content="game">
+    <link rel="canonical" href="/games/code-editor/">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .editor-container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 250px 1fr 400px;
+            grid-template-rows: 60px 1fr 40px;
+            gap: 2px;
+            background: rgba(0, 0, 0, 0.1);
+            height: 100vh;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .editor-area {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .editor-tabs {
+            background: rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+        }
+
+        .editor-tab {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 10px 20px;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 5px;
+        }
+
+        .editor-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .editor-tab.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-bottom: 2px solid #ff6b6b;
+        }
+
+        .tab-close {
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 0.7rem;
+            cursor: pointer;
+            padding: 2px;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tab-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .editor-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .code-editor {
+            width: 100%;
+            height: 100%;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            outline: none;
+            resize: none;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 20px;
+            tab-size: 4;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow: auto;
+        }
+
+        .line-numbers {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 50px;
+            background: #252526;
+            color: #858585;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 20px 10px;
+            border-right: 1px solid #3e3e42;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .preview-area {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-header {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .preview-title {
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .preview-content {
+            flex: 1;
+            background: white;
+            overflow: auto;
+        }
+
+        .preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(238, 90, 36, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(238, 90, 36, 0.4);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+        }
+
+        .btn.secondary:hover {
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn.small {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .file-tree {
+            margin-bottom: 20px;
+        }
+
+        .file-tree h3 {
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .file-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .file-item.active {
+            background: rgba(255, 107, 107, 0.2);
+            border-color: #ff6b6b;
+        }
+
+        .file-icon {
+            font-size: 1rem;
+            width: 16px;
+            text-align: center;
+        }
+
+        .file-name {
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .language-selector {
+            margin-bottom: 20px;
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .language-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .language-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .language-btn.active {
+            background: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+
+        .tools-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .tool-group {
+            margin-bottom: 15px;
+        }
+
+        .tool-group h4 {
+            color: white;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .tool-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .status-bar {
+            grid-column: 1 / -1;
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            padding: 5px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+        }
+
+        .status-left, .status-right {
+            display: flex;
+            gap: 15px;
+        }
+
+        .console-panel {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            padding: 15px;
+            height: 150px;
+            overflow-y: auto;
+            border-top: 1px solid #3e3e42;
+            display: none;
+        }
+
+        .console-panel.show {
+            display: block;
+        }
+
+        .console-line {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+
+        .console-error {
+            color: #f48771;
+        }
+
+        .console-warn {
+            color: #dcdcaa;
+        }
+
+        .console-info {
+            color: #9cdcfe;
+        }
+
+        .autocomplete-popup {
+            position: absolute;
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .autocomplete-item {
+            padding: 8px 12px;
+            color: #d4d4d4;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background: #094771;
+        }
+
+        .autocomplete-icon {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .syntax-highlight {
+            /* JavaScript/TypeScript */
+        }
+
+        .keyword {
+            color: #569cd6;
+            font-weight: 600;
+        }
+
+        .string {
+            color: #ce9178;
+        }
+
+        .number {
+            color: #b5cea8;
+        }
+
+        .comment {
+            color: #6a9955;
+            font-style: italic;
+        }
+
+        .function {
+            color: #dcdcaa;
+        }
+
+        .variable {
+            color: #9cdcfe;
+        }
+
+        .operator {
+            color: #d4d4d4;
+        }
+
+        /* HTML */
+        .tag {
+            color: #569cd6;
+        }
+
+        .attribute {
+            color: #92c5f7;
+        }
+
+        .attribute-value {
+            color: #ce9178;
+        }
+
+        /* CSS */
+        .property {
+            color: #9cdcfe;
+        }
+
+        .value {
+            color: #ce9178;
+        }
+
+        .selector {
+            color: #d7ba7d;
+        }
+
+        @media (max-width: 1024px) {
+            .editor-container {
+                grid-template-columns: 200px 1fr 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px 1fr 200px 40px;
+            }
+
+            .sidebar {
+                order: 3;
+                max-height: 200px;
+            }
+
+            .preview-area {
+                order: 2;
+            }
+        }
+
+        .minimap {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 100px;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #3e3e42;
+            border-radius: 4px;
+            overflow: hidden;
+            font-size: 2px;
+            line-height: 1;
+            color: #666;
+            padding: 2px;
+            font-family: monospace;
+            display: none;
+        }
+
+        .settings-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .setting-group {
+            margin-bottom: 12px;
+        }
+
+        .setting-label {
+            color: white;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .setting-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: white;
+            padding: 6px 8px;
+            font-size: 0.75rem;
+        }
+
+        .setting-select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: white;
+            padding: 6px 8px;
+            font-size: 0.75rem;
+        }
+
+        .setting-select option {
+            background: #2d2d30;
+            color: white;
+        }
+
+        .themes-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .theme-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .theme-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .theme-btn.active {
+            background: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <div class="header">
+            <h1>💻 在线代码编辑器</h1>
+            <div class="header-controls">
+                <button class="btn small" id="newFileBtn">新建文件</button>
+                <button class="btn small secondary" id="saveBtn">保存</button>
+                <button class="btn small secondary" id="runBtn">运行</button>
+                <button class="btn small" id="formatBtn">格式化</button>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="file-tree">
+                <h3>📁 文件资源管理器</h3>
+                <div id="fileList"></div>
+                <button class="btn small" id="addFileBtn">+ 添加文件</button>
+            </div>
+
+            <div class="language-selector">
+                <h3>🔧 编程语言</h3>
+                <div class="language-grid">
+                    <button class="language-btn active" data-lang="javascript">JavaScript</button>
+                    <button class="language-btn" data-lang="python">Python</button>
+                    <button class="language-btn" data-lang="html">HTML</button>
+                    <button class="language-btn" data-lang="css">CSS</button>
+                    <button class="language-btn" data-lang="json">JSON</button>
+                    <button class="language-btn" data-lang="markdown">Markdown</button>
+                </div>
+            </div>
+
+            <div class="tools-panel">
+                <h3>🛠️ 开发工具</h3>
+                <div class="tool-group">
+                    <h4>代码操作</h4>
+                    <div class="tool-buttons">
+                        <button class="btn small" id="undoBtn">撤销</button>
+                        <button class="btn small" id="redoBtn">重做</button>
+                        <button class="btn small" id="findBtn">查找</button>
+                        <button class="btn small" id="replaceBtn">替换</button>
+                    </div>
+                </div>
+                <div class="tool-group">
+                    <h4>视图控制</h4>
+                    <div class="tool-buttons">
+                        <button class="btn small secondary" id="consoleBtn">控制台</button>
+                        <button class="btn small secondary" id="minimapBtn">小地图</button>
+                        <button class="btn small secondary" id="wrapBtn">自动换行</button>
+                        <button class="btn small secondary" id="fullscreenBtn">全屏</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-panel">
+                <h3>⚙️ 编辑器设置</h3>
+                <div class="setting-group">
+                    <label class="setting-label" for="fontSize">字体大小</label>
+                    <input type="range" id="fontSize" class="setting-input" min="10" max="24" value="14">
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label" for="tabSize">Tab大小</label>
+                    <select id="tabSize" class="setting-select">
+                        <option value="2">2 空格</option>
+                        <option value="4" selected>4 空格</option>
+                        <option value="8">8 空格</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label" for="fontFamily">字体</label>
+                    <select id="fontFamily" class="setting-select">
+                        <option value="JetBrains Mono">JetBrains Mono</option>
+                        <option value="Fira Code">Fira Code</option>
+                        <option value="Monaco">Monaco</option>
+                        <option value="Consolas">Consolas</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="themes-panel">
+                <h3>🎨 主题样式</h3>
+                <div class="theme-grid">
+                    <button class="theme-btn active" data-theme="dark">深色</button>
+                    <button class="theme-btn" data-theme="light">浅色</button>
+                    <button class="theme-btn" data-theme="monokai">Monokai</button>
+                    <button class="theme-btn" data-theme="solarized">Solarized</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="editor-area">
+            <div class="editor-tabs" id="editorTabs"></div>
+            <div class="editor-wrapper">
+                <div class="line-numbers" id="lineNumbers"></div>
+                <textarea class="code-editor" id="codeEditor" placeholder="开始编写代码..."></textarea>
+                <div class="minimap" id="minimap"></div>
+                <div class="autocomplete-popup" id="autocompletePopup"></div>
+            </div>
+            <div class="console-panel" id="consolePanel"></div>
+        </div>
+
+        <div class="preview-area">
+            <div class="preview-header">
+                <div class="preview-title">🔍 实时预览</div>
+                <div>
+                    <button class="btn small" id="refreshPreviewBtn">刷新</button>
+                    <button class="btn small secondary" id="openInNewTabBtn">新窗口</button>
+                </div>
+            </div>
+            <div class="preview-content">
+                <iframe class="preview-iframe" id="previewFrame"></iframe>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-left">
+                <span id="languageStatus">JavaScript</span>
+                <span id="positionStatus">行 1, 列 1</span>
+                <span id="selectionStatus"></span>
+            </div>
+            <div class="status-right">
+                <span id="encodingStatus">UTF-8</span>
+                <span id="fileStatus">未保存</span>
+                <span id="livePreview">预览: 开启</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class CodeEditor {
+            constructor() {
+                this.currentFile = null;
+                this.files = new Map();
+                this.fileCounter = 0;
+                this.currentLanguage = 'javascript';
+                this.settings = {
+                    fontSize: 14,
+                    tabSize: 4,
+                    fontFamily: 'JetBrains Mono',
+                    theme: 'dark',
+                    wordWrap: false,
+                    showMinimap: false,
+                    showConsole: false,
+                    autoComplete: true,
+                    livePreview: true
+                };
+
+                this.history = [];
+                this.historyIndex = -1;
+                this.maxHistorySize = 100;
+
+                this.autocompleteData = {
+                    javascript: [
+                        { name: 'console.log', type: 'method', description: '输出到控制台' },
+                        { name: 'function', type: 'keyword', description: '函数声明' },
+                        { name: 'const', type: 'keyword', description: '常量声明' },
+                        { name: 'let', type: 'keyword', description: '变量声明' },
+                        { name: 'var', type: 'keyword', description: '变量声明' },
+                        { name: 'if', type: 'keyword', description: '条件语句' },
+                        { name: 'else', type: 'keyword', description: '否则分支' },
+                        { name: 'for', type: 'keyword', description: '循环语句' },
+                        { name: 'while', type: 'keyword', description: '条件循环' },
+                        { name: 'return', type: 'keyword', description: '返回值' },
+                        { name: 'document.getElementById', type: 'method', description: '通过ID获取元素' },
+                        { name: 'document.querySelector', type: 'method', description: '选择器查询' },
+                        { name: 'addEventListener', type: 'method', description: '添加事件监听器' },
+                        { name: 'setTimeout', type: 'function', description: '延时执行' },
+                        { name: 'setInterval', type: 'function', description: '定时执行' }
+                    ],
+                    html: [
+                        { name: 'div', type: 'tag', description: '通用容器元素' },
+                        { name: 'span', type: 'tag', description: '内联元素' },
+                        { name: 'p', type: 'tag', description: '段落元素' },
+                        { name: 'h1', type: 'tag', description: '一级标题' },
+                        { name: 'h2', type: 'tag', description: '二级标题' },
+                        { name: 'img', type: 'tag', description: '图片元素' },
+                        { name: 'a', type: 'tag', description: '链接元素' },
+                        { name: 'button', type: 'tag', description: '按钮元素' },
+                        { name: 'input', type: 'tag', description: '输入元素' },
+                        { name: 'form', type: 'tag', description: '表单元素' }
+                    ],
+                    css: [
+                        { name: 'color', type: 'property', description: '文本颜色' },
+                        { name: 'background', type: 'property', description: '背景样式' },
+                        { name: 'margin', type: 'property', description: '外边距' },
+                        { name: 'padding', type: 'property', description: '内边距' },
+                        { name: 'font-size', type: 'property', description: '字体大小' },
+                        { name: 'display', type: 'property', description: '显示类型' },
+                        { name: 'position', type: 'property', description: '定位方式' },
+                        { name: 'width', type: 'property', description: '宽度' },
+                        { name: 'height', type: 'property', description: '高度' },
+                        { name: 'border', type: 'property', description: '边框样式' }
+                    ]
+                };
+
+                this.themes = {
+                    dark: {
+                        background: '#1e1e1e',
+                        color: '#d4d4d4',
+                        lineNumberBg: '#252526',
+                        lineNumberColor: '#858585'
+                    },
+                    light: {
+                        background: '#ffffff',
+                        color: '#333333',
+                        lineNumberBg: '#f5f5f5',
+                        lineNumberColor: '#666666'
+                    },
+                    monokai: {
+                        background: '#272822',
+                        color: '#f8f8f2',
+                        lineNumberBg: '#383830',
+                        lineNumberColor: '#75715e'
+                    },
+                    solarized: {
+                        background: '#002b36',
+                        color: '#839496',
+                        lineNumberBg: '#073642',
+                        lineNumberColor: '#586e75'
+                    }
+                };
+
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.createDefaultFile();
+                this.updateLineNumbers();
+                this.updatePreview();
+                this.loadSettings();
+                this.applyTheme();
+            }
+
+            setupEventListeners() {
+                const codeEditor = document.getElementById('codeEditor');
+                const consolePanel = document.getElementById('consolePanel');
+
+                // 代码编辑器事件
+                codeEditor.addEventListener('input', () => {
+                    this.onCodeChange();
+                    this.updateLineNumbers();
+                    this.showAutocomplete();
+                    this.saveToHistory();
+                    if (this.settings.livePreview) {
+                        this.updatePreview();
+                    }
+                });
+
+                codeEditor.addEventListener('scroll', () => {
+                    this.syncLineNumbers();
+                });
+
+                codeEditor.addEventListener('keydown', (e) => {
+                    this.handleKeyDown(e);
+                });
+
+                codeEditor.addEventListener('click', () => {
+                    this.updateCursorPosition();
+                    this.hideAutocomplete();
+                });
+
+                codeEditor.addEventListener('blur', () => {
+                    setTimeout(() => this.hideAutocomplete(), 150);
+                });
+
+                // 工具栏按钮事件
+                document.getElementById('newFileBtn').addEventListener('click', () => this.createNewFile());
+                document.getElementById('saveBtn').addEventListener('click', () => this.saveFile());
+                document.getElementById('runBtn').addEventListener('click', () => this.runCode());
+                document.getElementById('formatBtn').addEventListener('click', () => this.formatCode());
+                document.getElementById('addFileBtn').addEventListener('click', () => this.addFileDialog());
+
+                // 开发工具事件
+                document.getElementById('undoBtn').addEventListener('click', () => this.undo());
+                document.getElementById('redoBtn').addEventListener('click', () => this.redo());
+                document.getElementById('findBtn').addEventListener('click', () => this.showFindDialog());
+                document.getElementById('replaceBtn').addEventListener('click', () => this.showReplaceDialog());
+                document.getElementById('consoleBtn').addEventListener('click', () => this.toggleConsole());
+                document.getElementById('minimapBtn').addEventListener('click', () => this.toggleMinimap());
+                document.getElementById('wrapBtn').addEventListener('click', () => this.toggleWordWrap());
+                document.getElementById('fullscreenBtn').addEventListener('click', () => this.toggleFullscreen());
+
+                // 预览控制事件
+                document.getElementById('refreshPreviewBtn').addEventListener('click', () => this.updatePreview());
+                document.getElementById('openInNewTabBtn').addEventListener('click', () => this.openInNewTab());
+
+                // 语言选择事件
+                document.querySelectorAll('.language-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.language-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.setLanguage(e.target.dataset.lang);
+                    });
+                });
+
+                // 主题选择事件
+                document.querySelectorAll('.theme-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.setTheme(e.target.dataset.theme);
+                    });
+                });
+
+                // 设置控制事件
+                document.getElementById('fontSize').addEventListener('input', (e) => {
+                    this.settings.fontSize = parseInt(e.target.value);
+                    this.applySettings();
+                });
+
+                document.getElementById('tabSize').addEventListener('change', (e) => {
+                    this.settings.tabSize = parseInt(e.target.value);
+                    this.applySettings();
+                });
+
+                document.getElementById('fontFamily').addEventListener('change', (e) => {
+                    this.settings.fontFamily = e.target.value;
+                    this.applySettings();
+                });
+
+                // 自动完成事件
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.autocomplete-popup')) {
+                        this.hideAutocomplete();
+                    }
+                });
+
+                // 键盘快捷键
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                        switch (e.key) {
+                            case 's':
+                                e.preventDefault();
+                                this.saveFile();
+                                break;
+                            case 'n':
+                                e.preventDefault();
+                                this.createNewFile();
+                                break;
+                            case 'o':
+                                e.preventDefault();
+                                this.openFile();
+                                break;
+                            case 'f':
+                                e.preventDefault();
+                                this.showFindDialog();
+                                break;
+                            case 'h':
+                                e.preventDefault();
+                                this.showReplaceDialog();
+                                break;
+                            case 'z':
+                                e.preventDefault();
+                                this.undo();
+                                break;
+                            case 'y':
+                                e.preventDefault();
+                                this.redo();
+                                break;
+                            case 'Enter':
+                                e.preventDefault();
+                                this.runCode();
+                                break;
+                        }
+                    }
+                });
+            }
+
+            createDefaultFile() {
+                const defaultContent = {
+                    javascript: `// 欢迎使用在线代码编辑器！
+console.log('Hello, World!');
+
+// 这是一个简单的JavaScript示例
+function greetUser(name) {
+    return \`Hello, \${name}! 欢迎使用代码编辑器。\`;
+}
+
+// 调用函数
+const message = greetUser('开发者');
+console.log(message);
+
+// 你可以在这里编写更多代码...`,
+                    html: `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的网页</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #ee5a24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 欢迎使用在线代码编辑器</h1>
+        <p>这是一个功能强大的代码编辑器，支持多种编程语言。</p>
+        <button class="btn" onclick="showMessage()">点击我</button>
+        <div id="message"></div>
+    </div>
+    
+    <script>
+        function showMessage() {
+            document.getElementById('message').innerHTML = 
+                '<h2>🎉 太棒了！代码运行成功！</h2>';
+        }
+    </script>
+</body>
+</html>`,
+                    css: `/* 欢迎使用CSS编辑器 */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.description {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.button {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3);
+}
+
+.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(238, 90, 36, 0.4);
+}`,
+                    python: `# 欢迎使用Python编辑器！
+print("Hello, World!")
+
+# 这是一个简单的Python示例
+def greet_user(name):
+    return f"Hello, {name}! 欢迎使用代码编辑器。"
+
+# 调用函数
+message = greet_user("开发者")
+print(message)
+
+# 一个简单的计算器
+def calculator(a, b, operation):
+    if operation == "+":
+        return a + b
+    elif operation == "-":
+        return a - b
+    elif operation == "*":
+        return a * b
+    elif operation == "/":
+        return a / b if b != 0 else "不能除以零"
+    else:
+        return "未知操作"
+
+# 测试计算器
+result = calculator(10, 5, "+")
+print(f"10 + 5 = {result}")
+
+# 你可以在这里编写更多Python代码...`,
+                    json: `{
+  "name": "我的项目",
+  "version": "1.0.0",
+  "description": "这是一个示例JSON文件",
+  "author": "开发者",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "webpack --mode production",
+    "dev": "webpack-dev-server --mode development"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1"
+  },
+  "devDependencies": {
+    "webpack": "^5.0.0",
+    "webpack-cli": "^4.0.0"
+  },
+  "keywords": [
+    "javascript",
+    "nodejs",
+    "web"
+  ],
+  "license": "MIT"
+}`,
+                    markdown: `# 📝 欢迎使用Markdown编辑器
+
+这是一个功能强大的**Markdown编辑器**，支持实时预览。
+
+## 🚀 特性
+
+- ✅ 实时预览
+- ✅ 语法高亮
+- ✅ 多种主题
+- ✅ 自动保存
+
+## 📖 语法示例
+
+### 文本格式
+
+*斜体文本*  
+**粗体文本**  
+***粗斜体文本***  
+~~删除线文本~~
+
+### 代码块
+
+\`\`\`javascript
+function hello() {
+    console.log("Hello, World!");
+}
+\`\`\`
+
+### 列表
+
+1. 第一项
+2. 第二项
+3. 第三项
+
+- 无序列表项一
+- 无序列表项二
+- 无序列表项三
+
+### 链接和图片
+
+[GitHub](https://github.com)
+
+### 表格
+
+| 姓名 | 年龄 | 城市 |
+|------|------|------|
+| 张三 | 25   | 北京 |
+| 李四 | 30   | 上海 |
+
+### 引用
+
+> 这是一个引用块。
+> 可以包含多行内容。
+
+---
+
+**开始编写你的Markdown文档吧！** 🎉`
+                };
+
+                this.createFile('main.' + this.getFileExtension(this.currentLanguage), defaultContent[this.currentLanguage] || defaultContent.javascript);
+            }
+
+            createFile(name, content = '') {
+                const fileId = `file_${++this.fileCounter}`;
+                const file = {
+                    id: fileId,
+                    name: name,
+                    content: content,
+                    language: this.detectLanguage(name),
+                    modified: false,
+                    created: new Date()
+                };
+
+                this.files.set(fileId, file);
+                this.currentFile = fileId;
+                this.updateFileList();
+                this.updateEditorTabs();
+                this.loadFile(fileId);
+                
+                return fileId;
+            }
+
+            createNewFile() {
+                const name = prompt('请输入文件名:', 'untitled.' + this.getFileExtension(this.currentLanguage));
+                if (name) {
+                    this.createFile(name);
+                }
+            }
+
+            addFileDialog() {
+                this.createNewFile();
+            }
+
+            loadFile(fileId) {
+                const file = this.files.get(fileId);
+                if (!file) return;
+
+                this.currentFile = fileId;
+                const codeEditor = document.getElementById('codeEditor');
+                codeEditor.value = file.content;
+                
+                this.setLanguage(file.language);
+                this.updateLineNumbers();
+                this.updateCursorPosition();
+                this.updateFileStatus();
+                this.updateEditorTabs();
+                
+                if (this.settings.livePreview) {
+                    this.updatePreview();
+                }
+            }
+
+            saveFile() {
+                if (!this.currentFile) return;
+
+                const file = this.files.get(this.currentFile);
+                if (!file) return;
+
+                const codeEditor = document.getElementById('codeEditor');
+                file.content = codeEditor.value;
+                file.modified = false;
+                file.lastSaved = new Date();
+
+                this.updateFileStatus();
+                this.updateEditorTabs();
+                
+                // 模拟保存到本地存储
+                this.saveToLocalStorage();
+                
+                this.showMessage('文件已保存', 'success');
+            }
+
+            deleteFile(fileId) {
+                if (this.files.size <= 1) {
+                    this.showMessage('至少需要保留一个文件', 'warning');
+                    return;
+                }
+
+                if (confirm('确定要删除这个文件吗？')) {
+                    this.files.delete(fileId);
+                    
+                    if (this.currentFile === fileId) {
+                        const remainingFiles = Array.from(this.files.keys());
+                        this.loadFile(remainingFiles[0]);
+                    }
+                    
+                    this.updateFileList();
+                    this.updateEditorTabs();
+                }
+            }
+
+            onCodeChange() {
+                if (!this.currentFile) return;
+
+                const file = this.files.get(this.currentFile);
+                if (!file) return;
+
+                const codeEditor = document.getElementById('codeEditor');
+                file.content = codeEditor.value;
+                file.modified = true;
+
+                this.updateFileStatus();
+                this.updateEditorTabs();
+                this.applySyntaxHighlighting();
+            }
+
+            updateFileList() {
+                const fileList = document.getElementById('fileList');
+                fileList.innerHTML = '';
+
+                this.files.forEach((file, fileId) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = `file-item ${fileId === this.currentFile ? 'active' : ''}`;
+                    fileItem.innerHTML = `
+                        <span class="file-icon">${this.getFileIcon(file.language)}</span>
+                        <span class="file-name">${file.name}${file.modified ? ' *' : ''}</span>
+                    `;
+                    
+                    fileItem.addEventListener('click', () => this.loadFile(fileId));
+                    fileItem.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        this.showFileContextMenu(e, fileId);
+                    });
+                    
+                    fileList.appendChild(fileItem);
+                });
+            }
+
+            updateEditorTabs() {
+                const editorTabs = document.getElementById('editorTabs');
+                editorTabs.innerHTML = '';
+
+                this.files.forEach((file, fileId) => {
+                    const tab = document.createElement('button');
+                    tab.className = `editor-tab ${fileId === this.currentFile ? 'active' : ''}`;
+                    tab.innerHTML = `
+                        <span>${file.name}${file.modified ? ' *' : ''}</span>
+                        <button class="tab-close" onclick="event.stopPropagation(); editor.closeFile('${fileId}')">×</button>
+                    `;
+                    
+                    tab.addEventListener('click', () => this.loadFile(fileId));
+                    editorTabs.appendChild(tab);
+                });
+            }
+
+            closeFile(fileId) {
+                const file = this.files.get(fileId);
+                if (file && file.modified) {
+                    if (!confirm('文件未保存，确定要关闭吗？')) {
+                        return;
+                    }
+                }
+
+                this.deleteFile(fileId);
+            }
+
+            getFileIcon(language) {
+                const icons = {
+                    javascript: '📄',
+                    html: '🌐',
+                    css: '🎨',
+                    python: '🐍',
+                    json: '📋',
+                    markdown: '📝'
+                };
+                return icons[language] || '📄';
+            }
+
+            getFileExtension(language) {
+                const extensions = {
+                    javascript: 'js',
+                    html: 'html',
+                    css: 'css',
+                    python: 'py',
+                    json: 'json',
+                    markdown: 'md'
+                };
+                return extensions[language] || 'txt';
+            }
+
+            detectLanguage(filename) {
+                const ext = filename.split('.').pop().toLowerCase();
+                const languageMap = {
+                    js: 'javascript',
+                    html: 'html',
+                    htm: 'html',
+                    css: 'css',
+                    py: 'python',
+                    json: 'json',
+                    md: 'markdown'
+                };
+                return languageMap[ext] || 'javascript';
+            }
+
+            setLanguage(language) {
+                this.currentLanguage = language;
+                document.getElementById('languageStatus').textContent = language.charAt(0).toUpperCase() + language.slice(1);
+                
+                if (this.currentFile) {
+                    const file = this.files.get(this.currentFile);
+                    if (file) {
+                        file.language = language;
+                    }
+                }
+
+                this.applySyntaxHighlighting();
+                this.updateFileList();
+            }
+
+            updateLineNumbers() {
+                const codeEditor = document.getElementById('codeEditor');
+                const lineNumbers = document.getElementById('lineNumbers');
+                
+                const lines = codeEditor.value.split('\n');
+                const lineNumbersText = lines.map((_, index) => index + 1).join('\n');
+                lineNumbers.textContent = lineNumbersText;
+            }
+
+            syncLineNumbers() {
+                const codeEditor = document.getElementById('codeEditor');
+                const lineNumbers = document.getElementById('lineNumbers');
+                lineNumbers.scrollTop = codeEditor.scrollTop;
+            }
+
+            updateCursorPosition() {
+                const codeEditor = document.getElementById('codeEditor');
+                const text = codeEditor.value;
+                const cursorPos = codeEditor.selectionStart;
+                
+                const lines = text.substring(0, cursorPos).split('\n');
+                const currentLine = lines.length;
+                const currentColumn = lines[lines.length - 1].length + 1;
+                
+                document.getElementById('positionStatus').textContent = `行 ${currentLine}, 列 ${currentColumn}`;
+                
+                const selectionLength = codeEditor.selectionEnd - codeEditor.selectionStart;
+                if (selectionLength > 0) {
+                    document.getElementById('selectionStatus').textContent = `选中 ${selectionLength} 个字符`;
+                } else {
+                    document.getElementById('selectionStatus').textContent = '';
+                }
+            }
+
+            updateFileStatus() {
+                if (!this.currentFile) {
+                    document.getElementById('fileStatus').textContent = '无文件';
+                    return;
+                }
+
+                const file = this.files.get(this.currentFile);
+                if (!file) return;
+
+                document.getElementById('fileStatus').textContent = file.modified ? '未保存' : '已保存';
+            }
+
+            handleKeyDown(e) {
+                const codeEditor = document.getElementById('codeEditor');
+                
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = codeEditor.selectionStart;
+                    const end = codeEditor.selectionEnd;
+                    const spaces = ' '.repeat(this.settings.tabSize);
+                    
+                    codeEditor.value = codeEditor.value.substring(0, start) + spaces + codeEditor.value.substring(end);
+                    codeEditor.selectionStart = codeEditor.selectionEnd = start + spaces.length;
+                    
+                    this.onCodeChange();
+                } else if (e.key === 'Enter') {
+                    // 自动缩进
+                    setTimeout(() => {
+                        const lines = codeEditor.value.substring(0, codeEditor.selectionStart).split('\n');
+                        const currentLine = lines[lines.length - 2] || '';
+                        const indent = currentLine.match(/^\s*/)[0];
+                        
+                        if (currentLine.trim().endsWith('{') || currentLine.trim().endsWith(':')) {
+                            const newIndent = indent + ' '.repeat(this.settings.tabSize);
+                            const start = codeEditor.selectionStart;
+                            codeEditor.value = codeEditor.value.substring(0, start) + newIndent + codeEditor.value.substring(start);
+                            codeEditor.selectionStart = codeEditor.selectionEnd = start + newIndent.length;
+                        } else if (indent) {
+                            const start = codeEditor.selectionStart;
+                            codeEditor.value = codeEditor.value.substring(0, start) + indent + codeEditor.value.substring(start);
+                            codeEditor.selectionStart = codeEditor.selectionEnd = start + indent.length;
+                        }
+                        
+                        this.onCodeChange();
+                    }, 0);
+                }
+                
+                this.updateCursorPosition();
+            }
+
+            showAutocomplete() {
+                const codeEditor = document.getElementById('codeEditor');
+                const popup = document.getElementById('autocompletePopup');
+                
+                if (!this.settings.autoComplete) {
+                    popup.style.display = 'none';
+                    return;
+                }
+
+                const cursorPos = codeEditor.selectionStart;
+                const text = codeEditor.value.substring(0, cursorPos);
+                const words = text.split(/\s+/);
+                const currentWord = words[words.length - 1];
+
+                if (currentWord.length < 2) {
+                    popup.style.display = 'none';
+                    return;
+                }
+
+                const suggestions = this.getAutocompleteSuggestions(currentWord);
+                if (suggestions.length === 0) {
+                    popup.style.display = 'none';
+                    return;
+                }
+
+                this.showAutocompleteSuggestions(suggestions, currentWord);
+            }
+
+            getAutocompleteSuggestions(word) {
+                const data = this.autocompleteData[this.currentLanguage] || [];
+                return data.filter(item => 
+                    item.name.toLowerCase().startsWith(word.toLowerCase())
+                ).slice(0, 10);
+            }
+
+            showAutocompleteSuggestions(suggestions, word) {
+                const popup = document.getElementById('autocompletePopup');
+                const codeEditor = document.getElementById('codeEditor');
+                
+                popup.innerHTML = '';
+                suggestions.forEach((suggestion, index) => {
+                    const item = document.createElement('div');
+                    item.className = `autocomplete-item ${index === 0 ? 'selected' : ''}`;
+                    item.innerHTML = `
+                        <span class="autocomplete-icon">${this.getAutocompleteIcon(suggestion.type)}</span>
+                        <span>${suggestion.name}</span>
+                    `;
+                    
+                    item.addEventListener('click', () => {
+                        this.insertAutocompletion(word, suggestion.name);
+                        this.hideAutocomplete();
+                    });
+                    
+                    popup.appendChild(item);
+                });
+
+                // 定位弹窗
+                const rect = codeEditor.getBoundingClientRect();
+                const textRect = this.getCursorPosition();
+                popup.style.left = `${textRect.left}px`;
+                popup.style.top = `${textRect.top + 20}px`;
+                popup.style.display = 'block';
+            }
+
+            hideAutocomplete() {
+                document.getElementById('autocompletePopup').style.display = 'none';
+            }
+
+            insertAutocompletion(word, completion) {
+                const codeEditor = document.getElementById('codeEditor');
+                const cursorPos = codeEditor.selectionStart;
+                const text = codeEditor.value;
+                
+                const beforeCursor = text.substring(0, cursorPos - word.length);
+                const afterCursor = text.substring(cursorPos);
+                
+                codeEditor.value = beforeCursor + completion + afterCursor;
+                codeEditor.selectionStart = codeEditor.selectionEnd = beforeCursor.length + completion.length;
+                
+                this.onCodeChange();
+                codeEditor.focus();
+            }
+
+            getAutocompleteIcon(type) {
+                const icons = {
+                    keyword: 'K',
+                    function: 'F',
+                    method: 'M',
+                    property: 'P',
+                    tag: 'T',
+                    variable: 'V'
+                };
+                return icons[type] || 'I';
+            }
+
+            getCursorPosition() {
+                const codeEditor = document.getElementById('codeEditor');
+                const rect = codeEditor.getBoundingClientRect();
+                
+                // 简化实现，返回编辑器位置
+                return {
+                    left: rect.left + 50,
+                    top: rect.top + 50
+                };
+            }
+
+            applySyntaxHighlighting() {
+                // 简化的语法高亮实现
+                // 在实际项目中，可以使用更强大的语法高亮库如 Prism.js 或 highlight.js
+            }
+
+            formatCode() {
+                const codeEditor = document.getElementById('codeEditor');
+                let code = codeEditor.value;
+                
+                try {
+                    switch (this.currentLanguage) {
+                        case 'javascript':
+                            code = this.formatJavaScript(code);
+                            break;
+                        case 'html':
+                            code = this.formatHTML(code);
+                            break;
+                        case 'css':
+                            code = this.formatCSS(code);
+                            break;
+                        case 'json':
+                            code = JSON.stringify(JSON.parse(code), null, this.settings.tabSize);
+                            break;
+                    }
+                    
+                    codeEditor.value = code;
+                    this.onCodeChange();
+                    this.showMessage('代码格式化完成', 'success');
+                } catch (error) {
+                    this.showMessage('代码格式化失败: ' + error.message, 'error');
+                }
+            }
+
+            formatJavaScript(code) {
+                // 简化的JavaScript格式化
+                return code
+                    .split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0)
+                    .join('\n');
+            }
+
+            formatHTML(code) {
+                // 简化的HTML格式化
+                let indent = 0;
+                const tabSize = this.settings.tabSize;
+                
+                return code
+                    .replace(/></g, '>\n<')
+                    .split('\n')
+                    .map(line => {
+                        line = line.trim();
+                        if (line.startsWith('</')) {
+                            indent = Math.max(0, indent - tabSize);
+                        }
+                        const formatted = ' '.repeat(indent) + line;
+                        if (line.startsWith('<') && !line.startsWith('</') && !line.endsWith('/>')) {
+                            indent += tabSize;
+                        }
+                        return formatted;
+                    })
+                    .join('\n');
+            }
+
+            formatCSS(code) {
+                // 简化的CSS格式化
+                return code
+                    .replace(/\{/g, ' {\n')
+                    .replace(/\}/g, '\n}\n')
+                    .replace(/;/g, ';\n')
+                    .split('\n')
+                    .map(line => {
+                        line = line.trim();
+                        if (line && !line.includes('{') && !line.includes('}')) {
+                            return '    ' + line;
+                        }
+                        return line;
+                    })
+                    .filter(line => line.length > 0)
+                    .join('\n');
+            }
+
+            runCode() {
+                if (this.currentLanguage === 'javascript') {
+                    this.runJavaScript();
+                } else if (this.currentLanguage === 'python') {
+                    this.runPython();
+                } else {
+                    this.updatePreview();
+                }
+            }
+
+            runJavaScript() {
+                const codeEditor = document.getElementById('codeEditor');
+                const code = codeEditor.value;
+                
+                this.clearConsole();
+                this.showConsole();
+                
+                try {
+                    // 重定向console.log
+                    const originalLog = console.log;
+                    console.log = (...args) => {
+                        this.addConsoleMessage(args.join(' '), 'info');
+                        originalLog.apply(console, args);
+                    };
+                    
+                    // 执行代码
+                    eval(code);
+                    
+                    // 恢复console.log
+                    console.log = originalLog;
+                    
+                    this.addConsoleMessage('代码执行完成', 'info');
+                } catch (error) {
+                    this.addConsoleMessage(`错误: ${error.message}`, 'error');
+                }
+            }
+
+            runPython() {
+                this.addConsoleMessage('Python代码执行需要服务器支持', 'warn');
+                this.showConsole();
+            }
+
+            updatePreview() {
+                const previewFrame = document.getElementById('previewFrame');
+                
+                if (this.currentLanguage === 'html') {
+                    const content = document.getElementById('codeEditor').value;
+                    const blob = new Blob([content], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    previewFrame.src = url;
+                } else if (this.currentLanguage === 'markdown') {
+                    const content = this.renderMarkdown(document.getElementById('codeEditor').value);
+                    const blob = new Blob([content], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    previewFrame.src = url;
+                } else {
+                    previewFrame.src = 'data:text/html,<h2>此语言不支持预览</h2>';
+                }
+            }
+
+            renderMarkdown(markdown) {
+                // 简化的Markdown渲染
+                return `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+                            h1, h2, h3 { color: #333; }
+                            code { background: #f4f4f4; padding: 2px 4px; border-radius: 3px; }
+                            pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+                            blockquote { border-left: 4px solid #ddd; margin: 0; padding-left: 20px; color: #666; }
+                        </style>
+                    </head>
+                    <body>
+                        <div>${this.parseMarkdown(markdown)}</div>
+                    </body>
+                    </html>
+                `;
+            }
+
+            parseMarkdown(text) {
+                return text
+                    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                    .replace(/\*\*\*(.*)\*\*\*/gim, '<strong><em>$1</em></strong>')
+                    .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                    .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                    .replace(/~~(.*)~~/gim, '<del>$1</del>')
+                    .replace(/`([^`]+)`/gim, '<code>$1</code>')
+                    .replace(/\n/gim, '<br>');
+            }
+
+            openInNewTab() {
+                if (this.currentLanguage === 'html') {
+                    const content = document.getElementById('codeEditor').value;
+                    const newWindow = window.open();
+                    newWindow.document.write(content);
+                    newWindow.document.close();
+                }
+            }
+
+            toggleConsole() {
+                const consolePanel = document.getElementById('consolePanel');
+                this.settings.showConsole = !this.settings.showConsole;
+                
+                if (this.settings.showConsole) {
+                    consolePanel.classList.add('show');
+                    this.addConsoleMessage('控制台已打开', 'info');
+                } else {
+                    consolePanel.classList.remove('show');
+                }
+            }
+
+            showConsole() {
+                const consolePanel = document.getElementById('consolePanel');
+                this.settings.showConsole = true;
+                consolePanel.classList.add('show');
+            }
+
+            clearConsole() {
+                document.getElementById('consolePanel').innerHTML = '';
+            }
+
+            addConsoleMessage(message, type = 'info') {
+                const consolePanel = document.getElementById('consolePanel');
+                const line = document.createElement('div');
+                line.className = `console-line console-${type}`;
+                line.textContent = `${new Date().toLocaleTimeString()} ${message}`;
+                consolePanel.appendChild(line);
+                consolePanel.scrollTop = consolePanel.scrollHeight;
+            }
+
+            toggleMinimap() {
+                const minimap = document.getElementById('minimap');
+                this.settings.showMinimap = !this.settings.showMinimap;
+                minimap.style.display = this.settings.showMinimap ? 'block' : 'none';
+            }
+
+            toggleWordWrap() {
+                const codeEditor = document.getElementById('codeEditor');
+                this.settings.wordWrap = !this.settings.wordWrap;
+                codeEditor.style.whiteSpace = this.settings.wordWrap ? 'pre-wrap' : 'pre';
+            }
+
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            saveToHistory() {
+                if (!this.currentFile) return;
+                
+                const file = this.files.get(this.currentFile);
+                if (!file) return;
+                
+                const state = {
+                    fileId: this.currentFile,
+                    content: file.content,
+                    timestamp: Date.now()
+                };
+                
+                this.history.push(state);
+                if (this.history.length > this.maxHistorySize) {
+                    this.history.shift();
+                }
+                this.historyIndex = this.history.length - 1;
+            }
+
+            undo() {
+                if (this.historyIndex > 0) {
+                    this.historyIndex--;
+                    const state = this.history[this.historyIndex];
+                    
+                    const file = this.files.get(state.fileId);
+                    if (file) {
+                        file.content = state.content;
+                        document.getElementById('codeEditor').value = state.content;
+                        this.updateLineNumbers();
+                    }
+                }
+            }
+
+            redo() {
+                if (this.historyIndex < this.history.length - 1) {
+                    this.historyIndex++;
+                    const state = this.history[this.historyIndex];
+                    
+                    const file = this.files.get(state.fileId);
+                    if (file) {
+                        file.content = state.content;
+                        document.getElementById('codeEditor').value = state.content;
+                        this.updateLineNumbers();
+                    }
+                }
+            }
+
+            showFindDialog() {
+                const searchTerm = prompt('查找:');
+                if (searchTerm) {
+                    this.findText(searchTerm);
+                }
+            }
+
+            showReplaceDialog() {
+                const searchTerm = prompt('查找:');
+                if (searchTerm) {
+                    const replaceTerm = prompt('替换为:');
+                    if (replaceTerm !== null) {
+                        this.replaceText(searchTerm, replaceTerm);
+                    }
+                }
+            }
+
+            findText(searchTerm) {
+                const codeEditor = document.getElementById('codeEditor');
+                const content = codeEditor.value;
+                const index = content.indexOf(searchTerm);
+                
+                if (index !== -1) {
+                    codeEditor.focus();
+                    codeEditor.setSelectionRange(index, index + searchTerm.length);
+                    this.showMessage(`找到 "${searchTerm}"`, 'success');
+                } else {
+                    this.showMessage(`未找到 "${searchTerm}"`, 'warning');
+                }
+            }
+
+            replaceText(searchTerm, replaceTerm) {
+                const codeEditor = document.getElementById('codeEditor');
+                const content = codeEditor.value;
+                const newContent = content.replace(new RegExp(searchTerm, 'g'), replaceTerm);
+                
+                codeEditor.value = newContent;
+                this.onCodeChange();
+                this.showMessage(`已替换所有 "${searchTerm}"`, 'success');
+            }
+
+            setTheme(theme) {
+                this.settings.theme = theme;
+                this.applyTheme();
+                this.saveSettings();
+            }
+
+            applyTheme() {
+                const themeData = this.themes[this.settings.theme];
+                if (!themeData) return;
+
+                const codeEditor = document.getElementById('codeEditor');
+                const lineNumbers = document.getElementById('lineNumbers');
+
+                codeEditor.style.backgroundColor = themeData.background;
+                codeEditor.style.color = themeData.color;
+                lineNumbers.style.backgroundColor = themeData.lineNumberBg;
+                lineNumbers.style.color = themeData.lineNumberColor;
+            }
+
+            applySettings() {
+                const codeEditor = document.getElementById('codeEditor');
+                
+                codeEditor.style.fontSize = this.settings.fontSize + 'px';
+                codeEditor.style.fontFamily = this.settings.fontFamily;
+                codeEditor.style.tabSize = this.settings.tabSize;
+                
+                document.getElementById('lineNumbers').style.fontSize = this.settings.fontSize + 'px';
+                document.getElementById('lineNumbers').style.fontFamily = this.settings.fontFamily;
+
+                this.updateLineNumbers();
+                this.saveSettings();
+            }
+
+            saveSettings() {
+                localStorage.setItem('codeEditorSettings', JSON.stringify(this.settings));
+            }
+
+            loadSettings() {
+                const saved = localStorage.getItem('codeEditorSettings');
+                if (saved) {
+                    try {
+                        this.settings = { ...this.settings, ...JSON.parse(saved) };
+                        
+                        document.getElementById('fontSize').value = this.settings.fontSize;
+                        document.getElementById('tabSize').value = this.settings.tabSize;
+                        document.getElementById('fontFamily').value = this.settings.fontFamily;
+                        
+                        this.applySettings();
+                    } catch (error) {
+                        console.error('加载设置失败:', error);
+                    }
+                }
+            }
+
+            saveToLocalStorage() {
+                const data = {
+                    files: Array.from(this.files.entries()),
+                    currentFile: this.currentFile,
+                    settings: this.settings
+                };
+                localStorage.setItem('codeEditorData', JSON.stringify(data));
+            }
+
+            loadFromLocalStorage() {
+                const saved = localStorage.getItem('codeEditorData');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        this.files = new Map(data.files);
+                        this.currentFile = data.currentFile;
+                        this.settings = { ...this.settings, ...data.settings };
+                        
+                        if (this.files.size > 0) {
+                            this.updateFileList();
+                            this.updateEditorTabs();
+                            if (this.currentFile && this.files.has(this.currentFile)) {
+                                this.loadFile(this.currentFile);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('加载数据失败:', error);
+                    }
+                }
+            }
+
+            showMessage(message, type = 'info') {
+                // 简化的消息显示
+                console.log(`[${type.toUpperCase()}] ${message}`);
+                
+                // 可以在这里添加更好的消息显示UI
+                const statusBar = document.querySelector('.status-bar .status-right');
+                const messageEl = document.createElement('span');
+                messageEl.textContent = message;
+                messageEl.style.color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#4ecdc4' : '#ffd93d';
+                
+                statusBar.appendChild(messageEl);
+                setTimeout(() => {
+                    statusBar.removeChild(messageEl);
+                }, 3000);
+            }
+
+            showFileContextMenu(e, fileId) {
+                // 简化的右键菜单实现
+                if (confirm('删除这个文件？')) {
+                    this.deleteFile(fileId);
+                }
+            }
+        }
+
+        // 全局变量用于访问编辑器实例
+        let editor;
+
+        // 初始化编辑器
+        document.addEventListener('DOMContentLoaded', () => {
+            editor = new CodeEditor();
+        });
+    </script>
+</body>
+</html>

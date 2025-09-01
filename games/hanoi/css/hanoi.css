@@ -1,0 +1,516 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', Arial, sans-serif;
+    background: linear-gradient(135deg, #2C1810 0%, #8B4513 50%, #DEB887 100%);
+    min-height: 100vh;
+    color: #333;
+    padding: 20px;
+    user-select: none;
+}
+
+.game-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: rgba(245, 245, 220, 0.95);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    border: 3px solid #8B4513;
+}
+
+.game-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.game-header h1 {
+    color: #8B4513;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.game-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    background: rgba(139, 69, 19, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: 600;
+    border: 2px solid #DEB887;
+}
+
+.stat span {
+    color: #8B4513;
+    font-weight: 700;
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.difficulty-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 2px solid #DEB887;
+}
+
+.difficulty-selector select {
+    padding: 5px 10px;
+    border: 1px solid #DEB887;
+    border-radius: 5px;
+    background: white;
+    color: #8B4513;
+    font-weight: 600;
+}
+
+.btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #8B4513;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(139, 69, 19, 0.3);
+}
+
+.btn:hover {
+    background: #A0522D;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(139, 69, 19, 0.4);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.game-board {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    margin: 50px 0;
+    height: 400px;
+    background: rgba(139, 69, 19, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    border: 2px solid #DEB887;
+}
+
+.tower {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tower:hover {
+    transform: translateY(-5px);
+}
+
+.tower-base {
+    width: 200px;
+    height: 20px;
+    background: linear-gradient(to bottom, #8B4513, #654321);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    border: 2px solid #A0522D;
+}
+
+.tower-pole {
+    width: 8px;
+    height: 300px;
+    background: linear-gradient(to right, #CD853F, #DEB887);
+    border-radius: 4px;
+    position: relative;
+    top: -10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid #8B4513;
+}
+
+.tower-label {
+    margin-top: 15px;
+    color: #8B4513;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.disk {
+    height: 30px;
+    border-radius: 15px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    position: absolute;
+    cursor: grab;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.disk:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.disk:active {
+    cursor: grabbing;
+}
+
+.disk.dragging {
+    z-index: 1000;
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+}
+
+.disk.moving {
+    transition: all 0.8s ease-in-out;
+}
+
+/* 不同大小圆盘的样式 */
+.disk.size-1 {
+    width: 60px;
+    background: linear-gradient(135deg, #FF6B6B, #FF5252);
+}
+
+.disk.size-2 {
+    width: 80px;
+    background: linear-gradient(135deg, #4ECDC4, #26A69A);
+}
+
+.disk.size-3 {
+    width: 100px;
+    background: linear-gradient(135deg, #45B7D1, #2196F3);
+}
+
+.disk.size-4 {
+    width: 120px;
+    background: linear-gradient(135deg, #96CEB4, #4CAF50);
+}
+
+.disk.size-5 {
+    width: 140px;
+    background: linear-gradient(135deg, #FECA57, #FF9800);
+}
+
+.disk.size-6 {
+    width: 160px;
+    background: linear-gradient(135deg, #FF9FF3, #E91E63);
+}
+
+.disk.size-7 {
+    width: 180px;
+    background: linear-gradient(135deg, #A29BFE, #6C5CE7);
+}
+
+.disk.size-8 {
+    width: 200px;
+    background: linear-gradient(135deg, #FD79A8, #E84393);
+}
+
+.tower.valid-drop {
+    background: rgba(76, 175, 80, 0.2);
+    border-radius: 10px;
+    transform: translateY(-10px);
+}
+
+.tower.invalid-drop {
+    background: rgba(244, 67, 54, 0.2);
+    border-radius: 10px;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.game-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.legend, .rules, .strategy, .history {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px solid #DEB887;
+}
+
+.legend h3, .rules h3, .strategy h3, .history h3 {
+    color: #8B4513;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.rules ul, .strategy ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.rules li, .strategy li {
+    margin-bottom: 8px;
+    padding-left: 25px;
+    position: relative;
+}
+
+.rules li::before {
+    content: "🗼";
+    position: absolute;
+    left: 0;
+}
+
+.strategy li::before {
+    content: "💡";
+    position: absolute;
+    left: 0;
+}
+
+.move-counter {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px solid #DEB887;
+    margin-bottom: 30px;
+}
+
+.move-counter h3 {
+    color: #8B4513;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.counter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.counter-item {
+    text-align: center;
+    padding: 15px;
+    background: rgba(139, 69, 19, 0.1);
+    border-radius: 10px;
+    border: 1px solid #DEB887;
+}
+
+.counter-label {
+    display: block;
+    font-size: 0.9em;
+    color: #8B4513;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.counter-value {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #654321;
+}
+
+.game-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.game-message.show {
+    display: flex;
+}
+
+.message-content {
+    background: linear-gradient(135deg, #F5F5DC, #FFFACD);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: 3px solid #8B4513;
+    max-width: 500px;
+}
+
+.message-content h2 {
+    color: #8B4513;
+    margin-bottom: 20px;
+    font-size: 2em;
+}
+
+.completion-stats {
+    margin-bottom: 20px;
+}
+
+.completion-stats p {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #654321;
+}
+
+.rating {
+    font-size: 2em;
+    margin-bottom: 15px;
+}
+
+.achievement {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #8B4513;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    border: 2px solid #8B4513;
+}
+
+.records {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px solid #DEB887;
+}
+
+.records h3 {
+    color: #8B4513;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.record-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.record-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: rgba(139, 69, 19, 0.1);
+    border-radius: 8px;
+    border: 1px solid #DEB887;
+}
+
+.record-item .level {
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.record-item .record {
+    color: #654321;
+    font-weight: 600;
+}
+
+.solving-animation .disk {
+    animation: solve-glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes solve-glow {
+    from { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
+    to { box-shadow: 0 0 20px #FFD700, 0 4px 8px rgba(0, 0, 0, 0.3); }
+}
+
+.completed-tower {
+    animation: tower-celebration 2s ease-in-out infinite;
+}
+
+@keyframes tower-celebration {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.05); }
+}
+
+@media (max-width: 768px) {
+    .game-container {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .game-header h1 {
+        font-size: 2em;
+    }
+    
+    .game-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .game-board {
+        height: 300px;
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    .tower {
+        flex-direction: row;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .tower-base {
+        width: 150px;
+        height: 15px;
+    }
+    
+    .tower-pole {
+        width: 6px;
+        height: 200px;
+    }
+    
+    .disk {
+        height: 25px;
+    }
+    
+    .disk.size-1 { width: 50px; }
+    .disk.size-2 { width: 65px; }
+    .disk.size-3 { width: 80px; }
+    .disk.size-4 { width: 95px; }
+    .disk.size-5 { width: 110px; }
+    .disk.size-6 { width: 125px; }
+    .disk.size-7 { width: 140px; }
+    .disk.size-8 { width: 155px; }
+    
+    .game-info {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .counter-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

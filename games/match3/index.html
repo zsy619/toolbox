@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消消乐游戏 - 经典三消益智游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="经典消消乐三消游戏，扁平化设计界面，多种特殊宝石效果，连击系统和关卡挑战，锻炼观察力和策略思维！">
+    <meta name="keywords" content="消消乐,三消游戏,益智游戏,宝石游戏,在线游戏,免费游戏,Match3,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#E91E63">
+    
+    <link rel="stylesheet" href="css/match3-extracted.css">
+</head>
+<body>
+    <main class="game-container">
+        <h1>💎 消消乐 💎</h1>
+        
+        <section class="game-info">
+            <div class="info-item">
+                <div class="info-label">得分</div>
+                <div class="info-value" id="score">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">关卡</div>
+                <div class="info-value" id="level">1</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">目标</div>
+                <div class="info-value" id="target">1000</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">移动</div>
+                <div class="info-value" id="moves">30</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">连击</div>
+                <div class="info-value" id="combo">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">时间</div>
+                <div class="info-value" id="timer">--:--</div>
+            </div>
+        </section>
+
+        <section class="controls">
+            <button class="btn" id="startBtn">🎮 开始游戏</button>
+            <button class="btn" id="pauseBtn" disabled>⏸️ 暂停</button>
+            <button class="btn" id="restartBtn">🔄 重新开始</button>
+            <button class="btn" id="hintBtn">💡 提示</button>
+            <button class="btn" id="settingsBtn">⚙️ 设置</button>
+        </section>
+
+        <!-- 道具栏 -->
+        <section class="power-ups" id="powerUpsSection" style="display: none;">
+            <h3>🔧 道具</h3>
+            <div class="power-up-grid">
+                <div class="power-up-item" id="bombPowerUp">
+                    <div class="power-up-icon">💣</div>
+                    <div class="power-up-info">
+                        <div class="power-up-name">炸弹</div>
+                        <div class="power-up-count" id="bombCount">3</div>
+                    </div>
+                </div>
+                <div class="power-up-item" id="rainbowPowerUp">
+                    <div class="power-up-icon">🌈</div>
+                    <div class="power-up-info">
+                        <div class="power-up-name">彩虹</div>
+                        <div class="power-up-count" id="rainbowCount">2</div>
+                    </div>
+                </div>
+                <div class="power-up-item" id="shufflePowerUp">
+                    <div class="power-up-icon">🔀</div>
+                    <div class="power-up-info">
+                        <div class="power-up-name">重排</div>
+                        <div class="power-up-count" id="shuffleCount">2</div>
+                    </div>
+                </div>
+                <div class="power-up-item" id="extraMovesPowerUp">
+                    <div class="power-up-icon">➕</div>
+                    <div class="power-up-info">
+                        <div class="power-up-name">额外移动</div>
+                        <div class="power-up-count" id="extraMovesCount">1</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="game-board">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+                <div class="progress-text" id="progressText">0 / 1000</div>
+            </div>
+            <div class="grid-container" id="gridContainer">
+                <!-- 游戏网格将通过JavaScript动态生成 -->
+            </div>
+        </section>
+
+        <section class="instructions">
+            <h3>🎮 游戏规则</h3>
+            <ul>
+                <li>💎 交换相邻宝石，形成3个或更多相同宝石的连线</li>
+                <li>⚡ 连续消除可获得连击奖励，分数倍增</li>
+                <li>🌟 形成L型或T型可产生特殊宝石</li>
+                <li>💥 4个连线产生炸弹宝石，可消除周围宝石</li>
+                <li>🌈 5个连线产生彩虹宝石，可消除同色宝石</li>
+                <li>🎯 在限定移动次数内达到目标分数</li>
+                <li>🚀 完成关卡解锁更高难度挑战</li>
+                <li>💡 卡住时可使用提示功能寻找可能的移动</li>
+            </ul>
+        </section>
+
+        <section class="special-gems">
+            <h3>✨ 特殊宝石说明</h3>
+            <div class="special-gem-grid">
+                <div class="special-gem-item">
+                    <div class="special-gem-icon bomb">💣</div>
+                    <div class="special-gem-desc">
+                        <h4>炸弹宝石</h4>
+                        <p>4个宝石连线形成，可消除周围3×3范围内的所有宝石</p>
+                    </div>
+                </div>
+                <div class="special-gem-item">
+                    <div class="special-gem-icon rainbow">🌈</div>
+                    <div class="special-gem-desc">
+                        <h4>彩虹宝石</h4>
+                        <p>5个宝石连线形成，可消除棋盘上所有同色宝石</p>
+                    </div>
+                </div>
+                <div class="special-gem-item">
+                    <div class="special-gem-icon" style="background: linear-gradient(135deg, #f39c12, #e67e22);">⚡</div>
+                    <div class="special-gem-desc">
+                        <h4>闪电宝石</h4>
+                        <p>L型或T型连线形成，可消除整行或整列宝石</p>
+                    </div>
+                </div>
+                <div class="special-gem-item">
+                    <div class="special-gem-icon" style="background: linear-gradient(135deg, #e91e63, #ad1457);">🔥</div>
+                    <div class="special-gem-desc">
+                        <h4>连击奖励</h4>
+                        <p>连续消除可获得连击奖励，每次连击分数翻倍</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 游戏结束弹窗 -->
+        <div class="game-over-overlay" id="gameOverOverlay">
+            <div class="game-over-content">
+                <h2 id="gameOverTitle">🎉 关卡完成！</h2>
+                <div class="final-stats">
+                    <p>最终得分: <span id="finalScore">0</span></p>
+                    <p>关卡: <span id="finalLevel">1</span></p>
+                    <p>最大连击: <span id="maxCombo">0</span></p>
+                    <p>剩余移动: <span id="remainingMoves">0</span></p>
+                    <p>游戏时长: <span id="gameTime">0</span></p>
+                </div>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button class="btn" id="nextLevelBtn">下一关</button>
+                    <button class="btn" id="retryBtn">重试</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置界面 -->
+        <div class="settings-overlay" id="settingsOverlay">
+            <div class="settings-content">
+                <h2>⚙️ 游戏设置</h2>
+                
+                <div class="setting-group">
+                    <h3>🎮 游戏设置</h3>
+                    <div class="setting-item">
+                        <span class="setting-label">难度等级</span>
+                        <div class="setting-control">
+                            <select class="difficulty-select" id="difficultySelect">
+                                <option value="easy">简单</option>
+                                <option value="normal" selected>普通</option>
+                                <option value="hard">困难</option>
+                                <option value="expert">专家</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">自动提示</span>
+                        <div class="setting-control">
+                            <div class="toggle-switch" id="autoHintToggle"></div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">动画效果</span>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" id="animationToggle"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>🔊 音效设置</h3>
+                    <div class="setting-item">
+                        <span class="setting-label">音效开关</span>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" id="soundToggle"></div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">音量大小</span>
+                        <div class="setting-control">
+                            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
+                            <span id="volumeValue">50%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>📊 统计信息</h3>
+                    <div class="setting-item">
+                        <span class="setting-label">总游戏次数</span>
+                        <div class="setting-control">
+                            <span id="totalGames">0</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">最高分数</span>
+                        <div class="setting-control">
+                            <span id="highScore">0</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">最高关卡</span>
+                        <div class="setting-control">
+                            <span id="maxLevel">1</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">总游戏时长</span>
+                        <div class="setting-control">
+                            <span id="totalPlayTime">0分钟</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="achievements-section">
+                    <h3>🏆 成就系统</h3>
+                    <div class="achievement-grid" id="achievementGrid">
+                        <!-- 成就将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="btn" id="resetStatsBtn" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">重置统计</button>
+                    <button class="btn" id="closeSettingsBtn">关闭</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/match3.js"></script>
+</body>
+</html>

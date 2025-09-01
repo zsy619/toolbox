@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>颜色匹配游戏 - 在线免费玩色彩记忆反应游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线颜色匹配游戏，色彩记忆反应训练，多种游戏模式，扁平化设计界面，提升色彩感知和反应速度！">
+    <meta name="keywords" content="颜色匹配,色彩游戏,反应游戏,记忆游戏,在线游戏,免费游戏,色彩训练,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#9C27B0">
+    
+    <link rel="stylesheet" href="css/color-match.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>🎨 颜色匹配</h1>
+            <div class="game-subtitle">色彩记忆反应训练游戏</div>
+        </header>
+
+        <section class="game-mode-selector">
+            <h3>🎮 游戏模式</h3>
+            <div class="mode-buttons">
+                <button class="mode-btn active" onclick="colorMatch.setMode('classic')">
+                    <span>🎯</span>
+                    <div>经典模式</div>
+                    <small>匹配指定颜色</small>
+                </button>
+                <button class="mode-btn" onclick="colorMatch.setMode('sequence')">
+                    <span>🔢</span>
+                    <div>序列模式</div>
+                    <small>记住颜色序列</small>
+                </button>
+                <button class="mode-btn" onclick="colorMatch.setMode('speed')">
+                    <span>⚡</span>
+                    <div>极速模式</div>
+                    <small>快速反应挑战</small>
+                </button>
+                <button class="mode-btn" onclick="colorMatch.setMode('zen')">
+                    <span>🧘</span>
+                    <div>禅修模式</div>
+                    <small>无时间限制</small>
+                </button>
+            </div>
+        </section>
+
+        <section class="game-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">分数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="level">1</div>
+                <div class="stat-label">等级</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="streak">0</div>
+                <div class="stat-label">连击</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="timeLeft">30</div>
+                <div class="stat-label">时间</div>
+            </div>
+        </section>
+
+        <section class="target-display" id="targetDisplay">
+            <h3>🎯 目标颜色</h3>
+            <div class="target-color" id="targetColor"></div>
+            <div class="target-info" id="targetInfo">点击开始游戏</div>
+        </section>
+
+        <section class="game-board-container">
+            <div class="game-board" id="gameBoard">
+                <!-- 颜色块将通过JavaScript动态生成 -->
+            </div>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn start-btn" onclick="colorMatch.startGame()" id="startBtn">🎮 开始游戏</button>
+            <button class="btn" onclick="colorMatch.pauseGame()" id="pauseBtn" disabled>⏸️ 暂停</button>
+            <button class="btn secondary" onclick="colorMatch.resetGame()">🔄 重置</button>
+            <button class="btn secondary" onclick="colorMatch.showHelp()">❓ 帮助</button>
+        </section>
+
+        <!-- 序列显示区域 -->
+        <section class="sequence-display" id="sequenceDisplay" style="display: none;">
+            <h3>📝 记住这个序列</h3>
+            <div class="sequence-colors" id="sequenceColors"></div>
+            <div class="sequence-timer" id="sequenceTimer">3</div>
+        </section>
+
+        <!-- 游戏结束弹窗 -->
+        <div class="game-over-popup" id="gameOverPopup">
+            <div class="popup-content">
+                <h2 id="gameOverTitle">🎉 游戏结束</h2>
+                <div class="final-stats">
+                    <div class="stat-display">
+                        <div class="stat-icon">🏆</div>
+                        <div>
+                            <div class="stat-label">最终分数</div>
+                            <div class="stat-value" id="finalScore">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">🎯</div>
+                        <div>
+                            <div class="stat-label">准确率</div>
+                            <div class="stat-value" id="accuracy">100%</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">⚡</div>
+                        <div>
+                            <div class="stat-label">最高连击</div>
+                            <div class="stat-value" id="maxStreak">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">📊</div>
+                        <div>
+                            <div class="stat-label">达到等级</div>
+                            <div class="stat-value" id="maxLevel">1</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="colorMatch.closeGameOver(); colorMatch.startGame();">再来一次</button>
+                    <button class="btn secondary" onclick="colorMatch.closeGameOver();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帮助弹窗 -->
+        <div class="help-popup" id="helpPopup">
+            <div class="popup-content help-content">
+                <h2>🎨 游戏说明</h2>
+                
+                <div class="help-section">
+                    <h3>🎯 游戏目标</h3>
+                    <p>根据不同的游戏模式，快速准确地匹配指定的颜色或序列。</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🎮 游戏模式</h3>
+                    <ul>
+                        <li><strong>经典模式：</strong>点击与目标颜色相同的色块</li>
+                        <li><strong>序列模式：</strong>记住并重复颜色序列</li>
+                        <li><strong>极速模式：</strong>在限定时间内快速匹配</li>
+                        <li><strong>禅修模式：</strong>无时间限制，放松练习</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🏆 评分规则</h3>
+                    <ul>
+                        <li>正确匹配获得基础分数</li>
+                        <li>连续正确增加连击奖励</li>
+                        <li>反应速度影响分数倍数</li>
+                        <li>等级越高分数倍数越大</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>💡 游戏技巧</h3>
+                    <ul>
+                        <li>专注于色彩的细微差别</li>
+                        <li>在序列模式中使用视觉记忆</li>
+                        <li>保持冷静，避免误点击</li>
+                        <li>练习可以提高色彩识别能力</li>
+                    </ul>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="colorMatch.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/color-match.js"></script>
+</body>
+</html>

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推箱子游戏 - 经典益智游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="经典推箱子游戏，多关卡挑战，扁平化设计界面，支持撤销和提示功能，锻炼逻辑思维和空间感知能力！">
+    <meta name="keywords" content="推箱子,益智游戏,逻辑游戏,在线游戏,免费游戏,Sokoban,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#FF6B6B">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'SF Pro Display', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-header h1 {
+            font-size: 2.8rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .level-controls, .action-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #levelSelect {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            cursor: pointer;
+        }
+
+        .game-board-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            min-height: 400px;
+        }
+
+        .game-board {
+            display: grid;
+            gap: 2px;
+            background: #34495e;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .cell.floor {
+            background: #ecf0f1;
+        }
+
+        .cell.wall {
+            background: #95a5a6;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell.target {
+            background: #ff6b6b;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+        }
+
+        .cell.player {
+            background: #3498db;
+            animation: playerPulse 2s ease-in-out infinite;
+        }
+
+        .cell.box {
+            background: #f39c12;
+            box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+        }
+
+        .cell.box-on-target {
+            background: #27ae60;
+            box-shadow: 0 0 20px rgba(39, 174, 96, 0.5);
+            animation: success 0.6s ease-out;
+        }
+
+        @keyframes playerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes success {
+            0% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .instructions, .controls-guide {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .instructions h3, .controls-guide h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+
+        .keys {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .legend {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .symbol {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .symbol.player { background: #3498db; }
+        .symbol.box { background: #f39c12; }
+        .symbol.target { background: #ff6b6b; }
+        .symbol.box-on-target { background: #27ae60; }
+        .symbol.wall { background: #95a5a6; }
+        .symbol.floor { background: #ecf0f1; }
+
+        .level-stats {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .level-stats h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            display: block;
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .game-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .message-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            margin: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .message-content h2 {
+            color: #27ae60;
+            margin-bottom: 25px;
+            font-size: 2rem;
+        }
+
+        .completion-stats {
+            margin-bottom: 25px;
+        }
+
+        .completion-stats p {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .rating {
+            font-size: 2rem;
+            margin-bottom: 25px;
+        }
+
+        .records {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .records h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        .record-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #ecf0f1;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .current-best, .overall-stats {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .overall-stats .stat {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .game-header h1 {
+                font-size: 2.2rem;
+            }
+
+            .game-stats {
+                gap: 15px;
+            }
+
+            .stat {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+
+            .game-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .level-controls, .action-controls {
+                justify-content: center;
+            }
+
+            .cell {
+                width: 35px;
+                height: 35px;
+                font-size: 20px;
+            }
+
+            .game-info {
+                grid-template-columns: 1fr;
+            }
+
+            .legend-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>📦 推箱子</h1>
+            <div class="game-stats">
+                <div class="stat">关卡: <span id="level">1</span></div>
+                <div class="stat">步数: <span id="steps">0</span></div>
+                <div class="stat">推动: <span id="pushes">0</span></div>
+                <div class="stat">时间: <span id="timer">00:00</span></div>
+            </div>
+        </header>
+        
+        <section class="game-controls">
+            <div class="level-controls">
+                <button class="btn" id="prevLevelBtn">上一关</button>
+                <select id="levelSelect" aria-label="选择关卡">
+                    <!-- 动态生成关卡选项 -->
+                </select>
+                <button class="btn" id="nextLevelBtn">下一关</button>
+            </div>
+            <div class="action-controls">
+                <button class="btn" id="resetBtn">🔄 重置</button>
+                <button class="btn" id="undoBtn">↩️ 撤销</button>
+                <button class="btn" id="hintBtn">💡 提示</button>
+                <button class="btn" id="pauseBtn">⏸️ 暂停</button>
+            </div>
+        </section>
+        
+        <section class="game-board-container">
+            <div class="game-board" id="gameBoard">
+                <!-- 动态生成游戏地图 -->
+            </div>
+        </section>
+        
+        <section class="game-info">
+            <div class="instructions">
+                <h3>🎯 游戏目标</h3>
+                <p>将所有箱子推到目标位置（红色方块）。工人只能推箱子，不能拉箱子。小心不要将箱子推到死角！</p>
+            </div>
+            
+            <div class="controls-guide">
+                <h3>🎮 操作方法</h3>
+                <div class="control-item">
+                    <span class="keys">↑↓←→</span>
+                    <span class="desc">方向键移动</span>
+                </div>
+                <div class="control-item">
+                    <span class="keys">WASD</span>
+                    <span class="desc">WASD移动</span>
+                </div>
+                <div class="control-item">
+                    <span class="keys">R</span>
+                    <span class="desc">重置关卡</span>
+                </div>
+                <div class="control-item">
+                    <span class="keys">U</span>
+                    <span class="desc">撤销移动</span>
+                </div>
+            </div>
+        </section>
+        
+        <section class="legend">
+            <h3>🗺️ 图例说明</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="symbol player">👤</div>
+                    <span>工人</span>
+                </div>
+                <div class="legend-item">
+                    <div class="symbol box">📦</div>
+                    <span>箱子</span>
+                </div>
+                <div class="legend-item">
+                    <div class="symbol target">🎯</div>
+                    <span>目标</span>
+                </div>
+                <div class="legend-item">
+                    <div class="symbol box-on-target">✅</div>
+                    <span>到位箱子</span>
+                </div>
+                <div class="legend-item">
+                    <div class="symbol wall">🧱</div>
+                    <span>墙壁</span>
+                </div>
+                <div class="legend-item">
+                    <div class="symbol floor">⬜</div>
+                    <span>地板</span>
+                </div>
+            </div>
+        </section>
+        
+        <section class="level-stats">
+            <h3>📊 关卡统计</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">最少步数</span>
+                    <span class="stat-value" id="minSteps">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">最少推动</span>
+                    <span class="stat-value" id="minPushes">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">完成率</span>
+                    <span class="stat-value" id="completion">0%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">难度</span>
+                    <span class="stat-value" id="difficulty">★☆☆</span>
+                </div>
+            </div>
+        </section>
+        
+        <section class="records">
+            <h3>🏆 最佳记录</h3>
+            <div class="record-tabs">
+                <button class="tab-btn active" data-tab="current">当前关卡</button>
+                <button class="tab-btn" data-tab="overall">总体统计</button>
+            </div>
+            <div class="record-content">
+                <div class="tab-panel active" id="currentTab">
+                    <div class="current-best" id="currentBest">
+                        暂无记录
+                    </div>
+                </div>
+                <div class="tab-panel" id="overallTab">
+                    <div class="overall-stats" id="overallStats">
+                        <div class="stat">总关卡数: <span id="totalLevels">0</span></div>
+                        <div class="stat">已完成: <span id="completedLevels">0</span></div>
+                        <div class="stat">完成率: <span id="overallCompletion">0%</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 游戏完成弹窗 -->
+        <div class="game-message" id="gameMessage">
+            <div class="message-content">
+                <h2 id="messageTitle">🎉 关卡完成！</h2>
+                <div class="completion-stats">
+                    <p>用时: <span id="finalTime">00:00</span></p>
+                    <p>总步数: <span id="finalSteps">0</span></p>
+                    <p>推动次数: <span id="finalPushes">0</span></p>
+                    <p>效率评价: <span id="efficiency">优秀</span></p>
+                </div>
+                <div class="rating" id="rating">⭐⭐⭐</div>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button class="btn" id="nextLevelMsgBtn">下一关</button>
+                    <button class="btn" id="retryBtn">重试</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="js/sokoban.js"></script>
+</body>
+</html>

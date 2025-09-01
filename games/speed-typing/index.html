@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极速打字游戏 - 在线免费打字速度训练游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线极速打字游戏，测试并提升打字速度和准确率，多种文本类型和难度模式，专业打字训练，扁平化设计界面！">
+    <meta name="keywords" content="极速打字,打字速度,打字训练,WPM测试,打字游戏,键盘练习,在线游戏,免费游戏,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#607D8B">
+    
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>⌨️ 极速打字</h1>
+            <div class="game-subtitle">测试你的打字速度和准确率</div>
+        </header>
+
+        <section class="test-settings">
+            <div class="settings-row">
+                <div class="setting-group">
+                    <h4>⏱️ 测试时长</h4>
+                    <div class="setting-buttons">
+                        <button class="setting-btn" onclick="speedTyping.setDuration(15)">15秒</button>
+                        <button class="setting-btn" onclick="speedTyping.setDuration(30)">30秒</button>
+                        <button class="setting-btn active" onclick="speedTyping.setDuration(60)">1分钟</button>
+                        <button class="setting-btn" onclick="speedTyping.setDuration(120)">2分钟</button>
+                        <button class="setting-btn" onclick="speedTyping.setDuration(300)">5分钟</button>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <h4>📚 文本类型</h4>
+                    <div class="setting-buttons">
+                        <button class="setting-btn active" onclick="speedTyping.setTextType('common')">常用词汇</button>
+                        <button class="setting-btn" onclick="speedTyping.setTextType('english')">英文句子</button>
+                        <button class="setting-btn" onclick="speedTyping.setTextType('numbers')">数字符号</button>
+                        <button class="setting-btn" onclick="speedTyping.setTextType('mixed')">混合文本</button>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <h4>🎯 难度等级</h4>
+                    <div class="setting-buttons">
+                        <button class="setting-btn active" onclick="speedTyping.setDifficulty('easy')">简单</button>
+                        <button class="setting-btn" onclick="speedTyping.setDifficulty('medium')">中等</button>
+                        <button class="setting-btn" onclick="speedTyping.setDifficulty('hard')">困难</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="game-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="wpm">0</div>
+                <div class="stat-label">WPM</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="accuracy">100%</div>
+                <div class="stat-label">准确率</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="timeLeft">60</div>
+                <div class="stat-label">剩余时间</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="wordsTyped">0</div>
+                <div class="stat-label">已输入词数</div>
+            </div>
+        </section>
+
+        <section class="typing-area">
+            <div class="text-display" id="textDisplay">
+                点击开始测试按钮开始打字练习...
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">准备开始测试</div>
+            </div>
+
+            <input type="text" class="typing-input" id="typingInput" placeholder="测试开始后在此处输入..." disabled>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn start-btn" onclick="speedTyping.startTest()" id="startBtn">🚀 开始测试</button>
+            <button class="btn" onclick="speedTyping.restartTest()" id="restartBtn" disabled>🔄 重新开始</button>
+            <button class="btn secondary" onclick="speedTyping.showResults()">📊 查看结果</button>
+            <button class="btn secondary" onclick="speedTyping.showHelp()">❓ 帮助</button>
+        </section>
+
+        <section class="results-panel" id="resultsPanel">
+            <h3>📊 测试结果</h3>
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="result-value" id="finalWPM">0</div>
+                    <div class="result-label">WPM</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-value" id="finalAccuracy">100%</div>
+                    <div class="result-label">准确率</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-value" id="totalChars">0</div>
+                    <div class="result-label">总字符数</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-value" id="correctChars">0</div>
+                    <div class="result-label">正确字符</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-value" id="incorrectChars">0</div>
+                    <div class="result-label">错误字符</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-value" id="rating">-</div>
+                    <div class="result-label">等级评价</div>
+                </div>
+            </div>
+
+            <div class="mistakes-display" id="mistakesDisplay" style="display: none;">
+                <div class="mistakes-title">❌ 常见错误字符</div>
+                <div id="mistakesList"></div>
+            </div>
+        </section>
+
+        <!-- 帮助弹窗 -->
+        <div class="popup" id="helpPopup">
+            <div class="popup-content">
+                <h2>⌨️ 打字测试说明</h2>
+                
+                <div style="text-align: left; margin-bottom: 20px;">
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎯 测试说明</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        在指定时间内尽可能准确快速地输入显示的文本。系统会实时计算你的打字速度（WPM）和准确率。
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">📊 评分标准</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>WPM (Words Per Minute)：</strong>每分钟输入的单词数<br>
+                        • <strong>准确率：</strong>正确输入字符占总输入字符的百分比<br>
+                        • <strong>等级评价：</strong>基于WPM和准确率的综合评分
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🏆 等级划分</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • 60+ WPM + 95%+ 准确率：大师级<br>
+                        • 40+ WPM + 90%+ 准确率：专家级<br>
+                        • 25+ WPM + 85%+ 准确率：熟练级<br>
+                        • 15+ WPM + 80%+ 准确率：入门级<br>
+                        • 其他：练习级
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎮 文本类型</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>常用词汇：</strong>日常常见的中英文词汇<br>
+                        • <strong>英文句子：</strong>完整的英文句子和段落<br>
+                        • <strong>数字符号：</strong>数字、标点和特殊符号<br>
+                        • <strong>混合文本：</strong>包含各种类型的综合文本
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">💡 提升技巧</h3>
+                    <p style="line-height: 1.6;">
+                        • 保持正确的手指位置和坐姿<br>
+                        • 不要看键盘，培养盲打习惯<br>
+                        • 先追求准确率，再提升速度<br>
+                        • 定期练习，持之以恒
+                    </p>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="speedTyping.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    
+    <script src="js/game.js"></script>
+</body>
+</html>

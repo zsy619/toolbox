@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>激光躲避游戏 - 在线免费激光闪避反应游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线激光躲避游戏，操控角色躲避激光束，多种难度模式，训练反应速度和操作技巧，扁平化设计界面！">
+    <meta name="keywords" content="激光躲避,闪避游戏,反应游戏,操作游戏,技巧游戏,在线游戏,免费游戏,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#F44336">
+    
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>🔴 激光躲避</h1>
+            <div class="game-subtitle">操控角色躲避激光束</div>
+        </header>
+
+        <section class="difficulty-selector">
+            <h3>⚡ 难度选择</h3>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn active" onclick="laserDodge.setDifficulty('easy')">
+                    <span>🟢</span>
+                    <div>简单</div>
+                    <small>激光缓慢，数量少</small>
+                </button>
+                <button class="difficulty-btn" onclick="laserDodge.setDifficulty('medium')">
+                    <span>🟡</span>
+                    <div>中等</div>
+                    <small>适中的挑战</small>
+                </button>
+                <button class="difficulty-btn" onclick="laserDodge.setDifficulty('hard')">
+                    <span>🔴</span>
+                    <div>困难</div>
+                    <small>激光快速，数量多</small>
+                </button>
+                <button class="difficulty-btn" onclick="laserDodge.setDifficulty('insane')">
+                    <span>💀</span>
+                    <div>地狱</div>
+                    <small>极限挑战</small>
+                </button>
+            </div>
+        </section>
+
+        <section class="game-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">分数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="level">1</div>
+                <div class="stat-label">等级</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="lives">3</div>
+                <div class="stat-label">生命</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="time">0.0s</div>
+                <div class="stat-label">存活时间</div>
+            </div>
+        </section>
+
+        <section class="game-canvas-container">
+            <div>
+                <canvas id="gameCanvas" width="600" height="400"></canvas>
+                <div class="controls-hint">
+                    使用 WASD 或方向键移动 • 鼠标也可控制
+                </div>
+            </div>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn start-btn" onclick="laserDodge.startGame()" id="startBtn">🚀 开始游戏</button>
+            <button class="btn" onclick="laserDodge.pauseGame()" id="pauseBtn" disabled>⏸️ 暂停</button>
+            <button class="btn secondary" onclick="laserDodge.resetGame()">🔄 重置</button>
+            <button class="btn secondary" onclick="laserDodge.showHelp()">❓ 帮助</button>
+        </section>
+
+        <section class="power-ups">
+            <h3>💎 道具效果</h3>
+            <div class="power-up-list">
+                <div class="power-up-item" id="shield-effect">
+                    <div class="power-up-icon">🛡️</div>
+                    <div class="power-up-info">
+                        <div class="power-up-name">护盾</div>
+                        <div class="power-up-desc">免疫一次伤害</div>
+                    </div>
+                </div>
+                <div class="power-up-item" id="speed-effect">
+                    <div class="power-up-icon">⚡</div>
+                    <div class="power-up-info">
+                        <div class="power-up-name">加速</div>
+                        <div class="power-up-desc">移动速度提升</div>
+                    </div>
+                </div>
+                <div class="power-up-item" id="slow-effect">
+                    <div class="power-up-icon">🐌</div>
+                    <div class="power-up-info">
+                        <div class="power-up-name">时间减慢</div>
+                        <div class="power-up-desc">激光移动减慢</div>
+                    </div>
+                </div>
+                <div class="power-up-item" id="small-effect">
+                    <div class="power-up-icon">🔸</div>
+                    <div class="power-up-info">
+                        <div class="power-up-name">缩小</div>
+                        <div class="power-up-desc">角色体积变小</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 游戏结束弹窗 -->
+        <div class="popup" id="gameOverPopup">
+            <div class="popup-content">
+                <h2 id="gameOverTitle">💥 游戏结束</h2>
+                <div class="final-stats">
+                    <div class="stat-display">
+                        <div class="stat-icon">🏆</div>
+                        <div>
+                            <div class="stat-label">最终分数</div>
+                            <div class="stat-value" id="finalScore">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">📊</div>
+                        <div>
+                            <div class="stat-label">达到等级</div>
+                            <div class="stat-value" id="finalLevel">1</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">⏱️</div>
+                        <div>
+                            <div class="stat-label">存活时间</div>
+                            <div class="stat-value" id="finalTime">0.0s</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">🎯</div>
+                        <div>
+                            <div class="stat-label">躲避次数</div>
+                            <div class="stat-value" id="dodgeCount">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="laserDodge.closeGameOver(); laserDodge.startGame();">再来一次</button>
+                    <button class="btn secondary" onclick="laserDodge.closeGameOver();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帮助弹窗 -->
+        <div class="popup" id="helpPopup">
+            <div class="popup-content">
+                <h2>🔴 游戏说明</h2>
+                
+                <div style="text-align: left; margin-bottom: 20px;">
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎯 游戏目标</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        操控蓝色角色躲避从各个方向射来的红色激光，尽可能长时间生存下去。
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎮 操作方式</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>键盘：</strong>WASD 或方向键移动<br>
+                        • <strong>鼠标：</strong>移动鼠标控制角色位置<br>
+                        • <strong>暂停：</strong>按空格键或点击暂停按钮
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">⚡ 难度等级</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>简单：</strong>激光慢，数量少，适合新手<br>
+                        • <strong>中等：</strong>适中的激光速度和数量<br>
+                        • <strong>困难：</strong>激光快，数量多，需要技巧<br>
+                        • <strong>地狱：</strong>极限挑战，高手专用
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">💎 道具系统</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>护盾：</strong>免疫一次激光伤害<br>
+                        • <strong>加速：</strong>提升移动速度<br>
+                        • <strong>时间减慢：</strong>激光移动变慢<br>
+                        • <strong>缩小：</strong>角色体积变小更难被击中
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🏆 评分系统</h3>
+                    <p style="line-height: 1.6;">
+                        • 存活时间越长分数越高<br>
+                        • 收集道具获得额外分数<br>
+                        • 高等级有分数倍数加成<br>
+                        • 高难度有额外分数奖励
+                    </p>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="laserDodge.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    
+    <script src="js/game.js"></script>
+</body>
+</html>

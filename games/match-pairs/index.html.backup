@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>连连看增强版 - 经典益智配对游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="经典连连看益智游戏增强版，扁平化设计界面，多种图案和难度等级，挑战你的记忆力和观察能力！">
+    <meta name="keywords" content="连连看,配对游戏,益智游戏,记忆游戏,在线游戏,免费游戏,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#FF6B6B">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'SF Pro Display', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.8rem;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E85);
+            color: white;
+            padding: 15px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .difficulty-selector {
+            margin-bottom: 25px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .difficulty-selector h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            background: white;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .difficulty-btn:hover {
+            background: #f8fafc;
+            transform: translateY(-2px);
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E85);
+            color: white;
+            border-color: #FF6B6B;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .btn.secondary:hover {
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn.success:hover {
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        .game-board-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .game-board {
+            background: #34495e;
+            padding: 15px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: grid;
+            gap: 8px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .tile {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .tile:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .tile.selected {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .tile.matched {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            animation: matchedPulse 0.6s ease;
+        }
+
+        .tile.wrong {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            animation: wrongShake 0.5s ease;
+        }
+
+        .tile.hint {
+            animation: hintGlow 1s ease infinite;
+        }
+
+        @keyframes matchedPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes hintGlow {
+            0%, 100% { box-shadow: 0 0 0 rgba(255, 193, 7, 0.7); }
+            50% { box-shadow: 0 0 20px rgba(255, 193, 7, 0.9); }
+        }
+
+        .progress-section {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B6B, #4ECDC4);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .game-complete-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .complete-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            margin: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .complete-content h2 {
+            color: #27ae60;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .complete-stats {
+            margin-bottom: 25px;
+        }
+
+        .complete-stats p {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .celebration {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+
+        .instruction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .instruction-item {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .instruction-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #FF6B6B, #FF8E85);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .instruction-text {
+            flex: 1;
+        }
+
+        .instruction-text h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+
+        .instruction-text p {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .game-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .difficulty-buttons, .game-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn, .difficulty-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .instruction-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .complete-content {
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .tile {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="game-container">
+        <h1>🔗 连连看增强版</h1>
+        
+        <section class="game-stats">
+            <div class="stat-item">
+                <div class="stat-label">分数</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">时间</div>
+                <div class="stat-value" id="time">05:00</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">连击</div>
+                <div class="stat-value" id="combo">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">剩余配对</div>
+                <div class="stat-value" id="pairs">0</div>
+            </div>
+        </section>
+
+        <section class="difficulty-selector">
+            <h3>🎯 选择难度</h3>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn active" data-difficulty="easy">🟢 简单 (4×4)</button>
+                <button class="difficulty-btn" data-difficulty="medium">🟡 中等 (6×6)</button>
+                <button class="difficulty-btn" data-difficulty="hard">🔴 困难 (8×6)</button>
+                <button class="difficulty-btn" data-difficulty="expert">💜 专家 (8×8)</button>
+            </div>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn success" id="newGameBtn" onclick="matchPairs.newGame()">🎮 新游戏</button>
+            <button class="btn secondary" id="pauseBtn" onclick="matchPairs.pauseGame()">⏸️ 暂停</button>
+            <button class="btn" id="hintBtn" onclick="matchPairs.showHint()">💡 提示</button>
+            <button class="btn secondary" id="shuffleBtn" onclick="matchPairs.shuffle()">🔀 重新洗牌</button>
+        </section>
+
+        <section class="progress-section">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">准备开始游戏</div>
+        </section>
+
+        <section class="game-board-container">
+            <div class="game-board" id="gameBoard">
+                <!-- 游戏方块将通过JavaScript生成 -->
+            </div>
+        </section>
+
+        <section class="instructions">
+            <h3>🎮 游戏规则</h3>
+            <div class="instruction-grid">
+                <div class="instruction-item">
+                    <div class="instruction-icon">🎯</div>
+                    <div class="instruction-text">
+                        <h4>游戏目标</h4>
+                        <p>找到所有相同的图案配对，在时间结束前清空所有方块</p>
+                    </div>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-icon">👆</div>
+                    <div class="instruction-text">
+                        <h4>操作方式</h4>
+                        <p>点击两个相同的图案即可消除，连续匹配可获得连击奖励</p>
+                    </div>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-icon">⚡</div>
+                    <div class="instruction-text">
+                        <h4>计分规则</h4>
+                        <p>基础分数10分，连击倍数加成，剩余时间额外奖励</p>
+                    </div>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-icon">🏆</div>
+                    <div class="instruction-text">
+                        <h4>挑战模式</h4>
+                        <p>四种难度等级，网格大小从4×4到8×8逐级递增</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 游戏完成弹窗 -->
+        <div class="game-complete-overlay" id="completeOverlay">
+            <div class="complete-content">
+                <div class="celebration">🎉</div>
+                <h2>恭喜完成！</h2>
+                <div class="complete-stats">
+                    <p>最终分数: <span id="finalScore">0</span></p>
+                    <p>用时: <span id="finalTime">00:00</span></p>
+                    <p>最高连击: <span id="finalCombo">0</span></p>
+                    <p>难度等级: <span id="finalDifficulty">简单</span></p>
+                </div>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button class="btn success" onclick="matchPairs.newGame()">再来一局</button>
+                    <button class="btn secondary" onclick="matchPairs.closeComplete()">返回</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        class MatchPairs {
+            constructor() {
+                this.difficulty = 'easy';
+                this.board = [];
+                this.selectedTiles = [];
+                this.matchedPairs = 0;
+                this.totalPairs = 0;
+                this.score = 0;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.timeLeft = 300; // 5分钟
+                this.gameStarted = false;
+                this.gamePaused = false;
+                this.timer = null;
+                this.hintCount = 3;
+                
+                this.difficulties = {
+                    easy: { rows: 4, cols: 4, time: 300, icons: 8 },
+                    medium: { rows: 6, cols: 6, time: 480, icons: 18 },
+                    hard: { rows: 6, cols: 8, time: 600, icons: 24 },
+                    expert: { rows: 8, cols: 8, time: 720, icons: 32 }
+                };
+                
+                this.icons = [
+                    '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
+                    '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔',
+                    '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜', '🦟',
+                    '🌸', '🌺', '🌻', '🌷', '🌹', '🥀', '🌼', '🌲'
+                ];
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.updateDisplay();
+            }
+
+            setupEventListeners() {
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (this.gameStarted && !this.gamePaused) return;
+                        
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.difficulty = e.target.dataset.difficulty;
+                    });
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === ' ') {
+                        e.preventDefault();
+                        if (this.gameStarted) {
+                            this.pauseGame();
+                        } else {
+                            this.newGame();
+                        }
+                    }
+                });
+            }
+
+            newGame() {
+                this.gameStarted = true;
+                this.gamePaused = false;
+                this.selectedTiles = [];
+                this.matchedPairs = 0;
+                this.score = 0;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.hintCount = 3;
+                
+                const config = this.difficulties[this.difficulty];
+                this.timeLeft = config.time;
+                this.totalPairs = (config.rows * config.cols) / 2;
+                
+                this.createBoard();
+                this.startTimer();
+                this.updateDisplay();
+                this.updateProgress();
+                
+                document.getElementById('pauseBtn').textContent = '⏸️ 暂停';
+                document.getElementById('completeOverlay').style.display = 'none';
+            }
+
+            createBoard() {
+                const config = this.difficulties[this.difficulty];
+                const totalTiles = config.rows * config.cols;
+                const pairsNeeded = totalTiles / 2;
+                
+                // 创建配对图标
+                const gameIcons = this.icons.slice(0, pairsNeeded);
+                const tiles = [...gameIcons, ...gameIcons];
+                
+                // 洗牌
+                for (let i = tiles.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+                }
+                
+                // 创建二维数组
+                this.board = [];
+                for (let i = 0; i < config.rows; i++) {
+                    this.board[i] = [];
+                    for (let j = 0; j < config.cols; j++) {
+                        this.board[i][j] = {
+                            icon: tiles[i * config.cols + j],
+                            matched: false,
+                            selected: false
+                        };
+                    }
+                }
+                
+                this.renderBoard();
+            }
+
+            renderBoard() {
+                const config = this.difficulties[this.difficulty];
+                const gameBoard = document.getElementById('gameBoard');
+                gameBoard.innerHTML = '';
+                gameBoard.style.gridTemplateColumns = `repeat(${config.cols}, 1fr)`;
+                gameBoard.style.gridTemplateRows = `repeat(${config.rows}, 1fr)`;
+                
+                for (let i = 0; i < config.rows; i++) {
+                    for (let j = 0; j < config.cols; j++) {
+                        const tile = document.createElement('div');
+                        tile.className = 'tile';
+                        tile.textContent = this.board[i][j].icon;
+                        tile.dataset.row = i;
+                        tile.dataset.col = j;
+                        
+                        tile.addEventListener('click', () => this.handleTileClick(i, j));
+                        
+                        gameBoard.appendChild(tile);
+                    }
+                }
+            }
+
+            handleTileClick(row, col) {
+                if (!this.gameStarted || this.gamePaused) return;
+                
+                const tile = this.board[row][col];
+                if (tile.matched || tile.selected) return;
+                
+                // 如果已经选择了2个方块，先清除选择
+                if (this.selectedTiles.length >= 2) {
+                    this.clearSelection();
+                }
+                
+                // 选择当前方块
+                tile.selected = true;
+                this.selectedTiles.push({row, col});
+                this.updateTileDisplay(row, col);
+                
+                // 如果选择了2个方块，检查是否匹配
+                if (this.selectedTiles.length === 2) {
+                    setTimeout(() => this.checkMatch(), 500);
+                }
+            }
+
+            checkMatch() {
+                const [tile1, tile2] = this.selectedTiles;
+                const icon1 = this.board[tile1.row][tile1.col].icon;
+                const icon2 = this.board[tile2.row][tile2.col].icon;
+                
+                if (icon1 === icon2) {
+                    // 匹配成功
+                    this.board[tile1.row][tile1.col].matched = true;
+                    this.board[tile2.row][tile2.col].matched = true;
+                    this.matchedPairs++;
+                    this.combo++;
+                    
+                    if (this.combo > this.maxCombo) {
+                        this.maxCombo = this.combo;
+                    }
+                    
+                    // 计算分数
+                    const baseScore = 10;
+                    const comboBonus = this.combo > 1 ? (this.combo - 1) * 5 : 0;
+                    this.score += baseScore + comboBonus;
+                    
+                    // 更新显示
+                    this.updateTileDisplay(tile1.row, tile1.col, 'matched');
+                    this.updateTileDisplay(tile2.row, tile2.col, 'matched');
+                    
+                    // 检查游戏是否完成
+                    if (this.matchedPairs === this.totalPairs) {
+                        this.gameComplete();
+                    }
+                } else {
+                    // 匹配失败
+                    this.combo = 0;
+                    this.updateTileDisplay(tile1.row, tile1.col, 'wrong');
+                    this.updateTileDisplay(tile2.row, tile2.col, 'wrong');
+                    
+                    setTimeout(() => {
+                        this.clearSelection();
+                    }, 800);
+                }
+                
+                this.updateDisplay();
+                this.updateProgress();
+            }
+
+            clearSelection() {
+                this.selectedTiles.forEach(({row, col}) => {
+                    if (!this.board[row][col].matched) {
+                        this.board[row][col].selected = false;
+                        this.updateTileDisplay(row, col);
+                    }
+                });
+                this.selectedTiles = [];
+            }
+
+            updateTileDisplay(row, col, status = null) {
+                const tileElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                const tile = this.board[row][col];
+                
+                // 清除所有状态类
+                tileElement.classList.remove('selected', 'matched', 'wrong', 'hint');
+                
+                if (status === 'matched') {
+                    tileElement.classList.add('matched');
+                } else if (status === 'wrong') {
+                    tileElement.classList.add('wrong');
+                } else if (tile.selected) {
+                    tileElement.classList.add('selected');
+                }
+            }
+
+            pauseGame() {
+                if (!this.gameStarted) return;
+                
+                if (this.gamePaused) {
+                    // 继续游戏
+                    this.gamePaused = false;
+                    this.startTimer();
+                    document.getElementById('pauseBtn').textContent = '⏸️ 暂停';
+                } else {
+                    // 暂停游戏
+                    this.gamePaused = true;
+                    if (this.timer) {
+                        clearInterval(this.timer);
+                        this.timer = null;
+                    }
+                    document.getElementById('pauseBtn').textContent = '▶️ 继续';
+                }
+            }
+
+            showHint() {
+                if (!this.gameStarted || this.gamePaused || this.hintCount <= 0) return;
+                
+                // 寻找可匹配的一对
+                const availableTiles = [];
+                const config = this.difficulties[this.difficulty];
+                
+                for (let i = 0; i < config.rows; i++) {
+                    for (let j = 0; j < config.cols; j++) {
+                        if (!this.board[i][j].matched) {
+                            availableTiles.push({row: i, col: j, icon: this.board[i][j].icon});
+                        }
+                    }
+                }
+                
+                // 找到第一对匹配的方块
+                for (let i = 0; i < availableTiles.length; i++) {
+                    for (let j = i + 1; j < availableTiles.length; j++) {
+                        if (availableTiles[i].icon === availableTiles[j].icon) {
+                            // 显示提示
+                            const tile1 = document.querySelector(`[data-row="${availableTiles[i].row}"][data-col="${availableTiles[i].col}"]`);
+                            const tile2 = document.querySelector(`[data-row="${availableTiles[j].row}"][data-col="${availableTiles[j].col}"]`);
+                            
+                            tile1.classList.add('hint');
+                            tile2.classList.add('hint');
+                            
+                            setTimeout(() => {
+                                tile1.classList.remove('hint');
+                                tile2.classList.remove('hint');
+                            }, 2000);
+                            
+                            this.hintCount--;
+                            return;
+                        }
+                    }
+                }
+            }
+
+            shuffle() {
+                if (!this.gameStarted || this.gamePaused) return;
+                
+                // 收集所有未匹配的图标
+                const unmatchedIcons = [];
+                const config = this.difficulties[this.difficulty];
+                
+                for (let i = 0; i < config.rows; i++) {
+                    for (let j = 0; j < config.cols; j++) {
+                        if (!this.board[i][j].matched) {
+                            unmatchedIcons.push(this.board[i][j].icon);
+                        }
+                    }
+                }
+                
+                // 洗牌
+                for (let i = unmatchedIcons.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [unmatchedIcons[i], unmatchedIcons[j]] = [unmatchedIcons[j], unmatchedIcons[i]];
+                }
+                
+                // 重新分配
+                let iconIndex = 0;
+                for (let i = 0; i < config.rows; i++) {
+                    for (let j = 0; j < config.cols; j++) {
+                        if (!this.board[i][j].matched) {
+                            this.board[i][j].icon = unmatchedIcons[iconIndex++];
+                        }
+                    }
+                }
+                
+                this.clearSelection();
+                this.renderBoard();
+            }
+
+            startTimer() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                }
+                
+                this.timer = setInterval(() => {
+                    if (!this.gamePaused) {
+                        this.timeLeft--;
+                        this.updateDisplay();
+                        
+                        if (this.timeLeft <= 0) {
+                            this.gameOver();
+                        }
+                    }
+                }, 1000);
+            }
+
+            gameComplete() {
+                this.gameStarted = false;
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+                
+                // 时间奖励
+                const timeBonus = this.timeLeft * 2;
+                this.score += timeBonus;
+                
+                // 显示完成弹窗
+                const minutes = Math.floor((this.difficulties[this.difficulty].time - this.timeLeft) / 60);
+                const seconds = (this.difficulties[this.difficulty].time - this.timeLeft) % 60;
+                const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('finalTime').textContent = timeString;
+                document.getElementById('finalCombo').textContent = this.maxCombo;
+                document.getElementById('finalDifficulty').textContent = this.getDifficultyName();
+                document.getElementById('completeOverlay').style.display = 'flex';
+                
+                this.updateDisplay();
+            }
+
+            gameOver() {
+                this.gameStarted = false;
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+                alert('时间到！游戏结束');
+            }
+
+            getDifficultyName() {
+                const names = {
+                    easy: '简单',
+                    medium: '中等', 
+                    hard: '困难',
+                    expert: '专家'
+                };
+                return names[this.difficulty];
+            }
+
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('combo').textContent = this.combo;
+                document.getElementById('pairs').textContent = this.totalPairs - this.matchedPairs;
+                
+                const minutes = Math.floor(this.timeLeft / 60);
+                const seconds = this.timeLeft % 60;
+                document.getElementById('time').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            updateProgress() {
+                const progress = (this.matchedPairs / this.totalPairs) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('progressText').textContent = 
+                    `进度: ${this.matchedPairs}/${this.totalPairs} 配对`;
+            }
+
+            closeComplete() {
+                document.getElementById('completeOverlay').style.display = 'none';
+            }
+        }
+
+        // 全局游戏实例
+        let matchPairs;
+
+        // 初始化游戏
+        document.addEventListener('DOMContentLoaded', () => {
+            matchPairs = new MatchPairs();
+        });
+    </script>
+</body>
+</html>

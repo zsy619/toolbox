@@ -1,0 +1,691 @@
+/* 扁平化自行车赛游戏样式 - 严格遵循Material Design */
+
+/* 基础重置和变量 */
+:root {
+    /* Material Design 色彩系统 - 自行车赛主题 */
+    --bike-green: #4CAF50;
+    --road-gray: #607D8B;
+    --energy-yellow: #FFC107;
+    --rhythm-orange: #FF5722;
+    --background-white: #FAFAFA;
+    --text-dark: #212121;
+    --text-secondary: #757575;
+    --surface-white: #FFFFFF;
+    
+    /* 扁平化设计间距系统 */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* 统一圆角 */
+    --border-radius: 16px;
+    --border-radius-small: 8px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', 'Roboto', Arial, sans-serif;
+    background-color: var(--background-white);
+    min-height: 100vh;
+    color: var(--text-dark);
+    padding: var(--spacing-md);
+    line-height: 1.6;
+}
+
+.game-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--surface-white);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-xl);
+    border: 2px solid var(--road-gray);
+}
+
+/* 游戏头部 */
+.game-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.game-header h1 {
+    color: var(--bike-green);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-lg);
+}
+
+.game-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--spacing-md);
+    background: var(--background-white);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-small);
+    border: 2px solid var(--road-gray);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--bike-green);
+}
+
+.stat-unit {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* 控制面板 */
+.game-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    flex-wrap: wrap;
+}
+
+/* 扁平化按钮设计 */
+.btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: none;
+    border-radius: var(--border-radius-small);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: var(--bike-green);
+    color: var(--surface-white);
+}
+
+.btn-primary:hover {
+    background-color: #388E3C;
+}
+
+.btn-secondary {
+    background-color: var(--road-gray);
+    color: var(--surface-white);
+}
+
+.btn-secondary:hover {
+    background-color: #455A64;
+}
+
+.btn-link {
+    background-color: transparent;
+    color: var(--bike-green);
+    border: 2px solid var(--bike-green);
+}
+
+.btn-link:hover {
+    background-color: var(--bike-green);
+    color: var(--surface-white);
+}
+
+.difficulty-selector {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.difficulty-selector label {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.difficulty-selector select {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 2px solid var(--road-gray);
+    border-radius: var(--border-radius-small);
+    background: var(--surface-white);
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+/* 游戏画布区域 */
+.game-canvas-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--spacing-xl);
+    background: var(--road-gray);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+}
+
+#gameCanvas {
+    border-radius: var(--border-radius-small);
+    background: var(--surface-white);
+    border: 2px solid var(--text-dark);
+}
+
+.stamina-indicator {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    background: var(--surface-white);
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-small);
+    border: 2px solid var(--energy-yellow);
+    text-align: center;
+    min-width: 100px;
+}
+
+.stamina-bar {
+    width: 80px;
+    height: 8px;
+    background: var(--background-white);
+    border-radius: var(--border-radius-small);
+    margin-bottom: var(--spacing-xs);
+    border: 1px solid var(--text-secondary);
+}
+
+.stamina-fill {
+    height: 100%;
+    background: var(--energy-yellow);
+    border-radius: var(--border-radius-small);
+    transition: width 0.2s ease;
+    width: 100%;
+}
+
+/* 操控面板 */
+.control-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.control-instructions h3 {
+    color: var(--text-dark);
+    margin-bottom: var(--spacing-md);
+    font-weight: 600;
+}
+
+.control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.control-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--spacing-sm);
+    background: var(--background-white);
+    border-radius: var(--border-radius-small);
+    border: 1px solid var(--road-gray);
+}
+
+.control-item kbd {
+    background: var(--text-dark);
+    color: var(--surface-white);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-small);
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.control-item span {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* 触屏控制 */
+.touch-controls {
+    display: none;
+}
+
+.touch-row {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.touch-btn {
+    width: 60px;
+    height: 60px;
+    background: var(--road-gray);
+    color: var(--surface-white);
+    border: none;
+    border-radius: var(--border-radius-small);
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.touch-btn:hover,
+.touch-btn:active {
+    background: var(--text-dark);
+}
+
+/* 踩踏节奏系统 */
+.rhythm-system {
+    background: var(--background-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-xl);
+    border: 2px solid var(--rhythm-orange);
+}
+
+.rhythm-system h3 {
+    color: var(--rhythm-orange);
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+    font-weight: 600;
+}
+
+.rhythm-meter {
+    background: var(--surface-white);
+    border-radius: var(--border-radius-small);
+    margin-bottom: var(--spacing-md);
+    border: 2px solid var(--rhythm-orange);
+    overflow: hidden;
+}
+
+.rhythm-zone {
+    position: relative;
+    height: 60px;
+    background: linear-gradient(to right, 
+        var(--rhythm-orange) 0%, 
+        var(--bike-green) 40%, 
+        var(--bike-green) 60%, 
+        var(--rhythm-orange) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.perfect-zone {
+    position: absolute;
+    left: 40%;
+    right: 40%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.rhythm-indicator {
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 4px;
+    background: var(--surface-white);
+    border-radius: 2px;
+    transition: left 0.1s ease;
+}
+
+.rhythm-tips {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.tip-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    background: var(--surface-white);
+    border-radius: var(--border-radius-small);
+    border: 1px solid var(--rhythm-orange);
+}
+
+.tip-name {
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.tip-score {
+    font-weight: 700;
+    color: var(--rhythm-orange);
+}
+
+/* 体力管理系统 */
+.stamina-system {
+    background: var(--background-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-xl);
+    border: 2px solid var(--energy-yellow);
+}
+
+.stamina-system h3 {
+    color: var(--energy-yellow);
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+    font-weight: 600;
+}
+
+.stamina-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.stamina-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    background: var(--surface-white);
+    border-radius: var(--border-radius-small);
+    border: 1px solid var(--energy-yellow);
+}
+
+.stamina-name {
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.stamina-value {
+    font-weight: 700;
+    color: var(--energy-yellow);
+}
+
+/* 赛道信息 */
+.track-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.track-section {
+    background: var(--background-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    border: 2px solid var(--road-gray);
+}
+
+.track-section h3 {
+    color: var(--bike-green);
+    margin-bottom: var(--spacing-md);
+    font-weight: 600;
+}
+
+.track-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.track-section li {
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid var(--background-white);
+    color: var(--text-dark);
+}
+
+.track-section li:before {
+    content: "▶ ";
+    color: var(--rhythm-orange);
+    font-weight: 700;
+}
+
+/* 性能面板 */
+.performance-panel {
+    background: var(--background-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-xl);
+    border: 2px solid var(--road-gray);
+}
+
+.performance-panel h3 {
+    color: var(--text-dark);
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+    font-weight: 600;
+}
+
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.performance-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    background: var(--surface-white);
+    border-radius: var(--border-radius-small);
+    border: 1px solid var(--road-gray);
+}
+
+.performance-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.performance-value {
+    font-weight: 700;
+    color: var(--bike-green);
+}
+
+/* 游戏模态框 */
+.game-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--surface-white);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius);
+    text-align: center;
+    min-width: 300px;
+    border: 2px solid var(--bike-green);
+}
+
+.modal-content h2 {
+    color: var(--bike-green);
+    margin-bottom: var(--spacing-lg);
+    font-weight: 700;
+}
+
+.result-stats {
+    margin-bottom: var(--spacing-lg);
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--background-white);
+}
+
+.result-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.result-value {
+    font-weight: 700;
+    color: var(--bike-green);
+}
+
+.modal-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+/* 返回链接 */
+.back-link {
+    text-align: center;
+    margin-top: var(--spacing-xl);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    body {
+        padding: var(--spacing-sm);
+    }
+    
+    .game-container {
+        padding: var(--spacing-md);
+    }
+    
+    .game-header h1 {
+        font-size: 2rem;
+    }
+    
+    .game-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .game-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    #gameCanvas {
+        width: 100%;
+        max-width: 400px;
+        height: 200px;
+    }
+    
+    .control-panel {
+        grid-template-columns: 1fr;
+    }
+    
+    .touch-controls {
+        display: block;
+    }
+    
+    .track-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .performance-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .rhythm-tips {
+        grid-template-columns: 1fr;
+    }
+    
+    .stamina-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 90%;
+        max-width: 400px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .game-stats {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+    }
+    
+    .control-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .touch-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .rhythm-zone {
+        height: 40px;
+    }
+}
+
+/* 扁平化设计强化 */
+.game-container,
+.btn,
+.stat-item,
+.control-item,
+.track-section,
+.performance-item,
+.modal-content,
+.rhythm-system,
+.stamina-system,
+.stamina-indicator {
+    box-shadow: none !important;
+    background-image: none !important;
+    text-shadow: none !important;
+}
+
+/* 动画效果 - 简洁CSS动画 */
+.btn,
+.touch-btn,
+.stat-value,
+.stamina-fill,
+.rhythm-indicator {
+    transition: all 0.2s ease;
+}
+
+.stat-value {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}

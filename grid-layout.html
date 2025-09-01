@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6行4列网格布局</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .grid-layout {
+            display: grid;
+            grid-template-columns: var(--col1, 1fr) var(--col2, 1fr) var(--col3, 1fr) var(--col4, 1fr);
+            grid-template-rows: var(--row1, 150px) var(--row2, 150px) var(--row3, 150px) 
+                              var(--row4, 150px) var(--row5, 150px) var(--row6, 150px);
+            gap: 15px;
+            position: relative;
+        }
+        
+        .grid-divider {
+            position: absolute;
+            background: rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        
+        .grid-divider.col {
+            width: 10px;
+            height: 100%;
+            cursor: col-resize;
+            transform: translateX(-5px);
+        }
+        
+        .grid-divider.row {
+            height: 10px;
+            width: 100%;
+            cursor: row-resize;
+            transform: translateY(-5px);
+        }
+        
+        .grid-item {
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            touch-action: none;
+            user-select: none;
+            position: relative;
+            /* 为调整大小时显示调整光标 */
+            resize: both; 
+            overflow: auto;
+        }
+        
+        /* 第17个布局样式 */
+        .item-1 {
+            grid-column: 1 / span 2;
+            grid-row: 1 / span 2;
+            background-color: #e74c3c;
+        }
+        
+        .item-2 {
+            grid-column: 3 / span 2;
+            grid-row: 1 / span 2;
+            background-color: #2ecc71;
+        }
+        
+        .item-3 {
+            grid-column: 1 / span 2;
+            grid-row: 3 / span 2;
+            background-color: #f39c12;
+        }
+        
+        .item-4 {
+            grid-column: 3 / span 2;
+            grid-row: 3 / span 2;
+            background-color: #9b59b6;
+        }
+        
+        .item-5 {
+            grid-column: 1;
+            grid-row: 5 / span 2;
+            background-color: #1abc9c;
+        }
+        
+        .item-6 {
+            grid-column: 2;
+            grid-row: 5 / span 2;
+            background-color: #d35400;
+        }
+        
+        .item-7 {
+            grid-column: 3;
+            grid-row: 5 / span 2;
+            background-color: #34495e;
+        }
+        
+        .item-8 {
+            grid-column: 4;
+            grid-row: 5 / span 2;
+            background-color: #7f8c8d;
+        }
+    </style>
+    <script src="assets/js/vendor/interact.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const grid = document.querySelector('.grid-layout');
+            const colCount = 4;
+            const rowCount = 6;
+
+            // 网格分隔线拖拽功能
+            interact('.grid-divider.col').draggable({
+                axis: 'x',
+                listeners: {
+                    move: function(event) {
+                        const divider = event.target;
+                        const rect = grid.getBoundingClientRect();
+                        const x = event.clientX - rect.left;
+                        const percent = Math.min(Math.max(x / rect.width * 100, 10), 90);
+                        
+                        const colIndex = Array.from(grid.querySelectorAll('.grid-divider.col')).indexOf(divider);
+                        const prevPercent = colIndex === 0 ? 0 : parseFloat(divider.style.left);
+                        const nextPercent = colIndex === 2 ? 100 : parseFloat(grid.querySelectorAll('.grid-divider.col')[colIndex + 1].style.left);
+                        
+                        if (percent > prevPercent + 10 && percent < nextPercent - 10) {
+                            divider.style.left = `${percent}%`;
+                            grid.style.setProperty(`--col${colIndex + 1}`, `${percent - prevPercent}%`);
+                            grid.style.setProperty(`--col${colIndex + 2}`, `${nextPercent - percent}%`);
+                        }
+                    }
+                }
+            });
+
+            interact('.grid-divider.row').draggable({
+                axis: 'y',
+                listeners: {
+                    move: function(event) {
+                        const divider = event.target;
+                        const rect = grid.getBoundingClientRect();
+                        const y = event.clientY - rect.top;
+                        const percent = Math.min(Math.max(y / rect.height * 100, 10), 90);
+                        
+                        const rowIndex = Array.from(grid.querySelectorAll('.grid-divider.row')).indexOf(divider);
+                        const prevPercent = rowIndex === 0 ? 0 : parseFloat(divider.style.top);
+                        const nextPercent = rowIndex === 4 ? 100 : parseFloat(grid.querySelectorAll('.grid-divider.row')[rowIndex + 1].style.top);
+                        
+                        if (percent > prevPercent + 10 && percent < nextPercent - 10) {
+                            divider.style.top = `${percent}%`;
+                            grid.style.setProperty(`--row${rowIndex + 1}`, `${percent - prevPercent}%`);
+                            grid.style.setProperty(`--row${rowIndex + 2}`, `${nextPercent - percent}%`);
+                        }
+                    }
+                }
+            });
+
+            // 为网格项添加可调整大小功能
+            interact('.grid-item').resizable({
+                edges: { left: true, right: true, bottom: true, top: true },
+                modifiers: [
+                    interact.modifiers.restrictEdges({
+                        outer: grid,
+                        endOnly: true
+                    }),
+                    interact.modifiers.restrictSize({
+                        min: { width: 50, height: 50 }
+                    })
+                ],
+                inertia: true
+            }).on('resizemove', function (event) {
+                const target = event.target;
+                const gridRect = grid.getBoundingClientRect();
+
+                // 计算列和行的变化
+                const startCol = parseInt(getComputedStyle(target).gridColumnStart);
+                const startRow = parseInt(getComputedStyle(target).gridRowStart);
+
+                const newWidth = event.rect.width;
+                const newHeight = event.rect.height;
+
+                const colSpan = Math.ceil(newWidth / (gridRect.width / colCount));
+                const rowSpan = Math.ceil(newHeight / (gridRect.height / rowCount));
+
+                // 更新网格项的位置和大小
+                target.style.gridColumn = `${startCol} / span ${colSpan}`;
+                target.style.gridRow = `${startRow} / span ${rowSpan}`;
+
+                // 重置样式
+                target.style.width = '';
+                target.style.height = '';
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>6行4列网格布局 - 第17个布局</h1>
+        <div class="grid-layout">
+            <!-- 列分隔线 -->
+            <div class="grid-divider col" style="left: calc(25% - 5px);"></div>
+            <div class="grid-divider col" style="left: calc(50% - 5px);"></div>
+            <div class="grid-divider col" style="left: calc(75% - 5px);"></div>
+            
+            <!-- 行分隔线 -->
+            <div class="grid-divider row" style="top: calc(16.666% - 5px);"></div>
+            <div class="grid-divider row" style="top: calc(33.333% - 5px);"></div>
+            <div class="grid-divider row" style="top: calc(50% - 5px);"></div>
+            <div class="grid-divider row" style="top: calc(66.666% - 5px);"></div>
+            <div class="grid-divider row" style="top: calc(83.333% - 5px);"></div>
+            
+            <!-- 网格项 -->
+            <div class="grid-item item-1">图形1</div>
+            <div class="grid-item item-2">图形2</div>
+            <div class="grid-item item-3">图形3</div>
+            <div class="grid-item item-4">图形4</div>
+            <div class="grid-item item-5">图形5</div>
+            <div class="grid-item item-6">图形6</div>
+            <div class="grid-item item-7">图形7</div>
+            <div class="grid-item item-8">图形8</div>
+        </div>
+    </div>
+</body>
+</html>

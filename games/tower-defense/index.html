@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塔防游戏 - 在线免费策略防御游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线塔防游戏，建造防御塔抵御敌人进攻，多种塔型和敌人类型，策略防御游戏，扁平化设计界面！">
+    <meta name="keywords" content="塔防游戏,策略游戏,防御游戏,塔防,在线游戏,免费游戏,策略防御,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>🏰 塔防游戏</h1>
+            <div class="game-subtitle">建造防御塔抵御敌人进攻</div>
+        </header>
+
+        <section class="game-interface">
+            <div class="game-board-container">
+                <canvas id="gameCanvas" width="600" height="400"></canvas>
+            </div>
+
+            <div class="control-panel">
+                <div class="game-stats">
+                    <h3>📊 游戏状态</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="health">100</div>
+                            <div class="stat-label">生命值</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="money">500</div>
+                            <div class="stat-label">金币</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="score">0</div>
+                            <div class="stat-label">分数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="kills">0</div>
+                            <div class="stat-label">击杀</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tower-shop">
+                    <h3>🏗️ 防御塔商店</h3>
+                    <div class="tower-grid">
+                        <button class="tower-btn" onclick="towerDefense.selectTower('basic')" id="basicTowerBtn">
+                            <div class="tower-icon">🔫</div>
+                            <div class="tower-name">基础塔</div>
+                            <div class="tower-cost">$50</div>
+                        </button>
+                        <button class="tower-btn" onclick="towerDefense.selectTower('cannon')" id="cannonTowerBtn">
+                            <div class="tower-icon">💥</div>
+                            <div class="tower-name">加农炮</div>
+                            <div class="tower-cost">$100</div>
+                        </button>
+                        <button class="tower-btn" onclick="towerDefense.selectTower('laser')" id="laserTowerBtn">
+                            <div class="tower-icon">🔴</div>
+                            <div class="tower-name">激光塔</div>
+                            <div class="tower-cost">$150</div>
+                        </button>
+                        <button class="tower-btn" onclick="towerDefense.selectTower('ice')" id="iceTowerBtn">
+                            <div class="tower-icon">❄️</div>
+                            <div class="tower-name">冰冻塔</div>
+                            <div class="tower-cost">$80</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="wave-info">
+                    <h3>🌊 波次信息</h3>
+                    <div class="wave-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="waveProgress"></div>
+                        </div>
+                        <div class="wave-text" id="waveText">点击开始游戏</div>
+                    </div>
+                </div>
+
+                <div class="game-controls">
+                    <div class="control-buttons">
+                        <button class="btn start-btn" onclick="towerDefense.startGame()" id="startBtn">🚀 开始游戏</button>
+                        <button class="btn" onclick="towerDefense.startWave()" id="waveBtn" disabled>🌊 开始波次</button>
+                        <button class="btn secondary" onclick="towerDefense.pauseGame()" id="pauseBtn" disabled>⏸️ 暂停</button>
+                        <button class="btn danger" onclick="towerDefense.resetGame()">🔄 重置游戏</button>
+                        <button class="btn secondary" onclick="towerDefense.showHelp()">❓ 帮助</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 游戏结束弹窗 -->
+        <div class="popup" id="gameOverPopup">
+            <div class="popup-content">
+                <h2 id="gameOverTitle">💥 游戏结束</h2>
+                <div class="final-stats">
+                    <div class="stat-display">
+                        <div class="stat-icon">🏆</div>
+                        <div>
+                            <div class="stat-label">最终分数</div>
+                            <div class="stat-value" id="finalScore">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">🌊</div>
+                        <div>
+                            <div class="stat-label">完成波次</div>
+                            <div class="stat-value" id="finalWave">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">💀</div>
+                        <div>
+                            <div class="stat-label">总击杀</div>
+                            <div class="stat-value" id="finalKills">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">🏗️</div>
+                        <div>
+                            <div class="stat-label">建造塔数</div>
+                            <div class="stat-value" id="towersBuilt">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="towerDefense.closeGameOver(); towerDefense.startGame();">再来一次</button>
+                    <button class="btn secondary" onclick="towerDefense.closeGameOver();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帮助弹窗 -->
+        <div class="popup" id="helpPopup">
+            <div class="popup-content">
+                <h2>🏰 游戏说明</h2>
+                
+                <div style="text-align: left; margin-bottom: 20px;">
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎯 游戏目标</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        建造防御塔阻止敌人到达终点，保护你的基地。敌人会沿着固定路径前进，你需要策略性地放置不同类型的塔来击败他们。
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🏗️ 防御塔类型</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>基础塔：</strong>低成本，中等伤害，射速快<br>
+                        • <strong>加农炮：</strong>高伤害，溅射效果，射速慢<br>
+                        • <strong>激光塔：</strong>持续伤害，穿透效果，高成本<br>
+                        • <strong>冰冻塔：</strong>减速敌人，辅助其他塔攻击
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎮 操作方式</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        1. 选择要建造的防御塔类型<br>
+                        2. 点击地图上的空白位置建造<br>
+                        3. 点击"开始波次"按钮开始敌人进攻<br>
+                        4. 击败敌人获得金币购买更多塔
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">💡 策略提示</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • 在敌人路径的拐角处建造塔效果更好<br>
+                        • 合理搭配不同类型的塔<br>
+                        • 优先升级关键位置的塔<br>
+                        • 注意管理金币，为后续波次做准备
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🏆 评分规则</h3>
+                    <p style="line-height: 1.6;">
+                        • 击败敌人获得分数和金币<br>
+                        • 完成波次获得奖励分数<br>
+                        • 保持满血通关获得额外奖励<br>
+                        • 使用更少的塔完成挑战获得效率奖励
+                    </p>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="towerDefense.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    
+    <script src="js/game.js"></script>
+</body>
+</html>

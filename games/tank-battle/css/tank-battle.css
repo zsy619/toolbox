@@ -1,0 +1,712 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', Arial, sans-serif;
+    background: linear-gradient(135deg, #2c3e50, #34495e, #4a6741);
+    min-height: 100vh;
+    color: #fff;
+    padding: 20px;
+    user-select: none;
+}
+
+.game-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 25px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.game-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.game-header h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #e74c3c;
+    text-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+    font-weight: bold;
+}
+
+.game-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid rgba(231, 76, 60, 0.3);
+}
+
+.stat {
+    text-align: center;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-width: 80px;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    color: #bdc3c7;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #e74c3c;
+    text-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
+}
+
+.difficulty-selector {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.difficulty-selector h3 {
+    color: #ecf0f1;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.difficulty-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.difficulty-btn {
+    padding: 12px 18px;
+    border: 3px solid rgba(231, 76, 60, 0.3);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    min-width: 120px;
+}
+
+.difficulty-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(231, 76, 60, 0.3);
+    border-color: #e74c3c;
+}
+
+.difficulty-btn.active {
+    border-color: #e74c3c;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.4);
+}
+
+.difficulty-btn span {
+    font-size: 1.5em;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.difficulty-btn div {
+    font-weight: bold;
+    margin-bottom: 3px;
+    font-size: 0.95em;
+}
+
+.difficulty-btn small {
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(45deg, #e74c3c, #c0392b);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9em;
+    min-width: 110px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+    background: linear-gradient(45deg, #c0392b, #a93226);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    background: #7f8c8d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn.secondary {
+    background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+}
+
+.btn.secondary:hover {
+    background: linear-gradient(45deg, #7f8c8d, #6c7b7d);
+    box-shadow: 0 5px 15px rgba(149, 165, 166, 0.4);
+}
+
+.game-board-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+#gameCanvas {
+    border: 3px solid #e74c3c;
+    border-radius: 12px;
+    background: #2c3e50;
+    box-shadow: 
+        0 0 30px rgba(231, 76, 60, 0.3),
+        inset 0 0 50px rgba(0, 0, 0, 0.3);
+}
+
+.mini-map {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(231, 76, 60, 0.5);
+    border-radius: 12px;
+    padding: 15px;
+    min-width: 180px;
+}
+
+.mini-map h4 {
+    color: #e74c3c;
+    margin-bottom: 12px;
+    font-size: 1em;
+    text-align: center;
+}
+
+#miniMapCanvas {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    display: block;
+    margin: 0 auto;
+}
+
+.controls-hint {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid rgba(231, 76, 60, 0.3);
+}
+
+.control-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #bdc3c7;
+    font-size: 0.9em;
+}
+
+.key {
+    background: #e74c3c;
+    color: #2c3e50;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.8em;
+    min-width: 50px;
+    text-align: center;
+}
+
+.desc {
+    font-weight: 600;
+}
+
+.game-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.tank-types-section, .power-ups-section {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid rgba(231, 76, 60, 0.3);
+}
+
+.tank-types-section h3, .power-ups-section h3 {
+    color: #e74c3c;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    text-align: center;
+}
+
+.tank-types-grid, .power-ups-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.tank-type-item, .power-up-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tank-icon, .power-icon {
+    font-size: 1.8em;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.tank-icon.player {
+    background: rgba(46, 204, 113, 0.2);
+}
+
+.tank-icon.enemy-basic {
+    background: rgba(52, 152, 219, 0.2);
+}
+
+.tank-icon.enemy-fast {
+    background: rgba(231, 76, 60, 0.2);
+}
+
+.tank-icon.enemy-heavy {
+    background: rgba(155, 89, 182, 0.2);
+}
+
+.tank-info, .power-info {
+    flex: 1;
+}
+
+.tank-name, .power-name {
+    color: #ecf0f1;
+    font-weight: bold;
+    font-size: 1em;
+    margin-bottom: 4px;
+}
+
+.tank-desc, .power-desc {
+    color: #bdc3c7;
+    font-size: 0.85em;
+    line-height: 1.3;
+}
+
+/* 弹窗样式 */
+.game-over-popup, .level-complete-popup, .help-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.game-over-popup.show, .level-complete-popup.show, .help-modal.show {
+    display: flex;
+}
+
+.popup-content, .modal-content {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(231, 76, 60, 0.6);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: popupSlideIn 0.5s ease-out;
+}
+
+@keyframes popupSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.popup-content h2 {
+    color: #e74c3c;
+    margin-bottom: 20px;
+    font-size: 2em;
+    text-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
+}
+
+.game-over-message, .level-complete-message {
+    font-size: 1.1em;
+    color: #ecf0f1;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.final-stats, .level-stats {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.final-stats p, .level-stats p {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    color: #bdc3c7;
+}
+
+.final-stats span, .level-stats span {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.new-record {
+    color: #f1c40f !important;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1em;
+    text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+}
+
+.popup-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* 帮助模态框 */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(231, 76, 60, 0.3);
+}
+
+.modal-header h2 {
+    color: #e74c3c;
+    font-size: 1.5em;
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    color: #bdc3c7;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e74c3c;
+}
+
+.modal-body {
+    text-align: left;
+}
+
+.help-section {
+    margin-bottom: 25px;
+}
+
+.help-section h3 {
+    color: #e74c3c;
+    margin-bottom: 12px;
+    font-size: 1.1em;
+    border-left: 4px solid #e74c3c;
+    padding-left: 12px;
+}
+
+.help-section p {
+    color: #bdc3c7;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.help-section ul {
+    color: #bdc3c7;
+    line-height: 1.6;
+    margin-left: 20px;
+}
+
+.help-section li {
+    margin-bottom: 8px;
+}
+
+.help-section strong {
+    color: #ecf0f1;
+    font-weight: 600;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+    .game-features {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .game-board-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .mini-map {
+        order: -1;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .game-container {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .game-header h1 {
+        font-size: 2em;
+    }
+    
+    .game-stats {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .stat {
+        min-width: 120px;
+    }
+    
+    .difficulty-buttons {
+        flex-direction: column;
+        align-items: center;
+        max-width: 250px;
+        margin: 0 auto;
+    }
+    
+    .difficulty-btn {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    #gameCanvas {
+        width: 100%;
+        height: auto;
+        max-width: 400px;
+        max-height: 400px;
+    }
+    
+    .controls-hint {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .control-item {
+        justify-content: center;
+    }
+    
+    .game-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        min-width: 200px;
+    }
+    
+    .popup-content, .modal-content {
+        padding: 25px;
+        margin: 20px;
+    }
+    
+    .popup-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .popup-actions .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .controls-hint {
+        padding: 10px;
+    }
+    
+    .control-item {
+        font-size: 0.8em;
+    }
+    
+    .key {
+        min-width: 40px;
+        padding: 3px 6px;
+        font-size: 0.7em;
+    }
+    
+    #gameCanvas {
+        max-width: 300px;
+        max-height: 300px;
+    }
+    
+    .tank-types-grid, .power-ups-grid {
+        gap: 8px;
+    }
+    
+    .tank-type-item, .power-up-item {
+        padding: 8px;
+    }
+    
+    .tank-icon, .power-icon {
+        font-size: 1.5em;
+        width: 35px;
+        height: 35px;
+    }
+}
+
+/* 游戏特效 */
+@keyframes explosion {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+.explosion {
+    animation: explosion 0.5s ease-out;
+}
+
+@keyframes muzzleFlash {
+    0% {
+        opacity: 1;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+.muzzle-flash {
+    animation: muzzleFlash 0.2s ease-out;
+}
+
+@keyframes powerUpGlow {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
+    }
+}
+
+.power-up-glow {
+    animation: powerUpGlow 1s ease-in-out infinite;
+}
+
+@keyframes shieldEffect {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+}
+
+.shield-effect {
+    animation: shieldEffect 1s ease-in-out infinite;
+}
+
+/* 状态指示器 */
+.invincible {
+    filter: brightness(1.5) saturate(1.5);
+    animation: powerUpGlow 0.5s ease-in-out infinite;
+}
+
+.rapid-fire {
+    filter: hue-rotate(60deg) brightness(1.2);
+}
+
+.damage-flash {
+    filter: brightness(2) hue-rotate(0deg);
+    animation: none;
+}

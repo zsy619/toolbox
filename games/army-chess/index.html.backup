@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>军棋游戏 - 军事策略对战</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #2d3436 0%, #636e72 50%, #b2bec3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 10px;
+        }
+
+        .game-subtitle {
+            color: #636e72;
+            font-size: 1.1em;
+        }
+
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #2d3436;
+        }
+
+        .info-item {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .red-info {
+            color: #e74c3c;
+        }
+
+        .blue-info {
+            color: #3498db;
+        }
+
+        .turn-info {
+            color: #27ae60;
+        }
+
+        .board-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .chess-board {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            grid-template-rows: repeat(12, 50px);
+            gap: 2px;
+            background: #34495e;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .chess-cell {
+            background: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .chess-cell:hover {
+            background: #d5dbdb;
+        }
+
+        .chess-cell.selected {
+            background: #f39c12;
+            color: white;
+        }
+
+        .chess-cell.possible-move {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .chess-cell.red-camp {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .chess-cell.blue-camp {
+            background: #3498db;
+            color: white;
+        }
+
+        .chess-cell.railway {
+            background: #95a5a6;
+        }
+
+        .chess-cell.headquarters {
+            background: #9b59b6;
+            color: white;
+            font-weight: bold;
+        }
+
+        .chess-piece {
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+            padding: 2px;
+        }
+
+        .red-piece {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 4px;
+        }
+
+        .blue-piece {
+            color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 4px;
+        }
+
+        .game-controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .control-button {
+            padding: 12px 25px;
+            background: #2d3436;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+
+        .control-button:hover {
+            background: #636e72;
+            transform: translateY(-2px);
+        }
+
+        .control-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: bold;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.info {
+            background: #e8f4f8;
+            color: #2980b9;
+        }
+
+        .message.success {
+            background: #d5f4e6;
+            color: #00b894;
+        }
+
+        .message.error {
+            background: #ffeaa7;
+            color: #e17055;
+        }
+
+        .piece-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .army-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .army-info h3 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .red-army h3 {
+            color: #e74c3c;
+        }
+
+        .blue-army h3 {
+            color: #3498db;
+        }
+
+        .piece-count {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .piece-item {
+            text-align: center;
+            padding: 5px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .chess-board {
+                grid-template-columns: repeat(5, 45px);
+                grid-template-rows: repeat(12, 38px);
+            }
+
+            .chess-cell {
+                font-size: 10px;
+            }
+
+            .chess-piece {
+                font-size: 8px;
+            }
+
+            .piece-info {
+                grid-template-columns: 1fr;
+            }
+
+            .game-title {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">🎖️ 军棋对战</h1>
+            <p class="game-subtitle">军事策略棋类游戏 - 运筹帷幄，决胜千里！</p>
+        </div>
+
+        <div class="game-info">
+            <div class="info-item red-info">
+                红军剩余: <span id="redCount">25</span>
+            </div>
+            <div class="info-item turn-info">
+                当前回合: <span id="currentTurn">红军</span>
+            </div>
+            <div class="info-item blue-info">
+                蓝军剩余: <span id="blueCount">25</span>
+            </div>
+        </div>
+
+        <div class="board-container">
+            <div class="chess-board" id="chessBoard">
+                <!-- 棋盘动态生成 -->
+            </div>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="piece-info">
+            <div class="army-info red-army">
+                <h3>🔴 红军兵力</h3>
+                <div class="piece-count" id="redPieceCount">
+                    <!-- 红军棋子统计 -->
+                </div>
+            </div>
+            <div class="army-info blue-army">
+                <h3>🔵 蓝军兵力</h3>
+                <div class="piece-count" id="bluePieceCount">
+                    <!-- 蓝军棋子统计 -->
+                </div>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button class="control-button" id="startButton">开始游戏</button>
+            <button class="control-button" id="resetButton">重新开始</button>
+            <button class="control-button" id="hintButton">提示</button>
+        </div>
+    </div>
+
+    <script>
+        class ArmyChess {
+            constructor() {
+                this.board = [];
+                this.currentPlayer = 'red';
+                this.selectedPiece = null;
+                this.gameStarted = false;
+                this.gameEnded = false;
+                
+                // 军棋棋子定义
+                this.pieces = {
+                    '司令': { rank: 1, count: 1, symbol: '司' },
+                    '军长': { rank: 2, count: 1, symbol: '军' },
+                    '师长': { rank: 3, count: 2, symbol: '师' },
+                    '旅长': { rank: 4, count: 2, symbol: '旅' },
+                    '团长': { rank: 5, count: 2, symbol: '团' },
+                    '营长': { rank: 6, count: 2, symbol: '营' },
+                    '连长': { rank: 7, count: 3, symbol: '连' },
+                    '排长': { rank: 8, count: 3, symbol: '排' },
+                    '工兵': { rank: 9, count: 3, symbol: '工' },
+                    '地雷': { rank: 10, count: 3, symbol: '雷' },
+                    '炸弹': { rank: 11, count: 2, symbol: '炸' },
+                    '军旗': { rank: 12, count: 1, symbol: '旗' }
+                };
+                
+                this.initBoard();
+                this.bindEvents();
+                this.renderBoard();
+                this.updatePieceCount();
+            }
+
+            initBoard() {
+                // 初始化12x5的棋盘
+                this.board = Array(12).fill(null).map(() => Array(5).fill(null));
+                
+                // 设置特殊地形
+                this.setupTerrain();
+                
+                // 放置棋子
+                this.setupPieces();
+            }
+
+            setupTerrain() {
+                // 设置铁路线（可以快速移动）
+                for (let col = 1; col < 4; col++) {
+                    this.board[1][col] = { type: 'railway' };
+                    this.board[5][col] = { type: 'railway' };
+                    this.board[6][col] = { type: 'railway' };
+                    this.board[10][col] = { type: 'railway' };
+                }
+                
+                // 设置大本营
+                this.board[0][1] = { type: 'headquarters', camp: 'red' };
+                this.board[0][3] = { type: 'headquarters', camp: 'red' };
+                this.board[11][1] = { type: 'headquarters', camp: 'blue' };
+                this.board[11][3] = { type: 'headquarters', camp: 'blue' };
+            }
+
+            setupPieces() {
+                // 随机布置红军棋子（下方）
+                this.placePiecesRandomly('red', 7, 11);
+                
+                // 随机布置蓝军棋子（上方）
+                this.placePiecesRandomly('blue', 0, 4);
+            }
+
+            placePiecesRandomly(color, startRow, endRow) {
+                const availablePositions = [];
+                
+                // 收集可用位置
+                for (let row = startRow; row <= endRow; row++) {
+                    for (let col = 0; col < 5; col++) {
+                        if (!this.board[row][col] || 
+                            (this.board[row][col].type !== 'headquarters')) {
+                            availablePositions.push([row, col]);
+                        }
+                    }
+                }
+                
+                // 创建棋子列表
+                const pieceList = [];
+                Object.entries(this.pieces).forEach(([name, info]) => {
+                    for (let i = 0; i < info.count; i++) {
+                        pieceList.push({
+                            name,
+                            rank: info.rank,
+                            symbol: info.symbol,
+                            color,
+                            hidden: true // 军棋中棋子是暗棋
+                        });
+                    }
+                });
+                
+                // 随机放置
+                for (let i = 0; i < pieceList.length && availablePositions.length > 0; i++) {
+                    const randomIndex = Math.floor(Math.random() * availablePositions.length);
+                    const [row, col] = availablePositions[randomIndex];
+                    
+                    this.board[row][col] = {
+                        ...this.board[row][col],
+                        piece: pieceList[i]
+                    };
+                    
+                    availablePositions.splice(randomIndex, 1);
+                }
+                
+                // 特殊处理：军旗和地雷只能放在后排
+                this.adjustSpecialPieces(color, startRow, endRow);
+            }
+
+            adjustSpecialPieces(color, startRow, endRow) {
+                // 确保军旗在大本营，地雷在后两排
+                const flagRow = color === 'red' ? 11 : 0;
+                const mineRows = color === 'red' ? [10, 11] : [0, 1];
+                
+                // 找到军旗并移到大本营
+                for (let row = startRow; row <= endRow; row++) {
+                    for (let col = 0; col < 5; col++) {
+                        if (this.board[row][col]?.piece?.name === '军旗') {
+                            const piece = this.board[row][col].piece;
+                            this.board[row][col] = { ...this.board[row][col], piece: null };
+                            
+                            // 放到大本营
+                            const flagPositions = [[flagRow, 1], [flagRow, 3]];
+                            const randomFlag = flagPositions[Math.floor(Math.random() * 2)];
+                            this.board[randomFlag[0]][randomFlag[1]] = {
+                                ...this.board[randomFlag[0]][randomFlag[1]],
+                                piece
+                            };
+                            break;
+                        }
+                    }
+                }
+            }
+
+            bindEvents() {
+                document.getElementById('startButton').addEventListener('click', () => {
+                    this.startGame();
+                });
+
+                document.getElementById('resetButton').addEventListener('click', () => {
+                    this.resetGame();
+                });
+
+                document.getElementById('hintButton').addEventListener('click', () => {
+                    this.showHint();
+                });
+
+                document.getElementById('chessBoard').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('chess-cell')) {
+                        const row = parseInt(e.target.dataset.row);
+                        const col = parseInt(e.target.dataset.col);
+                        this.handleCellClick(row, col);
+                    }
+                });
+            }
+
+            startGame() {
+                this.gameStarted = true;
+                this.gameEnded = false;
+                this.currentPlayer = 'red';
+                document.getElementById('startButton').style.display = 'none';
+                this.showMessage('游戏开始！红军先行', 'info');
+                this.renderBoard();
+            }
+
+            resetGame() {
+                this.gameStarted = false;
+                this.gameEnded = false;
+                this.selectedPiece = null;
+                this.currentPlayer = 'red';
+                this.initBoard();
+                this.renderBoard();
+                this.updatePieceCount();
+                document.getElementById('startButton').style.display = 'inline-block';
+                this.hideMessage();
+            }
+
+            handleCellClick(row, col) {
+                if (!this.gameStarted || this.gameEnded) return;
+
+                const cell = this.board[row][col];
+                
+                if (this.selectedPiece) {
+                    // 尝试移动棋子
+                    this.attemptMove(this.selectedPiece.row, this.selectedPiece.col, row, col);
+                } else if (cell?.piece && cell.piece.color === this.currentPlayer) {
+                    // 选择棋子
+                    this.selectPiece(row, col);
+                }
+            }
+
+            selectPiece(row, col) {
+                this.selectedPiece = { row, col };
+                this.renderBoard();
+                this.showPossibleMoves(row, col);
+            }
+
+            showPossibleMoves(row, col) {
+                const piece = this.board[row][col]?.piece;
+                if (!piece) return;
+
+                const moves = this.getPossibleMoves(row, col);
+                moves.forEach(([r, c]) => {
+                    const cell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                    if (cell) {
+                        cell.classList.add('possible-move');
+                    }
+                });
+            }
+
+            getPossibleMoves(row, col) {
+                const piece = this.board[row][col]?.piece;
+                if (!piece) return [];
+
+                const moves = [];
+                const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]; // 上下左右
+
+                if (piece.name === '工兵') {
+                    // 工兵可以沿铁路线移动
+                    return this.getEngineerMoves(row, col);
+                }
+
+                // 普通棋子只能移动一格
+                directions.forEach(([dr, dc]) => {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    
+                    if (this.isValidPosition(newRow, newCol)) {
+                        const targetCell = this.board[newRow][newCol];
+                        
+                        // 可以移动到空位或敌方棋子位置
+                        if (!targetCell?.piece || 
+                            targetCell.piece.color !== piece.color) {
+                            moves.push([newRow, newCol]);
+                        }
+                    }
+                });
+
+                return moves;
+            }
+
+            getEngineerMoves(row, col) {
+                // 工兵特殊移动规则（简化版）
+                const moves = [];
+                const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+                directions.forEach(([dr, dc]) => {
+                    let newRow = row + dr;
+                    let newCol = col + dc;
+                    
+                    while (this.isValidPosition(newRow, newCol)) {
+                        const targetCell = this.board[newRow][newCol];
+                        
+                        if (!targetCell?.piece) {
+                            moves.push([newRow, newCol]);
+                        } else if (targetCell.piece.color !== this.currentPlayer) {
+                            moves.push([newRow, newCol]);
+                            break;
+                        } else {
+                            break;
+                        }
+                        
+                        newRow += dr;
+                        newCol += dc;
+                    }
+                });
+
+                return moves;
+            }
+
+            attemptMove(fromRow, fromCol, toRow, toCol) {
+                const piece = this.board[fromRow][fromCol]?.piece;
+                const target = this.board[toRow][toCol];
+
+                if (!piece) return;
+
+                const possibleMoves = this.getPossibleMoves(fromRow, fromCol);
+                const isValidMove = possibleMoves.some(([r, c]) => r === toRow && c === toCol);
+
+                if (!isValidMove) {
+                    this.showMessage('无效移动！', 'error');
+                    this.clearSelection();
+                    return;
+                }
+
+                // 处理战斗
+                if (target?.piece) {
+                    const battleResult = this.resolveBattle(piece, target.piece);
+                    this.showMessage(battleResult.message, battleResult.type);
+                    
+                    if (battleResult.winner === piece) {
+                        this.movePiece(fromRow, fromCol, toRow, toCol);
+                    } else if (battleResult.winner === target.piece) {
+                        // 攻击方失败，移除攻击方棋子
+                        this.board[fromRow][fromCol] = { ...this.board[fromRow][fromCol], piece: null };
+                        this.revealPiece(toRow, toCol);
+                    } else {
+                        // 同归于尽
+                        this.board[fromRow][fromCol] = { ...this.board[fromRow][fromCol], piece: null };
+                        this.board[toRow][toCol] = { ...this.board[toRow][toCol], piece: null };
+                    }
+                } else {
+                    this.movePiece(fromRow, fromCol, toRow, toCol);
+                    this.showMessage(`${piece.name}移动到新位置`, 'info');
+                }
+
+                this.clearSelection();
+                this.checkGameEnd();
+                this.switchPlayer();
+                this.updatePieceCount();
+                this.renderBoard();
+            }
+
+            movePiece(fromRow, fromCol, toRow, toCol) {
+                const piece = this.board[fromRow][fromCol].piece;
+                this.board[toRow][toCol] = { ...this.board[toRow][toCol], piece };
+                this.board[fromRow][fromCol] = { ...this.board[fromRow][fromCol], piece: null };
+                this.revealPiece(toRow, toCol);
+            }
+
+            revealPiece(row, col) {
+                const piece = this.board[row][col]?.piece;
+                if (piece) {
+                    piece.hidden = false;
+                }
+            }
+
+            resolveBattle(attacker, defender) {
+                // 军棋战斗规则
+                this.revealPiece(this.selectedPiece.row, this.selectedPiece.col);
+                
+                // 特殊规则
+                if (defender.name === '地雷') {
+                    if (attacker.name === '工兵') {
+                        return {
+                            winner: attacker,
+                            message: '工兵成功排雷！',
+                            type: 'success'
+                        };
+                    } else {
+                        return {
+                            winner: defender,
+                            message: `${attacker.name}触雷阵亡！`,
+                            type: 'error'
+                        };
+                    }
+                }
+
+                if (defender.name === '军旗') {
+                    return {
+                        winner: attacker,
+                        message: `${attacker.name}夺取军旗！游戏结束！`,
+                        type: 'success'
+                    };
+                }
+
+                if (attacker.name === '炸弹') {
+                    return {
+                        winner: null,
+                        message: '炸弹爆炸！同归于尽！',
+                        type: 'info'
+                    };
+                }
+
+                if (defender.name === '炸弹') {
+                    return {
+                        winner: null,
+                        message: '触发炸弹！同归于尽！',
+                        type: 'info'
+                    };
+                }
+
+                // 按军衔比较
+                if (attacker.rank < defender.rank) {
+                    return {
+                        winner: attacker,
+                        message: `${attacker.name}击败${defender.name}！`,
+                        type: 'success'
+                    };
+                } else if (attacker.rank > defender.rank) {
+                    return {
+                        winner: defender,
+                        message: `${defender.name}击败${attacker.name}！`,
+                        type: 'error'
+                    };
+                } else {
+                    return {
+                        winner: null,
+                        message: `${attacker.name}与${defender.name}同归于尽！`,
+                        type: 'info'
+                    };
+                }
+            }
+
+            clearSelection() {
+                this.selectedPiece = null;
+                this.renderBoard();
+            }
+
+            switchPlayer() {
+                this.currentPlayer = this.currentPlayer === 'red' ? 'blue' : 'red';
+                document.getElementById('currentTurn').textContent = 
+                    this.currentPlayer === 'red' ? '红军' : '蓝军';
+            }
+
+            checkGameEnd() {
+                let redFlag = false, blueFlag = false;
+                let redPieces = 0, bluePieces = 0;
+
+                for (let row = 0; row < 12; row++) {
+                    for (let col = 0; col < 5; col++) {
+                        const piece = this.board[row][col]?.piece;
+                        if (piece) {
+                            if (piece.color === 'red') {
+                                redPieces++;
+                                if (piece.name === '军旗') redFlag = true;
+                            } else {
+                                bluePieces++;
+                                if (piece.name === '军旗') blueFlag = true;
+                            }
+                        }
+                    }
+                }
+
+                if (!redFlag) {
+                    this.endGame('蓝军胜利！夺取红军军旗！');
+                } else if (!blueFlag) {
+                    this.endGame('红军胜利！夺取蓝军军旗！');
+                } else if (redPieces <= 1) {
+                    this.endGame('蓝军胜利！红军无子可动！');
+                } else if (bluePieces <= 1) {
+                    this.endGame('红军胜利！蓝军无子可动！');
+                }
+            }
+
+            endGame(message) {
+                this.gameEnded = true;
+                this.showMessage(message, 'success');
+                
+                // 显示所有棋子
+                for (let row = 0; row < 12; row++) {
+                    for (let col = 0; col < 5; col++) {
+                        const piece = this.board[row][col]?.piece;
+                        if (piece) {
+                            piece.hidden = false;
+                        }
+                    }
+                }
+                
+                this.renderBoard();
+            }
+
+            showHint() {
+                if (!this.gameStarted || this.gameEnded) return;
+
+                const currentPieces = [];
+                for (let row = 0; row < 12; row++) {
+                    for (let col = 0; col < 5; col++) {
+                        const piece = this.board[row][col]?.piece;
+                        if (piece && piece.color === this.currentPlayer) {
+                            const moves = this.getPossibleMoves(row, col);
+                            if (moves.length > 0) {
+                                currentPieces.push({ row, col, moves: moves.length });
+                            }
+                        }
+                    }
+                }
+
+                if (currentPieces.length > 0) {
+                    // 建议移动最多可能移动的棋子
+                    const bestPiece = currentPieces.reduce((best, current) => 
+                        current.moves > best.moves ? current : best
+                    );
+                    
+                    this.selectPiece(bestPiece.row, bestPiece.col);
+                    this.showMessage(`建议移动位置 (${bestPiece.row}, ${bestPiece.col}) 的棋子`, 'info');
+                } else {
+                    this.showMessage('无可移动棋子！', 'error');
+                }
+            }
+
+            isValidPosition(row, col) {
+                return row >= 0 && row < 12 && col >= 0 && col < 5;
+            }
+
+            renderBoard() {
+                const board = document.getElementById('chessBoard');
+                board.innerHTML = '';
+
+                for (let row = 0; row < 12; row++) {
+                    for (let col = 0; col < 5; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'chess-cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+
+                        const cellData = this.board[row][col];
+                        
+                        // 设置地形样式
+                        if (cellData?.type === 'railway') {
+                            cell.classList.add('railway');
+                        } else if (cellData?.type === 'headquarters') {
+                            cell.classList.add('headquarters');
+                            if (cellData.camp) {
+                                cell.classList.add(`${cellData.camp}-camp`);
+                            }
+                        }
+
+                        // 显示棋子
+                        if (cellData?.piece) {
+                            const piece = cellData.piece;
+                            const pieceDiv = document.createElement('div');
+                            pieceDiv.className = `chess-piece ${piece.color}-piece`;
+                            
+                            if (piece.hidden && this.gameStarted && !this.gameEnded) {
+                                pieceDiv.textContent = '?';
+                            } else {
+                                pieceDiv.textContent = piece.symbol;
+                            }
+                            
+                            cell.appendChild(pieceDiv);
+                        }
+
+                        // 高亮选中的棋子
+                        if (this.selectedPiece && 
+                            this.selectedPiece.row === row && 
+                            this.selectedPiece.col === col) {
+                            cell.classList.add('selected');
+                        }
+
+                        board.appendChild(cell);
+                    }
+                }
+            }
+
+            updatePieceCount() {
+                let redCount = 0, blueCount = 0;
+                const redPieces = {}, bluePieces = {};
+
+                for (let row = 0; row < 12; row++) {
+                    for (let col = 0; col < 5; col++) {
+                        const piece = this.board[row][col]?.piece;
+                        if (piece) {
+                            if (piece.color === 'red') {
+                                redCount++;
+                                redPieces[piece.name] = (redPieces[piece.name] || 0) + 1;
+                            } else {
+                                blueCount++;
+                                bluePieces[piece.name] = (bluePieces[piece.name] || 0) + 1;
+                            }
+                        }
+                    }
+                }
+
+                document.getElementById('redCount').textContent = redCount;
+                document.getElementById('blueCount').textContent = blueCount;
+
+                this.updatePieceCountDisplay('redPieceCount', redPieces);
+                this.updatePieceCountDisplay('bluePieceCount', bluePieces);
+            }
+
+            updatePieceCountDisplay(elementId, pieceCount) {
+                const container = document.getElementById(elementId);
+                container.innerHTML = '';
+
+                Object.entries(this.pieces).forEach(([name, info]) => {
+                    const count = pieceCount[name] || 0;
+                    const item = document.createElement('div');
+                    item.className = 'piece-item';
+                    item.innerHTML = `${info.symbol}<br>${count}`;
+                    container.appendChild(item);
+                });
+            }
+
+            showMessage(text, type) {
+                const message = document.getElementById('message');
+                message.textContent = text;
+                message.className = `message ${type} show`;
+            }
+
+            hideMessage() {
+                const message = document.getElementById('message');
+                message.classList.remove('show');
+            }
+        }
+
+        // 启动游戏
+        window.addEventListener('load', () => {
+            new ArmyChess();
+        });
+    </script>
+</body>
+</html>

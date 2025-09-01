@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>农场游戏 - 快乐农场经营</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #00b894 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 10px;
+        }
+
+        .game-subtitle {
+            color: #636e72;
+            font-size: 1.1em;
+        }
+
+        .game-canvas {
+            border: 4px solid #2d3436;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+            background: #55a3ff;
+            cursor: pointer;
+        }
+
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #2d3436;
+            font-size: 1em;
+        }
+
+        .info-item {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .money-info {
+            color: #f39c12;
+        }
+
+        .level-info {
+            color: #9b59b6;
+        }
+
+        .time-info {
+            color: #3498db;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .controls h3 {
+            color: #2d3436;
+            margin-bottom: 15px;
+        }
+
+        .control-item {
+            display: inline-block;
+            margin: 5px 15px;
+            padding: 8px 16px;
+            background: #00b894;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-weight: bold;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.harvest {
+            background: #55efc4;
+            color: #2d3436;
+        }
+
+        .message.plant {
+            background: #fdcb6e;
+            color: #2d3436;
+        }
+
+        .message.level-up {
+            background: #fd79a8;
+            color: white;
+        }
+
+        .start-button {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 30px;
+            background: #00b894;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-button:hover {
+            background: #00a085;
+            transform: translateY(-2px);
+        }
+
+        .shop {
+            background: #2d3436;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .shop h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .shop-item {
+            background: #636e72;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .shop-item:hover {
+            background: #74b9ff;
+            transform: translateY(-2px);
+        }
+
+        .shop-item.selected {
+            background: #00b894;
+            transform: scale(1.1);
+        }
+
+        .inventory {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .inventory h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #2d3436;
+        }
+
+        .inventory-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+        }
+
+        .inventory-item {
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.8em;
+            border: 2px solid #ddd;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .game-canvas {
+                width: 100%;
+                height: auto;
+            }
+
+            .game-info {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .control-item {
+                display: block;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">🚜 农场游戏</h1>
+            <p class="game-subtitle">快乐农场经营 - 种植作物，体验田园生活！</p>
+        </div>
+
+        <div class="game-info">
+            <div class="info-item money-info">
+                金币: <span id="money">100</span>
+            </div>
+            <div class="info-item level-info">
+                等级: <span id="level">1</span>
+            </div>
+            <div class="info-item time-info">
+                天数: <span id="day">1</span>
+            </div>
+            <div class="info-item">
+                经验: <span id="exp">0</span>/100
+            </div>
+        </div>
+
+        <div class="shop">
+            <h3>🏪 种子商店</h3>
+            <div class="shop-items">
+                <div class="shop-item selected" data-seed="wheat">
+                    🌾 小麦<br>💰10
+                </div>
+                <div class="shop-item" data-seed="corn">
+                    🌽 玉米<br>💰20
+                </div>
+                <div class="shop-item" data-seed="tomato">
+                    🍅 番茄<br>💰30
+                </div>
+                <div class="shop-item" data-seed="carrot">
+                    🥕 胡萝卜<br>💰15
+                </div>
+                <div class="shop-item" data-seed="potato">
+                    🥔 土豆<br>💰25
+                </div>
+                <div class="shop-item" data-seed="strawberry">
+                    🍓 草莓<br>💰40
+                </div>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas" class="game-canvas" width="900" height="500"></canvas>
+
+        <div class="inventory">
+            <h3>📦 仓库</h3>
+            <div class="inventory-items" id="inventoryItems">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <button class="start-button" id="startButton">开始游戏</button>
+
+        <div class="controls">
+            <h3>🎮 游戏控制</h3>
+            <div class="control-item">选择种子 - 点击商店中的种子</div>
+            <div class="control-item">种植 - 点击空地种植作物</div>
+            <div class="control-item">收获 - 点击成熟的作物收获</div>
+            <div class="control-item">等待作物成长并出售赚钱</div>
+        </div>
+    </div>
+
+    <script>
+        class FarmGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.canvas.width = 900;
+                this.canvas.height = 500;
+                
+                this.gameState = 'menu';
+                this.money = 100;
+                this.level = 1;
+                this.day = 1;
+                this.exp = 0;
+                this.expNeeded = 100;
+                
+                this.selectedSeed = 'wheat';
+                this.inventory = {};
+                this.farm = [];
+                this.gameTime = 0;
+                this.dayLength = 30000; // 30秒一天
+                
+                this.seeds = {
+                    wheat: { name: '小麦', cost: 10, growTime: 5000, sellPrice: 15, emoji: '🌾' },
+                    corn: { name: '玉米', cost: 20, growTime: 8000, sellPrice: 35, emoji: '🌽' },
+                    tomato: { name: '番茄', cost: 30, growTime: 12000, sellPrice: 50, emoji: '🍅' },
+                    carrot: { name: '胡萝卜', cost: 15, growTime: 6000, sellPrice: 25, emoji: '🥕' },
+                    potato: { name: '土豆', cost: 25, growTime: 10000, sellPrice: 40, emoji: '🥔' },
+                    strawberry: { name: '草莓', cost: 40, growTime: 15000, sellPrice: 70, emoji: '🍓' }
+                };
+                
+                this.farmGrid = {
+                    rows: 6,
+                    cols: 10,
+                    cellSize: 80,
+                    startX: 50,
+                    startY: 50
+                };
+                
+                this.initializeFarm();
+                this.bindEvents();
+                this.updateUI();
+            }
+
+            initializeFarm() {
+                this.farm = [];
+                for (let row = 0; row < this.farmGrid.rows; row++) {
+                    this.farm[row] = [];
+                    for (let col = 0; col < this.farmGrid.cols; col++) {
+                        this.farm[row][col] = {
+                            type: 'empty',
+                            plantTime: 0,
+                            seedType: null,
+                            x: this.farmGrid.startX + col * this.farmGrid.cellSize,
+                            y: this.farmGrid.startY + row * this.farmGrid.cellSize,
+                            width: this.farmGrid.cellSize - 5,
+                            height: this.farmGrid.cellSize - 5
+                        };
+                    }
+                }
+                
+                // 初始化仓库
+                this.inventory = {
+                    wheat: 0,
+                    corn: 0,
+                    tomato: 0,
+                    carrot: 0,
+                    potato: 0,
+                    strawberry: 0
+                };
+            }
+
+            bindEvents() {
+                document.getElementById('startButton').addEventListener('click', () => {
+                    this.startGame();
+                });
+                
+                // 种子选择
+                document.querySelectorAll('.shop-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        this.selectSeed(e.currentTarget.dataset.seed);
+                    });
+                });
+                
+                this.canvas.addEventListener('click', (e) => {
+                    if (this.gameState === 'playing') {
+                        this.handleCanvasClick(e);
+                    }
+                });
+            }
+
+            selectSeed(seedType) {
+                this.selectedSeed = seedType;
+                document.querySelectorAll('.shop-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                document.querySelector(`[data-seed="${seedType}"]`).classList.add('selected');
+            }
+
+            handleCanvasClick(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // 确定点击的格子
+                const col = Math.floor((x - this.farmGrid.startX) / this.farmGrid.cellSize);
+                const row = Math.floor((y - this.farmGrid.startY) / this.farmGrid.cellSize);
+                
+                if (row >= 0 && row < this.farmGrid.rows && col >= 0 && col < this.farmGrid.cols) {
+                    const plot = this.farm[row][col];
+                    
+                    if (plot.type === 'empty') {
+                        this.plantSeed(row, col);
+                    } else if (plot.type === 'mature') {
+                        this.harvestCrop(row, col);
+                    }
+                }
+            }
+
+            plantSeed(row, col) {
+                const seed = this.seeds[this.selectedSeed];
+                if (this.money >= seed.cost) {
+                    this.money -= seed.cost;
+                    this.farm[row][col] = {
+                        ...this.farm[row][col],
+                        type: 'growing',
+                        seedType: this.selectedSeed,
+                        plantTime: Date.now()
+                    };
+                    
+                    this.showMessage(`种植了${seed.name}！`, 'plant');
+                    this.updateUI();
+                } else {
+                    this.showMessage('金币不足！', 'plant');
+                }
+            }
+
+            harvestCrop(row, col) {
+                const plot = this.farm[row][col];
+                const seed = this.seeds[plot.seedType];
+                
+                this.inventory[plot.seedType]++;
+                this.money += seed.sellPrice;
+                this.exp += 10;
+                
+                this.farm[row][col] = {
+                    ...this.farm[row][col],
+                    type: 'empty',
+                    seedType: null,
+                    plantTime: 0
+                };
+                
+                this.showMessage(`收获了${seed.name}！+${seed.sellPrice}金币`, 'harvest');
+                this.checkLevelUp();
+                this.updateUI();
+            }
+
+            checkLevelUp() {
+                if (this.exp >= this.expNeeded) {
+                    this.level++;
+                    this.exp -= this.expNeeded;
+                    this.expNeeded = Math.floor(this.expNeeded * 1.5);
+                    this.showMessage(`升级了！现在是${this.level}级！`, 'level-up');
+                }
+            }
+
+            startGame() {
+                this.gameState = 'playing';
+                this.gameTime = Date.now();
+                this.initializeFarm();
+                this.money = 100;
+                this.level = 1;
+                this.day = 1;
+                this.exp = 0;
+                this.expNeeded = 100;
+                this.updateUI();
+                this.hideMessage();
+                document.getElementById('startButton').style.display = 'none';
+                this.gameLoop();
+            }
+
+            gameLoop() {
+                if (this.gameState === 'playing') {
+                    this.update();
+                    this.draw();
+                    requestAnimationFrame(() => this.gameLoop());
+                }
+            }
+
+            update() {
+                const currentTime = Date.now();
+                
+                // 更新天数
+                if (currentTime - this.gameTime > this.dayLength) {
+                    this.day++;
+                    this.gameTime = currentTime;
+                    this.showMessage(`新的一天开始了！第${this.day}天`, 'plant');
+                }
+                
+                // 更新作物生长状态
+                for (let row = 0; row < this.farmGrid.rows; row++) {
+                    for (let col = 0; col < this.farmGrid.cols; col++) {
+                        const plot = this.farm[row][col];
+                        if (plot.type === 'growing') {
+                            const growTime = this.seeds[plot.seedType].growTime;
+                            if (currentTime - plot.plantTime > growTime) {
+                                plot.type = 'mature';
+                            }
+                        }
+                    }
+                }
+            }
+
+            draw() {
+                // 清空画布
+                this.ctx.fillStyle = '#55a3ff';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 绘制农场背景
+                this.drawFarmBackground();
+                
+                // 绘制农场格子
+                this.drawFarmGrid();
+                
+                // 绘制作物
+                this.drawCrops();
+            }
+
+            drawFarmBackground() {
+                // 绘制天空渐变
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                gradient.addColorStop(0, '#87CEEB');
+                gradient.addColorStop(1, '#98FB98');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 绘制云朵
+                this.drawClouds();
+                
+                // 绘制太阳
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.beginPath();
+                this.ctx.arc(this.canvas.width - 80, 80, 40, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // 太阳光线
+                this.ctx.strokeStyle = '#FFD700';
+                this.ctx.lineWidth = 3;
+                for (let i = 0; i < 8; i++) {
+                    const angle = (Math.PI * 2 / 8) * i;
+                    const startX = (this.canvas.width - 80) + Math.cos(angle) * 50;
+                    const startY = 80 + Math.sin(angle) * 50;
+                    const endX = (this.canvas.width - 80) + Math.cos(angle) * 70;
+                    const endY = 80 + Math.sin(angle) * 70;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(startX, startY);
+                    this.ctx.lineTo(endX, endY);
+                    this.ctx.stroke();
+                }
+            }
+
+            drawClouds() {
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                
+                // 云朵1
+                this.ctx.beginPath();
+                this.ctx.arc(150, 80, 25, 0, Math.PI * 2);
+                this.ctx.arc(180, 80, 35, 0, Math.PI * 2);
+                this.ctx.arc(210, 80, 25, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // 云朵2
+                this.ctx.beginPath();
+                this.ctx.arc(400, 60, 20, 0, Math.PI * 2);
+                this.ctx.arc(425, 60, 30, 0, Math.PI * 2);
+                this.ctx.arc(450, 60, 20, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+
+            drawFarmGrid() {
+                for (let row = 0; row < this.farmGrid.rows; row++) {
+                    for (let col = 0; col < this.farmGrid.cols; col++) {
+                        const plot = this.farm[row][col];
+                        
+                        // 绘制土地
+                        this.ctx.fillStyle = plot.type === 'empty' ? '#8B4513' : '#654321';
+                        this.ctx.fillRect(plot.x, plot.y, plot.width, plot.height);
+                        
+                        // 绘制边框
+                        this.ctx.strokeStyle = '#2F4F2F';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.strokeRect(plot.x, plot.y, plot.width, plot.height);
+                        
+                        // 绘制网格纹理
+                        if (plot.type === 'empty') {
+                            this.ctx.strokeStyle = '#A0522D';
+                            this.ctx.lineWidth = 1;
+                            for (let i = 0; i < 4; i++) {
+                                this.ctx.beginPath();
+                                this.ctx.moveTo(plot.x + 10 + i * 15, plot.y + 10);
+                                this.ctx.lineTo(plot.x + 25 + i * 15, plot.y + plot.height - 10);
+                                this.ctx.stroke();
+                            }
+                        }
+                    }
+                }
+            }
+
+            drawCrops() {
+                for (let row = 0; row < this.farmGrid.rows; row++) {
+                    for (let col = 0; col < this.farmGrid.cols; col++) {
+                        const plot = this.farm[row][col];
+                        
+                        if (plot.type === 'growing' || plot.type === 'mature') {
+                            const seed = this.seeds[plot.seedType];
+                            const centerX = plot.x + plot.width / 2;
+                            const centerY = plot.y + plot.height / 2;
+                            
+                            if (plot.type === 'growing') {
+                                // 绘制生长中的作物
+                                const currentTime = Date.now();
+                                const growProgress = (currentTime - plot.plantTime) / seed.growTime;
+                                const size = Math.min(growProgress, 0.8) * 40;
+                                
+                                this.ctx.fillStyle = '#228B22';
+                                this.ctx.fillRect(centerX - size/2, centerY - size/2, size, size/2);
+                                
+                                // 进度条
+                                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                                this.ctx.fillRect(plot.x + 5, plot.y + 5, plot.width - 10, 4);
+                                this.ctx.fillStyle = '#00FF00';
+                                this.ctx.fillRect(plot.x + 5, plot.y + 5, (plot.width - 10) * growProgress, 4);
+                            } else if (plot.type === 'mature') {
+                                // 绘制成熟的作物
+                                this.ctx.font = '36px Arial';
+                                this.ctx.textAlign = 'center';
+                                this.ctx.fillText(seed.emoji, centerX, centerY + 12);
+                                
+                                // 闪烁效果
+                                if (Math.floor(Date.now() / 500) % 2) {
+                                    this.ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+                                    this.ctx.fillRect(plot.x, plot.y, plot.width, plot.height);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            updateUI() {
+                document.getElementById('money').textContent = this.money;
+                document.getElementById('level').textContent = this.level;
+                document.getElementById('day').textContent = this.day;
+                document.getElementById('exp').textContent = `${this.exp}/${this.expNeeded}`;
+                
+                // 更新仓库
+                const inventoryContainer = document.getElementById('inventoryItems');
+                inventoryContainer.innerHTML = '';
+                
+                Object.entries(this.inventory).forEach(([type, count]) => {
+                    if (count > 0) {
+                        const item = document.createElement('div');
+                        item.className = 'inventory-item';
+                        item.innerHTML = `${this.seeds[type].emoji}<br>${this.seeds[type].name}<br>×${count}`;
+                        inventoryContainer.appendChild(item);
+                    }
+                });
+            }
+
+            showMessage(text, type) {
+                const message = document.getElementById('message');
+                message.textContent = text;
+                message.className = `message ${type} show`;
+                
+                setTimeout(() => {
+                    this.hideMessage();
+                }, 2000);
+            }
+
+            hideMessage() {
+                const message = document.getElementById('message');
+                message.classList.remove('show');
+            }
+        }
+
+        // 启动游戏
+        window.addEventListener('load', () => {
+            new FarmGame();
+        });
+    </script>
+</body>
+</html>

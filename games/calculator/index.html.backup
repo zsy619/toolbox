@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能计算器 - Calculator | 多功能科学计算工具</title>
+    <meta name="description" content="功能强大的智能计算器！支持基础运算、科学计算、单位换算、历史记录和多种主题，满足日常学习和工作的各种计算需求。">
+    <meta name="keywords" content="计算器,Calculator,科学计算器,单位换算,数学计算,工程计算,在线计算工具">
+    <meta name="author" content="Game Creator">
+    <meta property="og:title" content="智能计算器 - Calculator">
+    <meta property="og:description" content="功能强大的智能计算器，支持科学计算和单位换算">
+    <meta property="og:type" content="game">
+    <link rel="canonical" href="/games/calculator/">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .calculator-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-calculator {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            max-width: 90vw;
+            margin-top: 100px;
+        }
+
+        .calculator-display {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 25px 20px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .display-history {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            text-align: right;
+            margin-bottom: 5px;
+            min-height: 20px;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        }
+
+        .display-main {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-align: right;
+            word-wrap: break-word;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        }
+
+        .display-unit {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            text-align: right;
+            margin-top: 5px;
+            min-height: 16px;
+        }
+
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .calc-button {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .calc-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .calc-button:active {
+            transform: translateY(0);
+            transition: transform 0.1s ease;
+        }
+
+        .calc-button.operator {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border-color: rgba(255, 107, 107, 0.5);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .calc-button.operator:hover {
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .calc-button.equals {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            border-color: rgba(78, 205, 196, 0.5);
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .calc-button.equals:hover {
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .calc-button.function {
+            background: linear-gradient(135deg, #ffd93d, #ff9ff3);
+            color: #333;
+            border-color: rgba(255, 217, 61, 0.5);
+            box-shadow: 0 4px 15px rgba(255, 217, 61, 0.3);
+        }
+
+        .calc-button.function:hover {
+            box-shadow: 0 6px 20px rgba(255, 217, 61, 0.4);
+        }
+
+        .calc-button.wide {
+            grid-column: span 2;
+        }
+
+        .calc-button.tall {
+            grid-row: span 2;
+        }
+
+        .button-ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-top: 100px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-title {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 10px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid #4ecdc4;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .history-expression {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        }
+
+        .history-result {
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 4px;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        }
+
+        .history-time {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            padding: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .mode-btn.active {
+            background: #ff6b6b;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+        }
+
+        .converter-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .converter-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .converter-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .converter-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            padding: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+
+        .converter-select option {
+            background: #2d2d30;
+            color: white;
+        }
+
+        .converter-result {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: #4ecdc4;
+            font-weight: 600;
+            text-align: center;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        }
+
+        .theme-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .theme-btn {
+            aspect-ratio: 1;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .theme-btn.active {
+            border-color: #ffd93d;
+            border-width: 3px;
+            box-shadow: 0 0 15px rgba(255, 217, 61, 0.5);
+        }
+
+        .theme-gradient {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        .settings-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .setting-label {
+            color: white;
+            font-size: 0.85rem;
+        }
+
+        .setting-toggle {
+            width: 40px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .setting-toggle.active {
+            background: #4ecdc4;
+        }
+
+        .setting-toggle::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: white;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .setting-toggle.active::after {
+            left: 22px;
+        }
+
+        .scientific-panel {
+            display: none;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .scientific-panel.show {
+            display: grid;
+        }
+
+        .scientific-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.75rem;
+            padding: 8px 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .scientific-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .calculator-container {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .header {
+                position: static;
+                transform: none;
+                margin-bottom: 20px;
+            }
+
+            .main-calculator, .sidebar {
+                margin-top: 0;
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .display-main {
+                font-size: 2rem;
+            }
+
+            .calc-button {
+                padding: 15px;
+                font-size: 1.1rem;
+            }
+        }
+
+        .memory-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .memory-controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .memory-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: white;
+            font-size: 0.7rem;
+            padding: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .memory-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .memory-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 8px;
+            color: #ffd93d;
+            font-size: 0.8rem;
+            text-align: center;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        }
+
+        .error-display {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.5);
+            border-radius: 8px;
+            padding: 10px;
+            color: #ff6b6b;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-display.show {
+            display: block;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧮 智能计算器</h1>
+    </div>
+
+    <div class="calculator-container">
+        <div class="main-calculator">
+            <div class="calculator-display">
+                <div class="display-history" id="displayHistory"></div>
+                <div class="display-main" id="displayMain">0</div>
+                <div class="display-unit" id="displayUnit"></div>
+            </div>
+
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="basic" id="basicMode">基础</button>
+                <button class="mode-btn" data-mode="scientific" id="scientificMode">科学</button>
+            </div>
+
+            <div class="calculator-buttons" id="calculatorButtons">
+                <button class="calc-button function" data-action="clear">C</button>
+                <button class="calc-button function" data-action="clearEntry">CE</button>
+                <button class="calc-button function" data-action="backspace">⌫</button>
+                <button class="calc-button operator" data-action="divide">÷</button>
+
+                <button class="calc-button" data-action="digit" data-value="7">7</button>
+                <button class="calc-button" data-action="digit" data-value="8">8</button>
+                <button class="calc-button" data-action="digit" data-value="9">9</button>
+                <button class="calc-button operator" data-action="multiply">×</button>
+
+                <button class="calc-button" data-action="digit" data-value="4">4</button>
+                <button class="calc-button" data-action="digit" data-value="5">5</button>
+                <button class="calc-button" data-action="digit" data-value="6">6</button>
+                <button class="calc-button operator" data-action="subtract">−</button>
+
+                <button class="calc-button" data-action="digit" data-value="1">1</button>
+                <button class="calc-button" data-action="digit" data-value="2">2</button>
+                <button class="calc-button" data-action="digit" data-value="3">3</button>
+                <button class="calc-button operator" data-action="add">+</button>
+
+                <button class="calc-button wide" data-action="digit" data-value="0">0</button>
+                <button class="calc-button" data-action="decimal">.</button>
+                <button class="calc-button equals" data-action="equals">=</button>
+            </div>
+
+            <div class="scientific-panel" id="scientificPanel">
+                <button class="scientific-btn" data-action="sin">sin</button>
+                <button class="scientific-btn" data-action="cos">cos</button>
+                <button class="scientific-btn" data-action="tan">tan</button>
+                <button class="scientific-btn" data-action="log">log</button>
+                <button class="scientific-btn" data-action="ln">ln</button>
+
+                <button class="scientific-btn" data-action="asin">sin⁻¹</button>
+                <button class="scientific-btn" data-action="acos">cos⁻¹</button>
+                <button class="scientific-btn" data-action="atan">tan⁻¹</button>
+                <button class="scientific-btn" data-action="sqrt">√</button>
+                <button class="scientific-btn" data-action="cbrt">∛</button>
+
+                <button class="scientific-btn" data-action="power">x^y</button>
+                <button class="scientific-btn" data-action="factorial">x!</button>
+                <button class="scientific-btn" data-action="pi">π</button>
+                <button class="scientific-btn" data-action="e">e</button>
+                <button class="scientific-btn" data-action="exp">e^x</button>
+            </div>
+
+            <div class="error-display" id="errorDisplay"></div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">💾 内存</div>
+                <div class="memory-panel">
+                    <div class="memory-controls">
+                        <button class="memory-btn" data-action="memoryStore">MS</button>
+                        <button class="memory-btn" data-action="memoryRecall">MR</button>
+                        <button class="memory-btn" data-action="memoryAdd">M+</button>
+                        <button class="memory-btn" data-action="memoryClear">MC</button>
+                    </div>
+                    <div class="memory-display" id="memoryDisplay">0</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">📝 历史记录</div>
+                <div class="history-list" id="historyList">
+                    <div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">
+                        暂无计算记录
+                    </div>
+                </div>
+                <button class="mode-btn" style="width: 100%; margin-top: 10px;" id="clearHistory">清空历史</button>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">🔄 单位换算</div>
+                <div class="converter-section">
+                    <select class="converter-select" id="converterType">
+                        <option value="length">长度</option>
+                        <option value="weight">重量</option>
+                        <option value="temperature">温度</option>
+                        <option value="area">面积</option>
+                        <option value="volume">体积</option>
+                    </select>
+                    <input type="number" class="converter-input" id="converterInput" placeholder="输入数值">
+                    <select class="converter-select" id="converterFrom">
+                        <option value="m">米</option>
+                    </select>
+                    <select class="converter-select" id="converterTo">
+                        <option value="m">米</option>
+                    </select>
+                    <div class="converter-result" id="converterResult">结果将显示在这里</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">🎨 主题</div>
+                <div class="theme-selector">
+                    <button class="theme-btn active" data-theme="default">
+                        <div class="theme-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                    </button>
+                    <button class="theme-btn" data-theme="sunset">
+                        <div class="theme-gradient" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);"></div>
+                    </button>
+                    <button class="theme-btn" data-theme="ocean">
+                        <div class="theme-gradient" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);"></div>
+                    </button>
+                    <button class="theme-btn" data-theme="forest">
+                        <div class="theme-gradient" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);"></div>
+                    </button>
+                    <button class="theme-btn" data-theme="night">
+                        <div class="theme-gradient" style="background: linear-gradient(135deg, #232526 0%, #414345 100%);"></div>
+                    </button>
+                    <button class="theme-btn" data-theme="fire">
+                        <div class="theme-gradient" style="background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);"></div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">⚙️ 设置</div>
+                <div class="settings-panel">
+                    <div class="setting-item">
+                        <span class="setting-label">声音反馈</span>
+                        <div class="setting-toggle" id="soundToggle"></div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">振动反馈</span>
+                        <div class="setting-toggle" id="hapticToggle"></div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">角度单位</span>
+                        <select class="converter-select" id="angleUnit" style="width: 60px; padding: 4px;">
+                            <option value="deg">度</option>
+                            <option value="rad">弧度</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class Calculator {
+            constructor() {
+                this.display = document.getElementById('displayMain');
+                this.historyDisplay = document.getElementById('displayHistory');
+                this.unitDisplay = document.getElementById('displayUnit');
+                this.errorDisplay = document.getElementById('errorDisplay');
+                
+                this.currentInput = '0';
+                this.previousInput = '';
+                this.operator = '';
+                this.shouldResetDisplay = false;
+                this.memory = 0;
+                this.history = [];
+                this.isScientificMode = false;
+                this.angleUnit = 'deg';
+                this.settings = {
+                    sound: true,
+                    haptic: true
+                };
+
+                this.converters = {
+                    length: {
+                        name: '长度',
+                        units: {
+                            'm': '米',
+                            'km': '千米',
+                            'cm': '厘米',
+                            'mm': '毫米',
+                            'ft': '英尺',
+                            'in': '英寸',
+                            'yd': '码'
+                        },
+                        base: 'm',
+                        factors: {
+                            'm': 1,
+                            'km': 0.001,
+                            'cm': 100,
+                            'mm': 1000,
+                            'ft': 3.28084,
+                            'in': 39.3701,
+                            'yd': 1.09361
+                        }
+                    },
+                    weight: {
+                        name: '重量',
+                        units: {
+                            'kg': '千克',
+                            'g': '克',
+                            'lb': '磅',
+                            'oz': '盎司',
+                            't': '吨'
+                        },
+                        base: 'kg',
+                        factors: {
+                            'kg': 1,
+                            'g': 1000,
+                            'lb': 2.20462,
+                            'oz': 35.274,
+                            't': 0.001
+                        }
+                    },
+                    temperature: {
+                        name: '温度',
+                        units: {
+                            'c': '摄氏度',
+                            'f': '华氏度',
+                            'k': '开尔文'
+                        },
+                        convert: (value, from, to) => {
+                            let celsius;
+                            switch (from) {
+                                case 'c': celsius = value; break;
+                                case 'f': celsius = (value - 32) * 5/9; break;
+                                case 'k': celsius = value - 273.15; break;
+                            }
+                            
+                            switch (to) {
+                                case 'c': return celsius;
+                                case 'f': return celsius * 9/5 + 32;
+                                case 'k': return celsius + 273.15;
+                            }
+                        }
+                    },
+                    area: {
+                        name: '面积',
+                        units: {
+                            'm2': '平方米',
+                            'km2': '平方千米',
+                            'cm2': '平方厘米',
+                            'ft2': '平方英尺',
+                            'in2': '平方英寸'
+                        },
+                        base: 'm2',
+                        factors: {
+                            'm2': 1,
+                            'km2': 0.000001,
+                            'cm2': 10000,
+                            'ft2': 10.7639,
+                            'in2': 1550
+                        }
+                    },
+                    volume: {
+                        name: '体积',
+                        units: {
+                            'l': '升',
+                            'ml': '毫升',
+                            'm3': '立方米',
+                            'gal': '加仑',
+                            'fl_oz': '液体盎司'
+                        },
+                        base: 'l',
+                        factors: {
+                            'l': 1,
+                            'ml': 1000,
+                            'm3': 0.001,
+                            'gal': 0.264172,
+                            'fl_oz': 33.814
+                        }
+                    }
+                };
+
+                this.themes = {
+                    default: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    sunset: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                    ocean: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                    forest: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)',
+                    night: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
+                    fire: 'linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%)'
+                };
+
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.setupConverter();
+                this.loadSettings();
+                this.updateDisplay();
+                this.updateMemoryDisplay();
+            }
+
+            setupEventListeners() {
+                // 计算器按钮事件
+                document.getElementById('calculatorButtons').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('calc-button')) {
+                        this.handleButtonClick(e.target);
+                        this.addRipple(e.target, e);
+                    }
+                });
+
+                // 科学计算器按钮事件
+                document.getElementById('scientificPanel').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('scientific-btn')) {
+                        this.handleScientificFunction(e.target.dataset.action);
+                        this.addRipple(e.target, e);
+                    }
+                });
+
+                // 模式切换
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (e.target.dataset.mode) {
+                            this.switchMode(e.target.dataset.mode);
+                        }
+                    });
+                });
+
+                // 内存操作
+                document.querySelectorAll('.memory-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.handleMemoryOperation(e.target.dataset.action);
+                    });
+                });
+
+                // 历史记录
+                document.getElementById('clearHistory').addEventListener('click', () => {
+                    this.clearHistory();
+                });
+
+                document.getElementById('historyList').addEventListener('click', (e) => {
+                    const historyItem = e.target.closest('.history-item');
+                    if (historyItem) {
+                        const result = historyItem.querySelector('.history-result').textContent;
+                        this.currentInput = result;
+                        this.updateDisplay();
+                    }
+                });
+
+                // 单位换算
+                document.getElementById('converterType').addEventListener('change', () => {
+                    this.setupConverter();
+                });
+
+                document.getElementById('converterInput').addEventListener('input', () => {
+                    this.performConversion();
+                });
+
+                document.getElementById('converterFrom').addEventListener('change', () => {
+                    this.performConversion();
+                });
+
+                document.getElementById('converterTo').addEventListener('change', () => {
+                    this.performConversion();
+                });
+
+                // 主题切换
+                document.querySelectorAll('.theme-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.setTheme(e.target.dataset.theme);
+                    });
+                });
+
+                // 设置
+                document.getElementById('soundToggle').addEventListener('click', () => {
+                    this.toggleSetting('sound');
+                });
+
+                document.getElementById('hapticToggle').addEventListener('click', () => {
+                    this.toggleSetting('haptic');
+                });
+
+                document.getElementById('angleUnit').addEventListener('change', (e) => {
+                    this.angleUnit = e.target.value;
+                    this.saveSettings();
+                });
+
+                // 键盘事件
+                document.addEventListener('keydown', (e) => {
+                    this.handleKeyboard(e);
+                });
+
+                // 阻止右键菜单
+                document.addEventListener('contextmenu', (e) => {
+                    if (e.target.closest('.calc-button')) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            handleButtonClick(button) {
+                const action = button.dataset.action;
+                const value = button.dataset.value;
+
+                this.playSound();
+                this.triggerHaptic();
+
+                switch (action) {
+                    case 'digit':
+                        this.inputDigit(value);
+                        break;
+                    case 'decimal':
+                        this.inputDecimal();
+                        break;
+                    case 'add':
+                    case 'subtract':
+                    case 'multiply':
+                    case 'divide':
+                        this.inputOperator(action);
+                        break;
+                    case 'equals':
+                        this.calculate();
+                        break;
+                    case 'clear':
+                        this.clear();
+                        break;
+                    case 'clearEntry':
+                        this.clearEntry();
+                        break;
+                    case 'backspace':
+                        this.backspace();
+                        break;
+                }
+            }
+
+            inputDigit(digit) {
+                if (this.shouldResetDisplay) {
+                    this.currentInput = '';
+                    this.shouldResetDisplay = false;
+                }
+
+                if (this.currentInput === '0') {
+                    this.currentInput = digit;
+                } else {
+                    this.currentInput += digit;
+                }
+
+                this.updateDisplay();
+            }
+
+            inputDecimal() {
+                if (this.shouldResetDisplay) {
+                    this.currentInput = '0';
+                    this.shouldResetDisplay = false;
+                }
+
+                if (!this.currentInput.includes('.')) {
+                    this.currentInput += '.';
+                }
+
+                this.updateDisplay();
+            }
+
+            inputOperator(operator) {
+                if (this.operator && !this.shouldResetDisplay) {
+                    this.calculate();
+                }
+
+                this.previousInput = this.currentInput;
+                this.operator = operator;
+                this.shouldResetDisplay = true;
+
+                this.updateHistoryDisplay();
+            }
+
+            calculate() {
+                if (!this.operator || !this.previousInput) return;
+
+                try {
+                    const prev = parseFloat(this.previousInput);
+                    const current = parseFloat(this.currentInput);
+                    let result;
+
+                    switch (this.operator) {
+                        case 'add':
+                            result = prev + current;
+                            break;
+                        case 'subtract':
+                            result = prev - current;
+                            break;
+                        case 'multiply':
+                            result = prev * current;
+                            break;
+                        case 'divide':
+                            if (current === 0) {
+                                throw new Error('除数不能为零');
+                            }
+                            result = prev / current;
+                            break;
+                        default:
+                            return;
+                    }
+
+                    this.addToHistory(this.formatExpression(), result);
+                    this.currentInput = this.formatResult(result);
+                    this.operator = '';
+                    this.previousInput = '';
+                    this.shouldResetDisplay = true;
+
+                    this.historyDisplay.textContent = '';
+                    this.updateDisplay();
+                } catch (error) {
+                    this.showError(error.message);
+                }
+            }
+
+            handleScientificFunction(func) {
+                try {
+                    const current = parseFloat(this.currentInput);
+                    let result;
+
+                    switch (func) {
+                        case 'sin':
+                            result = Math.sin(this.toRadians(current));
+                            break;
+                        case 'cos':
+                            result = Math.cos(this.toRadians(current));
+                            break;
+                        case 'tan':
+                            result = Math.tan(this.toRadians(current));
+                            break;
+                        case 'asin':
+                            result = this.toDegrees(Math.asin(current));
+                            break;
+                        case 'acos':
+                            result = this.toDegrees(Math.acos(current));
+                            break;
+                        case 'atan':
+                            result = this.toDegrees(Math.atan(current));
+                            break;
+                        case 'log':
+                            result = Math.log10(current);
+                            break;
+                        case 'ln':
+                            result = Math.log(current);
+                            break;
+                        case 'sqrt':
+                            result = Math.sqrt(current);
+                            break;
+                        case 'cbrt':
+                            result = Math.cbrt(current);
+                            break;
+                        case 'factorial':
+                            result = this.factorial(current);
+                            break;
+                        case 'pi':
+                            this.currentInput = Math.PI.toString();
+                            this.updateDisplay();
+                            return;
+                        case 'e':
+                            this.currentInput = Math.E.toString();
+                            this.updateDisplay();
+                            return;
+                        case 'exp':
+                            result = Math.exp(current);
+                            break;
+                        case 'power':
+                            this.inputOperator('power');
+                            return;
+                        default:
+                            return;
+                    }
+
+                    if (isNaN(result) || !isFinite(result)) {
+                        throw new Error('无效的数学运算');
+                    }
+
+                    this.addToHistory(`${func}(${current})`, result);
+                    this.currentInput = this.formatResult(result);
+                    this.shouldResetDisplay = true;
+                    this.updateDisplay();
+                } catch (error) {
+                    this.showError(error.message);
+                }
+            }
+
+            factorial(n) {
+                if (n < 0 || n !== Math.floor(n)) {
+                    throw new Error('阶乘仅适用于非负整数');
+                }
+                if (n > 170) {
+                    throw new Error('数字过大');
+                }
+                
+                let result = 1;
+                for (let i = 2; i <= n; i++) {
+                    result *= i;
+                }
+                return result;
+            }
+
+            toRadians(degrees) {
+                return this.angleUnit === 'deg' ? degrees * (Math.PI / 180) : degrees;
+            }
+
+            toDegrees(radians) {
+                return this.angleUnit === 'deg' ? radians * (180 / Math.PI) : radians;
+            }
+
+            clear() {
+                this.currentInput = '0';
+                this.previousInput = '';
+                this.operator = '';
+                this.shouldResetDisplay = false;
+                this.historyDisplay.textContent = '';
+                this.unitDisplay.textContent = '';
+                this.hideError();
+                this.updateDisplay();
+            }
+
+            clearEntry() {
+                this.currentInput = '0';
+                this.updateDisplay();
+            }
+
+            backspace() {
+                if (this.currentInput.length > 1) {
+                    this.currentInput = this.currentInput.slice(0, -1);
+                } else {
+                    this.currentInput = '0';
+                }
+                this.updateDisplay();
+            }
+
+            handleMemoryOperation(operation) {
+                const current = parseFloat(this.currentInput);
+
+                switch (operation) {
+                    case 'memoryStore':
+                        this.memory = current;
+                        break;
+                    case 'memoryRecall':
+                        this.currentInput = this.memory.toString();
+                        this.shouldResetDisplay = true;
+                        break;
+                    case 'memoryAdd':
+                        this.memory += current;
+                        break;
+                    case 'memoryClear':
+                        this.memory = 0;
+                        break;
+                }
+
+                this.updateMemoryDisplay();
+                this.updateDisplay();
+            }
+
+            switchMode(mode) {
+                this.isScientificMode = mode === 'scientific';
+                
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.mode === mode);
+                });
+
+                const scientificPanel = document.getElementById('scientificPanel');
+                scientificPanel.classList.toggle('show', this.isScientificMode);
+            }
+
+            setupConverter() {
+                const type = document.getElementById('converterType').value;
+                const converter = this.converters[type];
+                
+                const fromSelect = document.getElementById('converterFrom');
+                const toSelect = document.getElementById('converterTo');
+                
+                fromSelect.innerHTML = '';
+                toSelect.innerHTML = '';
+                
+                Object.entries(converter.units).forEach(([key, value]) => {
+                    const fromOption = new Option(value, key);
+                    const toOption = new Option(value, key);
+                    fromSelect.appendChild(fromOption);
+                    toSelect.appendChild(toOption);
+                });
+
+                this.performConversion();
+            }
+
+            performConversion() {
+                const input = document.getElementById('converterInput').value;
+                const type = document.getElementById('converterType').value;
+                const from = document.getElementById('converterFrom').value;
+                const to = document.getElementById('converterTo').value;
+                const resultDiv = document.getElementById('converterResult');
+
+                if (!input || isNaN(input)) {
+                    resultDiv.textContent = '请输入有效数字';
+                    return;
+                }
+
+                const value = parseFloat(input);
+                const converter = this.converters[type];
+                let result;
+
+                if (converter.convert) {
+                    result = converter.convert(value, from, to);
+                } else {
+                    const baseValue = value / converter.factors[from];
+                    result = baseValue * converter.factors[to];
+                }
+
+                resultDiv.textContent = `${this.formatResult(result)} ${converter.units[to]}`;
+            }
+
+            addToHistory(expression, result) {
+                const historyItem = {
+                    expression: expression,
+                    result: this.formatResult(result),
+                    timestamp: new Date().toLocaleTimeString()
+                };
+
+                this.history.unshift(historyItem);
+                if (this.history.length > 50) {
+                    this.history.pop();
+                }
+
+                this.updateHistoryList();
+                this.saveHistory();
+            }
+
+            updateHistoryList() {
+                const historyList = document.getElementById('historyList');
+                
+                if (this.history.length === 0) {
+                    historyList.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">暂无计算记录</div>';
+                    return;
+                }
+
+                historyList.innerHTML = '';
+                this.history.slice(0, 10).forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
+                        <div class="history-expression">${item.expression}</div>
+                        <div class="history-result">${item.result}</div>
+                        <div class="history-time">${item.timestamp}</div>
+                    `;
+                    historyList.appendChild(historyItem);
+                });
+            }
+
+            clearHistory() {
+                if (confirm('确定要清空所有历史记录吗？')) {
+                    this.history = [];
+                    this.updateHistoryList();
+                    this.saveHistory();
+                }
+            }
+
+            formatExpression() {
+                const operatorSymbols = {
+                    add: '+',
+                    subtract: '−',
+                    multiply: '×',
+                    divide: '÷'
+                };
+                
+                return `${this.previousInput} ${operatorSymbols[this.operator]} ${this.currentInput}`;
+            }
+
+            formatResult(result) {
+                if (Math.abs(result) > 1e15 || (Math.abs(result) < 1e-10 && result !== 0)) {
+                    return result.toExponential(10);
+                }
+                
+                return parseFloat(result.toPrecision(12)).toString();
+            }
+
+            updateDisplay() {
+                this.display.textContent = this.currentInput;
+            }
+
+            updateHistoryDisplay() {
+                if (this.operator && this.previousInput) {
+                    const operatorSymbols = {
+                        add: '+',
+                        subtract: '−',
+                        multiply: '×',
+                        divide: '÷'
+                    };
+                    this.historyDisplay.textContent = `${this.previousInput} ${operatorSymbols[this.operator]}`;
+                }
+            }
+
+            updateMemoryDisplay() {
+                document.getElementById('memoryDisplay').textContent = this.formatResult(this.memory);
+            }
+
+            setTheme(theme) {
+                document.querySelectorAll('.theme-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.theme === theme);
+                });
+
+                document.body.style.background = this.themes[theme];
+                this.saveSettings();
+            }
+
+            toggleSetting(setting) {
+                this.settings[setting] = !this.settings[setting];
+                const toggle = document.getElementById(setting + 'Toggle');
+                toggle.classList.toggle('active', this.settings[setting]);
+                this.saveSettings();
+            }
+
+            handleKeyboard(e) {
+                if (e.target.matches('input, select, textarea')) return;
+
+                const key = e.key;
+                e.preventDefault();
+
+                if (/[0-9]/.test(key)) {
+                    this.inputDigit(key);
+                } else if (key === '.') {
+                    this.inputDecimal();
+                } else if (key === '+') {
+                    this.inputOperator('add');
+                } else if (key === '-') {
+                    this.inputOperator('subtract');
+                } else if (key === '*') {
+                    this.inputOperator('multiply');
+                } else if (key === '/') {
+                    this.inputOperator('divide');
+                } else if (key === 'Enter' || key === '=') {
+                    this.calculate();
+                } else if (key === 'Escape') {
+                    this.clear();
+                } else if (key === 'Backspace') {
+                    this.backspace();
+                }
+            }
+
+            addRipple(button, event) {
+                const ripple = document.createElement('span');
+                const rect = button.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = event.clientX - rect.left - size / 2;
+                const y = event.clientY - rect.top - size / 2;
+
+                ripple.className = 'button-ripple';
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+
+                button.appendChild(ripple);
+
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            }
+
+            playSound() {
+                if (!this.settings.sound) return;
+                
+                // 创建简单的点击音效
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            }
+
+            triggerHaptic() {
+                if (this.settings.haptic && navigator.vibrate) {
+                    navigator.vibrate(10);
+                }
+            }
+
+            showError(message) {
+                this.errorDisplay.textContent = message;
+                this.errorDisplay.classList.add('show');
+                
+                setTimeout(() => {
+                    this.hideError();
+                }, 3000);
+            }
+
+            hideError() {
+                this.errorDisplay.classList.remove('show');
+            }
+
+            saveSettings() {
+                const settings = {
+                    theme: document.querySelector('.theme-btn.active').dataset.theme,
+                    angleUnit: this.angleUnit,
+                    sound: this.settings.sound,
+                    haptic: this.settings.haptic
+                };
+                localStorage.setItem('calculatorSettings', JSON.stringify(settings));
+            }
+
+            saveHistory() {
+                localStorage.setItem('calculatorHistory', JSON.stringify(this.history));
+            }
+
+            loadSettings() {
+                try {
+                    const settings = JSON.parse(localStorage.getItem('calculatorSettings'));
+                    const history = JSON.parse(localStorage.getItem('calculatorHistory'));
+                    
+                    if (settings) {
+                        if (settings.theme) {
+                            this.setTheme(settings.theme);
+                        }
+                        
+                        if (settings.angleUnit) {
+                            this.angleUnit = settings.angleUnit;
+                            document.getElementById('angleUnit').value = settings.angleUnit;
+                        }
+                        
+                        this.settings.sound = settings.sound !== false;
+                        this.settings.haptic = settings.haptic !== false;
+                        
+                        document.getElementById('soundToggle').classList.toggle('active', this.settings.sound);
+                        document.getElementById('hapticToggle').classList.toggle('active', this.settings.haptic);
+                    }
+                    
+                    if (history) {
+                        this.history = history;
+                        this.updateHistoryList();
+                    }
+                } catch (error) {
+                    console.error('加载设置失败:', error);
+                }
+            }
+        }
+
+        // 初始化计算器
+        document.addEventListener('DOMContentLoaded', () => {
+            new Calculator();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>像素艺术编辑器 - Pixel Art Editor | 创意绘画工具</title>
+    <meta name="description" content="专业的像素艺术创作工具！支持多层编辑、动画制作、调色板管理和丰富的绘画工具，让你轻松创作精美的像素艺术作品。">
+    <meta name="keywords" content="像素艺术,Pixel Art,像素画,绘画工具,艺术创作,动画制作,调色板,数字艺术">
+    <meta name="author" content="Game Creator">
+    <meta property="og:title" content="像素艺术编辑器 - Pixel Art Editor">
+    <meta property="og:description" content="专业的像素艺术创作工具，支持多层编辑和动画制作">
+    <meta property="og:type" content="game">
+    <link rel="canonical" href="/games/pixel-art-editor/">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="editor-container">
+        <div class="header">
+            <h1>🎨 像素艺术编辑器</h1>
+            <div class="header-controls">
+                <div class="zoom-controls">
+                    <button class="zoom-btn" id="zoomOut">-</button>
+                    <span id="zoomLevel" style="color: white; font-weight: 600;">100%</span>
+                    <button class="zoom-btn" id="zoomIn">+</button>
+                </div>
+                <button class="btn small" id="toggleGrid">网格</button>
+                <button class="btn small" id="fullscreen">全屏</button>
+            </div>
+        </div>
+
+        <div class="toolbox">
+            <div class="tool-section">
+                <h3>🖌️ 绘画工具</h3>
+                <div class="tool-grid">
+                    <button class="tool-btn active" data-tool="pencil" title="铅笔">✏️</button>
+                    <button class="tool-btn" data-tool="brush" title="画笔">🖌️</button>
+                    <button class="tool-btn" data-tool="eraser" title="橡皮">🧹</button>
+                    <button class="tool-btn" data-tool="bucket" title="油漆桶">🪣</button>
+                    <button class="tool-btn" data-tool="eyedropper" title="吸管">💧</button>
+                    <button class="tool-btn" data-tool="line" title="直线">📏</button>
+                    <button class="tool-btn" data-tool="rectangle" title="矩形">⬜</button>
+                    <button class="tool-btn" data-tool="circle" title="圆形">⭕</button>
+                </div>
+            </div>
+
+            <div class="tool-section">
+                <h3>📐 画笔设置</h3>
+                <div class="slider-group">
+                    <label for="brushSize">画笔大小: <span id="brushSizeValue">1</span></label>
+                    <input type="range" id="brushSize" class="slider" min="1" max="20" value="1">
+                </div>
+                <div class="brush-preview" id="brushPreview"></div>
+            </div>
+
+            <div class="tool-section">
+                <h3>🎬 动画控制</h3>
+                <div class="animation-controls">
+                    <button class="btn small" id="addFrame">添加帧</button>
+                    <button class="btn small" id="deleteFrame">删除帧</button>
+                    <button class="btn small" id="playAnimation">播放</button>
+                    <div class="slider-group">
+                        <label for="frameRate">帧率: <span id="frameRateValue">12</span> FPS</label>
+                        <input type="range" id="frameRate" class="slider" min="1" max="30" value="12">
+                    </div>
+                    <div class="frame-timeline" id="frameTimeline"></div>
+                </div>
+            </div>
+
+            <div class="tool-section">
+                <h3>🔧 变换工具</h3>
+                <div class="transform-controls">
+                    <button class="btn small" id="flipH">水平翻转</button>
+                    <button class="btn small" id="flipV">垂直翻转</button>
+                    <button class="btn small" id="rotateL">左转90°</button>
+                    <button class="btn small" id="rotateR">右转90°</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-area">
+            <div class="canvas-container" id="canvasContainer">
+                <canvas id="pixelCanvas" width="320" height="320"></canvas>
+                <canvas id="gridOverlay" class="grid-overlay" width="320" height="320"></canvas>
+            </div>
+        </div>
+
+        <div class="properties-panel">
+            <div class="tool-section">
+                <h3>🎨 调色板</h3>
+                <div class="color-palette" id="colorPalette"></div>
+                <div class="custom-color">
+                    <input type="color" id="colorPicker" class="color-picker" value="#000000">
+                    <button class="btn small" id="addColor">添加颜色</button>
+                </div>
+            </div>
+
+            <div class="tool-section">
+                <h3>📋 图层管理</h3>
+                <div class="layers-panel">
+                    <button class="btn small" id="addLayer">添加图层</button>
+                    <div id="layersList"></div>
+                </div>
+            </div>
+
+            <div class="tool-section">
+                <h3>🖼️ 画布设置</h3>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <label style="color: white; font-size: 0.85rem;">尺寸:</label>
+                    <input type="number" id="canvasWidth" class="canvas-size-input" value="32" min="8" max="128">
+                    <span style="color: white;">×</span>
+                    <input type="number" id="canvasHeight" class="canvas-size-input" value="32" min="8" max="128">
+                </div>
+                <button class="btn small" id="resizeCanvas">调整画布</button>
+                <button class="btn small" id="clearCanvas">清空画布</button>
+            </div>
+
+            <div class="tool-section">
+                <h3>📁 文件操作</h3>
+                <div class="export-options">
+                    <button class="btn small" id="newProject">新建项目</button>
+                    <button class="btn small" id="saveProject">保存项目</button>
+                    <button class="btn small" id="loadProject">加载项目</button>
+                    <input type="file" id="fileInput" class="file-input" accept=".json,.png,.gif">
+                    <button class="btn small" id="exportPNG">导出PNG</button>
+                    <button class="btn small" id="exportGIF">导出GIF</button>
+                </div>
+            </div>
+
+            <div class="preview-area">
+                <h3 style="color: white; margin-bottom: 10px;">🔍 预览</h3>
+                <canvas id="previewCanvas" class="preview-canvas" width="64" height="64"></canvas>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div id="statusText">就绪 - 选择工具开始创作</div>
+            <div id="cursorPosition">位置: (0, 0)</div>
+            <div id="canvasInfo">画布: 32×32 | 当前帧: 1/1</div>
+        </div>
+    </div>
+
+    
+    <script src="js/game.js"></script>
+</body>
+</html>

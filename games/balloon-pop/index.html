@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>气球爆破游戏 - 在线免费气球点击反应游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线气球爆破游戏，快速点击五彩气球获得分数，多种游戏模式，训练反应速度和手眼协调，扁平化设计界面！">
+    <meta name="keywords" content="气球爆破,气球游戏,点击游戏,反应游戏,手眼协调,在线游戏,免费游戏,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#9C27B0">
+    
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>🎈 气球爆破</h1>
+            <div class="game-subtitle">快速点击五彩气球获得分数</div>
+        </header>
+
+        <section class="game-mode-selector">
+            <h3>🎯 游戏模式</h3>
+            <div class="mode-buttons">
+                <button class="mode-btn active" onclick="balloonPop.setMode('classic')">
+                    <span>🎈</span>
+                    <div>经典模式</div>
+                    <small>60秒限时挑战</small>
+                </button>
+                <button class="mode-btn" onclick="balloonPop.setMode('endless')">
+                    <span>♾️</span>
+                    <div>无限模式</div>
+                    <small>挑战最高分数</small>
+                </button>
+                <button class="mode-btn" onclick="balloonPop.setMode('survival')">
+                    <span>💣</span>
+                    <div>生存模式</div>
+                    <small>避开炸弹气球</small>
+                </button>
+                <button class="mode-btn" onclick="balloonPop.setMode('combo')">
+                    <span>⚡</span>
+                    <div>连击模式</div>
+                    <small>连击获得高分</small>
+                </button>
+            </div>
+        </section>
+
+        <section class="game-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">分数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="balloonsPop">0</div>
+                <div class="stat-label">已爆破</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="timeLeft">60</div>
+                <div class="stat-label">时间</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="combo">0</div>
+                <div class="stat-label">连击</div>
+            </div>
+        </section>
+
+        <section class="game-area" id="gameArea">
+            <div class="combo-display" id="comboDisplay">连击 x0</div>
+            <!-- 气球将在这里动态生成 -->
+        </section>
+
+        <section class="game-controls">
+            <button class="btn start-btn" onclick="balloonPop.startGame()" id="startBtn">🚀 开始游戏</button>
+            <button class="btn" onclick="balloonPop.pauseGame()" id="pauseBtn" disabled>⏸️ 暂停</button>
+            <button class="btn secondary" onclick="balloonPop.resetGame()">🔄 重置</button>
+            <button class="btn secondary" onclick="balloonPop.showHelp()">❓ 帮助</button>
+        </section>
+
+        <section class="achievements">
+            <h3>🏆 成就系统</h3>
+            <div class="achievement-list" id="achievementsList">
+                <div class="achievement-item" data-id="first_pop">
+                    <div class="achievement-icon">🎈</div>
+                    <div class="achievement-text">
+                        <div>初次尝试</div>
+                        <small>爆破第一个气球</small>
+                    </div>
+                </div>
+                <div class="achievement-item" data-id="combo_master">
+                    <div class="achievement-icon">⚡</div>
+                    <div class="achievement-text">
+                        <div>连击大师</div>
+                        <small>达成10连击</small>
+                    </div>
+                </div>
+                <div class="achievement-item" data-id="speed_demon">
+                    <div class="achievement-icon">🔥</div>
+                    <div class="achievement-text">
+                        <div>极速恶魔</div>
+                        <small>一分钟内爆破100个气球</small>
+                    </div>
+                </div>
+                <div class="achievement-item" data-id="survivor">
+                    <div class="achievement-icon">🛡️</div>
+                    <div class="achievement-text">
+                        <div>生存专家</div>
+                        <small>生存模式坚持2分钟</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 游戏结束弹窗 -->
+        <div class="popup" id="gameOverPopup">
+            <div class="popup-content">
+                <h2 id="gameOverTitle">🎉 游戏结束</h2>
+                <div class="final-stats">
+                    <div class="stat-display">
+                        <div class="stat-icon">🏆</div>
+                        <div>
+                            <div class="stat-label">最终分数</div>
+                            <div class="stat-value" id="finalScore">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">🎈</div>
+                        <div>
+                            <div class="stat-label">爆破气球</div>
+                            <div class="stat-value" id="finalBalloons">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">⚡</div>
+                        <div>
+                            <div class="stat-label">最高连击</div>
+                            <div class="stat-value" id="maxCombo">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-display">
+                        <div class="stat-icon">🎯</div>
+                        <div>
+                            <div class="stat-label">命中率</div>
+                            <div class="stat-value" id="accuracy">100%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="balloonPop.closeGameOver(); balloonPop.startGame();">再来一次</button>
+                    <button class="btn secondary" onclick="balloonPop.closeGameOver();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帮助弹窗 -->
+        <div class="popup" id="helpPopup">
+            <div class="popup-content">
+                <h2>🎈 游戏说明</h2>
+                
+                <div style="text-align: left; margin-bottom: 20px;">
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎯 游戏目标</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        快速点击上升的气球获得分数，不同颜色的气球分值不同，连击可获得额外奖励。
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎮 游戏模式</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>经典模式：</strong>60秒内爆破尽可能多的气球<br>
+                        • <strong>无限模式：</strong>没有时间限制，挑战最高分<br>
+                        • <strong>生存模式：</strong>避开黑色炸弹气球<br>
+                        • <strong>连击模式：</strong>连续爆破增加分数倍数
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎈 气球类型</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • 普通气球: 10分<br>
+                        • 特殊气球: 25分 + 额外效果<br>
+                        • 炸弹气球: -50分 (生存模式中游戏结束)
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">💡 游戏技巧</h3>
+                    <p style="line-height: 1.6;">
+                        • 优先点击特殊发光气球<br>
+                        • 保持连击以获得高分<br>
+                        • 注意避开炸弹气球<br>
+                        • 预判气球的上升轨迹
+                    </p>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="balloonPop.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    
+    <script src="js/game.js"></script>
+</body>
+</html>

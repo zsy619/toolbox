@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专业级图片拼图工具 - Layui版</title>
+    <link rel="stylesheet" href="../assets/css/layui.min.css">
+    <link rel="stylesheet" href="../assets/css/fontawesome.min.css">
+    <style>
+        :root {
+            --layui-primary: #16baaa;
+            --layui-success: #5fb878; 
+            --layui-info: #31bdec;
+            --layui-warning: #ffb800;
+            --layui-danger: #ff5722;
+            --layui-bg: #f8f8f8;
+            --layui-border: #e6e6e6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimSun, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* 头部样式 */
+        .header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--layui-border);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--layui-primary);
+        }
+
+        .logo i {
+            font-size: 28px;
+            background: linear-gradient(45deg, var(--layui-primary), var(--layui-info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 主容器 */
+        .main-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* 内容区域 */
+        .content-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            height: calc(100vh - 160px);
+            display: flex;
+        }
+
+        /* 左侧布局面板 */
+        .layout-panel {
+            width: 300px;
+            background: #fafafa;
+            border-right: 1px solid var(--layui-border);
+            padding: 20px 15px;
+            overflow-y: auto;
+        }
+
+        .layout-category {
+            margin-bottom: 25px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--layui-primary);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--layui-primary);
+        }
+
+        .category-header i {
+            font-size: 18px;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .layout-item {
+            background: white;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .layout-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(22, 186, 170, 0.3);
+        }
+
+        .layout-item.active {
+            border-color: var(--layui-primary);
+            box-shadow: 0 0 0 3px rgba(22, 186, 170, 0.2);
+            background: rgba(22, 186, 170, 0.05);
+        }
+
+        .layout-preview {
+            height: 60px;
+            margin-bottom: 8px;
+            display: grid;
+            gap: 2px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .layout-cell {
+            background: var(--layui-primary);
+            border-radius: 2px;
+            opacity: 0.8;
+        }
+
+        .layout-name {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* 中间预览区域 */
+        .preview-panel {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            background: #f9f9f9;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .preview-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .image-counter {
+            background: var(--layui-primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .preview-container {
+            flex: 1;
+            background: white;
+            border: 2px dashed #d9d9d9;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 400px;
+        }
+
+        .preview-container.drag-over {
+            border-color: var(--layui-primary);
+            background: rgba(22, 186, 170, 0.05);
+        }
+
+        .preview-grid {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            gap: 10px;
+        }
+
+        .grid-cell {
+            position: relative;
+            background: #fafafa;
+            border: 2px dashed #d9d9d9;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 100px;
+        }
+
+        .grid-cell:hover {
+            border-color: var(--layui-primary);
+            background: rgba(22, 186, 170, 0.05);
+        }
+
+        .grid-cell.has-image {
+            border-style: solid;
+            border-color: var(--layui-success);
+        }
+
+        .grid-cell img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .upload-hint {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+
+        .upload-hint i {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: block;
+            color: #ccc;
+        }
+
+        .cell-tools {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 3px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .grid-cell:hover .cell-tools {
+            opacity: 1;
+        }
+
+        .tool-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .tool-btn.remove {
+            background: rgba(255, 87, 34, 0.9);
+            color: white;
+        }
+
+        .tool-btn.replace {
+            background: rgba(22, 186, 170, 0.9);
+            color: white;
+        }
+
+        .cell-index {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* 右侧属性面板 */
+        .properties-panel {
+            width: 320px;
+            background: white;
+            border-left: 1px solid var(--layui-border);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .property-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .property-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--layui-primary);
+        }
+
+        .form-item {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slider-value {
+            min-width: 50px;
+            text-align: center;
+            background: #f5f5f5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+            border: 1px solid #e0e0e0;
+        }
+
+        .color-picker-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        /* 底部操作按钮 */
+        .bottom-actions {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid var(--layui-border);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* 结果展示 */
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .result-content {
+            max-width: 90%;
+            max-height: 90%;
+            margin: 5% auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            overflow: auto;
+        }
+
+        .result-image {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            margin: 20px 0;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            color: #ccc;
+            font-size: 16px;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .content-wrapper {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .layout-panel,
+            .properties-panel {
+                width: 100%;
+            }
+            
+            .layout-panel {
+                border-right: none;
+                border-bottom: 1px solid var(--layui-border);
+            }
+            
+            .properties-panel {
+                border-left: none;
+                border-top: 1px solid var(--layui-border);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .layout-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .main-container {
+                padding: 0 10px;
+            }
+        }
+
+        /* 加载动画 */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        /* 预设布局样式 */
+        .layout-2-1 { grid-template-columns: 1fr 1fr; }
+        .layout-2-2 { grid-template-rows: 1fr 1fr; }
+        .layout-3-1 { grid-template-columns: repeat(3, 1fr); }
+        .layout-3-2 { grid-template-rows: repeat(3, 1fr); }
+        .layout-3-3 { grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
+        .layout-4-1 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .layout-4-2 { grid-template-columns: repeat(4, 1fr); }
+        .layout-4-3 { grid-template-rows: repeat(4, 1fr); }
+        .layout-5-1 { grid-template-columns: repeat(5, 1fr); }
+        .layout-5-2 { grid-template-rows: repeat(5, 1fr); }
+        .layout-5-3 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .layout-6-1 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .layout-7-1 { grid-template-columns: repeat(7, 1fr); }
+        .layout-7-2 { grid-template-rows: repeat(7, 1fr); }
+        .layout-7-3 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .layout-8-1 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .layout-8-2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); }
+        .layout-8-3 { grid-template-columns: repeat(8, 1fr); }
+        .layout-9-1 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .layout-10-1 { grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .layout-10-2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(5, 1fr); }
+        .layout-10-3 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .layout-11-1 { grid-template-columns: repeat(11, 1fr); }
+        .layout-11-2 { grid-template-rows: repeat(11, 1fr); }
+        .layout-11-3 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .layout-12-1 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .layout-13-1 { grid-template-columns: repeat(13, 1fr); }
+        .layout-13-2 { grid-template-rows: repeat(13, 1fr); }
+        .layout-13-3 { grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); }
+        .layout-14-1 { grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(2, 1fr); }
+        .layout-14-2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(7, 1fr); }
+        .layout-14-3 { grid-template-columns: repeat(14, 1fr); }
+        .layout-15-1 { grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); }
+    </style>
+</head>
+<body>
+    <!-- 头部 -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-puzzle-piece"></i>
+                专业级图片拼图工具
+            </div>
+            <div class="header-actions">
+                <button class="layui-btn layui-btn-primary layui-btn-sm">
+                    <i class="fas fa-question-circle"></i> 帮助
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <div class="content-wrapper">
+            <!-- 左侧布局选择 -->
+            <div class="layout-panel">
+                <div class="layui-collapse" lay-accordion>
+                    <!-- 2图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 2图布局
+                        </h2>
+                        <div class="layui-colla-content layui-show">
+                            <div class="layout-grid">
+                                <div class="layout-item active" data-layout="2-1" data-count="2">
+                                    <div class="layout-preview layout-2-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">横向排列</div>
+                                </div>
+                                <div class="layout-item" data-layout="2-2" data-count="2">
+                                    <div class="layout-preview layout-2-2">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">纵向排列</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 3图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="3-1" data-count="3">
+                                    <div class="layout-preview layout-3-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">横向排列</div>
+                                </div>
+                                <div class="layout-item" data-layout="3-2" data-count="3">
+                                    <div class="layout-preview layout-3-2">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">纵向排列</div>
+                                </div>
+                                <div class="layout-item" data-layout="3-3" data-count="3">
+                                    <div class="layout-preview layout-3-3">
+                                        <div class="layout-cell" style="grid-row: span 2;"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">左大右小</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 4图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="4-1" data-count="4">
+                                    <div class="layout-preview layout-4-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">2x2网格</div>
+                                </div>
+                                <div class="layout-item" data-layout="4-2" data-count="4">
+                                    <div class="layout-preview layout-4-2">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">横向排列</div>
+                                </div>
+                                <div class="layout-item" data-layout="4-3" data-count="4">
+                                    <div class="layout-preview layout-4-3">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">纵向排列</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 5图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="5-1" data-count="5">
+                                    <div class="layout-preview layout-5-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">横向排列</div>
+                                </div>
+                                <div class="layout-item" data-layout="5-2" data-count="5">
+                                    <div class="layout-preview layout-5-2">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">纵向排列</div>
+                                </div>
+                                <div class="layout-item" data-layout="5-3" data-count="5">
+                                    <div class="layout-preview layout-5-3">
+                                        <div class="layout-cell" style="grid-column: span 2;"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">上大下小</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 6图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="6-1" data-count="6">
+                                    <div class="layout-preview layout-6-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">3x2网格</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 7图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="7-1" data-count="7">
+                                    <div class="layout-preview layout-7-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">横向排列</div>
+                                </div>
+                                <div class="layout-item" data-layout="7-2" data-count="7">
+                                    <div class="layout-preview layout-7-2">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">纵向排列</div>
+                                </div>
+                                <div class="layout-item" data-layout="7-3" data-count="7">
+                                    <div class="layout-preview layout-7-3">
+                                        <div class="layout-cell" style="grid-column: span 2; grid-row: span 2;"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">大图混合</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 8图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="8-1" data-count="8">
+                                    <div class="layout-preview layout-8-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">4x2网格</div>
+                                </div>
+                                <div class="layout-item" data-layout="8-2" data-count="8">
+                                    <div class="layout-preview layout-8-2">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">2x4网格</div>
+                                </div>
+                                <div class="layout-item" data-layout="8-3" data-count="8">
+                                    <div class="layout-preview layout-8-3">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">横向排列</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 9图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 9图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="9-1" data-count="9">
+                                    <div class="layout-preview layout-9-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">3x3九宫格</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 10图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 10图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="10-1" data-count="10">
+                                    <div class="layout-preview layout-10-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">5x2网格</div>
+                                </div>
+                                <div class="layout-item" data-layout="10-2" data-count="10">
+                                    <div class="layout-preview layout-10-2">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">2x5网格</div>
+                                </div>
+                                <div class="layout-item" data-layout="10-3" data-count="10">
+                                    <div class="layout-preview layout-10-3">
+                                        <div class="layout-cell" style="grid-column: span 2; grid-row: span 2;"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">混合布局</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 11图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 11图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="11-1" data-count="11">
+                                    <div class="layout-preview layout-11-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">横向排列</div>
+                                </div>
+                                <div class="layout-item" data-layout="11-2" data-count="11">
+                                    <div class="layout-preview layout-11-2">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">纵向排列</div>
+                                </div>
+                                <div class="layout-item" data-layout="11-3" data-count="11">
+                                    <div class="layout-preview layout-11-3">
+                                        <div class="layout-cell" style="grid-column: span 3;"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">上大下小</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 12图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 12图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="12-1" data-count="12">
+                                    <div class="layout-preview layout-12-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">4x3网格</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 13图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 13图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="13-1" data-count="13">
+                                    <div class="layout-preview layout-13-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">横向排列</div>
+                                </div>
+                                <div class="layout-item" data-layout="13-2" data-count="13">
+                                    <div class="layout-preview layout-13-2">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">纵向排列</div>
+                                </div>
+                                <div class="layout-item" data-layout="13-3" data-count="13">
+                                    <div class="layout-preview layout-13-3">
+                                        <div class="layout-cell" style="grid-column: span 2; grid-row: span 2;"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">混合布局</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 14图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 14图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="14-1" data-count="14">
+                                    <div class="layout-preview layout-14-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">7x2网格</div>
+                                </div>
+                                <div class="layout-item" data-layout="14-2" data-count="14">
+                                    <div class="layout-preview layout-14-2">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">2x7网格</div>
+                                </div>
+                                <div class="layout-item" data-layout="14-3" data-count="14">
+                                    <div class="layout-preview layout-14-3">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">横向排列</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 15图布局 -->
+                    <div class="layui-colla-item">
+                        <h2 class="layui-colla-title">
+                            <i class="fas fa-images"></i> 15图布局
+                        </h2>
+                        <div class="layui-colla-content">
+                            <div class="layout-grid">
+                                <div class="layout-item" data-layout="15-1" data-count="15">
+                                    <div class="layout-preview layout-15-1">
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                        <div class="layout-cell"></div>
+                                    </div>
+                                    <div class="layout-name">5x3网格</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中间预览区域 -->
+            <div class="preview-panel">
+                <div class="preview-header">
+                    <div class="preview-title">
+                        <i class="fas fa-eye"></i> 拼图预览
+                    </div>
+                    <div class="image-counter">
+                        已选择 <span id="imageCount">0</span> 张图片
+                    </div>
+                </div>
+                
+                <div class="preview-container" id="previewContainer">
+                    <div class="preview-grid layout-2-1" id="previewGrid">
+                        <div class="grid-cell" data-index="0">
+                            <div class="upload-hint">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div>点击上传图片</div>
+                                <div style="font-size: 12px; margin-top: 5px;">或拖拽图片到此处</div>
+                            </div>
+                            <div class="cell-index">1</div>
+                        </div>
+                        <div class="grid-cell" data-index="1">
+                            <div class="upload-hint">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div>点击上传图片</div>
+                                <div style="font-size: 12px; margin-top: 5px;">或拖拽图片到此处</div>
+                            </div>
+                            <div class="cell-index">2</div>
+                        </div>
+                    </div>
+                    
+                    <div class="loading-overlay" id="loadingOverlay">
+                        <div class="layui-icon layui-anim layui-anim-rotate layui-anim-loop">&#xe63e;</div>
+                        <span style="margin-left: 10px;">处理中...</span>
+                    </div>
+                </div>
+
+                <div class="bottom-actions">
+                    <button class="layui-btn layui-btn-lg" id="mergeBtn">
+                        <i class="fas fa-magic"></i> 开始合并
+                    </button>
+                    <button class="layui-btn layui-btn-primary layui-btn-lg" id="resetBtn">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
+                    <button class="layui-btn layui-btn-normal layui-btn-lg" id="downloadBtn" style="display: none;">
+                        <i class="fas fa-download"></i> 下载图片
+                    </button>
+                </div>
+            </div>
+
+            <!-- 右侧属性设置 -->
+            <div class="properties-panel">
+                <!-- 画布设置 -->
+                <div class="property-section">
+                    <div class="section-title">
+                        <i class="fas fa-cog"></i> 画布设置
+                    </div>
+                    
+                    <div class="form-item">
+                        <label class="form-label">输出尺寸</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="number" class="layui-input" id="canvasWidth" value="1200" placeholder="宽度">
+                            <span style="align-self: center;">×</span>
+                            <input type="number" class="layui-input" id="canvasHeight" value="800" placeholder="高度">
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">宽高比例</label>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
+                            <button class="layui-btn layui-btn-sm layui-btn-primary ratio-btn active" data-ratio="16:9">16:9</button>
+                            <button class="layui-btn layui-btn-sm layui-btn-primary ratio-btn" data-ratio="4:3">4:3</button>
+                            <button class="layui-btn layui-btn-sm layui-btn-primary ratio-btn" data-ratio="1:1">1:1</button>
+                            <button class="layui-btn layui-btn-sm layui-btn-primary ratio-btn" data-ratio="9:16">9:16</button>
+                            <button class="layui-btn layui-btn-sm layui-btn-primary ratio-btn" data-ratio="3:4">3:4</button>
+                            <button class="layui-btn layui-btn-sm layui-btn-primary ratio-btn" data-ratio="free">自由</button>
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">背景颜色</label>
+                        <div class="color-picker-group">
+                            <input type="color" class="layui-input" id="bgColor" value="#ffffff" style="width: 60px; padding: 2px;">
+                            <div class="color-preview" id="bgColorPreview" style="background: #ffffff;"></div>
+                            <span style="font-size: 12px; color: #999;">#ffffff</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 间距设置 -->
+                <div class="property-section">
+                    <div class="section-title">
+                        <i class="fas fa-arrows-alt"></i> 间距设置
+                    </div>
+                    
+                    <div class="form-item">
+                        <label class="form-label">图片间距</label>
+                        <div class="slider-group">
+                            <input type="range" class="layui-input" id="imageSpacing" min="0" max="50" value="10" style="flex: 1;">
+                            <span class="slider-value" id="spacingValue">10px</span>
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">边距设置</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                            <input type="number" class="layui-input layui-input-sm" id="paddingTop" value="0" placeholder="上">
+                            <input type="number" class="layui-input layui-input-sm" id="paddingRight" value="0" placeholder="右">
+                            <input type="number" class="layui-input layui-input-sm" id="paddingBottom" value="0" placeholder="下">
+                            <input type="number" class="layui-input layui-input-sm" id="paddingLeft" value="0" placeholder="左">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图片设置 -->
+                <div class="property-section">
+                    <div class="section-title">
+                        <i class="fas fa-image"></i> 图片设置
+                    </div>
+                    
+                    <div class="form-item">
+                        <label class="form-label">圆角半径</label>
+                        <div class="slider-group">
+                            <input type="range" class="layui-input" id="borderRadius" min="0" max="50" value="0" style="flex: 1;">
+                            <span class="slider-value" id="radiusValue">0px</span>
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">图片边框</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="number" class="layui-input layui-input-sm" id="borderWidth" value="0" placeholder="宽度" style="width: 60px;">
+                            <input type="color" class="layui-input" id="borderColor" value="#cccccc" style="width: 40px; padding: 2px;">
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">图片填充模式</label>
+                        <select class="layui-input" id="objectFit">
+                            <option value="cover">覆盖 (保持比例)</option>
+                            <option value="contain">包含 (完整显示)</option>
+                            <option value="fill">拉伸填充</option>
+                            <option value="none">原始尺寸</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 导出设置 -->
+                <div class="property-section">
+                    <div class="section-title">
+                        <i class="fas fa-download"></i> 导出设置
+                    </div>
+                    
+                    <div class="form-item">
+                        <label class="form-label">图片格式</label>
+                        <select class="layui-input" id="outputFormat">
+                            <option value="image/jpeg">JPEG (高压缩)</option>
+                            <option value="image/png">PNG (支持透明)</option>
+                            <option value="image/webp">WebP (高质量)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">图片质量</label>
+                        <div class="slider-group">
+                            <input type="range" class="layui-input" id="imageQuality" min="0.1" max="1" step="0.1" value="0.9" style="flex: 1;">
+                            <span class="slider-value" id="qualityValue">90%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-item">
+                        <label class="form-label">文件名前缀</label>
+                        <input type="text" class="layui-input" id="filePrefix" value="merged-image" placeholder="文件名前缀">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果展示模态框 -->
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <h3><i class="fas fa-check-circle" style="color: var(--layui-success);"></i> 拼图合并成功！</h3>
+            <img id="resultImage" class="result-image" alt="合并结果">
+            <div style="margin-top: 20px;">
+                <button class="layui-btn" onclick="downloadImage()">
+                    <i class="fas fa-download"></i> 下载图片
+                </button>
+                <button class="layui-btn layui-btn-primary" onclick="closeResultModal()">
+                    <i class="fas fa-times"></i> 关闭
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+
+    <script src="../assets/js/layui.min.js"></script>
+    <script>
+        // 应用程序状态
+        let currentLayout = '2-1';
+        let currentCount = 2;
+        let uploadedImages = [];
+        let mergedImageData = null;
+
+        // 初始化
+        layui.use(['element', 'layer'], function(){
+            const element = layui.element;
+            const layer = layui.layer;
+            
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // 初始化事件监听
+            initEventListeners();
+            // 初始化滑块值显示
+            updateSliderValues();
+            // 初始化预览网格
+            updatePreviewGrid();
+        }
+
+        function initEventListeners() {
+            // 布局选择
+            document.querySelectorAll('.layout-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    selectLayout(this);
+                });
+            });
+
+            // 比例按钮
+            document.querySelectorAll('.ratio-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    selectRatio(this);
+                });
+            });
+
+            // 滑块变化
+            document.getElementById('imageSpacing').addEventListener('input', updateSliderValues);
+            document.getElementById('borderRadius').addEventListener('input', updateSliderValues);
+            document.getElementById('imageQuality').addEventListener('input', updateSliderValues);
+
+            // 背景颜色变化
+            document.getElementById('bgColor').addEventListener('input', function() {
+                document.getElementById('bgColorPreview').style.background = this.value;
+            });
+
+            // 文件选择
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+            // 按钮事件
+            document.getElementById('mergeBtn').addEventListener('click', mergeImages);
+            document.getElementById('resetBtn').addEventListener('click', resetAll);
+            document.getElementById('downloadBtn').addEventListener('click', downloadImage);
+
+            // 拖拽事件
+            document.addEventListener('dragover', handleDragOver);
+            document.addEventListener('drop', handleDrop);
+        }
+
+        function selectLayout(item) {
+            // 移除所有活动状态
+            document.querySelectorAll('.layout-item').forEach(el => el.classList.remove('active'));
+            // 添加当前活动状态
+            item.classList.add('active');
+            
+            currentLayout = item.dataset.layout;
+            currentCount = parseInt(item.dataset.count);
+            
+            updatePreviewGrid();
+        }
+
+        function selectRatio(btn) {
+            document.querySelectorAll('.ratio-btn').forEach(el => {
+                el.classList.remove('layui-btn-normal');
+                el.classList.add('layui-btn-primary');
+                el.classList.remove('active');
+            });
+            
+            btn.classList.remove('layui-btn-primary');
+            btn.classList.add('layui-btn-normal');
+            btn.classList.add('active');
+            
+            const ratio = btn.dataset.ratio;
+            const width = document.getElementById('canvasWidth');
+            const height = document.getElementById('canvasHeight');
+            
+            if (ratio === '16:9') {
+                width.value = 1600;
+                height.value = 900;
+            } else if (ratio === '4:3') {
+                width.value = 1200;
+                height.value = 900;
+            } else if (ratio === '1:1') {
+                width.value = 1000;
+                height.value = 1000;
+            } else if (ratio === '9:16') {
+                width.value = 900;
+                height.value = 1600;
+            } else if (ratio === '3:4') {
+                width.value = 900;
+                height.value = 1200;
+            }
+        }
+
+        function updateSliderValues() {
+            const spacing = document.getElementById('imageSpacing');
+            const radius = document.getElementById('borderRadius');
+            const quality = document.getElementById('imageQuality');
+            
+            document.getElementById('spacingValue').textContent = spacing.value + 'px';
+            document.getElementById('radiusValue').textContent = radius.value + 'px';
+            document.getElementById('qualityValue').textContent = Math.round(quality.value * 100) + '%';
+            
+            // 实时更新预览
+            applySpacingToPreview();
+        }
+
+        function applySpacingToPreview() {
+            const spacing = document.getElementById('imageSpacing').value;
+            document.getElementById('previewGrid').style.gap = spacing + 'px';
+        }
+
+        function updatePreviewGrid() {
+            const grid = document.getElementById('previewGrid');
+            grid.className = `preview-grid layout-${currentLayout}`;
+            grid.innerHTML = '';
+
+            for (let i = 0; i < currentCount; i++) {
+                const cell = createGridCell(i);
+                grid.appendChild(cell);
+            }
+
+            applySpacingToPreview();
+            updateImageCounter();
+        }
+
+        function createGridCell(index) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            cell.dataset.index = index;
+            
+            const existingImage = uploadedImages[index];
+            
+            if (existingImage) {
+                cell.classList.add('has-image');
+                cell.innerHTML = `
+                    <img src="${existingImage.src}" alt="图片 ${index + 1}">
+                    <div class="cell-tools">
+                        <button class="tool-btn replace" onclick="replaceImage(${index})" title="替换图片">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                        <button class="tool-btn remove" onclick="removeImage(${index})" title="移除图片">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="cell-index">${index + 1}</div>
+                `;
+            } else {
+                cell.innerHTML = `
+                    <div class="upload-hint">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <div>点击上传图片</div>
+                        <div style="font-size: 12px; margin-top: 5px;">或拖拽图片到此处</div>
+                    </div>
+                    <div class="cell-index">${index + 1}</div>
+                `;
+            }
+            
+            // 点击上传
+            cell.addEventListener('click', function(e) {
+                if (!e.target.closest('.tool-btn')) {
+                    uploadToCell(index);
+                }
+            });
+            
+            // 拖拽处理
+            cell.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--layui-primary)';
+            });
+            
+            cell.addEventListener('dragleave', function(e) {
+                this.style.borderColor = '';
+            });
+            
+            cell.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '';
+                handleCellDrop(e, index);
+            });
+            
+            return cell;
+        }
+
+        function uploadToCell(index) {
+            const input = document.getElementById('fileInput');
+            input.dataset.targetIndex = index;
+            input.click();
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            const targetIndex = parseInt(e.target.dataset.targetIndex || 0);
+            
+            if (files.length > 0) {
+                processImageFile(files[0], targetIndex);
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            // 如果不是在单元格上，则不处理
+        }
+
+        function handleCellDrop(e, index) {
+            const files = Array.from(e.dataTransfer.files);
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                processImageFile(files[0], index);
+            }
+        }
+
+        function processImageFile(file, index) {
+            if (!file.type.startsWith('image/')) {
+                layui.layer.msg('请选择图片文件', {icon: 2});
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    uploadedImages[index] = {
+                        src: e.target.result,
+                        width: img.width,
+                        height: img.height,
+                        file: file
+                    };
+                    
+                    updatePreviewGrid();
+                    layui.layer.msg('图片上传成功', {icon: 1});
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function replaceImage(index) {
+            uploadToCell(index);
+        }
+
+        function removeImage(index) {
+            uploadedImages[index] = null;
+            updatePreviewGrid();
+            layui.layer.msg('图片已移除', {icon: 1});
+        }
+
+        function updateImageCounter() {
+            const count = uploadedImages.filter(img => img !== null && img !== undefined).length;
+            document.getElementById('imageCount').textContent = count;
+        }
+
+        async function mergeImages() {
+            const validImages = uploadedImages.filter(img => img !== null && img !== undefined);
+            
+            if (validImages.length === 0) {
+                layui.layer.msg('请至少上传一张图片', {icon: 2});
+                return;
+            }
+
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.add('show');
+
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // 获取设置参数
+                const canvasWidth = parseInt(document.getElementById('canvasWidth').value) || 1200;
+                const canvasHeight = parseInt(document.getElementById('canvasHeight').value) || 800;
+                const spacing = parseInt(document.getElementById('imageSpacing').value) || 10;
+                const bgColor = document.getElementById('bgColor').value;
+                const radius = parseInt(document.getElementById('borderRadius').value) || 0;
+                const borderWidth = parseInt(document.getElementById('borderWidth').value) || 0;
+                const borderColor = document.getElementById('borderColor').value;
+                const quality = parseFloat(document.getElementById('imageQuality').value) || 0.9;
+                const format = document.getElementById('outputFormat').value;
+
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
+
+                // 填充背景
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+                // 计算布局
+                const layout = calculateLayout(currentLayout, canvasWidth, canvasHeight, spacing);
+
+                // 绘制图片
+                const imagePromises = [];
+                for (let i = 0; i < currentCount; i++) {
+                    if (uploadedImages[i]) {
+                        const promise = new Promise((resolve) => {
+                            const img = new Image();
+                            img.onload = function() {
+                                const pos = layout.positions[i];
+                                if (pos) {
+                                    drawImageToCell(ctx, img, pos, radius, borderWidth, borderColor);
+                                }
+                                resolve();
+                            };
+                            img.src = uploadedImages[i].src;
+                        });
+                        imagePromises.push(promise);
+                    }
+                }
+
+                await Promise.all(imagePromises);
+
+                // 生成结果
+                const dataURL = canvas.toDataURL(format, quality);
+                mergedImageData = dataURL;
+
+                // 显示结果
+                showResult(dataURL);
+
+            } catch (error) {
+                console.error('合并失败:', error);
+                layui.layer.msg('合并失败: ' + error.message, {icon: 2});
+            } finally {
+                loadingOverlay.classList.remove('show');
+            }
+        }
+
+        function calculateLayout(layoutType, width, height, spacing) {
+            const positions = [];
+            
+            switch(layoutType) {
+                case '2-1': // 横向排列
+                    const w2h = (width - spacing) / 2;
+                    positions.push({x: 0, y: 0, width: w2h, height: height});
+                    positions.push({x: w2h + spacing, y: 0, width: w2h, height: height});
+                    break;
+                    
+                case '2-2': // 纵向排列
+                    const h2v = (height - spacing) / 2;
+                    positions.push({x: 0, y: 0, width: width, height: h2v});
+                    positions.push({x: 0, y: h2v + spacing, width: width, height: h2v});
+                    break;
+                    
+                case '3-1': // 3图横向
+                    const w3 = (width - spacing * 2) / 3;
+                    for (let i = 0; i < 3; i++) {
+                        positions.push({x: i * (w3 + spacing), y: 0, width: w3, height: height});
+                    }
+                    break;
+                    
+                case '3-2': // 3图纵向
+                    const h3 = (height - spacing * 2) / 3;
+                    for (let i = 0; i < 3; i++) {
+                        positions.push({x: 0, y: i * (h3 + spacing), width: width, height: h3});
+                    }
+                    break;
+                    
+                case '4-1': // 2x2网格
+                    const w4 = (width - spacing) / 2;
+                    const h4 = (height - spacing) / 2;
+                    positions.push({x: 0, y: 0, width: w4, height: h4});
+                    positions.push({x: w4 + spacing, y: 0, width: w4, height: h4});
+                    positions.push({x: 0, y: h4 + spacing, width: w4, height: h4});
+                    positions.push({x: w4 + spacing, y: h4 + spacing, width: w4, height: h4});
+                    break;
+                    
+                case '4-2': // 4图横向
+                    const w4h = (width - spacing * 3) / 4;
+                    for (let i = 0; i < 4; i++) {
+                        positions.push({x: i * (w4h + spacing), y: 0, width: w4h, height: height});
+                    }
+                    break;
+                    
+                case '4-3': // 4图纵向
+                    const h4v = (height - spacing * 3) / 4;
+                    for (let i = 0; i < 4; i++) {
+                        positions.push({x: 0, y: i * (h4v + spacing), width: width, height: h4v});
+                    }
+                    break;
+                    
+                case '5-1': // 5图横向
+                    const w5 = (width - spacing * 4) / 5;
+                    for (let i = 0; i < 5; i++) {
+                        positions.push({x: i * (w5 + spacing), y: 0, width: w5, height: height});
+                    }
+                    break;
+                    
+                case '5-2': // 5图纵向
+                    const h5 = (height - spacing * 4) / 5;
+                    for (let i = 0; i < 5; i++) {
+                        positions.push({x: 0, y: i * (h5 + spacing), width: width, height: h5});
+                    }
+                    break;
+                    
+                case '5-3': // 5图上大下小
+                    const w5_3 = (width - spacing) / 2;
+                    const h5_3 = (height - spacing) / 2;
+                    positions.push({x: 0, y: 0, width: width, height: h5_3}); // 上大
+                    for (let i = 0; i < 4; i++) {
+                        const col = i % 2;
+                        const row = Math.floor(i / 2);
+                        positions.push({
+                            x: col * (w5_3 + spacing),
+                            y: h5_3 + spacing + row * (h5_3 / 2),
+                            width: w5_3,
+                            height: h5_3 / 2
+                        });
+                    }
+                    break;
+                    
+                case '6-1': // 3x2网格
+                    const w6 = (width - spacing * 2) / 3;
+                    const h6 = (height - spacing) / 2;
+                    for (let row = 0; row < 2; row++) {
+                        for (let col = 0; col < 3; col++) {
+                            positions.push({
+                                x: col * (w6 + spacing),
+                                y: row * (h6 + spacing),
+                                width: w6,
+                                height: h6
+                            });
+                        }
+                    }
+                    break;
+                    
+                case '9-1': // 3x3网格
+                    const w9 = (width - spacing * 2) / 3;
+                    const h9 = (height - spacing * 2) / 3;
+                    for (let row = 0; row < 3; row++) {
+                        for (let col = 0; col < 3; col++) {
+                            positions.push({
+                                x: col * (w9 + spacing),
+                                y: row * (h9 + spacing),
+                                width: w9,
+                                height: h9
+                            });
+                        }
+                    }
+                    break;
+                    
+                case '7-1': // 7图横向
+                    const w7 = (width - spacing * 6) / 7;
+                    for (let i = 0; i < 7; i++) {
+                        positions.push({x: i * (w7 + spacing), y: 0, width: w7, height: height});
+                    }
+                    break;
+                    
+                case '7-2': // 7图纵向
+                    const h7 = (height - spacing * 6) / 7;
+                    for (let i = 0; i < 7; i++) {
+                        positions.push({x: 0, y: i * (h7 + spacing), width: width, height: h7});
+                    }
+                    break;
+                    
+                case '8-1': // 4x2网格
+                    const w8_1 = (width - spacing * 3) / 4;
+                    const h8_1 = (height - spacing) / 2;
+                    for (let row = 0; row < 2; row++) {
+                        for (let col = 0; col < 4; col++) {
+                            positions.push({
+                                x: col * (w8_1 + spacing),
+                                y: row * (h8_1 + spacing),
+                                width: w8_1,
+                                height: h8_1
+                            });
+                        }
+                    }
+                    break;
+                    
+                case '8-2': // 2x4网格
+                    const w8_2 = (width - spacing) / 2;
+                    const h8_2 = (height - spacing * 3) / 4;
+                    for (let row = 0; row < 4; row++) {
+                        for (let col = 0; col < 2; col++) {
+                            positions.push({
+                                x: col * (w8_2 + spacing),
+                                y: row * (h8_2 + spacing),
+                                width: w8_2,
+                                height: h8_2
+                            });
+                        }
+                    }
+                    break;
+                    
+                case '8-3': // 8图横向
+                    const w8_3 = (width - spacing * 7) / 8;
+                    for (let i = 0; i < 8; i++) {
+                        positions.push({x: i * (w8_3 + spacing), y: 0, width: w8_3, height: height});
+                    }
+                    break;
+                    
+                case '10-1': // 5x2网格
+                    const w10_1 = (width - spacing * 4) / 5;
+                    const h10_1 = (height - spacing) / 2;
+                    for (let row = 0; row < 2; row++) {
+                        for (let col = 0; col < 5; col++) {
+                            positions.push({
+                                x: col * (w10_1 + spacing),
+                                y: row * (h10_1 + spacing),
+                                width: w10_1,
+                                height: h10_1
+                            });
+                        }
+                    }
+                    break;
+                    
+                case '10-2': // 2x5网格
+                    const w10_2 = (width - spacing) / 2;
+                    const h10_2 = (height - spacing * 4) / 5;
+                    for (let row = 0; row < 5; row++) {
+                        for (let col = 0; col < 2; col++) {
+                            positions.push({
+                                x: col * (w10_2 + spacing),
+                                y: row * (h10_2 + spacing),
+                                width: w10_2,
+                                height: h10_2
+                            });
+                        }
+                    }
+                    break;
+                    
+                case '12-1': // 4x3网格
+                    const w12 = (width - spacing * 3) / 4;
+                    const h12 = (height - spacing * 2) / 3;
+                    for (let row = 0; row < 3; row++) {
+                        for (let col = 0; col < 4; col++) {
+                            positions.push({
+                                x: col * (w12 + spacing),
+                                y: row * (h12 + spacing),
+                                width: w12,
+                                height: h12
+                            });
+                        }
+                    }
+                    break;
+                    
+                case '14-1': // 7x2网格
+                    const w14_1 = (width - spacing * 6) / 7;
+                    const h14_1 = (height - spacing) / 2;
+                    for (let row = 0; row < 2; row++) {
+                        for (let col = 0; col < 7; col++) {
+                            positions.push({
+                                x: col * (w14_1 + spacing),
+                                y: row * (h14_1 + spacing),
+                                width: w14_1,
+                                height: h14_1
+                            });
+                        }
+                    }
+                    break;
+                    
+                case '14-2': // 2x7网格
+                    const w14_2 = (width - spacing) / 2;
+                    const h14_2 = (height - spacing * 6) / 7;
+                    for (let row = 0; row < 7; row++) {
+                        for (let col = 0; col < 2; col++) {
+                            positions.push({
+                                x: col * (w14_2 + spacing),
+                                y: row * (h14_2 + spacing),
+                                width: w14_2,
+                                height: h14_2
+                            });
+                        }
+                    }
+                    break;
+                    
+                case '15-1': // 5x3网格
+                    const w15 = (width - spacing * 4) / 5;
+                    const h15 = (height - spacing * 2) / 3;
+                    for (let row = 0; row < 3; row++) {
+                        for (let col = 0; col < 5; col++) {
+                            positions.push({
+                                x: col * (w15 + spacing),
+                                y: row * (h15 + spacing),
+                                width: w15,
+                                height: h15
+                            });
+                        }
+                    }
+                    break;
+                    
+                default:
+                    // 默认网格布局
+                    const cols = Math.ceil(Math.sqrt(currentCount));
+                    const rows = Math.ceil(currentCount / cols);
+                    const cellW = (width - spacing * (cols - 1)) / cols;
+                    const cellH = (height - spacing * (rows - 1)) / rows;
+                    
+                    for (let i = 0; i < currentCount; i++) {
+                        const row = Math.floor(i / cols);
+                        const col = i % cols;
+                        positions.push({
+                            x: col * (cellW + spacing),
+                            y: row * (cellH + spacing),
+                            width: cellW,
+                            height: cellH
+                        });
+                    }
+            }
+            
+            return { positions };
+        }
+
+        function drawImageToCell(ctx, img, pos, radius, borderWidth, borderColor) {
+            ctx.save();
+            
+            // 计算图片在单元格中的位置和尺寸
+            const objectFit = document.getElementById('objectFit').value;
+            let { x, y, width, height } = calculateImagePosition(img, pos, objectFit);
+            
+            // 绘制圆角
+            if (radius > 0) {
+                drawRoundedRect(ctx, pos.x, pos.y, pos.width, pos.height, radius);
+                ctx.clip();
+            }
+            
+            // 绘制图片
+            ctx.drawImage(img, x, y, width, height);
+            
+            ctx.restore();
+            
+            // 绘制边框
+            if (borderWidth > 0) {
+                ctx.strokeStyle = borderColor;
+                ctx.lineWidth = borderWidth;
+                if (radius > 0) {
+                    drawRoundedRect(ctx, pos.x, pos.y, pos.width, pos.height, radius);
+                    ctx.stroke();
+                } else {
+                    ctx.strokeRect(pos.x, pos.y, pos.width, pos.height);
+                }
+            }
+        }
+
+        function calculateImagePosition(img, pos, objectFit) {
+            const { x: cellX, y: cellY, width: cellW, height: cellH } = pos;
+            
+            switch (objectFit) {
+                case 'cover':
+                    const scale = Math.max(cellW / img.width, cellH / img.height);
+                    const scaledW = img.width * scale;
+                    const scaledH = img.height * scale;
+                    return {
+                        x: cellX + (cellW - scaledW) / 2,
+                        y: cellY + (cellH - scaledH) / 2,
+                        width: scaledW,
+                        height: scaledH
+                    };
+                    
+                case 'contain':
+                    const scaleContain = Math.min(cellW / img.width, cellH / img.height);
+                    const containW = img.width * scaleContain;
+                    const containH = img.height * scaleContain;
+                    return {
+                        x: cellX + (cellW - containW) / 2,
+                        y: cellY + (cellH - containH) / 2,
+                        width: containW,
+                        height: containH
+                    };
+                    
+                case 'fill':
+                    return {
+                        x: cellX,
+                        y: cellY,
+                        width: cellW,
+                        height: cellH
+                    };
+                    
+                default: // none
+                    return {
+                        x: cellX + (cellW - img.width) / 2,
+                        y: cellY + (cellH - img.height) / 2,
+                        width: img.width,
+                        height: img.height
+                    };
+            }
+        }
+
+        function drawRoundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        function showResult(dataURL) {
+            document.getElementById('resultImage').src = dataURL;
+            document.getElementById('resultModal').style.display = 'block';
+            document.getElementById('downloadBtn').style.display = 'inline-block';
+            
+            layui.layer.msg('拼图合并成功！', {icon: 1});
+        }
+
+        function closeResultModal() {
+            document.getElementById('resultModal').style.display = 'none';
+        }
+
+        function downloadImage() {
+            if (!mergedImageData) {
+                layui.layer.msg('没有可下载的图片', {icon: 2});
+                return;
+            }
+            
+            const link = document.createElement('a');
+            const format = document.getElementById('outputFormat').value;
+            const prefix = document.getElementById('filePrefix').value || 'merged-image';
+            const extension = format.split('/')[1];
+            
+            link.download = `${prefix}-${Date.now()}.${extension}`;
+            link.href = mergedImageData;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            layui.layer.msg('图片下载开始', {icon: 1});
+        }
+
+        function resetAll() {
+            layui.layer.confirm('确定要重置所有设置吗？', {icon: 3, title:'提示'}, function(index){
+                uploadedImages = [];
+                mergedImageData = null;
+                document.getElementById('downloadBtn').style.display = 'none';
+                updatePreviewGrid();
+                closeResultModal();
+                layui.layer.close(index);
+                layui.layer.msg('已重置', {icon: 1});
+            });
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('resultModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeResultModal();
+            }
+        });
+    </script>
+</body>
+</html>

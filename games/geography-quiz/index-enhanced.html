@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="地理知识问答游戏 - 探索世界地理知识，挑战你的地理素养">
+    <meta name="keywords" content="地理,问答,游戏,世界地理,学习">
+    <title>地理知识问答 - 探索地球奥秘</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2d3748;
+        }
+
+        /* 返回按钮 */
+        .back-btn {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 游戏容器 */
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shine 3s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        }
+
+        /* 游戏标题 */
+        .game-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-title {
+            font-size: 3.2em;
+            font-weight: 800;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-subtitle {
+            color: #555;
+            font-size: 1.3em;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        /* 地理分类选择器 */
+        .category-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .selector-title {
+            font-weight: bold;
+            color: #2d3436;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .category-button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .category-button.all {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        .category-button.physical {
+            background: linear-gradient(45deg, #00b894, #55efc4);
+            color: white;
+        }
+
+        .category-button.political {
+            background: linear-gradient(45deg, #fd79a8, #e84393);
+            color: white;
+        }
+
+        .category-button.cultural {
+            background: linear-gradient(45deg, #fdcb6e, #f39c12);
+            color: white;
+        }
+
+        .category-button.economic {
+            background: linear-gradient(45deg, #a29bfe, #6c5ce7);
+            color: white;
+        }
+
+        .category-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-button.active {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 统计面板 */
+        .quiz-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(116, 185, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: statShine 2s infinite;
+        }
+
+        @keyframes statShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 计时器 */
+        .timer {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2d3748;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .timer.warning {
+            color: #e74c3c;
+            animation: pulse 1s infinite;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* 进度条 */
+        .progress-container {
+            margin: 20px 0;
+            background: rgba(116, 185, 255, 0.1);
+            border-radius: 10px;
+            padding: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: progressShine 1.5s infinite;
+        }
+
+        @keyframes progressShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* 问题卡片 */
+        .question-card {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px solid rgba(116, 185, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .category-badge {
+            position: absolute;
+            top: -12px;
+            left: 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2d3436;
+            margin: 20px 0;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        /* 地理背景说明 */
+        .geographic-context {
+            background: linear-gradient(135deg, #e8f6f3, #d1f2eb);
+            padding: 18px;
+            border-radius: 15px;
+            margin: 15px 0;
+            color: #00b894;
+            font-weight: 500;
+            display: none;
+            border-left: 5px solid #00b894;
+            animation: slideDown 0.3s ease;
+        }
+
+        .geographic-context.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 答案网格 */
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .answer-button {
+            padding: 18px;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            min-height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(116, 185, 255, 0.3);
+        }
+
+        .answer-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .answer-button:hover::before {
+            left: 100%;
+        }
+
+        .answer-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(116, 185, 255, 0.4);
+        }
+
+        .answer-button.correct {
+            background: linear-gradient(135deg, #00b894, #55efc4);
+            animation: correctPulse 0.6s ease;
+            box-shadow: 0 10px 30px rgba(0, 184, 148, 0.5);
+        }
+
+        .answer-button.wrong {
+            background: linear-gradient(135deg, #e74c3c, #ff6b6b);
+            animation: wrongShake 0.6s ease;
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.5);
+        }
+
+        .answer-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* 分数动画 */
+        @keyframes scoreIncrease {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes scoreChange {
+            0% { transform: scale(1); color: inherit; }
+            25% { transform: scale(1.2); color: #00b894; }
+            50% { transform: scale(1.3); color: #00b894; }
+            100% { transform: scale(1); color: inherit; }
+        }
+
+        .score-animation {
+            animation: scoreChange 0.6s ease;
+        }
+
+        /* 高分奖励效果 */
+        @keyframes highScoreGlow {
+            0% { box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); }
+            50% { box-shadow: 0 0 20px rgba(46, 204, 113, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); }
+        }
+
+        .high-score-glow {
+            animation: highScoreGlow 1s ease 2;
+        }
+
+        /* 提示框 */
+        .hint-box {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
+            display: none;
+            border-left: 5px solid #f39c12;
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.2);
+            animation: slideDown 0.3s ease;
+        }
+
+        .hint-box.show {
+            display: block;
+        }
+
+        .hint-text {
+            color: #856404;
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        /* 控制按钮 */
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-start {
+            background: linear-gradient(45deg, #00b894, #55efc4);
+            color: white;
+        }
+
+        .btn-hint {
+            background: linear-gradient(45deg, #fdcb6e, #f39c12);
+            color: white;
+        }
+
+        .btn-next {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        .btn-restart {
+            background: linear-gradient(45deg, #fd79a8, #e84393);
+            color: white;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 消息框 */
+        .message {
+            text-align: center;
+            padding: 18px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-weight: 600;
+            font-size: 1.1em;
+            display: none;
+            animation: messageSlide 0.5s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .message.correct {
+            background: linear-gradient(135deg, #d1f2eb, #a7f3d0);
+            color: #00b894;
+            border: 2px solid #00b894;
+        }
+
+        .message.wrong {
+            background: linear-gradient(135deg, #fadbd8, #f8d7da);
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+        }
+
+        .message.final {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1.2em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .game-container {
+                padding: 25px;
+                margin: 0;
+            }
+
+            .game-title {
+                font-size: 2.5em;
+            }
+
+            .quiz-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .answers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .category-selector {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 6px;
+            }
+
+            .category-button {
+                min-width: auto;
+                padding: 10px 15px;
+                font-size: 0.9em;
+                flex: 1;
+                max-width: calc(50% - 6px);
+            }
+
+            .game-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .control-button {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .category-selector {
+                gap: 4px;
+            }
+
+            .category-button {
+                padding: 8px 12px;
+                font-size: 0.8em;
+                max-width: calc(50% - 4px);
+            }
+        }
+
+        /* 成就徽章 */
+        .achievement-badge {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px 5px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            animation: badgeGlow 2s infinite;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+
+        .achievement-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .achievement-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .achievement-badge:hover::before {
+            left: 100%;
+        }
+
+        .achievement-badge.master {
+            background: linear-gradient(45deg, #8e44ad, #9b59b6);
+            color: white;
+        }
+
+        .achievement-badge.expert {
+            background: linear-gradient(45deg, #f39c12, #f1c40f);
+            color: white;
+        }
+
+        .achievement-badge.good {
+            background: linear-gradient(45deg, #3498db, #74b9ff);
+            color: white;
+        }
+
+        .achievement-badge.average {
+            background: linear-gradient(45deg, #95a5a6, #bdc3c7);
+            color: white;
+        }
+
+        .achievement-badge.beginner {
+            background: linear-gradient(45deg, #e74c3c, #ff6b6b);
+            color: white;
+        }
+
+        @keyframes badgeGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); }
+            50% { box-shadow: 0 0 25px rgba(255, 255, 255, 0.7); }
+        }
+        
+        @keyframes specialEffect {
+            0% { 
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 1;
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-btn">← 返回游戏列表</a>
+    
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">🌍 地理知识问答</h1>
+            <p class="game-subtitle">探索地球奥秘 - 挑战你的地理知识！</p>
+        </div>
+
+        <div class="category-selector">
+            <h3 class="selector-title">选择地理分类</h3>
+            <button class="category-button all active" data-category="all">全分类</button>
+            <button class="category-button physical" data-category="physical">自然地理</button>
+            <button class="category-button political" data-category="political">政治地理</button>
+            <button class="category-button cultural" data-category="cultural">人文地理</button>
+            <button class="category-button economic" data-category="economic">经济地理</button>
+        </div>
+
+        <div class="quiz-stats">
+            <div class="stat-card">
+                <div class="stat-label">当前得分</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">题目进度</div>
+                <div class="stat-value"><span id="currentQuestion">0</span>/<span id="totalQuestions">12</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">正确率</div>
+                <div class="stat-value" id="accuracy">0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">连击数</div>
+                <div class="stat-value" id="streak">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">当前分类</div>
+                <div class="stat-value" id="currentCategory">全分类</div>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="timer" id="timer">
+            ⏰ 时间: <span id="timeLeft">25</span>秒
+        </div>
+
+        <div class="question-card" id="questionCard">
+            <div class="category-badge" id="categoryBadge">地理分类</div>
+            <div class="question-text" id="questionText">准备开始地理知识问答！选择分类后点击开始按钮。</div>
+            
+            <div class="hint-box" id="hintBox">
+                <div class="hint-text">💡 提示：<span id="hintText"></span></div>
+            </div>
+            
+            <div class="geographic-context" id="geographicContext"></div>
+        </div>
+
+        <div class="answers-grid" id="answersGrid"></div>
+
+        <div class="message" id="message"></div>
+
+        <div class="game-controls">
+            <button class="control-button btn-start" id="startButton">🚀 开始游戏</button>
+            <button class="control-button btn-hint" id="hintButton" style="display: none">💡 获取提示</button>
+            <button class="control-button btn-next" id="nextButton" style="display: none">➡️ 下一题</button>
+            <button class="control-button btn-restart" id="restartButton" style="display: none">🔄 重新开始</button>
+        </div>
+    </div>
+
+    <script src="geography-quiz-enhanced.js"></script>
+</body>
+</html>

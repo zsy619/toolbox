@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⛷️ 滑雪游戏 - 扁平化竞速游戏</title>
+    <link rel="stylesheet" href="css/skiing-game.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- 游戏头部 -->
+        <div class="game-header">
+            <h1>⛷️ 滑雪游戏</h1>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <span class="stat-label">速度</span>
+                    <span class="stat-value" id="speed">0</span>
+                    <span class="stat-unit">km/h</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">高度</span>
+                    <span class="stat-value" id="altitude">1000</span>
+                    <span class="stat-unit">m</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">距离</span>
+                    <span class="stat-value" id="distance">0</span>
+                    <span class="stat-unit">m</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">分数</span>
+                    <span class="stat-value" id="score">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏控制面板 -->
+        <div class="game-controls">
+            <button class="btn btn-primary" id="startBtn">开始滑雪</button>
+            <button class="btn btn-secondary" id="pauseBtn">暂停</button>
+            <button class="btn btn-secondary" id="resetBtn">重置</button>
+            <div class="difficulty-selector">
+                <label>雪道:</label>
+                <select id="slopeSelect">
+                    <option value="beginner">初级道</option>
+                    <option value="intermediate" selected>中级道</option>
+                    <option value="advanced">高级道</option>
+                    <option value="expert">专家道</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 游戏画布区域 -->
+        <div class="game-canvas-container">
+            <canvas id="gameCanvas" width="800" height="500"></canvas>
+            <div class="wind-indicator">
+                <div class="wind-arrow" id="windArrow">🌬️</div>
+                <span>风向</span>
+            </div>
+        </div>
+
+        <!-- 操控面板 -->
+        <div class="control-panel">
+            <div class="control-instructions">
+                <h3>🎮 操控说明</h3>
+                <div class="control-grid">
+                    <div class="control-item">
+                        <kbd>←</kbd>
+                        <span>左转</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>→</kbd>
+                        <span>右转</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>↑</kbd>
+                        <span>蹲下加速</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>↓</kbd>
+                        <span>减速刹车</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>Space</kbd>
+                        <span>跳跃</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 触屏控制按钮 -->
+            <div class="touch-controls" id="touchControls">
+                <div class="touch-row">
+                    <button class="touch-btn" id="crouchBtn">▲</button>
+                    <button class="touch-btn" id="jumpBtn">⬆</button>
+                </div>
+                <div class="touch-row">
+                    <button class="touch-btn" id="leftBtn">◀</button>
+                    <button class="touch-btn" id="brakeBtn">▼</button>
+                    <button class="touch-btn" id="rightBtn">▶</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 重力系统 -->
+        <div class="gravity-system">
+            <h3>🏔️ 重力下滑</h3>
+            <div class="gravity-meter">
+                <div class="slope-indicator" id="slopeIndicator">
+                    <div class="slope-angle" id="slopeAngle"></div>
+                    <span class="angle-text">坡度: <span id="angleValue">15°</span></span>
+                </div>
+            </div>
+            <div class="gravity-tips">
+                <div class="tip-item">
+                    <span class="tip-name">陡坡加速</span>
+                    <span class="tip-score">+50%速度</span>
+                </div>
+                <div class="tip-item">
+                    <span class="tip-name">缓坡减速</span>
+                    <span class="tip-score">-20%速度</span>
+                </div>
+                <div class="tip-item">
+                    <span class="tip-name">蹲下滑行</span>
+                    <span class="tip-score">+30%速度</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 避障系统 -->
+        <div class="obstacle-system">
+            <h3>🌲 障碍躲避</h3>
+            <div class="obstacle-grid">
+                <div class="obstacle-item">
+                    <span class="obstacle-name">树木</span>
+                    <span class="obstacle-penalty">-30分</span>
+                </div>
+                <div class="obstacle-item">
+                    <span class="obstacle-name">岩石</span>
+                    <span class="obstacle-penalty">-50分</span>
+                </div>
+                <div class="obstacle-item">
+                    <span class="obstacle-name">雪堆</span>
+                    <span class="obstacle-penalty">-20分</span>
+                </div>
+                <div class="obstacle-item">
+                    <span class="obstacle-name">其他滑雪者</span>
+                    <span class="obstacle-penalty">-40分</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 雪道信息 -->
+        <div class="track-info">
+            <div class="track-section">
+                <h3>🏁 雪道特色</h3>
+                <ul>
+                    <li>重力下滑物理引擎</li>
+                    <li>左右摆动躲避障碍</li>
+                    <li>风阻影响滑行速度</li>
+                    <li>坡度动态变化</li>
+                </ul>
+            </div>
+            <div class="track-section">
+                <h3>🏆 完成条件</h3>
+                <ul>
+                    <li>安全到达山脚</li>
+                    <li>避免撞击障碍物</li>
+                    <li>保持最高滑行速度</li>
+                    <li>收集加分道具</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 成绩展示 -->
+        <div class="performance-panel">
+            <h3>📊 滑雪数据</h3>
+            <div class="performance-grid">
+                <div class="performance-item">
+                    <span class="performance-label">当前得分</span>
+                    <span class="performance-value" id="currentScore">0</span>
+                </div>
+                <div class="performance-item">
+                    <span class="performance-label">最高分数</span>
+                    <span class="performance-value" id="highScore">0</span>
+                </div>
+                <div class="performance-item">
+                    <span class="performance-label">最高速度</span>
+                    <span class="performance-value" id="maxSpeed">0 km/h</span>
+                </div>
+                <div class="performance-item">
+                    <span class="performance-label">完美躲避</span>
+                    <span class="performance-value" id="perfectDodges">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏结果弹窗 -->
+        <div class="game-modal" id="gameModal">
+            <div class="modal-content">
+                <h2 id="resultTitle">⛷️ 滑雪结束</h2>
+                <div class="result-stats">
+                    <div class="result-item">
+                        <span class="result-label">最终得分</span>
+                        <span class="result-value" id="finalScore">0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">滑行距离</span>
+                        <span class="result-value" id="finalDistance">0m</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">最高速度</span>
+                        <span class="result-value" id="finalMaxSpeed">0 km/h</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">评级</span>
+                        <span class="result-value" id="finalRating">⭐⭐⭐</span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="playAgainBtn">再来一局</button>
+                    <button class="btn btn-secondary" id="backToMenuBtn">返回菜单</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 返回链接 -->
+        <div class="back-link">
+            <a href="../index.html" class="btn btn-link">← 返回游戏大厅</a>
+        </div>
+    </div>
+
+    <script src="js/skiing-game.js"></script>
+</body>
+</html>

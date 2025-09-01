@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金融复利计算器</title>
+    <meta name="keywords" content="金融复利计算器,复利计算公式,年金复利计算,投资收益率计算器,20年复利计算,复利计算器在线使用,长期投资回报预测,复利计算器免费,复利计算公式在线,复利计算器Excel替代" />
+    <link rel="stylesheet" href="assets/css/layui.min.css">
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+    <style>
+        :root {
+            --primary: #1E9FFF;
+            --secondary: #5FB878;
+            --warning: #FFB800;
+            --danger: #FF5722;
+            --light: #f8f8f8;
+            --dark: #333;
+            --gray: #e6e6e6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            text-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background: linear-gradient(120deg, var(--primary) 0%, #0d8bf2 100%);
+            color: white;
+            padding: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            height: 50px;
+            border-radius: 8px;
+            border: 2px solid var(--gray);
+            padding: 0 20px;
+            font-size: 1.1rem;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 159, 255, 0.2);
+        }
+
+        .calculator-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .calc-option {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            padding: 20px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            font-size: 1.1rem;
+            background: var(--light);
+            border: 2px solid var(--gray);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .calc-option i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .calc-option.active {
+            border-color: var(--primary);
+            background: rgba(30, 159, 255, 0.1);
+            color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(30, 159, 255, 0.2);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            height: 55px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(120deg, var(--primary) 0%, #0d8bf2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(120deg, #0d8bf2 0%, #0b7bd8 100%);
+            box-shadow: 0 5px 15px rgba(30, 159, 255, 0.4);
+        }
+
+        .btn-reset {
+            background: linear-gradient(120deg, var(--danger) 0%, #e64a19 100%);
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: linear-gradient(120deg, #e64a19 0%, #d84315 100%);
+            box-shadow: 0 5px 15px rgba(255, 87, 34, 0.4);
+        }
+
+        .result-container {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid var(--gray);
+            margin-top: 30px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .result-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .result-summary {
+            font-size: 1.2rem;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .highlight {
+            color: var(--secondary);
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .result-table th {
+            background: linear-gradient(120deg, var(--primary) 0%, #0d8bf2 100%);
+            color: white;
+            padding: 16px 15px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .result-table td {
+            padding: 14px 15px;
+            border-bottom: 1px solid var(--gray);
+            background: white;
+        }
+
+        .result-table tr:nth-child(even) td {
+            background: #f9f9f9;
+        }
+
+        .result-table tr:hover td {
+            background: #f1f7ff;
+        }
+
+        .result-table td:last-child {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 30px;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .calculator-options {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2rem;
+            }
+
+            .card-body {
+                padding: 20px;
+            }
+
+            .result-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .input-group input {
+                height: 45px;
+            }
+
+            .btn {
+                height: 50px;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .result-container {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0d8bf2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-calculator"></i> 金融复利计算器</h1>
+            <p>基于本金和年度收益率，计算未来20年内的资金增长情况，支持多种金融计算模式</p>
+        </header>
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-sliders-h"></i> 参数设置
+            </div>
+            <div class="card-body">
+                <div class="input-group">
+                    <label for="principal"><i class="fas fa-money-bill-wave"></i> 本金（元）</label>
+                    <input type="number" id="principal" class="layui-input" placeholder="请输入本金金额" value="100000">
+                </div>
+                <div class="input-group">
+                    <label for="rate"><i class="fas fa-percentage"></i> 年收益率（%）</label>
+                    <input type="number" id="rate" class="layui-input" placeholder="请输入年收益率" value="7" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label for="annuity"><i class="fas fa-coins"></i> 年金（元/年）</label>
+                    <input type="number" id="annuity" class="layui-input" placeholder="请输入每年年金金额" value="12000">
+                </div>
+                <div class="input-group">
+                    <label for="years"><i class="fas fa-calendar-alt"></i> 计算年限</label>
+                    <input type="number" id="years" class="layui-input" placeholder="请输入计算年限" value="20">
+                </div>
+                <div class="calculator-options">
+                    <div class="calc-option active" data-type="fv" id="btn-fv">
+                        <i class="fas fa-chart-line"></i>
+                        <span>算终值</span>
+                        <small>基于本金计算未来价值</small>
+                    </div>
+                    <div class="calc-option" data-type="annuity" id="btn-annuity">
+                        <i class="fas fa-piggy-bank"></i>
+                        <span>算年金</span>
+                        <small>基于年金计算未来价值</small>
+                    </div>
+                    <div class="calc-option" data-type="rate" id="btn-rate">
+                        <i class="fas fa-search-dollar"></i>
+                        <span>算利率</span>
+                        <small>计算所需收益率</small>
+                    </div>
+                    <div class="calc-option" data-type="principal" id="btn-principal">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>算本金</span>
+                        <small>计算所需初始本金</small>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="calculate">
+                        <i class="fas fa-calculator"></i> 开始计算
+                    </button>
+                    <button class="btn btn-reset" id="reset">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="result-container">
+            <div class="result-header">
+                <div class="result-title"><i class="fas fa-chart-bar"></i> 计算结果</div>
+            </div>
+            <div class="result-summary">
+                <p>初始本金 <span class="highlight">100,000 元</span>，年收益率 <span class="highlight">7%</span>，<span class="highlight">20 年</span>后终值为 <span class="highlight">386,968.45 元</span></p>
+            </div>
+            <div class="chart-container">
+                <canvas id="growthChart"></canvas>
+            </div>
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>年份</th>
+                        <th>年初金额（元）</th>
+                        <th>年度收益（元）</th>
+                        <th>年末总金额（元）</th>
+                    </tr>
+                </thead>
+                <tbody id="result-body">
+                    <!-- 结果将通过JS动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        <div class="footer">
+            <p>© 2023 金融复利计算器 | 响应式布局兼容移动端和电脑端</p>
+        </div>
+    </div>
+    <script src="assets/js/layui.min.js"></script>
+    <script src="assets/js/vendor/chart.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 初始化图表
+            var ctx = document.getElementById('growthChart').getContext('2d');
+            var growthChart;
+
+            // 初始化计算器
+            initCalculator();
+
+            // 计算类型按钮事件
+            document.getElementById('btn-fv').addEventListener('click', function () {
+                setActiveButton('fv');
+            });
+
+            document.getElementById('btn-annuity').addEventListener('click', function () {
+                setActiveButton('annuity');
+            });
+
+            document.getElementById('btn-rate').addEventListener('click', function () {
+                setActiveButton('rate');
+            });
+
+            document.getElementById('btn-principal').addEventListener('click', function () {
+                setActiveButton('principal');
+            });
+
+            // 计算按钮事件
+            document.getElementById('calculate').addEventListener('click', function () {
+                calculate();
+            });
+
+            // 重置按钮事件
+            document.getElementById('reset').addEventListener('click', function () {
+                resetCalculator();
+            });
+
+            // 设置活动按钮
+            function setActiveButton(type) {
+                // 移除所有按钮的active类
+                document.querySelectorAll('.calc-option').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // 为当前按钮添加active类
+                document.getElementById(`btn-${type}`).classList.add('active');
+
+                // 更新输入框提示
+                if (type === 'annuity') {
+                    document.getElementById('principal').placeholder = "请输入初始本金（可选）";
+                } else if (type === 'fv') {
+                    document.getElementById('principal').placeholder = "请输入本金金额";
+                }
+            }
+
+            // 初始化计算器
+            function initCalculator() {
+                // 创建图表
+                growthChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({ length: 20 }, (_, i) => `第${i + 1}年`),
+                        datasets: [{
+                            label: '年末总金额',
+                            data: [],
+                            borderColor: '#1E9FFF',
+                            backgroundColor: 'rgba(30, 159, 255, 0.1)',
+                            borderWidth: 3,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#fff',
+                            pointBorderWidth: 2,
+                            tension: 0.2,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                titleFont: {
+                                    size: 14
+                                },
+                                bodyFont: {
+                                    size: 14
+                                },
+                                padding: 12,
+                                displayColors: false,
+                                callbacks: {
+                                    label: function (context) {
+                                        return '金额: ' + context.parsed.y.toLocaleString() + '元';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                ticks: {
+                                    callback: function (value) {
+                                        return value.toLocaleString() + '元';
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // 初始计算
+                calculate();
+            }
+
+            // 计算函数
+            function calculate() {
+                var type = document.querySelector('.calc-option.active').getAttribute('data-type');
+                var principal = parseFloat(document.getElementById('principal').value) || 0;
+                var rate = parseFloat(document.getElementById('rate').value) || 0;
+                var annuity = parseFloat(document.getElementById('annuity').value) || 0;
+                var years = parseInt(document.getElementById('years').value) || 0;
+
+                if (years <= 0 || years > 100) {
+                    layui.layer.msg('计算年限必须在1-100年之间', { icon: 2 });
+                    return;
+                }
+
+                var summary = '';
+                var results = [];
+                var totalAmount = 0;
+
+                if (type === 'fv') {
+                    // 算终值
+                    if (principal <= 0) {
+                        layui.layer.msg('本金必须大于0', { icon: 2 });
+                        return;
+                    }
+
+                    var amount = principal;
+                    for (var i = 1; i <= years; i++) {
+                        var startAmount = amount;
+                        var interest = startAmount * (rate / 100);
+                        var endAmount = startAmount + interest;
+                        results.push({
+                            year: i,
+                            startAmount: startAmount,
+                            interest: interest,
+                            endAmount: endAmount
+                        });
+                        amount = endAmount;
+                    }
+                    totalAmount = amount;
+                    summary = `初始本金 <span class="highlight">${formatCurrency(principal)} 元</span>，年收益率 <span class="highlight">${rate}%</span>，<span class="highlight">${years} 年</span>后终值为 <span class="highlight">${formatCurrency(totalAmount)} 元</span>`;
+                }
+                else if (type === 'annuity') {
+                    // 算年金
+                    if (annuity <= 0) {
+                        layui.layer.msg('年金必须大于0', { icon: 2 });
+                        return;
+                    }
+
+                    var amount = principal;
+                    for (var i = 1; i <= years; i++) {
+                        var startAmount = amount;
+                        var interest = startAmount * (rate / 100);
+                        amount = startAmount + interest + annuity;
+                        results.push({
+                            year: i,
+                            startAmount: startAmount,
+                            interest: interest,
+                            endAmount: amount
+                        });
+                    }
+                    totalAmount = amount;
+                    summary = `初始本金 <span class="highlight">${formatCurrency(principal)} 元</span>，每年年金 <span class="highlight">${formatCurrency(annuity)} 元</span>，年收益率 <span class="highlight">${rate}%</span>，<span class="highlight">${years} 年</span>后终值为 <span class="highlight">${formatCurrency(totalAmount)} 元</span>`;
+                }
+                else if (type === 'rate') {
+                    // 算利率
+                    if (principal <= 0) {
+                        layui.layer.msg('本金必须大于0', { icon: 2 });
+                        return;
+                    }
+
+                    var targetAmount = parseFloat(prompt("请输入目标终值金额:", (principal * 3).toFixed(2))) || (principal * 3);
+                    if (targetAmount <= principal) {
+                        layui.layer.msg('目标终值必须大于本金', { icon: 2 });
+                        return;
+                    }
+
+                    var r = Math.pow(targetAmount / principal, 1 / years) - 1;
+                    var calculatedRate = (r * 100).toFixed(2);
+
+                    var amount = principal;
+                    for (var i = 1; i <= years; i++) {
+                        var startAmount = amount;
+                        var interest = startAmount * r;
+                        var endAmount = startAmount + interest;
+                        results.push({
+                            year: i,
+                            startAmount: startAmount,
+                            interest: interest,
+                            endAmount: endAmount
+                        });
+                        amount = endAmount;
+                    }
+                    totalAmount = amount;
+                    summary = `初始本金 <span class="highlight">${formatCurrency(principal)} 元</span>，目标终值 <span class="highlight">${formatCurrency(targetAmount)} 元</span>，<span class="highlight">${years} 年</span>所需年收益率为 <span class="highlight">${calculatedRate}%</span>`;
+                }
+                else if (type === 'principal') {
+                    // 算本金
+                    var targetAmount = parseFloat(prompt("请输入目标终值金额:", (principal * 3).toFixed(2))) || (principal * 3);
+                    if (targetAmount <= 0) {
+                        layui.layer.msg('目标终值必须大于0', { icon: 2 });
+                        return;
+                    }
+
+                    var calculatedPrincipal = targetAmount / Math.pow(1 + (rate / 100), years);
+
+                    var amount = calculatedPrincipal;
+                    for (var i = 1; i <= years; i++) {
+                        var startAmount = amount;
+                        var interest = startAmount * (rate / 100);
+                        var endAmount = startAmount + interest;
+                        results.push({
+                            year: i,
+                            startAmount: startAmount,
+                            interest: interest,
+                            endAmount: endAmount
+                        });
+                        amount = endAmount;
+                    }
+                    totalAmount = amount;
+                    summary = `目标终值 <span class="highlight">${formatCurrency(targetAmount)} 元</span>，年收益率 <span class="highlight">${rate}%</span>，<span class="highlight">${years} 年</span>所需本金为 <span class="highlight">${formatCurrency(calculatedPrincipal)} 元</span>`;
+                }
+
+                // 更新结果摘要
+                document.querySelector('.result-summary').innerHTML = `<p>${summary}</p>`;
+
+                // 更新结果表格
+                updateResultTable(results);
+
+                // 更新图表
+                updateChart(results, years);
+            }
+
+            // 更新结果表格
+            function updateResultTable(results) {
+                var tableHtml = '';
+                results.forEach(item => {
+                    tableHtml += `
+                        <tr>
+                            <td>${item.year}</td>
+                            <td>${formatCurrency(item.startAmount)}</td>
+                            <td>${formatCurrency(item.interest)}</td>
+                            <td>${formatCurrency(item.endAmount)}</td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('result-body').innerHTML = tableHtml;
+            }
+
+            // 更新图表
+            function updateChart(results, years) {
+                var chartData = results.map(function(item) { return item.endAmount; });
+                growthChart.data.datasets[0].data = chartData;
+                growthChart.data.labels = Array.from({ length: years }, (_, i) => `第${i + 1}年`);
+                growthChart.update();
+            }
+
+            // 格式化金额
+            function formatCurrency(value) {
+                return value.toLocaleString('zh-CN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            // 重置计算器
+            function resetCalculator() {
+                document.getElementById('principal').value = '100000';
+                document.getElementById('rate').value = '7';
+                document.getElementById('annuity').value = '12000';
+                document.getElementById('years').value = '20';
+
+                // 重置计算类型
+                setActiveButton('fv');
+
+                // 重置输入框提示
+                document.getElementById('principal').placeholder = "请输入本金金额";
+
+                // 重置结果
+                document.querySelector('.result-summary').innerHTML =
+                    '<p>初始本金 <span class="highlight">100,000 元</span>，年收益率 <span class="highlight">7%</span>，<span class="highlight">20 年</span>后终值为 <span class="highlight">386,968.45 元</span></p>';
+
+                // 重置表格
+                var resultBody = document.getElementById('result-body');
+                resultBody.innerHTML = '';
+
+                // 重置图表
+                growthChart.data.datasets[0].data = [];
+                growthChart.update();
+            }
+        });
+    </script>
+</body>
+
+</html>

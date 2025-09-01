@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛹 滑板游戏 - 扁平化竞速游戏</title>
+    <link rel="stylesheet" href="css/skateboard.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- 游戏头部 -->
+        <div class="game-header">
+            <h1>🛹 滑板游戏</h1>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <span class="stat-label">速度</span>
+                    <span class="stat-value" id="speed">0</span>
+                    <span class="stat-unit">km/h</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">平衡</span>
+                    <span class="stat-value" id="balance">100</span>
+                    <span class="stat-unit">%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">特技</span>
+                    <span class="stat-value" id="tricks">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">分数</span>
+                    <span class="stat-value" id="score">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏控制面板 -->
+        <div class="game-controls">
+            <button class="btn btn-primary" id="startBtn">开始滑板</button>
+            <button class="btn btn-secondary" id="pauseBtn">暂停</button>
+            <button class="btn btn-secondary" id="resetBtn">重置</button>
+            <div class="difficulty-selector">
+                <label>场地:</label>
+                <select id="venueSelect">
+                    <option value="street">街头场地</option>
+                    <option value="park" selected>滑板公园</option>
+                    <option value="vert">U型池</option>
+                    <option value="bowl">碗池</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 游戏画布区域 -->
+        <div class="game-canvas-container">
+            <canvas id="gameCanvas" width="800" height="500"></canvas>
+            <div class="balance-meter">
+                <div class="balance-bar">
+                    <div class="balance-fill" id="balanceFill"></div>
+                    <div class="balance-indicator" id="balanceIndicator"></div>
+                </div>
+                <span>平衡杆</span>
+            </div>
+        </div>
+
+        <!-- 操控面板 -->
+        <div class="control-panel">
+            <div class="control-instructions">
+                <h3>🎮 操控说明</h3>
+                <div class="control-grid">
+                    <div class="control-item">
+                        <kbd>←</kbd>
+                        <span>左倾</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>→</kbd>
+                        <span>右倾</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>↑</kbd>
+                        <span>加速</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>↓</kbd>
+                        <span>减速</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>Space</kbd>
+                        <span>跳跃</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>A/S/D/F</kbd>
+                        <span>特技组合</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 触屏控制按钮 -->
+            <div class="touch-controls" id="touchControls">
+                <div class="touch-row">
+                    <button class="touch-btn" id="accelerateBtn">▲</button>
+                    <button class="touch-btn" id="jumpBtn">⬆</button>
+                </div>
+                <div class="touch-row">
+                    <button class="touch-btn" id="leftBtn">◀</button>
+                    <button class="touch-btn" id="brakeBtn">▼</button>
+                    <button class="touch-btn" id="rightBtn">▶</button>
+                </div>
+                <div class="touch-row">
+                    <button class="touch-btn trick-btn" id="trickABtn">A</button>
+                    <button class="touch-btn trick-btn" id="trickSBtn">S</button>
+                    <button class="touch-btn trick-btn" id="trickDBtn">D</button>
+                    <button class="touch-btn trick-btn" id="trickFBtn">F</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 特技组合系统 -->
+        <div class="trick-system">
+            <h3>🤸 特技组合</h3>
+            <div class="trick-combo-display">
+                <div class="combo-sequence" id="comboSequence"></div>
+                <div class="combo-timer" id="comboTimer"></div>
+            </div>
+            <div class="trick-list">
+                <div class="trick-item">
+                    <span class="trick-combo">A+S</span>
+                    <span class="trick-name">Kickflip</span>
+                    <span class="trick-score">+100</span>
+                </div>
+                <div class="trick-item">
+                    <span class="trick-combo">D+F</span>
+                    <span class="trick-name">Heelflip</span>
+                    <span class="trick-score">+120</span>
+                </div>
+                <div class="trick-item">
+                    <span class="trick-combo">A+D+S</span>
+                    <span class="trick-name">360 Flip</span>
+                    <span class="trick-score">+200</span>
+                </div>
+                <div class="trick-item">
+                    <span class="trick-combo">Space+A+S</span>
+                    <span class="trick-name">Aerial Kickflip</span>
+                    <span class="trick-score">+300</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 平衡控制系统 -->
+        <div class="balance-system">
+            <h3>⚖️ 平衡控制</h3>
+            <div class="balance-tips">
+                <div class="tip-item">
+                    <span class="tip-name">完美平衡</span>
+                    <span class="tip-score">+20分/秒</span>
+                </div>
+                <div class="tip-item">
+                    <span class="tip-name">轻微倾斜</span>
+                    <span class="tip-score">+10分/秒</span>
+                </div>
+                <div class="tip-item">
+                    <span class="tip-name">严重失衡</span>
+                    <span class="tip-score">-50分</span>
+                </div>
+                <div class="tip-item">
+                    <span class="tip-name">摔倒重置</span>
+                    <span class="tip-score">-100分</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 场地信息 -->
+        <div class="track-info">
+            <div class="track-section">
+                <h3>🏁 场地特色</h3>
+                <ul>
+                    <li>组合键特技系统</li>
+                    <li>实时平衡杆控制</li>
+                    <li>物理引擎模拟</li>
+                    <li>多样化滑板场地</li>
+                </ul>
+            </div>
+            <div class="track-section">
+                <h3>🏆 完成条件</h3>
+                <ul>
+                    <li>完成特技组合</li>
+                    <li>保持身体平衡</li>
+                    <li>获得高分评价</li>
+                    <li>挑战创意动作</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 成绩展示 -->
+        <div class="performance-panel">
+            <h3>📊 滑板数据</h3>
+            <div class="performance-grid">
+                <div class="performance-item">
+                    <span class="performance-label">当前得分</span>
+                    <span class="performance-value" id="currentScore">0</span>
+                </div>
+                <div class="performance-item">
+                    <span class="performance-label">最高分数</span>
+                    <span class="performance-value" id="highScore">0</span>
+                </div>
+                <div class="performance-item">
+                    <span class="performance-label">特技总数</span>
+                    <span class="performance-value" id="totalTricks">0</span>
+                </div>
+                <div class="performance-item">
+                    <span class="performance-label">完美平衡</span>
+                    <span class="performance-value" id="perfectBalance">0s</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏结果弹窗 -->
+        <div class="game-modal" id="gameModal">
+            <div class="modal-content">
+                <h2 id="resultTitle">🛹 滑板结束</h2>
+                <div class="result-stats">
+                    <div class="result-item">
+                        <span class="result-label">最终得分</span>
+                        <span class="result-value" id="finalScore">0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">特技完成</span>
+                        <span class="result-value" id="finalTricks">0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">最高连击</span>
+                        <span class="result-value" id="finalCombo">0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">评级</span>
+                        <span class="result-value" id="finalRating">⭐⭐⭐</span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="playAgainBtn">再来一局</button>
+                    <button class="btn btn-secondary" id="backToMenuBtn">返回菜单</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 返回链接 -->
+        <div class="back-link">
+            <a href="../index.html" class="btn btn-link">← 返回游戏大厅</a>
+        </div>
+    </div>
+
+    <script src="js/skateboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird - 增强版</title>
+    <link rel="stylesheet" href="css/flappy.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="600" height="800"></canvas>
+        
+        <!-- 游戏控制按钮 -->
+        <div class="game-controls">
+            <button id="settingsBtn" class="control-btn" title="设置">
+                <i class="fas fa-cog"></i>
+            </button>
+            <button id="pauseBtn" class="control-btn" title="暂停/继续">
+                <i class="fas fa-pause"></i>
+            </button>
+            <button id="muteBtn" class="control-btn" title="静音">
+                <i class="fas fa-volume-up"></i>
+            </button>
+        </div>
+        
+        <div class="ui-overlay">
+            <div class="score" id="score">0</div>
+            <div class="high-score" id="highScore">最高: 0</div>
+            
+            <!-- 开始界面 -->
+            <div class="start-screen" id="startScreen">
+                <h1>🐦 Flappy Bird</h1>
+                <p>点击或按空格键开始</p>
+                <p>保持小鸟飞行，避开管道！</p>
+                <div class="difficulty-selector">
+                    <label>选择难度:</label>
+                    <select id="difficultySelect">
+                        <option value="easy">简单</option>
+                        <option value="normal" selected>普通</option>
+                        <option value="hard">困难</option>
+                        <option value="expert">专家</option>
+                    </select>
+                </div>
+                <button id="startBtn" class="game-btn">开始游戏</button>
+            </div>
+            
+            <!-- 游戏结束界面 -->
+            <div class="game-over-screen" id="gameOverScreen">
+                <h2>游戏结束</h2>
+                <div class="score-display">
+                    <p>本次得分: <span id="finalScore">0</span></p>
+                    <p>最高分: <span id="bestScore">0</span></p>
+                    <p>难度: <span id="finalDifficulty">普通</span></p>
+                </div>
+                <div class="game-stats">
+                    <p>游戏时长: <span id="gameTime">0</span>秒</p>
+                    <p>通过管道: <span id="pipesPassed">0</span>个</p>
+                </div>
+                <div class="button-group">
+                    <button id="restartBtn" class="game-btn">重新开始</button>
+                    <button id="menuBtn" class="game-btn secondary">返回菜单</button>
+                </div>
+            </div>
+            
+            <!-- 暂停界面 -->
+            <div class="pause-screen" id="pauseScreen">
+                <h2>游戏暂停</h2>
+                <p>点击继续按钮或按空格键继续游戏</p>
+                <button id="resumeBtn" class="game-btn">继续游戏</button>
+                <button id="pauseMenuBtn" class="game-btn secondary">返回菜单</button>
+            </div>
+            
+            <!-- 设置界面 -->
+            <div class="settings-screen" id="settingsScreen">
+                <h2>⚙️ 游戏设置</h2>
+                
+                <div class="settings-section">
+                    <h3>🎮 游戏设置</h3>
+                    <div class="setting-item">
+                        <label>难度等级:</label>
+                        <select id="settingsDifficulty">
+                            <option value="easy">简单 (重力: 0.3, 管道间距: 180px)</option>
+                            <option value="normal">普通 (重力: 0.5, 管道间距: 150px)</option>
+                            <option value="hard">困难 (重力: 0.7, 管道间距: 120px)</option>
+                            <option value="expert">专家 (重力: 0.9, 管道间距: 100px)</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>管道速度:</label>
+                        <input type="range" id="pipeSpeedSlider" min="0.5" max="4" step="0.5" value="1.5">
+                        <span id="pipeSpeedValue">1.5</span>
+                    </div>
+                    <div class="setting-item">
+                        <label>小鸟跳跃力度:</label>
+                        <input type="range" id="jumpForceSlider" min="6" max="12" step="1" value="8">
+                        <span id="jumpForceValue">8</span>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>🎨 外观设置</h3>
+                    <div class="setting-item">
+                        <label>小鸟颜色:</label>
+                        <select id="birdColorSelect">
+                            <option value="#FFD700">金色 (默认)</option>
+                            <option value="#FF6B6B">红色</option>
+                            <option value="#4ECDC4">青色</option>
+                            <option value="#45B7D1">蓝色</option>
+                            <option value="#96CEB4">绿色</option>
+                            <option value="#FFEAA7">黄色</option>
+                            <option value="#DDA0DD">紫色</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>背景主题:</label>
+                        <select id="backgroundTheme">
+                            <option value="day">白天</option>
+                            <option value="sunset">黄昏</option>
+                            <option value="night">夜晚</option>
+                            <option value="space">太空</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>管道样式:</label>
+                        <select id="pipeStyle">
+                            <option value="classic">经典绿色</option>
+                            <option value="metal">金属风格</option>
+                            <option value="neon">霓虹风格</option>
+                            <option value="wood">木质风格</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>🔊 音效设置</h3>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="soundEnabled" checked>
+                            启用音效
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>音效音量:</label>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                        <span id="volumeValue">50%</span>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>📊 统计信息</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">总游戏次数:</span>
+                            <span id="totalGames">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">总得分:</span>
+                            <span id="totalScore">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">平均得分:</span>
+                            <span id="averageScore">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">游戏时长:</span>
+                            <span id="totalPlayTime">0分钟</span>
+                        </div>
+                    </div>
+                    <button id="resetStatsBtn" class="game-btn danger">重置统计</button>
+                </div>
+                
+                <div class="button-group">
+                    <button id="saveSettingsBtn" class="game-btn">保存设置</button>
+                    <button id="closeSettingsBtn" class="game-btn secondary">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/flappy.js"></script>
+</body>
+</html>

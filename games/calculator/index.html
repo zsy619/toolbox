@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能计算器 - Calculator | 多功能科学计算工具</title>
+    <meta name="description" content="功能强大的智能计算器！支持基础运算、科学计算、单位换算、历史记录和多种主题，满足日常学习和工作的各种计算需求。">
+    <meta name="keywords" content="计算器,Calculator,科学计算器,单位换算,数学计算,工程计算,在线计算工具">
+    <meta name="author" content="Game Creator">
+    <meta property="og:title" content="智能计算器 - Calculator">
+    <meta property="og:description" content="功能强大的智能计算器，支持科学计算和单位换算">
+    <meta property="og:type" content="game">
+    <link rel="canonical" href="/games/calculator/">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>🧮 智能计算器</h1>
+    </div>
+
+    <div class="calculator-container">
+        <div class="main-calculator">
+            <div class="calculator-display">
+                <div class="display-history" id="displayHistory"></div>
+                <div class="display-main" id="displayMain">0</div>
+                <div class="display-unit" id="displayUnit"></div>
+            </div>
+
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="basic" id="basicMode">基础</button>
+                <button class="mode-btn" data-mode="scientific" id="scientificMode">科学</button>
+            </div>
+
+            <div class="calculator-buttons" id="calculatorButtons">
+                <button class="calc-button function" data-action="clear">C</button>
+                <button class="calc-button function" data-action="clearEntry">CE</button>
+                <button class="calc-button function" data-action="backspace">⌫</button>
+                <button class="calc-button operator" data-action="divide">÷</button>
+
+                <button class="calc-button" data-action="digit" data-value="7">7</button>
+                <button class="calc-button" data-action="digit" data-value="8">8</button>
+                <button class="calc-button" data-action="digit" data-value="9">9</button>
+                <button class="calc-button operator" data-action="multiply">×</button>
+
+                <button class="calc-button" data-action="digit" data-value="4">4</button>
+                <button class="calc-button" data-action="digit" data-value="5">5</button>
+                <button class="calc-button" data-action="digit" data-value="6">6</button>
+                <button class="calc-button operator" data-action="subtract">−</button>
+
+                <button class="calc-button" data-action="digit" data-value="1">1</button>
+                <button class="calc-button" data-action="digit" data-value="2">2</button>
+                <button class="calc-button" data-action="digit" data-value="3">3</button>
+                <button class="calc-button operator" data-action="add">+</button>
+
+                <button class="calc-button wide" data-action="digit" data-value="0">0</button>
+                <button class="calc-button" data-action="decimal">.</button>
+                <button class="calc-button equals" data-action="equals">=</button>
+            </div>
+
+            <div class="scientific-panel" id="scientificPanel">
+                <button class="scientific-btn" data-action="sin">sin</button>
+                <button class="scientific-btn" data-action="cos">cos</button>
+                <button class="scientific-btn" data-action="tan">tan</button>
+                <button class="scientific-btn" data-action="log">log</button>
+                <button class="scientific-btn" data-action="ln">ln</button>
+
+                <button class="scientific-btn" data-action="asin">sin⁻¹</button>
+                <button class="scientific-btn" data-action="acos">cos⁻¹</button>
+                <button class="scientific-btn" data-action="atan">tan⁻¹</button>
+                <button class="scientific-btn" data-action="sqrt">√</button>
+                <button class="scientific-btn" data-action="cbrt">∛</button>
+
+                <button class="scientific-btn" data-action="power">x^y</button>
+                <button class="scientific-btn" data-action="factorial">x!</button>
+                <button class="scientific-btn" data-action="pi">π</button>
+                <button class="scientific-btn" data-action="e">e</button>
+                <button class="scientific-btn" data-action="exp">e^x</button>
+            </div>
+
+            <div class="error-display" id="errorDisplay"></div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">💾 内存</div>
+                <div class="memory-panel">
+                    <div class="memory-controls">
+                        <button class="memory-btn" data-action="memoryStore">MS</button>
+                        <button class="memory-btn" data-action="memoryRecall">MR</button>
+                        <button class="memory-btn" data-action="memoryAdd">M+</button>
+                        <button class="memory-btn" data-action="memoryClear">MC</button>
+                    </div>
+                    <div class="memory-display" id="memoryDisplay">0</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">📝 历史记录</div>
+                <div class="history-list" id="historyList">
+                    <div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">
+                        暂无计算记录
+                    </div>
+                </div>
+                <button class="mode-btn" style="width: 100%; margin-top: 10px;" id="clearHistory">清空历史</button>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">🔄 单位换算</div>
+                <div class="converter-section">
+                    <select class="converter-select" id="converterType">
+                        <option value="length">长度</option>
+                        <option value="weight">重量</option>
+                        <option value="temperature">温度</option>
+                        <option value="area">面积</option>
+                        <option value="volume">体积</option>
+                    </select>
+                    <input type="number" class="converter-input" id="converterInput" placeholder="输入数值">
+                    <select class="converter-select" id="converterFrom">
+                        <option value="m">米</option>
+                    </select>
+                    <select class="converter-select" id="converterTo">
+                        <option value="m">米</option>
+                    </select>
+                    <div class="converter-result" id="converterResult">结果将显示在这里</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">🎨 主题</div>
+                <div class="theme-selector">
+                    <button class="theme-btn active" data-theme="default">
+                        <div class="theme-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                    </button>
+                    <button class="theme-btn" data-theme="sunset">
+                        <div class="theme-gradient" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);"></div>
+                    </button>
+                    <button class="theme-btn" data-theme="ocean">
+                        <div class="theme-gradient" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);"></div>
+                    </button>
+                    <button class="theme-btn" data-theme="forest">
+                        <div class="theme-gradient" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);"></div>
+                    </button>
+                    <button class="theme-btn" data-theme="night">
+                        <div class="theme-gradient" style="background: linear-gradient(135deg, #232526 0%, #414345 100%);"></div>
+                    </button>
+                    <button class="theme-btn" data-theme="fire">
+                        <div class="theme-gradient" style="background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);"></div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">⚙️ 设置</div>
+                <div class="settings-panel">
+                    <div class="setting-item">
+                        <span class="setting-label">声音反馈</span>
+                        <div class="setting-toggle" id="soundToggle"></div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">振动反馈</span>
+                        <div class="setting-toggle" id="hapticToggle"></div>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">角度单位</span>
+                        <select class="converter-select" id="angleUnit" style="width: 60px; padding: 4px;">
+                            <option value="deg">度</option>
+                            <option value="rad">弧度</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <script src="js/game.js"></script>
+</body>
+</html>

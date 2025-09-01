@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="免费在线数字转大写金额工具，支持人民币金额实时转换，提供JavaScript、Python、Java、Golang、PHP等多语言实现代码，符合中国人民银行规范">
+    <meta name="keywords" content="大写金额转换,人民币大写,数字转中文金额,金额转换工具,财务工具,大写金额生成器">
+    <meta name="author" content="前端UI大师">
+    <title>高级数字转大写金额工具 - 多语言实现 | 实时转换</title>
+    <link rel="stylesheet" href="assets/css/fontawesome.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/highlight-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2ecc71;
+            --secondary-dark: #27ae60;
+            --danger: #e74c3c;
+            --danger-dark: #c0392b;
+            --light-bg: #f8f9fa;
+            --dark-text: #2c3e50;
+            --light-text: #7f8c8d;
+            --border: #e0e0e0;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --yi-color: #9b59b6;
+            --wan-color: #27ae60;
+            --yuan-color: #3498db;
+            --jiao-color: #f39c12;
+            --fen-color: #e74c3c;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            color: var(--dark-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 35px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+            transform: rotate(30deg);
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            position: relative;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+            font-weight: 300;
+            position: relative;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-title {
+            padding: 22px 30px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title i {
+            margin-right: 15px;
+            font-size: 1.4rem;
+            color: white;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .input-group {
+                flex-direction: row;
+            }
+        }
+
+        .amount-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .amount-input {
+            width: 100%;
+            height: 65px;
+            font-size: 1.4rem;
+            padding: 0 25px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            transition: all 0.3s;
+            outline: none;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+        }
+
+        .amount-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.25);
+        }
+
+        .input-label {
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: white;
+            padding: 0 10px;
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            height: 65px;
+            min-width: 120px;
+            padding: 0 20px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-generate:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #1c6ea4 100%);
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+            color: white;
+        }
+
+        .btn-copy:hover {
+            background: linear-gradient(135deg, var(--secondary-dark) 0%, #1e8449 100%);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: linear-gradient(135deg, var(--danger-dark) 0%, #a93226 100%);
+        }
+
+        .result-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #eef2f6 100%);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            min-height: 150px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-box {
+            font-size: 2.2rem;
+            color: var(--dark-text);
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.8;
+            padding: 10px 20px;
+            border-radius: 8px;
+            max-width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .segment-yi {
+            color: var(--yi-color);
+            font-weight: 800;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .segment-wan {
+            color: var(--wan-color);
+            font-weight: 800;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .segment-yuan {
+            color: var(--yuan-color);
+            font-weight: 800;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .segment-jiao {
+            color: var(--jiao-color);
+            font-weight: 800;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .segment-fen {
+            color: var(--fen-color);
+            font-weight: 800;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .segment-unit {
+            padding: 0 5px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+
+        .tabs-container {
+            margin-top: 20px;
+        }
+
+        .tabs-header {
+            display: flex;
+            overflow-x: auto;
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 25px;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-btn {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            color: var(--light-text);
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .code-container {
+            background: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .code-header {
+            background: #1a2530;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .language-name {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #3498db;
+        }
+
+        .code-content {
+            padding: 25px;
+            overflow-x: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .reference-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .reference-table th {
+            padding: 18px;
+            text-align: left;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .reference-table td {
+            padding: 18px;
+            border-bottom: 1px solid var(--border);
+            background: white;
+        }
+
+        .reference-table tr:nth-child(even) td {
+            background: var(--light-bg);
+        }
+
+        .reference-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 35px 0;
+            color: var(--light-text);
+            font-size: 1.1rem;
+            margin-top: 40px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .feature-icon {
+            font-size: 2.8rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+        }
+
+        .feature-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: var(--light-text);
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+                padding: 0 20px;
+            }
+
+            .btn {
+                padding: 0 15px;
+                font-size: 1.1rem;
+                height: 60px;
+                min-width: 100px;
+            }
+
+            .result-box {
+                font-size: 1.6rem;
+                padding: 20px;
+            }
+
+            .tab-btn {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+
+            .card-body {
+                padding: 25px;
+            }
+
+            .amount-input {
+                height: 60px;
+                font-size: 1.2rem;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 160px;
+            background-color: #2c3e50;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 150%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 8px;
+            border-style: solid;
+            border-color: #2c3e50 transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .auto-convert-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(52, 152, 219, 0.08);
+            border-radius: 8px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--secondary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(30px);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+        }
+
+        .status-off .status-dot {
+            background-color: var(--danger);
+        }
+
+        .status-off {
+            color: var(--danger);
+        }
+
+        .instructions {
+            background: rgba(243, 156, 18, 0.1);
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+
+        .seo-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .seo-section h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-bg);
+        }
+
+        .seo-content {
+            line-height: 1.8;
+        }
+
+        .seo-content p {
+            margin-bottom: 15px;
+        }
+
+        .seo-content ul {
+            padding-left: 25px;
+            margin-bottom: 20px;
+        }
+
+        .seo-content li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 页面头部 -->
+    <div class="header">
+        <h1>高级数字转大写金额工具</h1>
+        <p>智能化转换，可视化展示，让金额转换更直观、更高效</p>
+    </div>
+    <div class="container">
+        <!-- 转换工具卡片 -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-exchange-alt"></i> 金额转换工具
+            </div>
+            <div class="card-body">
+                <div class="instructions">
+                    <i class="fas fa-lightbulb"></i> 提示：输入金额后，系统将自动转换为大写金额，支持小数点和千分位分隔符
+                </div>
+                <div class="input-group">
+                    <div class="amount-container">
+                        <div class="input-label">输入金额 (人民币)</div>
+                        <input type="text" id="amount-input" class="amount-input" placeholder="请输入金额" value="99.99">
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-generate" id="generate-btn">
+                            <i class="fas fa-sync-alt"></i> 重新生成
+                        </button>
+                        <button class="btn btn-copy" id="copy-btn">
+                            <i class="fas fa-copy"></i> 复制结果
+                        </button>
+                        <button class="btn btn-clear" id="clear-btn">
+                            <i class="fas fa-trash"></i> 清空
+                        </button>
+                    </div>
+                </div>
+                <div class="auto-convert-container">
+                    <span class="status-indicator" id="status-indicator">
+                        <span class="status-dot"></span>
+                        <span>实时转换已启用</span>
+                    </span>
+                    <label class="switch">
+                        <input type="checkbox" id="auto-convert" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="result-container">
+                    <div class="result-box" id="result-box">
+                        <span class="segment-yuan">玖拾玖</span>
+                        <span class="segment-unit">元</span>
+                        <span class="segment-jiao">玖角</span>
+                        <span class="segment-fen">玖分</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- SEO内容区域 -->
+        <div class="seo-section">
+            <h2><i class="fas fa-info-circle"></i> 关于人民币大写金额规范</h2>
+            <div class="seo-content">
+                <p>人民币大写金额是财务和商务活动中重要的书写规范，遵循中国人民银行制定的《支付结算办法》相关规定：</p>
+                <ul>
+                    <li>中文大写金额数字应用正楷或行书填写，如壹、贰、叁、肆、伍、陆、柒、捌、玖、拾、佰、仟、万、亿、元、角、分、零、整(正)等字样</li>
+                    <li>大写金额数字到"元"为止的，在"元"之后应写"整"（或"正"）字，在"角"之后可以不写"整"（或"正"）字</li>
+                    <li>大写金额数字前未印"人民币"字样的，应加填"人民币"三字</li>
+                    <li>阿拉伯金额数字中间有"0"时，中文大写要写"零"字</li>
+                    <li>阿拉伯金额数字中间连续有几个"0"时，中文大写金额中间可以只写一个"零"字</li>
+                    <li>阿拉伯金额数字元位是"0"，或者数字中间连续有几个"0"，元位也是"0"，但角位不是"0"时，中文大写金额可以只写一个"零"字，也可以不写"零"字</li>
+                </ul>
+                <p>本工具严格遵循中国人民银行规定的大写金额规范，可用于发票、合同、财务报表等正式文件中的金额书写。</p>
+            </div>
+        </div>
+        <!-- 代码预览卡片 -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-laptop-code"></i> 编程语言实现
+            </div>
+            <div class="card-body">
+                <div class="tabs-container">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" data-tab="javascript">JavaScript</button>
+                        <button class="tab-btn" data-tab="python">Python</button>
+                        <button class="tab-btn" data-tab="java">Java</button>
+                        <button class="tab-btn" data-tab="golang">Golang</button>
+                        <button class="tab-btn" data-tab="php">PHP</button>
+                    </div>
+                    <!-- JavaScript -->
+                    <div class="tab-content active" id="javascript-tab">
+                        <div class="code-container">
+                            <div class="code-header">
+                                <div class="language-name">JavaScript 实现</div>
+                                <div class="tooltip">
+                                    <i class="far fa-copy copy-icon" data-code="javascript"></i>
+                                    <span class="tooltiptext">复制代码到剪贴板</span>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <pre><code class="language-javascript">function toChineseAmount(n) {
+  if (isNaN(n) || n > 999999999999.99) return "无效金额";
+  
+  const fraction = ['角', '分'];
+  const digit = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
+  const unit = [['元', '万', '亿'], ['', '拾', '佰', '仟']];
+  let num = Math.abs(n);
+  let s = '';
+  
+  // 处理小数部分
+  for (let i = 0; i < fraction.length; i++) {
+    const d = Math.floor(num * 10 * Math.pow(10, i)) % 10;
+    s += (digit[d] + fraction[i]).replace(/零./, '');
+  }
+  s = s || '整';
+  
+  // 处理整数部分
+  num = Math.floor(num);
+  for (let i = 0; i < unit[0].length && num > 0; i++) {
+    let p = '';
+    for (let j = 0; j < unit[1].length && num > 0; j++) {
+      p = digit[num % 10] + unit[1][j] + p;
+      num = Math.floor(num / 10);
+    }
+    s = p.replace(/(零.)*零$/, '')
+         .replace(/^$/, '零') + unit[0][i] + s;
+  }
+  
+  return s.replace(/(零.)*零元/, '元')
+         .replace(/(零.)+/g, '零')
+         .replace(/^整$/, '零元整');
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Python -->
+                    <div class="tab-content" id="python-tab">
+                        <div class="code-container">
+                            <div class="code-header">
+                                <div class="language-name">Python 实现</div>
+                                <div class="tooltip">
+                                    <i class="far fa-copy copy-icon" data-code="python"></i>
+                                    <span class="tooltiptext">复制代码到剪贴板</span>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <pre><code class="language-python">def to_chinese_amount(n):
+    if not isinstance(n, (int, float)) or n > 999999999999.99:
+        return "无效金额"
+    
+    fraction = ['角', '分']
+    digit = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖']
+    unit = [['元', '万', '亿'], ['', '拾', '佰', '仟']]
+    num = abs(n)
+    s = ''
+    
+    # 处理小数部分
+    for i in range(len(fraction)):
+        digit_val = int(num * 10 * (10 ** i) % 10)
+        s += (digit[digit_val] + fraction[i]).replace('零.', '')
+    s = s or '整'
+    
+    # 处理整数部分
+    num = int(num)
+    for i in range(len(unit[0])):
+        if num <= 0: break
+        p = ''
+        for j in range(len(unit[1])):
+            if num <= 0: break
+            p = digit[num % 10] + unit[1][j] + p
+            num = num // 10
+        s = p.replace('零零', '零').replace('零万', '万') + unit[0][i] + s
+    
+    return s.replace('零元', '元').replace('零零', '零')</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Java -->
+                    <div class="tab-content" id="java-tab">
+                        <div class="code-container">
+                            <div class="code-header">
+                                <div class="language-name">Java 实现</div>
+                                <div class="tooltip">
+                                    <i class="far fa-copy copy-icon" data-code="java"></i>
+                                    <span class="tooltiptext">复制代码到剪贴板</span>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <pre><code class="language-java">public class AmountConverter {
+    public static String toChineseAmount(double n) {
+        if (Double.isNaN(n) || n > 999999999999.99) {
+            return "无效金额";
+        }
+        
+        final String[] fraction = {"角", "分"};
+        final String[] digit = {"零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"};
+        final String[][] unit = {{"元", "万", "亿"}, {"", "拾", "佰", "仟"}};
+        
+        double num = Math.abs(n);
+        StringBuilder s = new StringBuilder();
+        
+        // 处理小数部分
+        for (int i = 0; i < fraction.length; i++) {
+            int d = (int) (num * 10 * Math.pow(10, i)) % 10;
+            s.append(digit[d]).append(fraction[i]);
+        }
+        if (s.length() == 0) {
+            s.append("整");
+        }
+        
+        // 处理整数部分
+        long integerPart = (long) num;
+        for (int i = 0; i < unit[0].length && integerPart > 0; i++) {
+            StringBuilder p = new StringBuilder();
+            for (int j = 0; j < unit[1].length && integerPart > 0; j++) {
+                p.insert(0, digit[(int) (integerPart % 10)] + unit[1][j]);
+                integerPart /= 10;
+            }
+            s.insert(0, p.toString().replaceAll("零$", "") + unit[0][i]);
+        }
+        
+        return s.toString()
+                .replaceAll("零元", "元")
+                .replaceAll("零零", "零")
+                .replaceAll("零万", "万");
+    }
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Golang -->
+                    <div class="tab-content" id="golang-tab">
+                        <div class="code-container">
+                            <div class="code-header">
+                                <div class="language-name">Golang 实现</div>
+                                <div class="tooltip">
+                                    <i class="far fa-copy copy-icon" data-code="golang"></i>
+                                    <span class="tooltiptext">复制代码到剪贴板</span>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <pre><code class="language-go">package main
+
+import (
+    "math"
+    "strings"
+)
+
+func toChineseAmount(n float64) string {
+    if math.IsNaN(n) || n > 999999999999.99 {
+        return "无效金额"
+    }
+    
+    fraction := []string{"角", "分"}
+    digit := []string{"零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"}
+    unit := [][]string{
+        {"元", "万", "亿"},
+        {"", "拾", "佰", "仟"},
+    }
+    
+    num := math.Abs(n)
+    s := ""
+    
+    // 处理小数部分
+    for i := 0; i < len(fraction); i++ {
+        d := int(num*10*math.Pow10(i)) % 10
+        s += digit[d] + fraction[i]
+    }
+    if s == "" {
+        s = "整"
+    }
+    
+    // 处理整数部分
+    integerPart := int64(num)
+    for i := 0; i < len(unit[0]) && integerPart > 0; i++ {
+        p := ""
+        for j := 0; j < len(unit[1]) && integerPart > 0; j++ {
+            p = digit[integerPart%10] + unit[1][j] + p
+            integerPart /= 10
+        }
+        s = p + unit[0][i] + s
+    }
+    
+    // 清理多余的零
+    s = strings.ReplaceAll(s, "零元", "元")
+    s = strings.ReplaceAll(s, "零零", "零")
+    s = strings.ReplaceAll(s, "零万", "万")
+    
+    return s
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- PHP -->
+                    <div class="tab-content" id="php-tab">
+                        <div class="code-container">
+                            <div class="code-header">
+                                <div class="language-name">PHP 实现</div>
+                                <div class="tooltip">
+                                    <i class="far fa-copy copy-icon" data-code="php"></i>
+                                    <span class="tooltiptext">复制代码到剪贴板</span>
+                                </div>
+                            </div>
+                            <div class="code-content">
+                                <pre><code class="language-php">function toChineseAmount($n) {
+    if (!is_numeric($n) || $n > 999999999999.99) {
+        return "无效金额";
+    }
+    
+    $fraction = array('角', '分');
+    $digit = array('零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖');
+    $unit = array(
+        array('元', '万', '亿'),
+        array('', '拾', '佰', '仟')
+    );
+    
+    $num = abs($n);
+    $s = '';
+    
+    // 处理小数部分
+    for ($i = 0; $i < count($fraction); $i++) {
+        $d = (int)($num * 10 * pow(10, $i)) % 10;
+        $s .= $digit[$d] . $fraction[$i];
+    }
+    if ($s === '') {
+        $s = '整';
+    }
+    
+    // 处理整数部分
+    $integerPart = (int)$num;
+    for ($i = 0; $i < count($unit[0]) && $integerPart > 0; $i++) {
+        $p = '';
+        for ($j = 0; $j < count($unit[1]) && $integerPart > 0; $j++) {
+            $p = $digit[$integerPart % 10] . $unit[1][$j] . $p;
+            $integerPart = (int)($integerPart / 10);
+        }
+        $s = $p . $unit[0][$i] . $s;
+    }
+    
+    // 清理多余的零
+    $s = str_replace('零元', '元', $s);
+    $s = str_replace('零零', '零', $s);
+    $s = str_replace('零万', '万', $s);
+    
+    return $s;
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="feature-grid">
+            <!-- 对照表卡片 -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-table"></i> 金额大小写对照表
+                </div>
+                <div class="card-body">
+                    <table class="reference-table">
+                        <thead>
+                            <tr>
+                                <th>阿拉伯数字</th>
+                                <th>中文小写</th>
+                                <th>中文大写</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>0</td>
+                                <td>零</td>
+                                <td>零</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>一</td>
+                                <td>壹</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>二</td>
+                                <td>贰</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>三</td>
+                                <td>叁</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>四</td>
+                                <td>肆</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>五</td>
+                                <td>伍</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>六</td>
+                                <td>陆</td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td>七</td>
+                                <td>柒</td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td>八</td>
+                                <td>捌</td>
+                            </tr>
+                            <tr>
+                                <td>9</td>
+                                <td>九</td>
+                                <td>玖</td>
+                            </tr>
+                            <tr>
+                                <td>10</td>
+                                <td>十</td>
+                                <td>拾</td>
+                            </tr>
+                            <tr>
+                                <td>100</td>
+                                <td>百</td>
+                                <td>佰</td>
+                            </tr>
+                            <tr>
+                                <td>1,000</td>
+                                <td>千</td>
+                                <td>仟</td>
+                            </tr>
+                            <tr>
+                                <td>10,000</td>
+                                <td>万</td>
+                                <td>万</td>
+                            </tr>
+                            <tr>
+                                <td>100,000,000</td>
+                                <td>亿</td>
+                                <td>亿</td>
+                            </tr>
+                            <tr>
+                                <td>¥</td>
+                                <td>元</td>
+                                <td>元</td>
+                            </tr>
+                            <tr>
+                                <td>0.1</td>
+                                <td>角</td>
+                                <td>角</td>
+                            </tr>
+                            <tr>
+                                <td>0.01</td>
+                                <td>分</td>
+                                <td>分</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- 功能特性卡片 -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-star"></i> 工具特性
+                </div>
+                <div class="card-body">
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h3>智能实时转换</h3>
+                            <p>输入金额后自动转换为大写，无需手动点击按钮</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-palette"></i>
+                            </div>
+                            <h3>可视化展示</h3>
+                            <p>不同单位使用不同颜色区分，阅读更直观</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <h3>全设备兼容</h3>
+                            <p>在手机、平板和电脑上均有完美体验</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <h3>多语言支持</h3>
+                            <p>提供5种编程语言的金额转换实现代码</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>© 2025 高级数字转大写金额工具 | 遵循现代扁平化设计原则</p>
+        <p>本工具生成的大写金额符合中国人民银行规范</p>
+    </div>
+    <script src="assets/js/vendor/highlight.min.js"></script>
+    <script>
+        // 初始化代码高亮
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('pre code').forEach((el) => {
+                hljs.highlightElement(el);
+            });
+        });
+
+        // 大写金额转换函数
+        function toChineseAmount(n) {
+            if (isNaN(n) || n > 999999999999.99) return "无效金额";
+
+            const fraction = ['角', '分'];
+            const digit = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
+            const unit = [['元', '万', '亿'], ['', '拾', '佰', '仟']];
+            let num = Math.abs(n);
+            let s = '';
+
+            // 处理小数部分
+            for (let i = 0; i < fraction.length; i++) {
+                const d = Math.floor(num * 10 * Math.pow(10, i)) % 10;
+                s += (digit[d] + fraction[i]).replace(/零./, '');
+            }
+            s = s || '整';
+
+            // 处理整数部分
+            num = Math.floor(num);
+            for (let i = 0; i < unit[0].length && num > 0; i++) {
+                let p = '';
+                for (let j = 0; j < unit[1].length && num > 0; j++) {
+                    p = digit[num % 10] + unit[1][j] + p;
+                    num = Math.floor(num / 10);
+                }
+                s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s;
+            }
+
+            return s.replace(/(零.)*零元/, '元')
+                .replace(/(零.)+/g, '零')
+                .replace(/^整$/, '零元整');
+        }
+
+        // 格式化金额显示（添加颜色分段）
+        function formatAmountDisplay(amountStr) {
+            // 按单位拆分金额
+            const segments = [];
+            const units = ['亿', '万', '元', '角', '分'];
+
+            // 添加颜色类
+            const unitClasses = {
+                '亿': 'segment-yi',
+                '万': 'segment-wan',
+                '元': 'segment-yuan',
+                '角': 'segment-jiao',
+                '分': 'segment-fen'
+            };
+
+            let remaining = amountStr;
+
+            // 处理亿、万、元部分
+            for (const unit of ['亿', '万', '元']) {
+                const index = remaining.indexOf(unit);
+                if (index !== -1) {
+                    segments.push({
+                        text: remaining.substring(0, index + 1),
+                        unit: unit,
+                        className: unitClasses[unit]
+                    });
+                    remaining = remaining.substring(index + 1);
+                }
+            }
+
+            // 处理角分部分
+            if (remaining.includes('角') || remaining.includes('分')) {
+                if (remaining.includes('角')) {
+                    const jiaoIndex = remaining.indexOf('角');
+                    segments.push({
+                        text: remaining.substring(0, jiaoIndex + 1),
+                        unit: '角',
+                        className: 'segment-jiao'
+                    });
+                    remaining = remaining.substring(jiaoIndex + 1);
+                }
+
+                if (remaining.includes('分')) {
+                    segments.push({
+                        text: remaining,
+                        unit: '分',
+                        className: 'segment-fen'
+                    });
+                } else if (remaining) {
+                    segments.push({
+                        text: remaining,
+                        unit: '',
+                        className: ''
+                    });
+                }
+            } else if (remaining) {
+                segments.push({
+                    text: remaining,
+                    unit: '',
+                    className: ''
+                });
+            }
+
+            // 生成带样式的HTML
+            let html = '';
+            segments.forEach(segment => {
+                // 为数字部分添加样式，单位单独处理
+                const textWithoutUnit = segment.text.replace(segment.unit, '');
+                html += `<span class="${segment.className}">${textWithoutUnit}</span>`;
+
+                if (segment.unit) {
+                    html += `<span class="segment-unit">${segment.unit}</span>`;
+                }
+            });
+
+            return html;
+        }
+
+        // DOM元素
+        const amountInput = document.getElementById('amount-input');
+        const generateBtn = document.getElementById('generate-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const resultBox = document.getElementById('result-box');
+        const autoConvertToggle = document.getElementById('auto-convert');
+        const statusIndicator = document.getElementById('status-indicator');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const copyIcons = document.querySelectorAll('.copy-icon');
+
+        // 自动转换开关状态
+        let autoConvertEnabled = true;
+
+        // 更新大写金额显示
+        function updateAmountDisplay() {
+            const amount = parseFloat(amountInput.value.replace(/,/g, ''));
+            if (isNaN(amount)) {
+                resultBox.innerHTML = '<span style="color: var(--danger);">请输入有效的金额数字</span>';
+                return;
+            }
+
+            const chineseAmount = toChineseAmount(amount);
+            resultBox.innerHTML = formatAmountDisplay(chineseAmount);
+        }
+
+        // 输入框事件 - 自动转换
+        amountInput.addEventListener('input', function () {
+            // 格式化输入（只允许数字和小数点）
+            this.value = this.value.replace(/[^0-9.]/g, '');
+
+            // 限制只能有一个小数点
+            const decimalCount = (this.value.match(/\./g) || []).length;
+            if (decimalCount > 1) {
+                this.value = this.value.slice(0, -1);
+            }
+
+            if (autoConvertEnabled) {
+                updateAmountDisplay();
+            }
+        });
+
+        // 生成按钮事件
+        generateBtn.addEventListener('click', function () {
+            updateAmountDisplay();
+        });
+
+        // 复制按钮事件
+        copyBtn.addEventListener('click', function () {
+            const plainText = resultBox.innerText;
+            if (plainText && !plainText.includes('请输入')) {
+                navigator.clipboard.writeText(plainText)
+                    .then(() => {
+                        const originalHTML = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalHTML;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                    });
+            }
+        });
+
+        // 清空按钮事件
+        clearBtn.addEventListener('click', function () {
+            amountInput.value = '';
+            resultBox.innerHTML = '<span style="color: var(--light-text);">请输入金额</span>';
+        });
+
+        // 自动转换开关事件
+        autoConvertToggle.addEventListener('change', function () {
+            autoConvertEnabled = this.checked;
+            if (autoConvertEnabled) {
+                statusIndicator.classList.remove('status-off');
+                updateAmountDisplay();
+            } else {
+                statusIndicator.classList.add('status-off');
+            }
+        });
+
+        // 标签切换事件
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                // 移除所有active类
+                tabBtns.forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // 添加当前active类
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+
+        // 代码复制事件
+        copyIcons.forEach(icon => {
+            icon.addEventListener('click', function () {
+                const codeType = this.getAttribute('data-code');
+                const codeElement = document.querySelector(`#${codeType}-tab pre code`);
+
+                if (codeElement) {
+                    navigator.clipboard.writeText(codeElement.textContent)
+                        .then(() => {
+                            const originalIcon = this.className;
+                            this.className = 'fas fa-check';
+                            setTimeout(() => {
+                                this.className = originalIcon;
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('复制失败:', err);
+                        });
+                }
+            });
+        });
+
+        // 初始加载时转换默认值
+        window.addEventListener('DOMContentLoaded', function () {
+            // 添加千分位格式化
+            amountInput.value = parseFloat(amountInput.value).toLocaleString();
+            updateAmountDisplay();
+        });
+    </script>
+</body>
+
+</html>

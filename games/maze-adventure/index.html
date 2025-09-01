@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>迷宫探险游戏 - 在线免费玩智力挑战寻路游戏 | A*算法寻路提示</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线迷宫探险游戏，支持4个难度等级，采用A*算法智能寻路提示，战争迷雾模式，宝物收集系统。挑战你的空间认知能力和策略思维！">
+    <meta name="keywords" content="迷宫游戏,寻路游戏,智力游戏,在线游戏,免费游戏,A*算法,战争迷雾,策略游戏,益智游戏,HTML5游戏">
+    <meta name="author" content="游戏工具箱">
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    <meta property="og:title" content="迷宫探险游戏 - 在线免费玩智力挑战寻路游戏">
+    <meta property="og:description" content="免费在线迷宫探险游戏，支持4个难度等级，采用A*算法智能寻路提示，战争迷雾模式，宝物收集系统。挑战你的空间认知能力！">
+    <meta property="og:image" content="">
+    <meta property="og:site_name" content="游戏工具箱">
+    <meta property="og:locale" content="zh_CN">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="">
+    <meta property="twitter:title" content="迷宫探险游戏 - 在线免费玩智力挑战寻路游戏">
+    <meta property="twitter:description" content="免费在线迷宫探险游戏，支持4个难度等级，采用A*算法智能寻路提示，战争迷雾模式，宝物收集系统。">
+    <meta property="twitter:image" content="">
+    
+    <!-- 移动端优化 -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="迷宫探险">
+    
+    <!-- 主题颜色 -->
+    <meta name="theme-color" content="#f39c12">
+    <meta name="msapplication-TileColor" content="#f39c12">
+    
+    <!-- 结构化数据 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Game",
+      "name": "迷宫探险游戏",
+      "description": "免费在线迷宫探险游戏，支持4个难度等级，采用A*算法智能寻路提示，战争迷雾模式，宝物收集系统。挑战你的空间认知能力和策略思维！",
+      "genre": ["智力游戏", "策略游戏", "益智游戏"],
+      "gamePlatform": ["Web浏览器", "HTML5"],
+      "operatingSystem": ["Windows", "macOS", "Linux", "iOS", "Android"],
+      "applicationCategory": "Game",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "游戏工具箱"
+      },
+      "dateCreated": "2025-01-23",
+      "inLanguage": "zh-CN",
+      "isAccessibleForFree": true,
+      "gameItem": [
+        {
+          "@type": "Thing",
+          "name": "4个难度等级"
+        },
+        {
+          "@type": "Thing", 
+          "name": "A*算法寻路"
+        },
+        {
+          "@type": "Thing",
+          "name": "战争迷雾模式"
+        },
+        {
+          "@type": "Thing",
+          "name": "宝物收集系统"
+        }
+      ]
+    }
+    </script>
+    
+    <link rel="stylesheet" href="css/maze-adventure.css">
+</head>
+<body>
+    <main class="game-container" role="main">
+        <header class="game-header">
+            <h1>🧭 迷宫探险</h1>
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-label">关卡</div>
+                    <div class="stat-value" id="currentLevel">1</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">步数</div>
+                    <div class="stat-value" id="steps">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">时间</div>
+                    <div class="stat-value" id="timer">00:00</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">宝物</div>
+                    <div class="stat-value" id="treasures">0</div>
+                </div>
+            </div>
+        </header>
+
+        <section class="difficulty-selector" aria-labelledby="difficulty-title">
+            <h3 id="difficulty-title">🎯 难度选择</h3>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn active" onclick="mazeGame.setDifficulty('easy')">
+                    <span>😊</span>
+                    <div>简单</div>
+                    <small>15×15 迷宫</small>
+                </button>
+                <button class="difficulty-btn" onclick="mazeGame.setDifficulty('medium')">
+                    <span>🤔</span>
+                    <div>中等</div>
+                    <small>21×21 迷宫</small>
+                </button>
+                <button class="difficulty-btn" onclick="mazeGame.setDifficulty('hard')">
+                    <span>😈</span>
+                    <div>困难</div>
+                    <small>31×31 迷宫</small>
+                </button>
+                <button class="difficulty-btn" onclick="mazeGame.setDifficulty('expert')">
+                    <span>🔥</span>
+                    <div>专家</div>
+                    <small>41×41 迷宫</small>
+                </button>
+            </div>
+        </section>
+
+        <section class="game-controls" aria-label="游戏控制按钮">
+            <button class="btn" id="newMazeBtn" onclick="mazeGame.generateNewMaze()">🆕 新迷宫</button>
+            <button class="btn" id="hintBtn" onclick="mazeGame.showHint()">💡 提示</button>
+            <button class="btn" id="solutionBtn" onclick="mazeGame.showSolution()">🔍 显示路径</button>
+            <button class="btn" id="resetBtn" onclick="mazeGame.resetLevel()">🔄 重置</button>
+        </section>
+
+        <section class="game-board-container" aria-label="游戏主画面">
+            <canvas id="mazeCanvas" width="600" height="600"></canvas>
+            
+            <div class="minimap" id="minimap">
+                <canvas id="minimapCanvas" width="150" height="150"></canvas>
+                <div class="minimap-label">小地图</div>
+            </div>
+            
+            <div class="fog-toggle">
+                <label>
+                    <input type="checkbox" id="fogOfWar" onchange="mazeGame.toggleFogOfWar()">
+                    <span class="toggle-text">战争迷雾</span>
+                </label>
+            </div>
+        </section>
+
+        <section class="controls-hint" aria-labelledby="controls-title">
+            <div class="control-item">
+                <span class="key">↑↓←→</span>
+                <span class="desc">移动角色</span>
+            </div>
+            <div class="control-item">
+                <span class="key">WASD</span>
+                <span class="desc">备用移动</span>
+            </div>
+            <div class="control-item">
+                <span class="key">空格</span>
+                <span class="desc">收集宝物</span>
+            </div>
+            <div class="control-item">
+                <span class="key">H</span>
+                <span class="desc">提示</span>
+            </div>
+        </section>
+
+        <section class="game-features" aria-label="游戏特色功能介绍">
+            <div class="feature-section">
+                <h3>🎮 游戏特色</h3>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🧭</div>
+                        <div class="feature-info">
+                            <div class="feature-name">智能寻路</div>
+                            <div class="feature-desc">使用A*算法生成最优路径提示</div>
+                        </div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌫️</div>
+                        <div class="feature-info">
+                            <div class="feature-name">战争迷雾</div>
+                            <div class="feature-desc">增加探索的神秘感和挑战性</div>
+                        </div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💎</div>
+                        <div class="feature-info">
+                            <div class="feature-name">宝物收集</div>
+                            <div class="feature-desc">探索迷宫中的隐藏宝物</div>
+                        </div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🗺️</div>
+                        <div class="feature-info">
+                            <div class="feature-name">小地图</div>
+                            <div class="feature-desc">实时显示探索进度和位置</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="legend-section">
+                <h3>🔤 图例说明</h3>
+                <div class="legend-grid">
+                    <div class="legend-item">
+                        <div class="legend-symbol player">🚶</div>
+                        <div class="legend-desc">玩家角色</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol exit">🚪</div>
+                        <div class="legend-desc">迷宫出口</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol treasure">💎</div>
+                        <div class="legend-desc">宝物</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol wall"></div>
+                        <div class="legend-desc">墙壁</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol path"></div>
+                        <div class="legend-desc">通道</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol visited"></div>
+                        <div class="legend-desc">已探索</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="victory-popup" id="victoryPopup" style="display: none;" role="dialog" aria-labelledby="victoryTitle" aria-hidden="true">
+            <div class="victory-content">
+                <h2 id="victoryTitle">🎉 恭喜通关！</h2>
+                <div class="victory-message" id="victoryMessage">太棒了！你成功走出了迷宫！</div>
+                <div class="victory-stats">
+                    <p>完成关卡: <span id="finalLevel">1</span></p>
+                    <p>总步数: <span id="finalSteps">0</span></p>
+                    <p>完成时间: <span id="finalTime">00:00</span></p>
+                    <p>收集宝物: <span id="finalTreasures">0</span></p>
+                    <p>探索率: <span id="explorationRate">0%</span></p>
+                </div>
+                <div class="victory-actions">
+                    <button class="btn" onclick="mazeGame.closeVictory(); mazeGame.nextLevel();">下一关</button>
+                    <button class="btn secondary" onclick="mazeGame.closeVictory(); mazeGame.generateNewMaze();">新迷宫</button>
+                    <button class="btn secondary" onclick="mazeGame.closeVictory();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-modal" id="helpModal" style="display: none;" role="dialog" aria-labelledby="helpTitle" aria-hidden="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="helpTitle">🧭 迷宫探险指南</h2>
+                    <button class="close-btn" onclick="mazeGame.closeHelp()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="help-section">
+                        <h3>🎯 游戏目标</h3>
+                        <p>在迷宫中找到从起点到终点的路径。收集路上的宝物，以最少的步数和最短的时间完成挑战！</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 操作方式</h3>
+                        <ul>
+                            <li><strong>方向键：</strong>↑↓←→ 控制角色移动</li>
+                            <li><strong>WASD：</strong>备用移动键位</li>
+                            <li><strong>空格键：</strong>收集脚下的宝物</li>
+                            <li><strong>H键：</strong>获取路径提示</li>
+                            <li><strong>鼠标点击：</strong>也可以点击相邻格子移动</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>⚙️ 难度等级</h3>
+                        <ul>
+                            <li><strong>简单：</strong>15×15格子，适合新手</li>
+                            <li><strong>中等：</strong>21×21格子，增加挑战</li>
+                            <li><strong>困难：</strong>31×31格子，考验耐心</li>
+                            <li><strong>专家：</strong>41×41格子，终极挑战</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🌟 特殊功能</h3>
+                        <ul>
+                            <li><strong>战争迷雾：</strong>只能看到周围已探索的区域</li>
+                            <li><strong>小地图：</strong>显示整体探索进度</li>
+                            <li><strong>智能提示：</strong>显示到终点的最短路径</li>
+                            <li><strong>宝物收集：</strong>额外的探索目标</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>💡 游戏技巧</h3>
+                        <ul>
+                            <li>开启战争迷雾增加挑战性和真实感</li>
+                            <li>收集所有宝物可以获得额外分数</li>
+                            <li>尝试记住走过的路径，避免重复探索</li>
+                            <li>使用提示功能学习寻路策略</li>
+                            <li>挑战更高难度来提升空间认知能力</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/maze-adventure.js"></script>
+</body>
+</html>

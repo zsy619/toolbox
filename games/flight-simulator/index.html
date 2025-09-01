@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞行模拟 - 驾驶体验游戏</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>✈️ 飞行模拟器</h1>
+            <p class="game-subtitle">体验真实的飞行驾驶</p>
+        </div>
+
+        <div class="flight-instruments">
+            <div class="instrument-panel">
+                <div class="instrument altitude">
+                    <div class="instrument-label">高度</div>
+                    <div class="instrument-value" id="altitude">0</div>
+                    <div class="instrument-unit">米</div>
+                </div>
+                <div class="instrument speed">
+                    <div class="instrument-label">速度</div>
+                    <div class="instrument-value" id="speed">0</div>
+                    <div class="instrument-unit">km/h</div>
+                </div>
+                <div class="instrument fuel">
+                    <div class="instrument-label">燃料</div>
+                    <div class="fuel-bar">
+                        <div class="fuel-fill" id="fuelFill"></div>
+                    </div>
+                    <div class="instrument-value" id="fuel">100%</div>
+                </div>
+                <div class="instrument heading">
+                    <div class="instrument-label">航向</div>
+                    <div class="compass" id="compass">
+                        <div class="compass-needle"></div>
+                        <div class="compass-directions">
+                            <span class="north">N</span>
+                            <span class="east">E</span>
+                            <span class="south">S</span>
+                            <span class="west">W</span>
+                        </div>
+                    </div>
+                    <div class="instrument-value" id="heading">0°</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-main">
+            <div class="flight-area">
+                <div class="sky-view" id="skyView">
+                    <div class="horizon-line" id="horizonLine"></div>
+                    <div class="clouds-container" id="cloudsContainer"></div>
+                    <div class="aircraft-hud">
+                        <div class="crosshair"></div>
+                        <div class="flight-path-vector" id="flightPathVector"></div>
+                    </div>
+                    <div class="ground" id="ground"></div>
+                </div>
+
+                <div class="flight-controls">
+                    <div class="control-stick">
+                        <div class="stick-area" id="stickArea">
+                            <div class="stick" id="controlStick"></div>
+                        </div>
+                        <div class="control-label">操纵杆</div>
+                    </div>
+                    
+                    <div class="throttle-controls">
+                        <div class="throttle-slider">
+                            <label>油门:</label>
+                            <input type="range" id="throttleSlider" min="0" max="100" value="0">
+                            <span id="throttleValue">0%</span>
+                        </div>
+                        <div class="rudder-slider">
+                            <label>方向舵:</label>
+                            <input type="range" id="rudderSlider" min="-50" max="50" value="0">
+                            <span id="rudderValue">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mission-panel">
+                <div class="mission-info">
+                    <h3>🎯 飞行任务</h3>
+                    <div class="current-mission" id="currentMission">
+                        <div class="mission-title">基础飞行训练</div>
+                        <div class="mission-objective">保持平稳飞行5分钟</div>
+                        <div class="mission-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="missionProgress"></div>
+                            </div>
+                            <div class="progress-text" id="progressText">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="weather-info">
+                    <h3>🌤️ 天气状况</h3>
+                    <div class="weather-display">
+                        <div class="weather-item">
+                            <span class="weather-label">风向:</span>
+                            <span class="weather-value" id="windDirection">北风</span>
+                        </div>
+                        <div class="weather-item">
+                            <span class="weather-label">风速:</span>
+                            <span class="weather-value" id="windSpeed">5 km/h</span>
+                        </div>
+                        <div class="weather-item">
+                            <span class="weather-label">能见度:</span>
+                            <span class="weather-value" id="visibility">10 km</span>
+                        </div>
+                        <div class="weather-item">
+                            <span class="weather-label">云层:</span>
+                            <span class="weather-value" id="cloudCover">少云</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flight-log">
+                    <h3>📝 飞行日志</h3>
+                    <div class="log-entries" id="logEntries">
+                        <!-- 日志条目将通过JavaScript生成 -->
+                    </div>
+                </div>
+
+                <div class="emergency-controls">
+                    <h3>🚨 紧急控制</h3>
+                    <div class="emergency-buttons">
+                        <button class="emergency-btn" id="autopilotBtn">🤖 自动驾驶</button>
+                        <button class="emergency-btn" id="landingBtn">🛬 紧急降落</button>
+                        <button class="emergency-btn" id="resetBtn">🔄 重置飞行</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flight-stats">
+            <div class="stat-item">
+                <div class="stat-label">飞行时间</div>
+                <div class="stat-value" id="flightTime">00:00</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">飞行距离</div>
+                <div class="stat-value" id="flightDistance">0 km</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">最高高度</div>
+                <div class="stat-value" id="maxAltitude">0 m</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">平均速度</div>
+                <div class="stat-value" id="avgSpeed">0 km/h</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">飞行评分</div>
+                <div class="stat-value" id="flightRating">⭐⭐⭐</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>

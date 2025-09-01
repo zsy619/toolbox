@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐节拍器 - 在线免费音乐节拍训练工具 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线音乐节拍器，专业节拍训练工具，支持多种节拍模式和速度调节，扁平化设计界面，适合音乐学习和练习！">
+    <meta name="keywords" content="节拍器,音乐节拍,节拍训练,音乐工具,节拍练习,在线节拍器,免费节拍器,扁平化设计,音乐学习">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#E91E63">
+    
+    <link rel="stylesheet" href="css/rhythm-beat.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>🎵 音乐节拍器</h1>
+            <div class="game-subtitle">专业节拍训练工具</div>
+        </header>
+
+        <section class="tempo-display">
+            <div class="tempo-circle" id="tempoCircle">
+                <div class="tempo-value" id="tempoValue">120</div>
+                <div class="tempo-label">BPM</div>
+                <div class="tempo-indicator" id="tempoIndicator"></div>
+            </div>
+            
+            <div class="tempo-controls">
+                <button class="tempo-btn" id="decreaseBtn" onclick="rhythmBeat.changeTempo(-1)">-</button>
+                <input type="range" id="tempoSlider" min="40" max="200" value="120" class="tempo-slider">
+                <button class="tempo-btn" id="increaseBtn" onclick="rhythmBeat.changeTempo(1)">+</button>
+            </div>
+
+            <div class="tempo-presets">
+                <button class="preset-btn" onclick="rhythmBeat.setTempo(60)">
+                    <span>🐌</span>
+                    <div>慢板</div>
+                    <small>60 BPM</small>
+                </button>
+                <button class="preset-btn" onclick="rhythmBeat.setTempo(90)">
+                    <span>🚶</span>
+                    <div>中板</div>
+                    <small>90 BPM</small>
+                </button>
+                <button class="preset-btn active" onclick="rhythmBeat.setTempo(120)">
+                    <span>🏃</span>
+                    <div>快板</div>
+                    <small>120 BPM</small>
+                </button>
+                <button class="preset-btn" onclick="rhythmBeat.setTempo(160)">
+                    <span>⚡</span>
+                    <div>急板</div>
+                    <small>160 BPM</small>
+                </button>
+            </div>
+        </section>
+
+        <section class="time-signature">
+            <h3>🎼 拍号设置</h3>
+            <div class="signature-controls">
+                <div class="signature-selector">
+                    <label>每小节拍数</label>
+                    <select id="beatsPerMeasure" onchange="rhythmBeat.updateTimeSignature()">
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4" selected>4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select>
+                </div>
+                <div class="signature-divider">/</div>
+                <div class="signature-selector">
+                    <label>音符类型</label>
+                    <select id="noteValue" onchange="rhythmBeat.updateTimeSignature()">
+                        <option value="2">2 (二分音符)</option>
+                        <option value="4" selected>4 (四分音符)</option>
+                        <option value="8">8 (八分音符)</option>
+                        <option value="16">16 (十六分音符)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="signature-display">
+                <div class="signature-fraction">
+                    <div class="numerator" id="signatureNumerator">4</div>
+                    <div class="denominator" id="signatureDenominator">4</div>
+                </div>
+                <div class="signature-description" id="signatureDescription">4/4拍 - 四四拍</div>
+            </div>
+        </section>
+
+        <section class="beat-display">
+            <div class="beat-pattern" id="beatPattern">
+                <div class="beat-circle strong active" data-beat="1">1</div>
+                <div class="beat-circle weak" data-beat="2">2</div>
+                <div class="beat-circle weak" data-beat="3">3</div>
+                <div class="beat-circle weak" data-beat="4">4</div>
+            </div>
+            
+            <div class="beat-counter">
+                <span class="current-beat" id="currentBeat">1</span>
+                <span class="beat-separator">/</span>
+                <span class="total-beats" id="totalBeats">4</span>
+            </div>
+        </section>
+
+        <section class="control-panel">
+            <div class="main-controls">
+                <button class="control-btn play-btn" id="playBtn" onclick="rhythmBeat.togglePlay()">
+                    <span class="btn-icon">▶️</span>
+                    <span class="btn-text">开始</span>
+                </button>
+                
+                <button class="control-btn stop-btn" onclick="rhythmBeat.stop()">
+                    <span class="btn-icon">⏹️</span>
+                    <span class="btn-text">停止</span>
+                </button>
+                
+                <button class="control-btn tap-btn" id="tapBtn" onclick="rhythmBeat.tapTempo()">
+                    <span class="btn-icon">👆</span>
+                    <span class="btn-text">敲击测速</span>
+                </button>
+            </div>
+
+            <div class="advanced-controls">
+                <div class="volume-control">
+                    <label>🔊 音量</label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="70" class="volume-slider">
+                    <span id="volumeValue">70%</span>
+                </div>
+                
+                <div class="sound-selection">
+                    <label>🎵 音效</label>
+                    <select id="soundSelect" onchange="rhythmBeat.changeSoundType()">
+                        <option value="click">经典滴答声</option>
+                        <option value="beep">电子哔声</option>
+                        <option value="drum">鼓点声</option>
+                        <option value="piano">钢琴音</option>
+                        <option value="wood">木质敲击</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="practice-mode">
+            <h3>🎯 练习模式</h3>
+            <div class="practice-options">
+                <button class="practice-btn" onclick="rhythmBeat.startBasicPractice()">
+                    <span>🎵</span>
+                    <div>基础练习</div>
+                    <small>稳定节拍训练</small>
+                </button>
+                
+                <button class="practice-btn" onclick="rhythmBeat.startAccentPractice()">
+                    <span>💪</span>
+                    <div>重音练习</div>
+                    <small>强拍弱拍训练</small>
+                </button>
+                
+                <button class="practice-btn" onclick="rhythmBeat.startVariationPractice()">
+                    <span>🌟</span>
+                    <div>变化练习</div>
+                    <small>节拍变化训练</small>
+                </button>
+                
+                <button class="practice-btn" onclick="rhythmBeat.startSilentPractice()">
+                    <span>🤫</span>
+                    <div>静音练习</div>
+                    <small>内在节拍感训练</small>
+                </button>
+            </div>
+        </section>
+
+        <section class="statistics">
+            <h3>📊 练习统计</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="practiceTime">00:00</div>
+                    <div class="stat-label">练习时长</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalBeats">0</div>
+                    <div class="stat-label">总拍数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="accuracy">100%</div>
+                    <div class="stat-label">节拍准确度</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="currentTempo">120</div>
+                    <div class="stat-label">当前速度</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 练习完成弹窗 -->
+        <div class="practice-popup" id="practicePopup">
+            <div class="popup-content">
+                <h2>🎉 练习完成！</h2>
+                <div class="practice-results">
+                    <div class="result-chart" id="resultChart">
+                        <canvas id="accuracyChart" width="200" height="200"></canvas>
+                    </div>
+                    <div class="result-stats">
+                        <div class="result-item">
+                            <span class="result-label">练习时长:</span>
+                            <span class="result-value" id="finalTime">00:00</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">平均速度:</span>
+                            <span class="result-value" id="avgTempo">120 BPM</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">节拍准确度:</span>
+                            <span class="result-value" id="finalAccuracy">100%</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">总拍数:</span>
+                            <span class="result-value" id="finalBeats">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="rhythmBeat.continuePractice()">继续练习</button>
+                    <button class="btn secondary" onclick="rhythmBeat.closePractice()">结束练习</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置弹窗 -->
+        <div class="settings-popup" id="settingsPopup">
+            <div class="popup-content">
+                <h2>⚙️ 高级设置</h2>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label>视觉节拍指示器</label>
+                        <input type="checkbox" id="visualIndicator" checked onchange="rhythmBeat.toggleVisualIndicator()">
+                    </div>
+                    <div class="setting-item">
+                        <label>振动反馈（移动设备）</label>
+                        <input type="checkbox" id="vibrationFeedback" onchange="rhythmBeat.toggleVibration()">
+                    </div>
+                    <div class="setting-item">
+                        <label>自动保存设置</label>
+                        <input type="checkbox" id="autoSave" checked onchange="rhythmBeat.toggleAutoSave()">
+                    </div>
+                    <div class="setting-item">
+                        <label>暗色主题</label>
+                        <input type="checkbox" id="darkTheme" onchange="rhythmBeat.toggleTheme()">
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="rhythmBeat.closeSettings()">完成</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-controls">
+            <button class="btn secondary" onclick="rhythmBeat.showSettings()">⚙️ 设置</button>
+            <button class="btn secondary" onclick="rhythmBeat.resetSettings()">🔄 重置</button>
+            <button class="btn secondary" onclick="rhythmBeat.showHelp()">❓ 帮助</button>
+        </div>
+
+        <!-- 帮助弹窗 -->
+        <div class="help-popup" id="helpPopup">
+            <div class="popup-content help-content">
+                <h2>🎵 节拍器使用说明</h2>
+                
+                <div class="help-section">
+                    <h3>🎯 基本功能</h3>
+                    <ul>
+                        <li><strong>速度调节：</strong>使用滑块或+/-按钮调整速度，范围40-200 BPM</li>
+                        <li><strong>拍号设置：</strong>选择每小节拍数和音符类型</li>
+                        <li><strong>音效选择：</strong>提供多种节拍音效供选择</li>
+                        <li><strong>敲击测速：</strong>通过敲击按钮自动检测节拍速度</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🎼 拍号说明</h3>
+                    <ul>
+                        <li><strong>4/4拍：</strong>最常见的拍号，强-弱-次强-弱</li>
+                        <li><strong>3/4拍：</strong>华尔兹节拍，强-弱-弱</li>
+                        <li><strong>2/4拍：</strong>进行曲节拍，强-弱</li>
+                        <li><strong>6/8拍：</strong>复合拍子，两个强拍</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🎯 练习模式</h3>
+                    <ul>
+                        <li><strong>基础练习：</strong>稳定的节拍训练，适合初学者</li>
+                        <li><strong>重音练习：</strong>强调强拍和弱拍的区别</li>
+                        <li><strong>变化练习：</strong>节拍和速度的变化训练</li>
+                        <li><strong>静音练习：</strong>培养内在节拍感</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>💡 使用技巧</h3>
+                    <ul>
+                        <li>练习时专注于稳定性而非速度</li>
+                        <li>使用敲击测速功能检测自己的自然节拍</li>
+                        <li>配合呼吸节奏进行练习</li>
+                        <li>定期进行静音练习培养内在节拍感</li>
+                    </ul>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="rhythmBeat.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/rhythm-beat.js"></script>
+</body>
+</html>

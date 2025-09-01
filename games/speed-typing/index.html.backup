@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极速打字游戏 - 在线免费打字速度训练游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线极速打字游戏，测试并提升打字速度和准确率，多种文本类型和难度模式，专业打字训练，扁平化设计界面！">
+    <meta name="keywords" content="极速打字,打字速度,打字训练,WPM测试,打字游戏,键盘练习,在线游戏,免费游戏,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#607D8B">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #90A4AE 0%, #607D8B 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .game-header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .game-header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+
+        .test-settings {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .settings-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .setting-group {
+            text-align: center;
+        }
+
+        .setting-group h4 {
+            margin-bottom: 10px;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .setting-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .setting-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            border: 2px solid transparent;
+        }
+
+        .setting-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .setting-btn.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .typing-area {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 300px;
+            position: relative;
+        }
+
+        .text-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            min-height: 150px;
+            overflow-y: auto;
+            user-select: text;
+        }
+
+        .text-display .char {
+            position: relative;
+        }
+
+        .text-display .char.correct {
+            background-color: rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+        }
+
+        .text-display .char.incorrect {
+            background-color: rgba(244, 67, 54, 0.3);
+            color: #F44336;
+        }
+
+        .text-display .char.current {
+            background-color: rgba(255, 215, 79, 0.5);
+            animation: cursor-blink 1s infinite;
+        }
+
+        @keyframes cursor-blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .typing-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-family: 'Courier New', monospace;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            outline: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .typing-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .typing-input:focus {
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #81C784);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: #546E7A;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(84, 110, 122, 0.3);
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            background: #455A64;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(84, 110, 122, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.start-btn {
+            background: #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn.start-btn:hover {
+            background: #43A047;
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .results-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: none;
+        }
+
+        .results-panel.show {
+            display: block;
+        }
+
+        .results-panel h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 300;
+            font-size: 1.3rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mistakes-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(244, 67, 54, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .mistakes-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #FFCDD2;
+        }
+
+        .mistake-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mistake-item:last-child {
+            border-bottom: none;
+        }
+
+        /* 弹窗样式 */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .popup.show {
+            display: flex;
+        }
+
+        .popup-content {
+            background: linear-gradient(135deg, #90A4AE 0%, #607D8B 100%);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .popup-content h2 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+
+        .popup-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .game-header h1 {
+                font-size: 2rem;
+            }
+            
+            .settings-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .text-display {
+                font-size: 1rem;
+                padding: 15px;
+            }
+            
+            .typing-input {
+                font-size: 1rem;
+            }
+            
+            .game-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                min-width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .setting-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>⌨️ 极速打字</h1>
+            <div class="game-subtitle">测试你的打字速度和准确率</div>
+        </header>
+
+        <section class="test-settings">
+            <div class="settings-row">
+                <div class="setting-group">
+                    <h4>⏱️ 测试时长</h4>
+                    <div class="setting-buttons">
+                        <button class="setting-btn" onclick="speedTyping.setDuration(15)">15秒</button>
+                        <button class="setting-btn" onclick="speedTyping.setDuration(30)">30秒</button>
+                        <button class="setting-btn active" onclick="speedTyping.setDuration(60)">1分钟</button>
+                        <button class="setting-btn" onclick="speedTyping.setDuration(120)">2分钟</button>
+                        <button class="setting-btn" onclick="speedTyping.setDuration(300)">5分钟</button>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <h4>📚 文本类型</h4>
+                    <div class="setting-buttons">
+                        <button class="setting-btn active" onclick="speedTyping.setTextType('common')">常用词汇</button>
+                        <button class="setting-btn" onclick="speedTyping.setTextType('english')">英文句子</button>
+                        <button class="setting-btn" onclick="speedTyping.setTextType('numbers')">数字符号</button>
+                        <button class="setting-btn" onclick="speedTyping.setTextType('mixed')">混合文本</button>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <h4>🎯 难度等级</h4>
+                    <div class="setting-buttons">
+                        <button class="setting-btn active" onclick="speedTyping.setDifficulty('easy')">简单</button>
+                        <button class="setting-btn" onclick="speedTyping.setDifficulty('medium')">中等</button>
+                        <button class="setting-btn" onclick="speedTyping.setDifficulty('hard')">困难</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="game-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="wpm">0</div>
+                <div class="stat-label">WPM</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="accuracy">100%</div>
+                <div class="stat-label">准确率</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="timeLeft">60</div>
+                <div class="stat-label">剩余时间</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="wordsTyped">0</div>
+                <div class="stat-label">已输入词数</div>
+            </div>
+        </section>
+
+        <section class="typing-area">
+            <div class="text-display" id="textDisplay">
+                点击开始测试按钮开始打字练习...
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">准备开始测试</div>
+            </div>
+
+            <input type="text" class="typing-input" id="typingInput" placeholder="测试开始后在此处输入..." disabled>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn start-btn" onclick="speedTyping.startTest()" id="startBtn">🚀 开始测试</button>
+            <button class="btn" onclick="speedTyping.restartTest()" id="restartBtn" disabled>🔄 重新开始</button>
+            <button class="btn secondary" onclick="speedTyping.showResults()">📊 查看结果</button>
+            <button class="btn secondary" onclick="speedTyping.showHelp()">❓ 帮助</button>
+        </section>
+
+        <section class="results-panel" id="resultsPanel">
+            <h3>📊 测试结果</h3>
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="result-value" id="finalWPM">0</div>
+                    <div class="result-label">WPM</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-value" id="finalAccuracy">100%</div>
+                    <div class="result-label">准确率</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-value" id="totalChars">0</div>
+                    <div class="result-label">总字符数</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-value" id="correctChars">0</div>
+                    <div class="result-label">正确字符</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-value" id="incorrectChars">0</div>
+                    <div class="result-label">错误字符</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-value" id="rating">-</div>
+                    <div class="result-label">等级评价</div>
+                </div>
+            </div>
+
+            <div class="mistakes-display" id="mistakesDisplay" style="display: none;">
+                <div class="mistakes-title">❌ 常见错误字符</div>
+                <div id="mistakesList"></div>
+            </div>
+        </section>
+
+        <!-- 帮助弹窗 -->
+        <div class="popup" id="helpPopup">
+            <div class="popup-content">
+                <h2>⌨️ 打字测试说明</h2>
+                
+                <div style="text-align: left; margin-bottom: 20px;">
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎯 测试说明</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        在指定时间内尽可能准确快速地输入显示的文本。系统会实时计算你的打字速度（WPM）和准确率。
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">📊 评分标准</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>WPM (Words Per Minute)：</strong>每分钟输入的单词数<br>
+                        • <strong>准确率：</strong>正确输入字符占总输入字符的百分比<br>
+                        • <strong>等级评价：</strong>基于WPM和准确率的综合评分
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🏆 等级划分</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • 60+ WPM + 95%+ 准确率：大师级<br>
+                        • 40+ WPM + 90%+ 准确率：专家级<br>
+                        • 25+ WPM + 85%+ 准确率：熟练级<br>
+                        • 15+ WPM + 80%+ 准确率：入门级<br>
+                        • 其他：练习级
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">🎮 文本类型</h3>
+                    <p style="line-height: 1.6; margin-bottom: 15px;">
+                        • <strong>常用词汇：</strong>日常常见的中英文词汇<br>
+                        • <strong>英文句子：</strong>完整的英文句子和段落<br>
+                        • <strong>数字符号：</strong>数字、标点和特殊符号<br>
+                        • <strong>混合文本：</strong>包含各种类型的综合文本
+                    </p>
+                    
+                    <h3 style="color: #FFD54F; margin-bottom: 10px;">💡 提升技巧</h3>
+                    <p style="line-height: 1.6;">
+                        • 保持正确的手指位置和坐姿<br>
+                        • 不要看键盘，培养盲打习惯<br>
+                        • 先追求准确率，再提升速度<br>
+                        • 定期练习，持之以恒
+                    </p>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="speedTyping.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        class SpeedTyping {
+            constructor() {
+                this.duration = 60; // 默认60秒
+                this.textType = 'common';
+                this.difficulty = 'easy';
+                this.isActive = false;
+                this.isPaused = false;
+                
+                // 测试数据
+                this.currentText = '';
+                this.typedText = '';
+                this.currentIndex = 0;
+                this.startTime = 0;
+                this.timeLeft = 60;
+                this.timer = null;
+                
+                // 统计数据
+                this.correctChars = 0;
+                this.incorrectChars = 0;
+                this.totalKeystrokes = 0;
+                this.mistakes = new Map();
+                
+                // 文本库
+                this.textLibrary = {
+                    common: [
+                        '时间 管理 效率 工作 学习 生活 健康 运动 阅读 思考',
+                        '科技 创新 发展 进步 改变 未来 机会 挑战 成功 失败',
+                        '友谊 爱情 家庭 亲情 理解 支持 信任 包容 感恩 快乐',
+                        '梦想 目标 计划 行动 坚持 努力 奋斗 成长 收获 满足',
+                        '自然 环境 保护 地球 气候 生态 动物 植物 森林 海洋'
+                    ],
+                    english: [
+                        'The quick brown fox jumps over the lazy dog near the riverbank.',
+                        'Technology has revolutionized the way we communicate and work together.',
+                        'Learning new skills requires patience, practice, and dedication to improvement.',
+                        'Success comes to those who are willing to work hard and never give up.',
+                        'The beautiful sunset painted the sky with vibrant colors of orange and pink.'
+                    ],
+                    numbers: [
+                        '123 456 789 0.50 $25.99 @email.com #hashtag 100% 3:45pm',
+                        '(555) 123-4567 www.example.com user@domain.org file_name.txt',
+                        'Order #12345: $67.89 - Qty: 3 @ $22.63 each (Tax: 8.5%)',
+                        'API_KEY=abc123xyz789 PORT=8080 DEBUG=true VERSION=1.2.3',
+                        'Date: 2024/03/15 Time: 14:30:25 ID: A1B2C3 Score: 95.7%'
+                    ],
+                    mixed: [
+                        'Hello world! 今天天气很好，温度25°C，湿度60%。Meeting @ 3:30pm.',
+                        'Code: function test() { return "Hello, 世界!"; } // Comments 注释',
+                        'Email: user@example.com Phone: +86-138-0013-8000 微信: wechat123',
+                        'Shopping list: 🍎苹果 $2.50, 🥛牛奶 ¥15.80, 🍞面包 €3.20',
+                        'Password: Abc123@#$ Username: user_2024 验证码: 6789'
+                    ]
+                };
+                
+                this.bindEvents();
+                this.updateDisplay();
+            }
+            
+            bindEvents() {
+                const input = document.getElementById('typingInput');
+                
+                input.addEventListener('input', (e) => {
+                    if (this.isActive) {
+                        this.handleInput(e.target.value);
+                    }
+                });
+                
+                input.addEventListener('keydown', (e) => {
+                    if (this.isActive) {
+                        this.totalKeystrokes++;
+                    }
+                });
+                
+                // 防止失去焦点
+                input.addEventListener('blur', () => {
+                    if (this.isActive) {
+                        setTimeout(() => input.focus(), 10);
+                    }
+                });
+                
+                // 快捷键
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        e.preventDefault();
+                        if (!this.isActive) {
+                            this.startTest();
+                        } else {
+                            this.restartTest();
+                        }
+                    }
+                });
+            }
+            
+            setDuration(duration) {
+                if (this.isActive) return;
+                
+                this.duration = duration;
+                this.timeLeft = duration;
+                
+                document.querySelectorAll('.test-settings .setting-buttons')[0]
+                    .querySelectorAll('.setting-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                event.target.classList.add('active');
+                
+                this.updateDisplay();
+            }
+            
+            setTextType(type) {
+                if (this.isActive) return;
+                
+                this.textType = type;
+                
+                document.querySelectorAll('.test-settings .setting-buttons')[1]
+                    .querySelectorAll('.setting-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                event.target.classList.add('active');
+            }
+            
+            setDifficulty(difficulty) {
+                if (this.isActive) return;
+                
+                this.difficulty = difficulty;
+                
+                document.querySelectorAll('.test-settings .setting-buttons')[2]
+                    .querySelectorAll('.setting-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                event.target.classList.add('active');
+            }
+            
+            generateText() {
+                const texts = this.textLibrary[this.textType];
+                let selectedTexts = [];
+                
+                // 根据难度选择文本数量
+                const textCount = {
+                    easy: 2,
+                    medium: 3,
+                    hard: 4
+                }[this.difficulty];
+                
+                // 随机选择文本
+                for (let i = 0; i < textCount; i++) {
+                    const randomIndex = Math.floor(Math.random() * texts.length);
+                    selectedTexts.push(texts[randomIndex]);
+                }
+                
+                return selectedTexts.join(' ');
+            }
+            
+            startTest() {
+                this.isActive = true;
+                this.startTime = Date.now();
+                this.timeLeft = this.duration;
+                this.currentIndex = 0;
+                this.typedText = '';
+                this.correctChars = 0;
+                this.incorrectChars = 0;
+                this.totalKeystrokes = 0;
+                this.mistakes.clear();
+                
+                // 生成测试文本
+                this.currentText = this.generateText();
+                
+                // 更新UI
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('restartBtn').disabled = false;
+                document.getElementById('typingInput').disabled = false;
+                document.getElementById('typingInput').focus();
+                document.getElementById('resultsPanel').classList.remove('show');
+                
+                this.displayText();
+                this.startTimer();
+                this.updateDisplay();
+            }
+            
+            restartTest() {
+                this.endTest();
+                setTimeout(() => this.startTest(), 100);
+            }
+            
+            startTimer() {
+                this.timer = setInterval(() => {
+                    this.timeLeft--;
+                    this.updateDisplay();
+                    
+                    if (this.timeLeft <= 0) {
+                        this.endTest();
+                    }
+                }, 1000);
+            }
+            
+            handleInput(inputValue) {
+                this.typedText = inputValue;
+                
+                // 检查输入
+                let correctCount = 0;
+                let incorrectCount = 0;
+                
+                for (let i = 0; i < this.typedText.length; i++) {
+                    if (i < this.currentText.length) {
+                        if (this.typedText[i] === this.currentText[i]) {
+                            correctCount++;
+                        } else {
+                            incorrectCount++;
+                            // 记录错误字符
+                            const expected = this.currentText[i];
+                            const typed = this.typedText[i];
+                            const key = `${expected} → ${typed}`;
+                            this.mistakes.set(key, (this.mistakes.get(key) || 0) + 1);
+                        }
+                    } else {
+                        incorrectCount++;
+                    }
+                }
+                
+                this.correctChars = correctCount;
+                this.incorrectChars = incorrectCount;
+                this.currentIndex = this.typedText.length;
+                
+                this.displayText();
+                this.updateDisplay();
+                
+                // 检查是否完成
+                if (this.typedText.length >= this.currentText.length) {
+                    setTimeout(() => this.endTest(), 100);
+                }
+            }
+            
+            displayText() {
+                const textDisplay = document.getElementById('textDisplay');
+                let html = '';
+                
+                for (let i = 0; i < this.currentText.length; i++) {
+                    const char = this.currentText[i];
+                    let className = '';
+                    
+                    if (i < this.typedText.length) {
+                        className = this.typedText[i] === char ? 'correct' : 'incorrect';
+                    } else if (i === this.currentIndex) {
+                        className = 'current';
+                    }
+                    
+                    html += `<span class="char ${className}">${char === ' ' ? '&nbsp;' : char}</span>`;
+                }
+                
+                textDisplay.innerHTML = html;
+            }
+            
+            updateDisplay() {
+                const elapsed = this.isActive ? (Date.now() - this.startTime) / 1000 : 0;
+                const totalChars = this.correctChars + this.incorrectChars;
+                
+                // 计算WPM (以5个字符为一个单词)
+                const wpm = elapsed > 0 ? Math.round((this.correctChars / 5) / (elapsed / 60)) : 0;
+                
+                // 计算准确率
+                const accuracy = totalChars > 0 ? Math.round((this.correctChars / totalChars) * 100) : 100;
+                
+                // 计算已输入词数
+                const wordsTyped = Math.floor(this.correctChars / 5);
+                
+                document.getElementById('wpm').textContent = wpm;
+                document.getElementById('accuracy').textContent = accuracy + '%';
+                document.getElementById('timeLeft').textContent = this.timeLeft;
+                document.getElementById('wordsTyped').textContent = wordsTyped;
+                
+                // 更新进度条
+                const progress = ((this.duration - this.timeLeft) / this.duration) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+                
+                let progressText = `已完成 ${progress.toFixed(1)}%`;
+                if (this.isActive) {
+                    progressText += ` • ${this.typedText.length}/${this.currentText.length} 字符`;
+                }
+                document.getElementById('progressText').textContent = progressText;
+            }
+            
+            endTest() {
+                this.isActive = false;
+                
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+                
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('restartBtn').disabled = true;
+                document.getElementById('typingInput').disabled = true;
+                document.getElementById('typingInput').value = '';
+                
+                this.showResults();
+            }
+            
+            showResults() {
+                const elapsed = this.startTime ? (Date.now() - this.startTime) / 1000 : 0;
+                const totalChars = this.correctChars + this.incorrectChars;
+                
+                // 计算最终结果
+                const wpm = elapsed > 0 ? Math.round((this.correctChars / 5) / (elapsed / 60)) : 0;
+                const accuracy = totalChars > 0 ? Math.round((this.correctChars / totalChars) * 100) : 100;
+                
+                // 等级评价
+                let rating = '练习级';
+                if (wpm >= 60 && accuracy >= 95) {
+                    rating = '大师级 🏆';
+                } else if (wpm >= 40 && accuracy >= 90) {
+                    rating = '专家级 ⭐';
+                } else if (wpm >= 25 && accuracy >= 85) {
+                    rating = '熟练级 👍';
+                } else if (wpm >= 15 && accuracy >= 80) {
+                    rating = '入门级 📚';
+                }
+                
+                // 更新结果显示
+                document.getElementById('finalWPM').textContent = wpm;
+                document.getElementById('finalAccuracy').textContent = accuracy + '%';
+                document.getElementById('totalChars').textContent = totalChars;
+                document.getElementById('correctChars').textContent = this.correctChars;
+                document.getElementById('incorrectChars').textContent = this.incorrectChars;
+                document.getElementById('rating').textContent = rating;
+                
+                // 显示错误分析
+                if (this.mistakes.size > 0) {
+                    const mistakesDisplay = document.getElementById('mistakesDisplay');
+                    const mistakesList = document.getElementById('mistakesList');
+                    
+                    let mistakesHtml = '';
+                    const sortedMistakes = Array.from(this.mistakes.entries())
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 5);
+                    
+                    sortedMistakes.forEach(([mistake, count]) => {
+                        mistakesHtml += `
+                            <div class="mistake-item">
+                                <span>${mistake}</span>
+                                <span>${count}次</span>
+                            </div>
+                        `;
+                    });
+                    
+                    mistakesList.innerHTML = mistakesHtml;
+                    mistakesDisplay.style.display = 'block';
+                } else {
+                    document.getElementById('mistakesDisplay').style.display = 'none';
+                }
+                
+                document.getElementById('resultsPanel').classList.add('show');
+            }
+            
+            showHelp() {
+                document.getElementById('helpPopup').classList.add('show');
+            }
+            
+            closeHelp() {
+                document.getElementById('helpPopup').classList.remove('show');
+            }
+        }
+
+        // 全局变量
+        let speedTyping;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            speedTyping = new SpeedTyping();
+        });
+    </script>
+</body>
+</html>

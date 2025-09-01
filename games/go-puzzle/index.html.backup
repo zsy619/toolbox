@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>围棋死活题 - 围棋训练游戏</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #DEB887 0%, #F4A460 50%, #CD853F 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-width: 1000px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #8B4513;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .info-card {
+            background: #FFF8DC;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #DEB887;
+        }
+        .info-label {
+            color: #8B4513;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .info-value {
+            color: #4A4A4A;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #8B4513;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #A0522D;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+            min-height: 600px;
+        }
+        .go-board-container {
+            background: #DEB887;
+            border-radius: 15px;
+            padding: 20px;
+            border: 3px solid #8B4513;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .go-board {
+            width: 450px;
+            height: 450px;
+            background: #DEB887;
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            grid-template-rows: repeat(11, 1fr);
+        }
+        .go-cell {
+            border: 1px solid #8B4513;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .go-cell:hover {
+            background: rgba(255, 215, 0, 0.3);
+        }
+        .go-cell.last-move {
+            background: rgba(255, 0, 0, 0.3);
+        }
+        .go-stone {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .go-stone.black {
+            background: radial-gradient(circle at 30% 30%, #666, #111);
+            color: white;
+        }
+        .go-stone.white {
+            background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+            color: black;
+            border: 1px solid #ccc;
+        }
+        .go-stone:hover {
+            transform: scale(1.1);
+        }
+        .control-panel {
+            background: #FFF8DC;
+            border-radius: 15px;
+            padding: 15px;
+            border: 2px solid #DEB887;
+        }
+        .section-title {
+            text-align: center;
+            color: #8B4513;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        .puzzle-info {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #DEB887;
+        }
+        .puzzle-title {
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        .puzzle-description {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .puzzle-type {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+        .type-life { background: #32CD32; }
+        .type-death { background: #DC143C; }
+        .type-tesuji { background: #4169E1; }
+        .move-sequence {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 2px solid #DEB887;
+        }
+        .move-entry {
+            padding: 5px;
+            margin: 2px 0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        .move-entry:nth-child(even) {
+            background: #F5F5F5;
+        }
+        .move-entry.black { color: #333; }
+        .move-entry.white { color: #666; }
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .action-btn {
+            background: #DEB887;
+            color: #8B4513;
+            border: 2px solid #8B4513;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .action-btn:hover {
+            background: #8B4513;
+            color: white;
+            transform: translateY(-1px);
+        }
+        .territory-display {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 15px;
+            border: 2px solid #DEB887;
+        }
+        .territory-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .territory-black { background: #f0f0f0; color: #333; }
+        .territory-white { background: #f8f8f8; color: #666; }
+        .puzzle-list {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 15px;
+            border: 2px solid #DEB887;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .puzzle-item {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #DDD;
+        }
+        .puzzle-item:hover {
+            background: #F0F8FF;
+            transform: scale(1.02);
+        }
+        .puzzle-item.current {
+            background: #FFE4B5;
+            border-color: #DEB887;
+        }
+        .puzzle-item.solved {
+            background: #E6FFE6;
+            border-color: #32CD32;
+        }
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .success-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            animation: successPop 0.5s ease-out;
+            border: 3px solid #8B4513;
+        }
+        @keyframes successPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .coordinate-labels {
+            position: absolute;
+            font-size: 0.8rem;
+            color: #8B4513;
+            font-weight: bold;
+        }
+        .coord-top, .coord-bottom {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+        .coord-left, .coord-right {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            height: 100%;
+        }
+        .coord-top { top: -20px; }
+        .coord-bottom { bottom: -20px; }
+        .coord-left { left: -20px; }
+        .coord-right { right: -20px; }
+        @media (max-width: 768px) {
+            .game-container { padding: 15px; }
+            h1 { font-size: 2rem; }
+            .game-board { grid-template-columns: 1fr; gap: 15px; }
+            .go-board { width: 300px; height: 300px; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); }
+            .go-stone { width: 20px; height: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>⚫ 围棋死活题 ⚪</h1>
+        
+        <div class="game-info">
+            <div class="info-card">
+                <div class="info-label">题目</div>
+                <div class="info-value" id="currentPuzzle">1</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">手数</div>
+                <div class="info-value" id="moveCount">0</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">用时</div>
+                <div class="info-value" id="solveTime">00:00</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">完成</div>
+                <div class="info-value" id="solvedCount">0/15</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="goPuzzle.resetPuzzle()">重置</button>
+            <button onclick="goPuzzle.undoMove()" id="undoBtn" disabled>悔棋</button>
+            <button onclick="goPuzzle.showHint()">提示</button>
+            <button onclick="goPuzzle.checkSolution()">检查答案</button>
+            <button onclick="goPuzzle.showRules()">游戏规则</button>
+        </div>
+
+        <div class="game-board">
+            <div class="go-board-container">
+                <div class="go-board" id="goBoard">
+                    <div class="coordinate-labels coord-top">
+                        <span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span><span>J</span><span>K</span><span>L</span>
+                    </div>
+                    <div class="coordinate-labels coord-left">
+                        <span>11</span><span>10</span><span>9</span><span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <div class="puzzle-info">
+                    <div class="puzzle-title" id="puzzleTitle">基础死活</div>
+                    <div class="puzzle-description" id="puzzleDescription">黑先，争取做活</div>
+                    <div class="puzzle-type type-life" id="puzzleType">做活题</div>
+                </div>
+
+                <div class="move-sequence">
+                    <h4 style="color: #8B4513; margin-bottom: 10px;">着手记录</h4>
+                    <div id="moveSequence"></div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="goPuzzle.nextPuzzle()">下一题</button>
+                    <button class="action-btn" onclick="goPuzzle.previousPuzzle()">上一题</button>
+                    <button class="action-btn" onclick="goPuzzle.randomPuzzle()">随机题目</button>
+                    <button class="action-btn" onclick="goPuzzle.analyzePosition()">形势分析</button>
+                </div>
+
+                <div class="territory-display">
+                    <h4 style="color: #8B4513; margin-bottom: 10px;">目标分析</h4>
+                    <div id="territoryInfo">
+                        <div class="territory-item">
+                            <span>目标：</span>
+                            <span id="puzzleGoal">做活黑棋</span>
+                        </div>
+                        <div class="territory-item">
+                            <span>难度：</span>
+                            <span id="puzzleDifficulty">★★☆</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="puzzle-list">
+                    <h4 style="color: #8B4513; margin-bottom: 10px;">题目列表</h4>
+                    <div id="puzzleList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="success-modal" id="successModal">
+        <div class="success-content">
+            <h2>🎉 解答正确！🎉</h2>
+            <p id="successText"></p>
+            <div style="margin: 20px 0;">
+                <p>用时: <span id="finalTime">00:00</span></p>
+                <p>手数: <span id="finalMoves">0</span></p>
+            </div>
+            <button onclick="goPuzzle.closeSuccessModal()">下一题</button>
+            <button onclick="goPuzzle.closeSuccessModal(); goPuzzle.resetPuzzle();">再做一次</button>
+        </div>
+    </div>
+
+    <script>
+        class GoPuzzleGame {
+            constructor() {
+                this.currentPuzzleIndex = 0;
+                this.board = Array(11).fill(null).map(() => Array(11).fill(0)); // 0=空, 1=黑, 2=白
+                this.moveHistory = [];
+                this.startTime = Date.now();
+                this.solvedPuzzles = new Set(JSON.parse(localStorage.getItem('solvedGoPuzzles') || '[]'));
+                this.currentPlayer = 1; // 1=黑先, 2=白
+                
+                this.puzzles = [
+                    {
+                        name: "基础死活",
+                        description: "黑先，争取做活",
+                        type: "life",
+                        goal: "做活黑棋",
+                        difficulty: 2,
+                        board: [
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,2,2,2,0,0,0,0,0],
+                            [0,0,2,1,1,1,2,0,0,0,0],
+                            [0,0,2,1,0,1,2,0,0,0,0],
+                            [0,0,2,1,1,1,2,0,0,0,0],
+                            [0,0,0,2,2,2,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0]
+                        ],
+                        solution: [{row: 5, col: 4}],
+                        firstMove: 1
+                    },
+                    {
+                        name: "角部死活",
+                        description: "黑先，杀死白棋",
+                        type: "death",
+                        goal: "杀死白棋",
+                        difficulty: 3,
+                        board: [
+                            [1,1,2,0,0,0,0,0,0,0,0],
+                            [0,1,2,0,0,0,0,0,0,0,0],
+                            [1,1,2,0,0,0,0,0,0,0,0],
+                            [2,2,2,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0]
+                        ],
+                        solution: [{row: 1, col: 0}],
+                        firstMove: 1
+                    },
+                    {
+                        name: "手筋练习",
+                        description: "黑先，找出妙手",
+                        type: "tesuji",
+                        goal: "找出最佳手筋",
+                        difficulty: 4,
+                        board: [
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,1,2,2,1,0,0,0,0,0],
+                            [0,1,1,2,0,2,1,1,0,0,0],
+                            [0,1,2,2,2,2,2,1,0,0,0],
+                            [0,1,2,1,1,1,2,1,0,0,0],
+                            [0,1,2,1,0,1,2,1,0,0,0],
+                            [0,1,2,1,1,1,2,1,0,0,0],
+                            [0,1,2,2,2,2,2,1,0,0,0],
+                            [0,1,1,1,1,1,1,1,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0],
+                            [0,0,0,0,0,0,0,0,0,0,0]
+                        ],
+                        solution: [{row: 5, col: 4}],
+                        firstMove: 1
+                    }
+                ];
+                
+                // 生成更多题目
+                for (let i = 4; i <= 15; i++) {
+                    this.puzzles.push({
+                        name: `死活题${i}`,
+                        description: `第${i}题：围棋基础训练`,
+                        type: ["life", "death", "tesuji"][i % 3],
+                        goal: "完成目标",
+                        difficulty: Math.floor(i / 3) + 1,
+                        board: this.generateRandomPuzzle(),
+                        solution: [],
+                        firstMove: 1
+                    });
+                }
+                
+                this.init();
+            }
+
+            init() {
+                this.createBoard();
+                this.loadPuzzle(0);
+                this.updateDisplay();
+                this.updatePuzzleList();
+                this.startTimer();
+            }
+
+            createBoard() {
+                const board = document.getElementById('goBoard');
+                // 清除现有内容但保留坐标标签
+                const cells = board.querySelectorAll('.go-cell');
+                cells.forEach(cell => cell.remove());
+                
+                for (let row = 0; row < 11; row++) {
+                    for (let col = 0; col < 11; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'go-cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        cell.onclick = () => this.handleCellClick(row, col);
+                        
+                        // 添加棋盘线条样式
+                        if (row === 0) cell.style.borderTop = 'none';
+                        if (row === 10) cell.style.borderBottom = 'none';
+                        if (col === 0) cell.style.borderLeft = 'none';
+                        if (col === 10) cell.style.borderRight = 'none';
+                        
+                        // 星位标记
+                        if ((row === 3 && col === 3) || (row === 3 && col === 7) || 
+                            (row === 7 && col === 3) || (row === 7 && col === 7) || 
+                            (row === 5 && col === 5)) {
+                            cell.style.background = 'radial-gradient(circle, #8B4513 1px, transparent 1px)';
+                        }
+                        
+                        board.appendChild(cell);
+                    }
+                }
+            }
+
+            loadPuzzle(index) {
+                if (index < 0 || index >= this.puzzles.length) return;
+                
+                this.currentPuzzleIndex = index;
+                const puzzle = this.puzzles[index];
+                
+                // 复制棋盘状态
+                this.board = puzzle.board.map(row => [...row]);
+                this.moveHistory = [];
+                this.currentPlayer = puzzle.firstMove || 1;
+                this.startTime = Date.now();
+                
+                // 更新UI
+                document.getElementById('puzzleTitle').textContent = puzzle.name;
+                document.getElementById('puzzleDescription').textContent = puzzle.description;
+                document.getElementById('puzzleGoal').textContent = puzzle.goal;
+                document.getElementById('puzzleDifficulty').textContent = '★'.repeat(puzzle.difficulty) + '☆'.repeat(5 - puzzle.difficulty);
+                
+                const typeElement = document.getElementById('puzzleType');
+                const typeNames = { life: '做活题', death: '杀棋题', tesuji: '手筋题' };
+                typeElement.textContent = typeNames[puzzle.type] || '综合题';
+                typeElement.className = `puzzle-type type-${puzzle.type}`;
+                
+                this.renderBoard();
+                this.updateDisplay();
+                this.updateMoveSequence();
+            }
+
+            renderBoard() {
+                const cells = document.querySelectorAll('.go-cell');
+                
+                cells.forEach(cell => {
+                    const row = parseInt(cell.dataset.row);
+                    const col = parseInt(cell.dataset.col);
+                    const stone = this.board[row][col];
+                    
+                    // 清除现有棋子和标记
+                    cell.innerHTML = '';
+                    cell.classList.remove('last-move');
+                    
+                    if (stone !== 0) {
+                        const stoneElement = document.createElement('div');
+                        stoneElement.className = `go-stone ${stone === 1 ? 'black' : 'white'}`;
+                        
+                        // 显示手数
+                        const moveIndex = this.moveHistory.findIndex(move => move.row === row && move.col === col);
+                        if (moveIndex >= 0) {
+                            stoneElement.textContent = moveIndex + 1;
+                        }
+                        
+                        cell.appendChild(stoneElement);
+                    }
+                    
+                    // 标记最后一手
+                    if (this.moveHistory.length > 0) {
+                        const lastMove = this.moveHistory[this.moveHistory.length - 1];
+                        if (lastMove.row === row && lastMove.col === col) {
+                            cell.classList.add('last-move');
+                        }
+                    }
+                });
+            }
+
+            handleCellClick(row, col) {
+                // 检查是否可以落子
+                if (this.board[row][col] !== 0) return;
+                
+                // 落子
+                this.makeMove(row, col);
+            }
+
+            makeMove(row, col) {
+                // 记录移动
+                const move = {
+                    row: row,
+                    col: col,
+                    player: this.currentPlayer,
+                    captured: []
+                };
+                
+                // 落子
+                this.board[row][col] = this.currentPlayer;
+                
+                // 检查提子
+                const captured = this.checkCaptures(row, col);
+                move.captured = captured;
+                
+                // 移除被提的子
+                captured.forEach(pos => {
+                    this.board[pos.row][pos.col] = 0;
+                });
+                
+                this.moveHistory.push(move);
+                
+                // 切换玩家
+                this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
+                
+                this.renderBoard();
+                this.updateDisplay();
+                this.updateMoveSequence();
+                
+                // 检查是否解决问题
+                this.checkPuzzleSolved();
+            }
+
+            checkCaptures(row, col) {
+                const player = this.board[row][col];
+                const opponent = player === 1 ? 2 : 1;
+                const captured = [];
+                
+                // 检查四个方向的敌子
+                const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                
+                directions.forEach(([dr, dc]) => {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    
+                    if (this.isValidPosition(newRow, newCol) && this.board[newRow][newCol] === opponent) {
+                        const group = this.getGroup(newRow, newCol);
+                        if (this.countLiberties(group) === 0) {
+                            captured.push(...group);
+                        }
+                    }
+                });
+                
+                return captured;
+            }
+
+            getGroup(row, col) {
+                const player = this.board[row][col];
+                const group = [];
+                const visited = new Set();
+                const stack = [{row, col}];
+                
+                while (stack.length > 0) {
+                    const {row: r, col: c} = stack.pop();
+                    const key = `${r},${c}`;
+                    
+                    if (visited.has(key)) continue;
+                    visited.add(key);
+                    
+                    if (this.board[r][c] === player) {
+                        group.push({row: r, col: c});
+                        
+                        // 检查四个方向
+                        const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                        directions.forEach(([dr, dc]) => {
+                            const newRow = r + dr;
+                            const newCol = c + dc;
+                            if (this.isValidPosition(newRow, newCol)) {
+                                stack.push({row: newRow, col: newCol});
+                            }
+                        });
+                    }
+                }
+                
+                return group;
+            }
+
+            countLiberties(group) {
+                const liberties = new Set();
+                
+                group.forEach(({row, col}) => {
+                    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                    directions.forEach(([dr, dc]) => {
+                        const newRow = row + dr;
+                        const newCol = col + dc;
+                        if (this.isValidPosition(newRow, newCol) && this.board[newRow][newCol] === 0) {
+                            liberties.add(`${newRow},${newCol}`);
+                        }
+                    });
+                });
+                
+                return liberties.size;
+            }
+
+            isValidPosition(row, col) {
+                return row >= 0 && row < 11 && col >= 0 && col < 11;
+            }
+
+            checkPuzzleSolved() {
+                const puzzle = this.puzzles[this.currentPuzzleIndex];
+                
+                // 简化的解决检查
+                if (puzzle.solution && puzzle.solution.length > 0) {
+                    const solution = puzzle.solution[0];
+                    const lastMove = this.moveHistory[this.moveHistory.length - 1];
+                    
+                    if (lastMove && lastMove.row === solution.row && lastMove.col === solution.col) {
+                        this.solvePuzzle();
+                    }
+                } else {
+                    // 对于没有预设解答的题目，检查特定条件
+                    if (this.moveHistory.length >= 3) {
+                        // 简单判断：如果下了3手以上，就算解决
+                        this.solvePuzzle();
+                    }
+                }
+            }
+
+            solvePuzzle() {
+                this.solvedPuzzles.add(this.currentPuzzleIndex);
+                localStorage.setItem('solvedGoPuzzles', JSON.stringify([...this.solvedPuzzles]));
+                
+                const solveTime = Math.floor((Date.now() - this.startTime) / 1000);
+                const minutes = Math.floor(solveTime / 60);
+                const seconds = solveTime % 60;
+                const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                document.getElementById('finalTime').textContent = timeString;
+                document.getElementById('finalMoves').textContent = this.moveHistory.length;
+                document.getElementById('successText').textContent = `你成功解决了"${this.puzzles[this.currentPuzzleIndex].name}"！`;
+                document.getElementById('successModal').style.display = 'flex';
+                
+                this.updateDisplay();
+                this.updatePuzzleList();
+            }
+
+            undoMove() {
+                if (this.moveHistory.length === 0) return;
+                
+                const lastMove = this.moveHistory.pop();
+                
+                // 恢复棋盘状态
+                this.board[lastMove.row][lastMove.col] = 0;
+                
+                // 恢复被提的子
+                lastMove.captured.forEach(pos => {
+                    const opponent = lastMove.player === 1 ? 2 : 1;
+                    this.board[pos.row][pos.col] = opponent;
+                });
+                
+                // 切换玩家
+                this.currentPlayer = lastMove.player;
+                
+                this.renderBoard();
+                this.updateDisplay();
+                this.updateMoveSequence();
+            }
+
+            resetPuzzle() {
+                this.loadPuzzle(this.currentPuzzleIndex);
+            }
+
+            nextPuzzle() {
+                if (this.currentPuzzleIndex < this.puzzles.length - 1) {
+                    this.loadPuzzle(this.currentPuzzleIndex + 1);
+                }
+            }
+
+            previousPuzzle() {
+                if (this.currentPuzzleIndex > 0) {
+                    this.loadPuzzle(this.currentPuzzleIndex - 1);
+                }
+            }
+
+            randomPuzzle() {
+                const randomIndex = Math.floor(Math.random() * this.puzzles.length);
+                this.loadPuzzle(randomIndex);
+            }
+
+            showHint() {
+                const puzzle = this.puzzles[this.currentPuzzleIndex];
+                if (puzzle.solution && puzzle.solution.length > 0) {
+                    const hint = puzzle.solution[0];
+                    const coord = this.positionToCoordinate(hint.row, hint.col);
+                    alert(`提示：考虑在 ${coord} 位置落子`);
+                } else {
+                    alert('这道题目暂无提示，请仔细分析棋形！');
+                }
+            }
+
+            checkSolution() {
+                // 简化的答案检查
+                if (this.moveHistory.length === 0) {
+                    alert('请先下棋！');
+                    return;
+                }
+                
+                const puzzle = this.puzzles[this.currentPuzzleIndex];
+                if (puzzle.solution && puzzle.solution.length > 0) {
+                    const solution = puzzle.solution[0];
+                    const hasCorrectMove = this.moveHistory.some(move => 
+                        move.row === solution.row && move.col === solution.col
+                    );
+                    
+                    if (hasCorrectMove) {
+                        alert('恭喜！你找到了正确答案！');
+                        this.solvePuzzle();
+                    } else {
+                        alert('还没找到最佳解答，继续思考！');
+                    }
+                } else {
+                    alert('这道题目的答案有多种可能，继续探索！');
+                }
+            }
+
+            analyzePosition() {
+                // 简化的形势分析
+                let blackTerritory = 0;
+                let whiteTerritory = 0;
+                let blackStones = 0;
+                let whiteStones = 0;
+                
+                for (let row = 0; row < 11; row++) {
+                    for (let col = 0; col < 11; col++) {
+                        if (this.board[row][col] === 1) {
+                            blackStones++;
+                        } else if (this.board[row][col] === 2) {
+                            whiteStones++;
+                        }
+                    }
+                }
+                
+                alert(`棋局分析：
+                
+黑棋：${blackStones} 子
+白棋：${whiteStones} 子
+手数：${this.moveHistory.length}
+
+当前轮到：${this.currentPlayer === 1 ? '黑棋' : '白棋'}
+                
+提示：分析各块棋的死活状态，寻找关键点。`);
+            }
+
+            generateRandomPuzzle() {
+                // 生成随机题目布局
+                const board = Array(11).fill(null).map(() => Array(11).fill(0));
+                
+                // 随机放置一些棋子形成死活问题
+                const patterns = [
+                    // 基础死活模式
+                    [[1,1,1], [1,0,1], [1,1,1]],
+                    // 角部死活
+                    [[2,2,0], [1,2,0], [1,1,0]],
+                    // 边部死活
+                    [[0,2,2,2,0], [1,1,1,1,1], [0,1,0,1,0]]
+                ];
+                
+                const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+                const startRow = Math.floor(Math.random() * (11 - pattern.length));
+                const startCol = Math.floor(Math.random() * (11 - pattern[0].length));
+                
+                for (let i = 0; i < pattern.length; i++) {
+                    for (let j = 0; j < pattern[i].length; j++) {
+                        if (pattern[i][j] !== 0) {
+                            board[startRow + i][startCol + j] = pattern[i][j];
+                        }
+                    }
+                }
+                
+                return board;
+            }
+
+            positionToCoordinate(row, col) {
+                const letters = 'ABCDEFGHJKLMNOPQRS';
+                return `${letters[col]}${11 - row}`;
+            }
+
+            updateDisplay() {
+                document.getElementById('currentPuzzle').textContent = this.currentPuzzleIndex + 1;
+                document.getElementById('moveCount').textContent = this.moveHistory.length;
+                document.getElementById('solvedCount').textContent = `${this.solvedPuzzles.size}/${this.puzzles.length}`;
+                document.getElementById('undoBtn').disabled = this.moveHistory.length === 0;
+            }
+
+            updateMoveSequence() {
+                const container = document.getElementById('moveSequence');
+                container.innerHTML = '';
+                
+                this.moveHistory.forEach((move, index) => {
+                    const entry = document.createElement('div');
+                    entry.className = `move-entry ${move.player === 1 ? 'black' : 'white'}`;
+                    const coord = this.positionToCoordinate(move.row, move.col);
+                    const player = move.player === 1 ? '●' : '○';
+                    entry.textContent = `${index + 1}. ${player} ${coord}`;
+                    container.appendChild(entry);
+                });
+                
+                container.scrollTop = container.scrollHeight;
+            }
+
+            updatePuzzleList() {
+                const container = document.getElementById('puzzleList');
+                container.innerHTML = '';
+                
+                this.puzzles.forEach((puzzle, index) => {
+                    const item = document.createElement('div');
+                    let className = 'puzzle-item';
+                    if (index === this.currentPuzzleIndex) className += ' current';
+                    if (this.solvedPuzzles.has(index)) className += ' solved';
+                    
+                    item.className = className;
+                    item.onclick = () => this.loadPuzzle(index);
+                    
+                    const solved = this.solvedPuzzles.has(index) ? ' ✓' : '';
+                    const typeNames = { life: '活', death: '杀', tesuji: '筋' };
+                    
+                    item.innerHTML = `
+                        <div style="font-weight: bold;">${index + 1}. ${puzzle.name}${solved}</div>
+                        <div style="font-size: 0.8rem; color: #666;">${typeNames[puzzle.type]} ★${puzzle.difficulty}</div>
+                    `;
+                    
+                    container.appendChild(item);
+                });
+            }
+
+            startTimer() {
+                setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    document.getElementById('solveTime').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+
+            closeSuccessModal() {
+                document.getElementById('successModal').style.display = 'none';
+                this.nextPuzzle();
+            }
+
+            showRules() {
+                alert(`围棋死活题游戏规则：
+
+目标：
+• 根据题目要求完成做活、杀棋或手筋任务
+• 通常黑先，找到最佳着点
+
+基本规则：
+• 点击棋盘空点落子
+• 遵循围棋基本规则（气、提子等）
+• 可以悔棋和重置
+
+题目类型：
+• 做活题：让己方棋子获得两眼做活
+• 杀棋题：杀死对方棋子
+• 手筋题：找出精妙的技巧着法
+
+操作说明：
+• 左键点击空点落子
+• 使用悔棋可以撤销上一步
+• 检查答案验证解法正确性
+• 提示功能帮助思考
+
+围棋知识：
+• 气：棋子直接相邻的空点
+• 眼：被己方棋子围住的空点
+• 死活：棋子能否做成两眼存活
+
+解题技巧：
+• 仔细分析双方棋子的气数
+• 寻找关键的做眼点或破眼点
+• 考虑先手和后手的差别
+• 注意对杀中的缓手和急手`);
+            }
+        }
+
+        // 初始化游戏
+        const goPuzzle = new GoPuzzleGame();
+    </script>
+</body>
+</html>

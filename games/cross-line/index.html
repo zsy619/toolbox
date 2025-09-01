@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>十字连珠游戏 - 在线免费玩创新策略棋类游戏 | 扁平化设计</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线十字连珠游戏，创新策略棋类游戏，形成十字形连线获胜，支持人机对战，扁平化设计界面！">
+    <meta name="keywords" content="十字连珠,策略游戏,棋类游戏,五子棋变种,在线游戏,免费游戏,人机对战,扁平化设计">
+    <meta name="author" content="游戏工具箱">
+    <meta name="theme-color" content="#FF5722">
+    
+    <link rel="stylesheet" href="css/cross-line.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <h1>✚ 十字连珠</h1>
+            <div class="game-status">
+                <div class="current-player">
+                    <div class="player-indicator" id="playerIndicator">
+                        <div class="piece black"></div>
+                        <span>黑子先手</span>
+                    </div>
+                </div>
+                <div class="game-info">
+                    <div class="info-item">
+                        <span class="label">回合</span>
+                        <span class="value" id="turnCount">1</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">黑子</span>
+                        <span class="value" id="blackScore">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">白子</span>
+                        <span class="value" id="whiteScore">0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="game-description">
+            <p>🎯 在棋盘上形成十字形连线（纵向或横向5子+交叉3子）即可获胜！</p>
+        </section>
+
+        <section class="game-mode-selector">
+            <h3>🎮 游戏模式</h3>
+            <div class="mode-buttons">
+                <button class="mode-btn active" onclick="crossLineGame.setGameMode('ai')">
+                    <span>🤖</span>
+                    <div>人机对战</div>
+                    <small>挑战AI智能</small>
+                </button>
+                <button class="mode-btn" onclick="crossLineGame.setGameMode('human')">
+                    <span>👥</span>
+                    <div>双人对战</div>
+                    <small>本地对弈</small>
+                </button>
+            </div>
+        </section>
+
+        <section class="difficulty-selector" id="difficultySelector">
+            <h3>🎯 AI难度</h3>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn" onclick="crossLineGame.setDifficulty('easy')">
+                    <span>😊</span>
+                    <div>简单</div>
+                    <small>新手友好</small>
+                </button>
+                <button class="difficulty-btn active" onclick="crossLineGame.setDifficulty('medium')">
+                    <span>🤔</span>
+                    <div>中等</div>
+                    <small>有一定挑战</small>
+                </button>
+                <button class="difficulty-btn" onclick="crossLineGame.setDifficulty('hard')">
+                    <span>😤</span>
+                    <div>困难</div>
+                    <small>高手对决</small>
+                </button>
+            </div>
+        </section>
+
+        <section class="game-controls">
+            <button class="btn start-btn" onclick="crossLineGame.newGame()">🎮 新游戏</button>
+            <button class="btn" onclick="crossLineGame.undo()" id="undoBtn" disabled>↩️ 悔棋</button>
+            <button class="btn secondary" onclick="crossLineGame.showHelp()">❓ 规则</button>
+            <button class="btn secondary" onclick="crossLineGame.showStats()">📊 统计</button>
+        </section>
+
+        <section class="game-board-container">
+            <div class="board-wrapper">
+                <div class="coordinate-labels">
+                    <div class="coord-row top">
+                        <div class="coord-cell">A</div><div class="coord-cell">B</div><div class="coord-cell">C</div>
+                        <div class="coord-cell">D</div><div class="coord-cell">E</div><div class="coord-cell">F</div>
+                        <div class="coord-cell">G</div><div class="coord-cell">H</div><div class="coord-cell">I</div>
+                        <div class="coord-cell">J</div><div class="coord-cell">K</div><div class="coord-cell">L</div>
+                        <div class="coord-cell">M</div><div class="coord-cell">N</div><div class="coord-cell">O</div>
+                    </div>
+                </div>
+                
+                <div class="board-content">
+                    <div class="coordinate-labels left">
+                        <div class="coord-column">
+                            <div class="coord-cell">1</div><div class="coord-cell">2</div><div class="coord-cell">3</div>
+                            <div class="coord-cell">4</div><div class="coord-cell">5</div><div class="coord-cell">6</div>
+                            <div class="coord-cell">7</div><div class="coord-cell">8</div><div class="coord-cell">9</div>
+                            <div class="coord-cell">10</div><div class="coord-cell">11</div><div class="coord-cell">12</div>
+                            <div class="coord-cell">13</div><div class="coord-cell">14</div><div class="coord-cell">15</div>
+                        </div>
+                    </div>
+                    
+                    <div class="game-board" id="gameBoard">
+                        <!-- 15x15棋盘将通过JavaScript生成 -->
+                    </div>
+                    
+                    <div class="coordinate-labels right">
+                        <div class="coord-column">
+                            <div class="coord-cell">1</div><div class="coord-cell">2</div><div class="coord-cell">3</div>
+                            <div class="coord-cell">4</div><div class="coord-cell">5</div><div class="coord-cell">6</div>
+                            <div class="coord-cell">7</div><div class="coord-cell">8</div><div class="coord-cell">9</div>
+                            <div class="coord-cell">10</div><div class="coord-cell">11</div><div class="coord-cell">12</div>
+                            <div class="coord-cell">13</div><div class="coord-cell">14</div><div class="coord-cell">15</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="coordinate-labels">
+                    <div class="coord-row bottom">
+                        <div class="coord-cell">A</div><div class="coord-cell">B</div><div class="coord-cell">C</div>
+                        <div class="coord-cell">D</div><div class="coord-cell">E</div><div class="coord-cell">F</div>
+                        <div class="coord-cell">G</div><div class="coord-cell">H</div><div class="coord-cell">I</div>
+                        <div class="coord-cell">J</div><div class="coord-cell">K</div><div class="coord-cell">L</div>
+                        <div class="coord-cell">M</div><div class="coord-cell">N</div><div class="coord-cell">O</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="win-patterns">
+            <h3>🏆 获胜模式</h3>
+            <div class="pattern-display">
+                <div class="pattern-item">
+                    <div class="pattern-icon">➕</div>
+                    <div class="pattern-desc">
+                        <strong>十字连珠</strong>
+                        <small>横向5子+纵向3子交叉</small>
+                    </div>
+                </div>
+                <div class="pattern-item">
+                    <div class="pattern-icon">⊕</div>
+                    <div class="pattern-desc">
+                        <strong>双向十字</strong>
+                        <small>两个方向形成十字</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 游戏胜利弹窗 -->
+        <div class="victory-popup" id="victoryPopup">
+            <div class="popup-content">
+                <h2 id="victoryTitle">🎉 黑子获胜！</h2>
+                <div class="victory-pattern" id="victoryPattern">
+                    <div class="pattern-display-large">
+                        <div class="win-type" id="winType">十字连珠</div>
+                        <div class="win-detail" id="winDetail">横向5子+纵向3子交叉获胜</div>
+                    </div>
+                </div>
+                <div class="victory-stats">
+                    <div class="stat-row">
+                        <span>对局回合:</span>
+                        <span id="finalTurns">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>获胜方式:</span>
+                        <span id="winMethod">十字连珠</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>用时:</span>
+                        <span id="gameTime">00:00</span>
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="crossLineGame.closeVictory(); crossLineGame.newGame();">再来一局</button>
+                    <button class="btn secondary" onclick="crossLineGame.closeVictory();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 规则说明弹窗 -->
+        <div class="help-popup" id="helpPopup">
+            <div class="popup-content help-content">
+                <h2>📋 十字连珠规则</h2>
+                
+                <div class="help-section">
+                    <h3>🎯 游戏目标</h3>
+                    <p>在15×15棋盘上，通过放置棋子形成特定的十字形连线模式获胜。</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🏆 获胜条件</h3>
+                    <ul>
+                        <li><strong>十字连珠：</strong>横向或纵向连成5子，并在中心位置有垂直方向的3子交叉</li>
+                        <li><strong>双向十字：</strong>同时在横向和纵向都形成完整的十字形</li>
+                        <li><strong>传统五连：</strong>任意方向连成5子也可获胜</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>⚡ 游戏规则</h3>
+                    <ul>
+                        <li>黑子先手，双方轮流下子</li>
+                        <li>每次只能在空位置放置一枚棋子</li>
+                        <li>支持悔棋功能（人机对战时只能悔棋一步）</li>
+                        <li>形成获胜模式后游戏立即结束</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🤖 AI难度</h3>
+                    <ul>
+                        <li><strong>简单：</strong>基础算法，随机性较大</li>
+                        <li><strong>中等：</strong>会阻挡玩家并寻找机会</li>
+                        <li><strong>困难：</strong>深度搜索，策略性极强</li>
+                    </ul>
+                </div>
+                
+                <div class="popup-actions">
+                    <button class="btn" onclick="crossLineGame.closeHelp();">明白了</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计弹窗 -->
+        <div class="stats-popup" id="statsPopup">
+            <div class="popup-content">
+                <h2>📊 游戏统计</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalGames">0</div>
+                        <div class="stat-label">总局数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="playerWins">0</div>
+                        <div class="stat-label">玩家胜</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="aiWins">0</div>
+                        <div class="stat-label">AI胜</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="winRate">0%</div>
+                        <div class="stat-label">胜率</div>
+                    </div>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn secondary" onclick="crossLineGame.resetStats();">重置统计</button>
+                    <button class="btn" onclick="crossLineGame.closeStats();">关闭</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/cross-line.js"></script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>弹珠台游戏 - 在线免费玩经典街机物理弹球游戏 | 真实物理引擎</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线弹珠台游戏，经典街机物理弹球游戏，真实物理引擎模拟，多种得分区域，连击系统，粒子特效。重温经典街机弹珠台的乐趣！">
+    <meta name="keywords" content="弹珠台,弹球游戏,街机游戏,物理游戏,在线游戏,免费游戏,经典游戏,HTML5游戏,物理引擎,街机模拟">
+    <meta name="author" content="游戏工具箱">
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    <meta property="og:title" content="弹珠台游戏 - 在线免费玩经典街机物理弹球游戏">
+    <meta property="og:description" content="免费在线弹珠台游戏，经典街机物理弹球游戏，真实物理引擎模拟，多种得分区域，连击系统。重温经典街机弹珠台！">
+    <meta property="og:image" content="">
+    <meta property="og:site_name" content="游戏工具箱">
+    <meta property="og:locale" content="zh_CN">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="">
+    <meta property="twitter:title" content="弹珠台游戏 - 在线免费玩经典街机物理弹球游戏">
+    <meta property="twitter:description" content="免费在线弹珠台游戏，经典街机物理弹球游戏，真实物理引擎模拟，多种得分区域。">
+    <meta property="twitter:image" content="">
+    
+    <!-- 移动端优化 -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="弹珠台">
+    
+    <!-- 主题颜色 -->
+    <meta name="theme-color" content="#00ff88">
+    <meta name="msapplication-TileColor" content="#00ff88">
+    
+    <!-- 结构化数据 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Game",
+      "name": "弹珠台游戏",
+      "description": "免费在线弹珠台游戏，经典街机物理弹球游戏，真实物理引擎模拟，多种得分区域，连击系统，粒子特效。重温经典街机弹珠台的乐趣！",
+      "genre": ["街机游戏", "物理游戏", "经典游戏"],
+      "gamePlatform": ["Web浏览器", "HTML5"],
+      "operatingSystem": ["Windows", "macOS", "Linux", "iOS", "Android"],
+      "applicationCategory": "Game",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "游戏工具箱"
+      },
+      "dateCreated": "2025-01-23",
+      "inLanguage": "zh-CN",
+      "isAccessibleForFree": true,
+      "gameItem": [
+        {
+          "@type": "Thing",
+          "name": "真实物理引擎"
+        },
+        {
+          "@type": "Thing", 
+          "name": "多种得分区域"
+        },
+        {
+          "@type": "Thing",
+          "name": "连击系统"
+        },
+        {
+          "@type": "Thing",
+          "name": "粒子特效"
+        }
+      ]
+    }
+    </script>
+    
+    <link rel="stylesheet" href="css/pinball.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>🎯 弹珠台</h1>
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-label">得分</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">弹珠</div>
+                    <div class="stat-value" id="ballsLeft">3</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">倍数</div>
+                    <div class="stat-value" id="multiplier">×1</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">最高分</div>
+                    <div class="stat-value" id="highScore">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button class="btn" id="launchBtn" onclick="pinballGame.launchBall()">🚀 发射</button>
+            <button class="btn" id="pauseBtn" onclick="pinballGame.togglePause()">⏸️ 暂停</button>
+            <button class="btn" id="resetBtn" onclick="pinballGame.resetGame()">🔄 重置</button>
+            <button class="btn" id="helpBtn" onclick="pinballGame.showHelp()">❓ 帮助</button>
+        </div>
+
+        <div class="pinball-machine">
+            <canvas id="gameCanvas" width="400" height="600"></canvas>
+            
+            <div class="flipper-controls">
+                <div class="flipper-hint left-hint">
+                    <div class="key-indicator">A</div>
+                    <div class="flipper-label">左挡板</div>
+                </div>
+                <div class="flipper-hint right-hint">
+                    <div class="key-indicator">D</div>
+                    <div class="flipper-label">右挡板</div>
+                </div>
+            </div>
+
+            <div class="power-meter" id="powerMeter">
+                <div class="power-label">发射力度</div>
+                <div class="power-bar">
+                    <div class="power-fill" id="powerFill"></div>
+                </div>
+                <div class="power-value" id="powerValue">0%</div>
+            </div>
+        </div>
+
+        <div class="game-info">
+            <div class="score-zones">
+                <h3>🎯 得分区域</h3>
+                <div class="zone-list">
+                    <div class="zone-item">
+                        <span class="zone-color red"></span>
+                        <span class="zone-name">红色靶标</span>
+                        <span class="zone-points">1000分</span>
+                    </div>
+                    <div class="zone-item">
+                        <span class="zone-color blue"></span>
+                        <span class="zone-name">蓝色靶标</span>
+                        <span class="zone-points">500分</span>
+                    </div>
+                    <div class="zone-item">
+                        <span class="zone-color yellow"></span>
+                        <span class="zone-name">黄色靶标</span>
+                        <span class="zone-points">300分</span>
+                    </div>
+                    <div class="zone-item">
+                        <span class="zone-color green"></span>
+                        <span class="zone-name">绿色靶标</span>
+                        <span class="zone-points">200分</span>
+                    </div>
+                    <div class="zone-item">
+                        <span class="zone-color orange"></span>
+                        <span class="zone-name">橙色弹簧</span>
+                        <span class="zone-points">100分</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="special-features">
+                <h3>⭐ 特殊功能</h3>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <span class="feature-icon">🎯</span>
+                        <div class="feature-info">
+                            <div class="feature-name">连击奖励</div>
+                            <div class="feature-desc">连续命中靶标获得倍数奖励</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">💎</span>
+                        <div class="feature-info">
+                            <div class="feature-name">奖励弹珠</div>
+                            <div class="feature-desc">达到特定分数获得额外弹珠</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔥</span>
+                        <div class="feature-info">
+                            <div class="feature-name">火焰模式</div>
+                            <div class="feature-desc">连续命中激活特殊效果</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-over-popup" id="gameOverPopup" style="display: none;">
+            <div class="popup-content">
+                <h2 id="gameOverTitle">🎮 游戏结束</h2>
+                <div class="final-stats">
+                    <p>最终得分: <span id="finalScore">0</span></p>
+                    <p>最高连击: <span id="finalCombo">0</span></p>
+                    <p>命中靶标: <span id="finalHits">0</span></p>
+                    <p id="newHighScore" style="display: none;">🏆 新纪录！</p>
+                </div>
+                <div class="popup-actions">
+                    <button class="btn" onclick="pinballGame.closeGameOver(); pinballGame.resetGame();">再玩一局</button>
+                    <button class="btn secondary" onclick="pinballGame.closeGameOver();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-modal" id="helpModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🎮 弹珠台游戏指南</h2>
+                    <button class="close-btn" onclick="pinballGame.closeHelp()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="help-section">
+                        <h3>🎯 游戏目标</h3>
+                        <p>使用挡板控制弹珠，让弹珠撞击各种靶标和障碍物来获得分数。避免弹珠掉出游戏区域，尽可能获得高分！</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 操作方式</h3>
+                        <ul>
+                            <li><strong>发射弹珠：</strong>点击"发射"按钮或按空格键，长按蓄力</li>
+                            <li><strong>左挡板：</strong>按住A键或点击左侧区域</li>
+                            <li><strong>右挡板：</strong>按住D键或点击右侧区域</li>
+                            <li><strong>台面倾斜：</strong>方向键轻微调整台面角度</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>📊 得分系统</h3>
+                        <ul>
+                            <li><strong>红色靶标：</strong>1000分，最高价值目标</li>
+                            <li><strong>蓝色靶标：</strong>500分，高价值目标</li>
+                            <li><strong>黄色靶标：</strong>300分，中等价值</li>
+                            <li><strong>绿色靶标：</strong>200分，基础得分</li>
+                            <li><strong>弹簧障碍：</strong>100分，弹射加速</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>⭐ 特殊机制</h3>
+                        <ul>
+                            <li><strong>连击系统：</strong>连续命中靶标会增加分数倍数</li>
+                            <li><strong>奖励弹珠：</strong>每10000分获得一个额外弹珠</li>
+                            <li><strong>火焰模式：</strong>连击达到5次激活特殊视觉效果</li>
+                            <li><strong>物理引擎：</strong>真实的弹珠运动和碰撞效果</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>💡 游戏技巧</h3>
+                        <ul>
+                            <li>合理控制发射力度，避免弹珠直接掉落</li>
+                            <li>学会使用挡板的时机，延长弹珠在台面的时间</li>
+                            <li>观察弹珠轨迹，预判最佳击打时机</li>
+                            <li>利用弹簧和障碍物改变弹珠方向</li>
+                            <li>保持连击来获得更高的分数倍数</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/pinball.js"></script>
+</body>
+</html>

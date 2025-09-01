@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西蒙说游戏 - 在线免费玩记忆挑战序列模仿游戏 | 4个难度等级</title>
+    
+    <!-- SEO Meta标签 -->
+    <meta name="description" content="免费在线西蒙说游戏，经典记忆挑战序列模仿游戏，4个难度等级，Web Audio API音效，颜色序列记忆训练。提升记忆力和注意力！">
+    <meta name="keywords" content="西蒙说,记忆游戏,序列记忆,颜色游戏,在线游戏,免费游戏,记忆训练,注意力训练,HTML5游戏,益智游戏">
+    <meta name="author" content="游戏工具箱">
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    <meta property="og:title" content="西蒙说游戏 - 在线免费玩记忆挑战序列模仿游戏">
+    <meta property="og:description" content="免费在线西蒙说游戏，经典记忆挑战序列模仿游戏，4个难度等级，Web Audio API音效，颜色序列记忆训练。提升记忆力！">
+    <meta property="og:image" content="">
+    <meta property="og:site_name" content="游戏工具箱">
+    <meta property="og:locale" content="zh_CN">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="">
+    <meta property="twitter:title" content="西蒙说游戏 - 在线免费玩记忆挑战序列模仿游戏">
+    <meta property="twitter:description" content="免费在线西蒙说游戏，经典记忆挑战序列模仿游戏，4个难度等级，Web Audio API音效。">
+    <meta property="twitter:image" content="">
+    
+    <!-- 移动端优化 -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="西蒙说">
+    
+    <!-- 主题颜色 -->
+    <meta name="theme-color" content="#9b59b6">
+    <meta name="msapplication-TileColor" content="#9b59b6">
+    
+    <!-- 结构化数据 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Game",
+      "name": "西蒙说游戏",
+      "description": "免费在线西蒙说游戏，经典记忆挑战序列模仿游戏，4个难度等级，Web Audio API音效，颜色序列记忆训练。提升记忆力和注意力！",
+      "genre": ["记忆游戏", "益智游戏", "训练游戏"],
+      "gamePlatform": ["Web浏览器", "HTML5"],
+      "operatingSystem": ["Windows", "macOS", "Linux", "iOS", "Android"],
+      "applicationCategory": "Game",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "游戏工具箱"
+      },
+      "dateCreated": "2025-01-23",
+      "inLanguage": "zh-CN",
+      "isAccessibleForFree": true,
+      "gameItem": [
+        {
+          "@type": "Thing",
+          "name": "4个难度等级"
+        },
+        {
+          "@type": "Thing", 
+          "name": "Web Audio API音效"
+        },
+        {
+          "@type": "Thing",
+          "name": "记忆力训练"
+        },
+        {
+          "@type": "Thing",
+          "name": "注意力提升"
+        }
+      ]
+    }
+    </script>
+    
+    <link rel="stylesheet" href="css/simon-says.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>🎮 西蒙说</h1>
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">当前关卡</div>
+                    <div class="info-value" id="currentLevel">1</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">最高记录</div>
+                    <div class="info-value" id="bestScore">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">连击次数</div>
+                    <div class="info-value" id="streak">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="difficulty-selector">
+            <h3>⚙️ 难度设置</h3>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn active" onclick="simonGame.setDifficulty('easy')">
+                    <span>😊</span>
+                    <div>简单</div>
+                    <small>1.5秒间隔</small>
+                </button>
+                <button class="difficulty-btn" onclick="simonGame.setDifficulty('medium')">
+                    <span>🤔</span>
+                    <div>中等</div>
+                    <small>1秒间隔</small>
+                </button>
+                <button class="difficulty-btn" onclick="simonGame.setDifficulty('hard')">
+                    <span>😈</span>
+                    <div>困难</div>
+                    <small>0.6秒间隔</small>
+                </button>
+                <button class="difficulty-btn" onclick="simonGame.setDifficulty('expert')">
+                    <span>🔥</span>
+                    <div>专家</div>
+                    <small>0.4秒间隔</small>
+                </button>
+            </div>
+        </div>
+
+        <div class="game-status">
+            <div class="status-message" id="statusMessage">点击开始游戏</div>
+            <div class="progress-info">
+                <div class="sequence-progress">
+                    <span>序列进度: </span>
+                    <span id="sequenceProgress">0/0</span>
+                </div>
+                <div class="time-remaining" id="timeRemaining" style="display: none;">
+                    <span>剩余时间: </span>
+                    <span id="timeLeft">10</span>秒
+                </div>
+            </div>
+        </div>
+
+        <div class="simon-board">
+            <div class="color-button red" data-color="red" data-sound="262">
+                <div class="button-number">1</div>
+                <div class="button-label">红色</div>
+            </div>
+            <div class="color-button green" data-color="green" data-sound="330">
+                <div class="button-number">2</div>
+                <div class="button-label">绿色</div>
+            </div>
+            <div class="color-button blue" data-color="blue" data-sound="392">
+                <div class="button-number">3</div>
+                <div class="button-label">蓝色</div>
+            </div>
+            <div class="color-button yellow" data-color="yellow" data-sound="523">
+                <div class="button-number">4</div>
+                <div class="button-label">黄色</div>
+            </div>
+            <div class="center-display">
+                <div class="level-display" id="levelDisplay">1</div>
+                <div class="start-button" id="startButton" onclick="simonGame.startGame()">
+                    开始
+                </div>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button class="btn" id="startBtn" onclick="simonGame.startGame()">🎯 开始游戏</button>
+            <button class="btn" id="restartBtn" onclick="simonGame.restartGame()">🔄 重新开始</button>
+            <button class="btn" id="soundToggle" onclick="simonGame.toggleSound()">🔊 音效开启</button>
+            <button class="btn" id="helpBtn" onclick="simonGame.showHelp()">❓ 帮助</button>
+        </div>
+
+        <div class="game-stats">
+            <h3>📊 游戏统计</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-info">
+                        <div class="stat-label">历史最高</div>
+                        <div class="stat-value" id="allTimeBest">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎮</div>
+                    <div class="stat-info">
+                        <div class="stat-label">总游戏数</div>
+                        <div class="stat-value" id="totalGames">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-info">
+                        <div class="stat-label">平均分数</div>
+                        <div class="stat-value" id="averageScore">0</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-info">
+                        <div class="stat-label">最长连击</div>
+                        <div class="stat-value" id="longestStreak">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="victory-popup" id="victoryPopup" style="display: none;">
+            <div class="victory-content">
+                <h2 id="victoryTitle">🎉 恭喜通关！</h2>
+                <div class="victory-message" id="victoryMessage">太棒了！你完成了这个关卡。</div>
+                <div class="victory-stats">
+                    <p>达到关卡: <span id="finalLevel">1</span></p>
+                    <p>游戏得分: <span id="finalScore">0</span></p>
+                    <p>游戏时长: <span id="finalTime">00:00</span></p>
+                    <p id="newRecordText" style="display: none;">🏆 新纪录！</p>
+                </div>
+                <div class="victory-actions">
+                    <button class="btn" onclick="simonGame.closeVictory(); simonGame.startGame();">继续挑战</button>
+                    <button class="btn secondary" onclick="simonGame.closeVictory();">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-modal" id="helpModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🎮 西蒙说游戏规则</h2>
+                    <button class="close-btn" onclick="simonGame.closeHelp()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="help-section">
+                        <h3>📋 游戏目标</h3>
+                        <p>西蒙说是一个记忆挑战游戏。你需要记住并重复西蒙显示的颜色序列。随着关卡提升，序列会变得越来越长，挑战你的记忆极限！</p>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎯 游戏规则</h3>
+                        <ul>
+                            <li>游戏开始时，西蒙会显示一个颜色序列</li>
+                            <li>仔细观察并记住序列的顺序</li>
+                            <li>序列播放完毕后，按照相同顺序点击颜色按钮</li>
+                            <li>答对后进入下一关，序列会增加一个新颜色</li>
+                            <li>答错则游戏结束，显示最终成绩</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>🎮 操作方式</h3>
+                        <ul>
+                            <li><strong>鼠标点击：</strong>点击颜色按钮进行游戏</li>
+                            <li><strong>键盘操作：</strong>使用数字键1-4对应红绿蓝黄四色</li>
+                            <li><strong>空格键：</strong>开始/重新开始游戏</li>
+                            <li><strong>音效提示：</strong>每种颜色都有独特的音效</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>⚙️ 难度设置</h3>
+                        <ul>
+                            <li><strong>简单：</strong>1.5秒间隔，适合新手</li>
+                            <li><strong>中等：</strong>1秒间隔，标准难度</li>
+                            <li><strong>困难：</strong>0.6秒间隔，考验反应</li>
+                            <li><strong>专家：</strong>0.4秒间隔，极限挑战</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-section">
+                        <h3>💡 游戏技巧</h3>
+                        <ul>
+                            <li>专心观看序列，避免分心</li>
+                            <li>可以在心中默念颜色名称来加强记忆</li>
+                            <li>利用音效提示，每种颜色的音调不同</li>
+                            <li>保持节奏感，按照原序列的节拍来点击</li>
+                            <li>从简单难度开始，逐步提升挑战</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/simon-says.js"></script>
+</body>
+</html>
