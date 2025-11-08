@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta标签验证工具</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 600;
+        }
+        input[type="url"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .results {
+            margin-top: 30px;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        .section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .meta-row {
+            display: flex;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            align-items: flex-start;
+        }
+        .meta-label {
+            flex: 0 0 200px;
+            font-weight: 600;
+            color: #34495e;
+            font-size: 13px;
+        }
+        .meta-value {
+            flex: 1;
+            color: #555;
+            font-size: 13px;
+            word-break: break-all;
+        }
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.warning { background: #fff3cd; color: #856404; }
+        .image-preview {
+            max-width: 200px;
+            margin-top: 10px;
+            border-radius: 6px;
+            border: 2px solid #e0e6ed;
+        }
+        .check-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+        .check-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Meta标签验证工具</h1>
+        <p class="subtitle">检查网页的微信分享和收藏元数据配置</p>
+
+        <div class="input-group">
+            <label for="url-input">输入要检查的URL:</label>
+            <input type="url" id="url-input" placeholder="https://tools.yy24365.com/" value="https://tools.yy24365.com/">
+        </div>
+
+        <button class="btn" onclick="checkUrl()">🚀 开始检查</button>
+
+        <div id="results" class="results" style="display: none;">
+            <div class="section">
+                <h3>✅ 配置检查清单</h3>
+                <div id="checklist"></div>
+            </div>
+
+            <div class="section">
+                <h3>📋 基础SEO标签</h3>
+                <div id="basic-seo"></div>
+            </div>
+
+            <div class="section">
+                <h3>🎯 微信收藏标签 (Schema.org)</h3>
+                <div id="schema-tags"></div>
+            </div>
+
+            <div class="section">
+                <h3>📱 微信分享标签 (Open Graph)</h3>
+                <div id="og-tags"></div>
+            </div>
+
+            <div class="section">
+                <h3>🖼️ 图片预览</h3>
+                <div id="image-preview"></div>
+            </div>
+
+            <div class="section">
+                <h3>🧪 测试链接</h3>
+                <div id="test-links"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkUrl() {
+            const url = document.getElementById('url-input').value;
+            if (!url) {
+                alert('请输入URL');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            
+            // 显示加载状态
+            document.getElementById('checklist').innerHTML = '<div class="loading">正在检查...</div>';
+
+            try {
+                // 使用代理或直接fetch（可能会有CORS问题）
+                const response = await fetch(url);
+                const html = await response.text();
+                
+                // 解析HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // 执行检查
+                performChecks(doc, url);
+            } catch (error) {
+                // 如果fetch失败，提供手动检查指南
+                showManualCheckGuide(url);
+            }
+        }
+
+        function performChecks(doc, url) {
+            // 检查清单
+            const checks = [
+                {
+                    name: 'HTML结构',
+                    check: () => {
+                        const html = doc.documentElement;
+                        return html.hasAttribute('itemscope') && html.hasAttribute('itemtype');
+                    }
+                },
+                {
+                    name: 'Title标签',
+                    check: () => doc.querySelector('title') !== null
+                },
+                {
+                    name: 'Meta Description',
+                    check: () => doc.querySelector('meta[name="description"]') !== null
+                },
+                {
+                    name: 'itemprop name',
+                    check: () => doc.querySelector('meta[itemprop="name"]') !== null
+                },
+                {
+                    name: 'itemprop description',
+                    check: () => doc.querySelector('meta[itemprop="description"]') !== null
+                },
+                {
+                    name: 'itemprop image',
+                    check: () => doc.querySelector('meta[itemprop="image"]') !== null
+                },
+                {
+                    name: 'og:title',
+                    check: () => doc.querySelector('meta[property="og:title"]') !== null
+                },
+                {
+                    name: 'og:description',
+                    check: () => doc.querySelector('meta[property="og:description"]') !== null
+                },
+                {
+                    name: 'og:image',
+                    check: () => doc.querySelector('meta[property="og:image"]') !== null
+                },
+                {
+                    name: 'Favicon',
+                    check: () => doc.querySelector('link[rel="icon"]') !== null
+                }
+            ];
+
+            let checklistHtml = '';
+            checks.forEach(item => {
+                const passed = item.check();
+                const icon = passed ? '✅' : '❌';
+                const statusClass = passed ? 'success' : 'error';
+                checklistHtml += `
+                    <div class="check-item">
+                        <span class="check-icon">${icon}</span>
+                        <span>${item.name}</span>
+                        <span class="status ${statusClass}">${passed ? '通过' : '失败'}</span>
+                    </div>
+                `;
+            });
+            document.getElementById('checklist').innerHTML = checklistHtml;
+
+            // 基础SEO
+            const title = doc.querySelector('title')?.textContent || '未设置';
+            const description = doc.querySelector('meta[name="description"]')?.content || '未设置';
+            document.getElementById('basic-seo').innerHTML = `
+                <div class="meta-row">
+                    <div class="meta-label">Title</div>
+                    <div class="meta-value">${title}</div>
+                </div>
+                <div class="meta-row">
+                    <div class="meta-label">Description</div>
+                    <div class="meta-value">${description}</div>
+                </div>
+            `;
+
+            // Schema.org标签
+            const itempropName = doc.querySelector('meta[itemprop="name"]')?.content || '未设置';
+            const itempropDesc = doc.querySelector('meta[itemprop="description"]')?.content || '未设置';
+            const itempropImage = doc.querySelector('meta[itemprop="image"]')?.content || '未设置';
+            document.getElementById('schema-tags').innerHTML = `
+                <div class="meta-row">
+                    <div class="meta-label">itemprop name</div>
+                    <div class="meta-value">${itempropName}</div>
+                </div>
+                <div class="meta-row">
+                    <div class="meta-label">itemprop description</div>
+                    <div class="meta-value">${itempropDesc}</div>
+                </div>
+                <div class="meta-row">
+                    <div class="meta-label">itemprop image</div>
+                    <div class="meta-value">${itempropImage}</div>
+                </div>
+            `;
+
+            // Open Graph标签
+            const ogTitle = doc.querySelector('meta[property="og:title"]')?.content || '未设置';
+            const ogDesc = doc.querySelector('meta[property="og:description"]')?.content || '未设置';
+            const ogImage = doc.querySelector('meta[property="og:image"]')?.content || '未设置';
+            const ogType = doc.querySelector('meta[property="og:type"]')?.content || '未设置';
+            document.getElementById('og-tags').innerHTML = `
+                <div class="meta-row">
+                    <div class="meta-label">og:title</div>
+                    <div class="meta-value">${ogTitle}</div>
+                </div>
+                <div class="meta-row">
+                    <div class="meta-label">og:description</div>
+                    <div class="meta-value">${ogDesc}</div>
+                </div>
+                <div class="meta-row">
+                    <div class="meta-label">og:image</div>
+                    <div class="meta-value">${ogImage}</div>
+                </div>
+                <div class="meta-row">
+                    <div class="meta-label">og:type</div>
+                    <div class="meta-value">${ogType}</div>
+                </div>
+            `;
+
+            // 图片预览
+            const imageUrl = ogImage !== '未设置' ? ogImage : itempropImage;
+            if (imageUrl !== '未设置') {
+                document.getElementById('image-preview').innerHTML = `
+                    <img src="${imageUrl}" class="image-preview" alt="预览图" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22>图片加载失败</text></svg>'">
+                    <p style="margin-top: 10px; color: #7f8c8d; font-size: 12px;">图片URL: ${imageUrl}</p>
+                `;
+            } else {
+                document.getElementById('image-preview').innerHTML = '<p style="color: #e74c3c;">未找到图片</p>';
+            }
+
+            // 测试链接
+            const timestamp = Date.now();
+            const testUrl1 = `${url}?wechat_test=${timestamp}_v1`;
+            const testUrl2 = `${url}?wechat_test=${timestamp}_v2`;
+            document.getElementById('test-links').innerHTML = `
+                <p style="margin-bottom: 15px; color: #7f8c8d; font-size: 13px;">
+                    使用以下带时间戳的URL在微信中测试，避免缓存问题：
+                </p>
+                <div class="meta-row">
+                    <div class="meta-label">测试URL 1</div>
+                    <div class="meta-value">
+                        <a href="${testUrl1}" target="_blank">${testUrl1}</a>
+                    </div>
+                </div>
+                <div class="meta-row">
+                    <div class="meta-label">测试URL 2</div>
+                    <div class="meta-value">
+                        <a href="${testUrl2}" target="_blank">${testUrl2}</a>
+                    </div>
+                </div>
+                <p style="margin-top: 15px; color: #7f8c8d; font-size: 12px;">
+                    💡 提示：将URL发送到微信，在微信中打开并测试收藏和分享功能
+                </p>
+            `;
+        }
+
+        function showManualCheckGuide(url) {
+            document.getElementById('checklist').innerHTML = `
+                <div style="padding: 20px; text-align: center;">
+                    <p style="color: #e74c3c; margin-bottom: 15px;">⚠️ 无法自动检查（CORS限制）</p>
+                    <p style="color: #7f8c8d; margin-bottom: 20px;">请使用以下在线工具手动验证：</p>
+                    <div style="text-align: left;">
+                        <div class="meta-row">
+                            <div class="meta-label">Open Graph</div>
+                            <div class="meta-value">
+                                <a href="https://www.opengraph.xyz/?url=${encodeURIComponent(url)}" target="_blank">
+                                    https://www.opengraph.xyz/
+                                </a>
+                            </div>
+                        </div>
+                        <div class="meta-row">
+                            <div class="meta-label">Schema.org</div>
+                            <div class="meta-value">
+                                <a href="https://validator.schema.org/#url=${encodeURIComponent(url)}" target="_blank">
+                                    https://validator.schema.org/
+                                </a>
+                            </div>
+                        </div>
+                        <div class="meta-row">
+                            <div class="meta-label">Facebook Debugger</div>
+                            <div class="meta-value">
+                                <a href="https://developers.facebook.com/tools/debug/?q=${encodeURIComponent(url)}" target="_blank">
+                                    Facebook Sharing Debugger
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 隐藏其他部分
+            document.getElementById('basic-seo').innerHTML = '';
+            document.getElementById('schema-tags').innerHTML = '';
+            document.getElementById('og-tags').innerHTML = '';
+            document.getElementById('image-preview').innerHTML = '';
+            
+            // 显示测试链接
+            const timestamp = Date.now();
+            const testUrl1 = `${url}?wechat_test=${timestamp}_v1`;
+            const testUrl2 = `${url}?wechat_test=${timestamp}_v2`;
+            document.getElementById('test-links').innerHTML = `
+                <p style="margin-bottom: 15px; color: #7f8c8d; font-size: 13px;">
+                    使用以下带时间戳的URL在微信中测试：
+                </p>
+                <div class="meta-row">
+                    <div class="meta-value">
+                        <a href="${testUrl1}" target="_blank">${testUrl1}</a>
+                    </div>
+                </div>
+                <div class="meta-row">
+                    <div class="meta-value">
+                        <a href="${testUrl2}" target="_blank">${testUrl2}</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 页面加载时自动检查
+        window.addEventListener('load', () => {
+            const urlInput = document.getElementById('url-input');
+            if (urlInput.value) {
+                // 不自动检查，让用户手动点击
+            }
+        });
+    </script>
+</body>
+</html>

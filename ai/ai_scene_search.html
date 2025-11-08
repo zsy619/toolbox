@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI应用场景分析表</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-light: #dbeafe;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark);
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--secondary);
+            font-size: 1.125rem;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary);
+        }
+
+        .filter-select {
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            min-width: 180px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        thead {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        th {
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            background-color: var(--primary);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: var(--primary-light);
+        }
+
+        td {
+            padding: 16px 12px;
+            vertical-align: top;
+            font-size: 0.875rem;
+        }
+
+        .category-header {
+            background-color: #e2e8f0;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--dark);
+        }
+
+        .category-header td {
+            padding: 12px;
+        }
+
+        .number {
+            font-weight: 600;
+            color: var(--primary);
+            width: 40px;
+        }
+
+        .scenario-name {
+            font-weight: 600;
+            width: 200px;
+        }
+
+        .target-audience,
+        .pain-points,
+        .explicit-needs,
+        .implicit-needs,
+        .expectations,
+        .obstacles {
+            width: 300px;
+        }
+
+        .list-item {
+            margin-bottom: 6px;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .list-item:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--secondary);
+            font-size: 0.875rem;
+        }
+
+        .highlight {
+            background-color: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: var(--secondary);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .table-container {
+                border-radius: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI应用场景分析表</h1>
+            <p>全面分析50个AI应用场景的目标人群、痛点、需求、期望与阻碍</p>
+        </div>
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" placeholder="搜索应用场景、目标人群、痛点...">
+            </div>
+            <select class="filter-select" id="categoryFilter">
+                <option value="all">所有分类</option>
+                <option value="内容创作与文案撰写">内容创作与文案撰写</option>
+                <option value="办公与行政效率">办公与行政效率</option>
+                <option value="数据处理与分析">数据处理与分析</option>
+                <option value="研究与学习">研究与学习</option>
+                <option value="设计与多媒体制作">设计与多媒体制作</option>
+                <option value="编程与技术开发">编程与技术开发</option>
+                <option value="特定领域与专业服务">特定领域与专业服务</option>
+                <option value="信息与文件管理">信息与文件管理</option>
+            </select>
+        </div>
+        <div class="stats">
+            <div id="resultsCount">共找到 50 个应用场景</div>
+            <div id="selectedCategory">当前分类: 所有分类</div>
+        </div>
+        <div class="table-container">
+            <table id="scenarioTable">
+                <thead>
+                    <tr>
+                        <th class="number">序号</th>
+                        <th class="scenario-name">应用场景</th>
+                        <th class="target-audience">目标人群</th>
+                        <th class="pain-points">对应痛点</th>
+                        <th class="explicit-needs">显性需求</th>
+                        <th class="implicit-needs">隐性需求</th>
+                        <th class="expectations">期望（动力）</th>
+                        <th class="obstacles">阻碍（阻力）</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- 内容将通过JavaScript动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        <div class="footer">
+            <p>AI应用场景分析表 - 共50个场景 | 数据更新时间: 2025年11月</p>
+        </div>
+    </div>
+    <script>
+        // 应用场景数据
+        const scenarios = [
+            // 内容创作与文案撰写 (1-9)
+            {
+                id: 1,
+                category: "内容创作与文案撰写",
+                name: "营销文案撰写",
+                targetAudience: ["社交媒体运营", "内容创作者", "营销人员"],
+                painPoints: ["创意枯竭", "更新频率快", "效果压力大"],
+                explicitNeeds: ["快速生成不同平台的文案内容", "追踪热点并生成相关选题", "仿写爆款笔记提升流量"],
+                implicitNeeds: ["保持内容的新鲜感与吸引力", "减轻日常更新的创作压力", "提升内容的转化率与互动数据"],
+                expectations: ["利用AI实现'灵感永动机'，随时获得创意", "通过AI批量生产，实现矩阵号运营，最大化流量曝光", "借助AI数据分析能力，复制成功文案模式，提高爆文概率"],
+                obstacles: ["生成内容同质化严重，缺乏品牌独特性和人格化", "对热点理解肤浅，文案流于表面，缺乏深度洞察", "平台算法迭代，AI生成内容可能被降权或限流"]
+            },
+            {
+                id: 2,
+                category: "内容创作与文案撰写",
+                name: "通用文案与文稿撰写",
+                targetAudience: ["内容创作者", "编辑", "作家"],
+                painPoints: ["创作压力大", "灵感不稳定", "质量要求高"],
+                explicitNeeds: ["获得写作灵感和素材", "提升文稿的写作速度", "优化文稿的语言表达"],
+                implicitNeeds: ["克服创作瓶颈与拖延症", "保证输出质量的稳定性", "建立个人或品牌的写作风格"],
+                expectations: ["将AI作为'共同创作者'，突破个人思维局限", "利用AI快速完成初稿，将精力集中于修改和润色，提升整体效率", "通过长期'训练'，让AI模仿自己的文风，成为专属写作助手"],
+                obstacles: ["AI生成内容可能缺乏真情实感和原创性深度", "对专业性强的领域，内容准确性难以保证，需要大量时间核查", "过度依赖可能导致自身写作能力的退化"]
+            },
+            {
+                id: 3,
+                category: "内容创作与文案撰写",
+                name: "方案/项目书/规划文档撰写",
+                targetAudience: ["项目经理", "咨询顾问", "策划人员"],
+                painPoints: ["结构复杂", "专业性要求高", "耗时耗力"],
+                explicitNeeds: ["快速搭建方案框架与结构", "填充专业、可信的内容", "根据不同客户需求定制方案"],
+                implicitNeeds: ["提升方案的专业度与说服力", "降低复杂思考的认知负荷", "在竞争中通过高质量文档脱颖而出"],
+                expectations: ["利用AI快速构建逻辑严谨的框架，确保方案结构完整性", "借助AI的知识库，补充自身专业领域的盲点，提升方案深度", "快速生成多个方案雏形，供客户选择，提高中标率"],
+                obstacles: ["生成的内容可能过于模板化，缺乏针对性的创新解决方案", "涉及公司核心战略或机密数据时，存在数据泄露风险", "对AI的依赖可能导致思维惰性，弱化深度战略思考能力"]
+            },
+            {
+                id: 4,
+                category: "内容创作与文案撰写",
+                name: "报告与总结撰写",
+                targetAudience: ["分析师", "研究人员", "职场人士"],
+                painPoints: ["数据整合复杂", "分析深度要求高", "写作耗时"],
+                explicitNeeds: ["将数据与结论自动转化为文字", "遵循固定的报告格式与规范", "快速生成报告初稿"],
+                implicitNeeds: ["呈现深度洞察而非罗列数据", "节省时间以专注于核心分析", "让报告更易于上级理解和认可"],
+                expectations: ["将AI作为'数据分析助理'，自动完成数据到文字的转换，极大提升效率", "利用AI优化报告语言，使其更符合阅读习惯，提升沟通效果", "确保报告格式规范统一，呈现专业形象"],
+                obstacles: ["AI可能无法理解数据背后的复杂业务逻辑，导致分析结论偏离或浅薄", "生成的语言可能呆板，缺乏报告应有的说服力和影响力", "对原始数据的质量要求极高，垃圾进、垃圾出"]
+            },
+            {
+                id: 5,
+                category: "内容创作与文案撰写",
+                name: "合同、协议、法律文书撰写与修改",
+                targetAudience: ["法务人员", "商务人士"],
+                painPoints: ["法律条款复杂", "专业性强", "修改风险高"],
+                explicitNeeds: ["生成标准合同文本与条款", "检查文本的逻辑漏洞与风险点", "根据特定场景修改条款"],
+                implicitNeeds: ["规避潜在的法律风险", "提升合同撰写的效率以加快业务流程", "确保文书的专业性与严谨性"],
+                expectations: ["利用AI快速生成基础合同文本，节省大量查阅范本的时间", "通过AI进行交叉检查，辅助发现人力可能忽略的条款冲突或漏洞", "快速响应业务需求，支持业务高速发展"],
+                obstacles: ["法律文书责任重大，AI的'幻觉'可能产生致命错误，仍需专家全盘审核", "涉及非标或复杂谈判条款时，AI的灵活性不足", "法律更新快，AI知识库可能存在滞后性"]
+            },
+            {
+                id: 6,
+                category: "内容创作与文案撰写",
+                name: "教学与培训材料撰写",
+                targetAudience: ["教师", "培训师", "教育工作者"],
+                painPoints: ["备课压力大", "内容创作耗时", "创新困难"],
+                explicitNeeds: ["快速生成教案和讲义内容", "将知识点融入有趣的教学场景", "设计课程大纲与培训脚本"],
+                implicitNeeds: ["提升教学内容的吸引力和效果", "减轻备课的重复性劳动负担", "实现教学方法的创新与个性化"],
+                expectations: ["利用AI快速生成标准化教学内容，将教师从重复劳动中解放出来", "借助AI生成案例、故事、互动环节设计，让课堂更生动", "为不同水平的学生快速生成个性化学习材料"],
+                obstacles: ["生成的内容可能不符合教学大纲或考试要求", "缺乏教育温度和因材施教的针对性，可能内容千篇一律", "教师需要花费时间学习和适应与AI协作的新工作流程"]
+            },
+            {
+                id: 7,
+                category: "内容创作与文案撰写",
+                name: "创意内容生成",
+                targetAudience: ["营销人员", "设计师", "AI使用者"],
+                painPoints: ["创意构思困难", "设计耗时", "效果不稳定"],
+                explicitNeeds: ["获得创意灵感和多样化方案", "生成具体的创意文案或设计提示"],
+                implicitNeeds: ["激发创新思维，打破常规", "降低创意工作的门槛与成本", "使产出更具趣味性和传播性"],
+                expectations: ["利用AI进行'头脑风暴'，获得超越常规思维的创意组合", "快速生成大量方案进行筛选，提高创意产出的效率和成功率", "让非设计人员也能快速表达视觉创意"],
+                obstacles: ["创意质量不稳定，大量产出中精品率可能不高", "可能滋生思维的惰性，过度依赖AI而弱化自身的创造力", "版权归属问题模糊，商用存在风险"]
+            },
+            {
+                id: 8,
+                category: "内容创作与文案撰写",
+                name: "文章与笔记优化、提炼与修改",
+                targetAudience: ["编辑", "作者", "学生"],
+                painPoints: ["修改工作繁琐", "重点提取不易", "耗时耗力"],
+                explicitNeeds: ["自动修正语法与措辞错误", "提炼长篇文章的核心要点", "对文稿进行润色与风格优化"],
+                implicitNeeds: ["提升文本的可读性与专业性", "提高信息消化与整理的效率", "确保内容表达精准无误"],
+                expectations: ["将AI作为'超级校对员'，快速提升文稿质量，减少低级错误", "利用AI快速抓取文献、书籍核心思想，提高阅读和研究效率", "统一团队或个人的行文风格，塑造专业品牌形象"],
+                obstacles: ["优化可能流于表面，无法触及深层的逻辑和结构问题", "自动提炼可能丢失原文的细微语境和隐含意义，导致误解", "过度优化可能导致文本失去个人特色"]
+            },
+            {
+                id: 9,
+                category: "内容创作与文案撰写",
+                name: "批量文案生成",
+                targetAudience: ["社交媒体运营", "营销人员"],
+                painPoints: ["批量创作压力大", "质量不稳定", "热点追踪困难"],
+                explicitNeeds: ["一次性生成大量同类型文案", "保持批量产出内容的质量基线"],
+                implicitNeeds: ["实现矩阵化、规模化的内容运营", "维持账号活跃度与流量稳定", "解放人力以专注于策略规划"],
+                expectations: ["通过AI实现内容生产的工业化，以量换量，覆盖更多流量入口", "确保所有账号内容输出质量的下限，避免因人力水平不齐导致的质量波动"],
+                obstacles: ["极易导致内容严重同质化，被平台和用户识别为垃圾内容", "管理海量生成内容本身成为新的负担（发布、审核、数据跟踪）", "难以构建有忠诚度的粉丝社群，因为内容缺乏人格化连接"]
+            },
+            // 办公与行政效率 (10-16)
+            {
+                id: 10,
+                category: "办公与行政效率",
+                name: "会议记录与纪要整理",
+                targetAudience: ["秘书", "行政人员", "管理人员"],
+                painPoints: ["记录不完整", "整理耗时", "多场景记录压力大"],
+                explicitNeeds: ["将录音自动转为文字稿", "自动提炼会议纪要与待办事项"],
+                implicitNeeds: ["确保会议决议和信息的准确传递", "解放人力，使其能更专注于会议本身", "建立可追溯的会议档案"],
+                expectations: ["实现'会后即出纪要'，极大缩短信息流转周期，提升决策和执行效率", "确保会议结论和责任分配被清晰、无歧义地记录，减少推诿和误解"],
+                obstacles: ["在多人讨论、口音、杂音等复杂场景下，转录准确率下降", "难以准确捕捉会议的'弦外之音'和情绪氛围", "涉及敏感信息的会议，存在隐私和安全风险"]
+            },
+            {
+                id: 11,
+                category: "办公与行政效率",
+                name: "电子邮件优化与撰写",
+                targetAudience: ["职场人士", "商务人员"],
+                painPoints: ["邮件写作耗时", "表达不准确"],
+                explicitNeeds: ["快速生成邮件初稿", "优化邮件的语气和用词"],
+                implicitNeeds: ["维护专业、得体的商务形象", "提高沟通效率与准确性", "避免因表述不清产生的误会"],
+                expectations: ["快速处理日常邮件，节省大量时间", "确保对外沟通的专业性，尤其是在跨文化商务场景中避免冒犯"],
+                obstacles: ["生成邮件可能显得过于模板化，缺乏人情味", "对复杂或微妙的沟通情境（如道歉、谈判）处理能力有限"]
+            },
+            {
+                id: 12,
+                category: "办公与行政效率",
+                name: "演示文稿（PPT）设计与制作",
+                targetAudience: ["学生", "职场人士", "培训师"],
+                painPoints: ["设计耗时", "内容组织困难", "制作压力大"],
+                explicitNeeds: ["自动生成PPT文案与大纲", "提供排版与设计建议"],
+                implicitNeeds: ["制作出视觉精美、逻辑清晰的演示文档", "节省在美化与格式调整上的时间", "提升演讲的说服力与表现力"],
+                expectations: ["将构思直接转化为高质量视觉演示，极大降低制作门槛和时间成本", "获得专业级的版式和设计建议，提升幻灯片的视觉冲击力"],
+                obstacles: ["生成的设计可能缺乏独特性，容易'撞衫'", "对复杂逻辑和图表的可视化支持仍然较弱", "需要人工进行深度的内容逻辑梳理和校对"]
+            },
+            {
+                id: 13,
+                category: "办公与行政效率",
+                name: "文档整理与归档",
+                targetAudience: ["学生", "研究人员", "办公人员"],
+                painPoints: ["信息碎片化", "整理耗时", "查找困难"],
+                explicitNeeds: ["将零散信息结构化归纳", "快速检索和定位所需文档"],
+                implicitNeeds: ["构建个人知识体系", "减少信息遗忘和丢失", "提高学习与工作效率"],
+                expectations: ["打造'第二大脑'，实现个人知识的数字化和体系化，随时调用", "通过智能关联，发现不同知识间的隐藏联系，激发创新"],
+                obstacles: ["前期整理和录入规则设定需要投入时间", "AI的分类和理解可能不符合个人习惯，需要人工校正"]
+            },
+            {
+                id: 14,
+                category: "办公与行政效率",
+                name: "行政与财务流程处理",
+                targetAudience: ["行政人员", "财务人员", "员工"],
+                painPoints: ["流程繁琐", "重复性工作多", "易出错"],
+                explicitNeeds: ["自动识别和归类发票信息", "辅助完成标准化流程审批"],
+                implicitNeeds: ["杜绝人为操作的错误", "将人力从重复性事务中解放出来", "加速内部运营流程"],
+                expectations: ["实现流程自动化，实现'零错误'和'无纸化'，显著降低运营成本", "让员工从事更高价值的工作，提升工作满意度和人效"],
+                obstacles: ["对非标准票据或异常情况的处理能力不足", "与现有财务、OA系统的集成可能需要技术开发和成本", "面临流程变革带来的组织阻力"]
+            },
+            {
+                id: 15,
+                category: "办公与行政效率",
+                name: "数据整理与表格制作",
+                targetAudience: ["办公人员", "分析师", "财务人员"],
+                painPoints: ["表格制作繁琐", "公式复杂", "易出错"],
+                explicitNeeds: ["自动生成和填充表格", "协助编写复杂公式"],
+                implicitNeeds: ["确保数据计算的准确性", "提升数据处理与分析的效率", "让报告中的数据呈现更直观"],
+                expectations: ["用自然语言指令即可完成复杂表格和公式，极大降低学习成本", "减少人为计算错误，保证数据的准确性和可靠性"],
+                obstacles: ["对复杂、多步骤的数据处理逻辑理解可能出错", "生成的结果仍需人工进行逻辑和业务层面的校验"]
+            },
+            {
+                id: 16,
+                category: "办公与行政效率",
+                name: "计划制定",
+                targetAudience: ["管理者", "个人用户", "旅行者"],
+                painPoints: ["规划不科学", "信息搜集繁琐", "执行困难"],
+                explicitNeeds: ["快速生成计划草案", "整合多方信息（如行程、资源）"],
+                implicitNeeds: ["制定出更周全、高效的方案", "减少规划阶段的决策疲劳", "确保计划的可执行性与落地"],
+                expectations: ["快速获得一个考虑周全的计划蓝本，在此基础上微调即可，省时省力", "整合实时信息（如天气、票价），生成动态优化的计划"],
+                obstacles: ["计划的'个性化'程度不足，可能忽略某些特定偏好或约束条件", "现实中的突发情况可能打乱AI生成的精密计划"]
+            },
+            // 数据处理与分析 (17-23)
+            {
+                id: 17,
+                category: "数据处理与分析",
+                name: "数据处理与清洗",
+                targetAudience: ["数据分析师", "办公人员"],
+                painPoints: ["数据量大", "处理复杂", "易出错"],
+                explicitNeeds: ["自动化完成数据清洗工作", "识别并处理异常数据"],
+                implicitNeeds: ["为后续分析提供高质量、干净的数据基础", "提高数据分析的整体效率与可靠性"],
+                expectations: ["将数据科学家从最耗时、最枯燥的工作中解放出来", "建立标准化、可复用的数据预处理流程，保证数据质量"],
+                obstacles: ["清洗规则需要明确定义，对于模糊、复杂的脏数据模式，AI可能处理不佳", "错误的清洗可能引入新的偏差，影响最终分析结果"]
+            },
+            {
+                id: 18,
+                category: "数据处理与分析",
+                name: "市场与行业调研分析",
+                targetAudience: ["市场人员", "产品经理", "研究人员"],
+                painPoints: ["信息搜集繁琐", "分析复杂", "工作量大"],
+                explicitNeeds: ["快速搜集并整合市场信息", "生成调研分析报告"],
+                implicitNeeds: ["准确把握市场动态与趋势", "为战略决策提供可靠依据", "在竞争中保持信息优势"],
+                expectations: ["实现'一键式'市场扫描，快速了解一个新行业或市场", "7x24小时监控市场动态，及时发现机会与威胁"],
+                obstacles: ["信息的真实性和可靠性需要交叉验证，AI可能无法辨别虚假信息", "深度洞察和趋势判断仍需人类的行业经验和商业嗅觉"]
+            },
+            {
+                id: 19,
+                category: "数据处理与分析",
+                name: "业务与数据分析报告",
+                targetAudience: ["业务分析师", "数据分析师"],
+                painPoints: ["分析复杂", "决策支持需求强", "写作耗时"],
+                explicitNeeds: ["将数据结果自动转化为业务洞察", "生成易于理解的报告陈述"],
+                implicitNeeds: ["凸显数据分析的商业价值", "促进数据在决策中的实际应用", "提升个人在组织中的影响力"],
+                expectations: ["让数据'会说话'，自动生成有说服力的叙事，驱动业务行动", "大幅缩短从数据到决策的路径，提升组织敏捷性"],
+                obstacles: ["AI可能错误解读数据，生成误导性的结论或建议", "报告可能流于形式，缺乏对业务背景的深度理解，建议不具操作性"]
+            },
+            {
+                id: 20,
+                category: "数据处理与分析",
+                name: "信息搜索与归总",
+                targetAudience: ["研究人员", "学生", "管理者"],
+                painPoints: ["信息过载", "检索效率低", "决策效率低"],
+                explicitNeeds: ["从海量信息中快速找到关键内容", "将搜索结果归纳总结"],
+                implicitNeeds: ["节省查阅资料的时间成本", "获得全面、不偏颇的信息视角", "支撑快速、准确的判断与决策"],
+                expectations: ["获得一个'超级智能搜索引擎'，直接获取答案而非一堆链接", "打破信息茧房，获得多元化的信息视角"],
+                obstacles: ["存在'幻觉'，生成不实信息，可信度挑战", "信息源的质量和偏见会影响最终结论"]
+            },
+            {
+                id: 21,
+                category: "数据处理与分析",
+                name: "竞对调研与市场洞察",
+                targetAudience: ["市场分析师", "策略师", "产品经理"],
+                painPoints: ["信息噪音大", "趋势判断困难"],
+                explicitNeeds: ["监控竞争对手的动态", "分析行业潜在机会与风险"],
+                implicitNeeds: ["保持企业的竞争优势", "预见并响应市场变化", "驱动产品与服务的创新"],
+                expectations: ["建立自动化竞争情报系统，实现对竞争对手的实时跟踪", "通过大数据分析，发现潜在的市场颠覆性机会"],
+                obstacles: ["公开信息的局限性，难以获取核心机密信息", "趋势预测具有不确定性，AI模型可能误判"]
+            },
+            {
+                id: 22,
+                category: "数据处理与分析",
+                name: "风险评估与政策依据查找",
+                targetAudience: ["风控人员", "合规官"],
+                painPoints: ["政策变化快", "查找困难"],
+                explicitNeeds: ["快速定位相关政策和法规条文", "识别业务中的潜在合规风险"],
+                implicitNeeds: ["确保企业运营的合法合规", "规避重大的财务与声誉损失", "建立稳健的内部控制体系"],
+                expectations: ["打造'合规雷达'，实时预警政策变动及相关风险", "快速完成合规性审查，支持业务快速创新而不越雷池"],
+                obstacles: ["法律法规的解释存在灰色地带，AI难以把握", "知识库更新不及时可能导致依据过时"]
+            },
+            {
+                id: 23,
+                category: "数据处理与分析",
+                name: "调研问卷设计与分析",
+                targetAudience: ["市场研究人员", "培训师"],
+                painPoints: ["问卷设计专业", "数据分析复杂"],
+                explicitNeeds: ["辅助设计科学有效的问卷问题", "自动分析问卷结果并生成结论"],
+                implicitNeeds: ["获得真实、有价值的用户反馈", "提升调研项目的专业度与效率", "深度理解目标用户的需求与行为"],
+                expectations: ["降低问卷设计的专业门槛，避免引导性、歧义性问题", "实现调研结果的即时分析，快速获得决策依据"],
+                obstacles: ["问题设计仍需结合业务目标，AI可能无法完全理解调研背后的深层目的", "对开放题的文本分析可能不够精准，丢失关键情感信息"]
+            },
+            // 研究与学习 (24-29)
+            {
+                id: 24,
+                category: "研究与学习",
+                name: "专业知识学习与资料收集",
+                targetAudience: ["学习者", "职场人士", "技术人员"],
+                painPoints: ["学习曲线陡峭", "知识体系复杂", "时间有限"],
+                explicitNeeds: ["快速获取某个领域的结构化知识", "获得高质量的学习资料推荐"],
+                implicitNeeds: ["加速个人成长与职业晋升", "在项目中快速上手，解决问题", "建立跨领域知识背景，增强竞争力"],
+                expectations: ["拥有一个'随身领域专家'，随时解答疑问，提供学习路径", "快速实现知识跨界，成为'T型人才'"],
+                obstacles: ["知识可能碎片化，缺乏系统性和深度", "可能存在知识错误，需要与权威资料交叉核对"]
+            },
+            {
+                id: 25,
+                category: "研究与学习",
+                name: "研究与调研（深度研究、文献综述）",
+                targetAudience: ["学者", "研究人员", "分析师"],
+                painPoints: ["研究深度要求高", "耗时耗力", "信息整合困难"],
+                explicitNeeds: ["完成深度的文献检索与综述", "提供相关的研究思路与视角"],
+                implicitNeeds: ["产出具有创新性的研究成果", "确保研究的全面性与前沿性", "提升学术或行业影响力"],
+                expectations: ["极大地缩短文献调研时间，站在巨人的肩膀上更快地找到研究突破口", "通过交叉关联，发现前人未注意到的研究空白"],
+                obstacles: ["对文献质量的判断力不足，可能引入低质量参考文献", "真正的理论创新仍需要研究者的创造性思维，AI主要是辅助"]
+            },
+            {
+                id: 26,
+                category: "研究与学习",
+                name: "知识体系搭建与管理",
+                targetAudience: ["学习者", "研究者"],
+                painPoints: ["知识整合困难", "体系构建复杂"],
+                explicitNeeds: ["将零散知识点连接成知识网络", "可视化呈现知识结构"],
+                implicitNeeds: ["形成对领域的系统性理解", "实现知识的长期保留与有效应用", "为创新奠定坚实的知识基础"],
+                expectations: ["构建可视化的'个人知识图谱'，清晰看到知识间的关联，促进理解与迁移", "让知识不再是孤岛，而是能够产生复利效应的网络"],
+                obstacles: ["前期构建需要投入大量精力进行'投喂'和整理", "AI的理解可能与个人的认知结构不符，需要不断调整"]
+            },
+            {
+                id: 27,
+                category: "研究与学习",
+                name: "读书与内容提炼",
+                targetAudience: ["学生", "读者", "研究人员"],
+                painPoints: ["重点提取困难", "理解耗时", "阅读效率低"],
+                explicitNeeds: ["快速提炼书籍或长文的中心思想与要点"],
+                implicitNeeds: ["提高信息吸收的效率", "抓住核心观点，避免迷失在细节中", "便于后续的复习与引用"],
+                expectations: ["实现'速读'与'精读'的结合，快速掌握大量文献的核心", "制作高质量的读书笔记和摘要，方便知识管理"],
+                obstacles: ["提炼可能丢失作者的论证过程和精妙之处，导致理解肤浅", "不同的人对'重点'的理解不同，AI的提炼可能不符合个人需求"]
+            },
+            {
+                id: 28,
+                category: "研究与学习",
+                name: "学术与科研支持",
+                targetAudience: ["科研人员", "学者", "研究生"],
+                painPoints: ["申报竞争激烈", "创新压力大", "材料准备复杂"],
+                explicitNeeds: ["寻找创新性的研究课题方向", "辅助撰写项目申报材料"],
+                implicitNeeds: ["提高项目中标和论文录用的成功率", "在学术生涯中获得关键性突破", "争取更多的科研资源与经费"],
+                expectations: ["利用AI进行文献计量学分析，发现新兴前沿和潜在的合作者", "提升本子写作效率和质量，在激烈的资源竞争中胜出"],
+                obstacles: ["研究选题可能趋于热门和同质化，缺乏真正的冷门颠覆性创新", "申报材料可能显得模板化，难以在专家评审中脱颖而出"]
+            },
+            {
+                id: 29,
+                category: "研究与学习",
+                name: "作业检查与辅导",
+                targetAudience: ["家长", "教师"],
+                painPoints: ["检查工作繁琐", "耗时", "容易出错"],
+                explicitNeeds: ["自动检查作业答案的正确性"],
+                implicitNeeds: ["确保孩子学习基础扎实", "减轻家长和教师的辅导负担", "及时发现问题并纠正"],
+                expectations: ["获得一个不知疲倦的'家庭教师'，提供即时反馈", "让家长从检查作业的冲突中解脱出来，改善亲子关系"],
+                obstacles: ["可能只关注答案对错，无法理解孩子的解题思路和思维过程", "过度依赖可能削弱学生的自主检查和深度学习能力"]
+            },
+            // 设计与多媒体制作 (30-33)
+            {
+                id: 30,
+                category: "设计与多媒体制作",
+                name: "图片处理与优化",
+                targetAudience: ["设计师", "摄影师", "营销人员"],
+                painPoints: ["设计软件复杂", "操作耗时", "技术门槛高"],
+                explicitNeeds: ["通过指令完成图片修改、优化或生成", "扩展图片内容或改变风格"],
+                implicitNeeds: ["降低专业设计工具的使用门槛", "快速实现创意视觉表达", "节省雇佣专业设计师的成本"],
+                expectations: ["'所想即所得'，将脑海中的画面快速变为高质量的视觉资产", "完成以前需要高超PS技术才能实现的效果，democratize design"],
+                obstacles: ["生成结果的随机性大，需要反复生成和筛选，时间成本可能不低", "版权和肖像权等法律风险不清晰", "对细节的控制力不如专业软件"]
+            },
+            {
+                id: 31,
+                category: "设计与多媒体制作",
+                name: "视频剪辑与制作",
+                targetAudience: ["视频创作者", "营销人员"],
+                painPoints: ["视频编辑软件复杂", "制作耗时"],
+                explicitNeeds: ["自动化完成视频剪辑的部分流程", "生成视频脚本或字幕"],
+                implicitNeeds: ["提高视频内容的生产效率", "使个人或小团队也能产出高质量视频", "快速响应热点进行视频创作"],
+                expectations: ["实现'一键成片'，大幅降低视频制作的门槛和周期", "自动生成字幕，节省大量繁琐的听打时间"],
+                obstacles: ["自动化剪辑的创意性和节奏感可能不如人类剪辑师", "对复杂叙事和特定艺术风格的支持有限"]
+            },
+            {
+                id: 32,
+                category: "设计与多媒体制作",
+                name: "图形与原型设计",
+                targetAudience: ["设计师", "产品经理"],
+                painPoints: ["创意设计困难", "客户要求多样", "修改频繁"],
+                explicitNeeds: ["根据描述生成设计稿或原型图", "提供多个设计风格方案供选择"],
+                implicitNeeds: ["加速设计迭代与沟通效率", "更直观地呈现想法，降低沟通成本", "探索更多创意可能性"],
+                expectations: ["快速进行创意验证，在投入大量开发资源前看到可视化的原型", "激发团队灵感，通过快速生成多种方案来碰撞出最佳设计"],
+                obstacles: ["生成的设计可能不够精细，无法直接用于开发", "与专业设计工具（如Figma, Sketch）的工作流整合仍在早期"]
+            },
+            {
+                id: 33,
+                category: "设计与多媒体制作",
+                name: "视觉化设计",
+                targetAudience: ["设计师", "教育工作者"],
+                painPoints: ["视觉表达困难", "设计耗时"],
+                explicitNeeds: ["将抽象概念或文字描述转化为直观的图表或图像"],
+                implicitNeeds: ["增强信息传递的效果和感染力", "使教学内容更生动有趣", "提升作品的视觉专业度"],
+                expectations: ["让复杂的概念和信息变得一目了然，提升沟通和教学效率", "为PPT、文章等快速配图，提升整体质量"],
+                obstacles: ["生成图像与期望有差距，需要多次迭代提示词", "对抽象概念的视觉化可能不准确或引发歧义"]
+            },
+            // 编程与技术开发 (34-39)
+            {
+                id: 34,
+                category: "编程与技术开发",
+                name: "代码编写与调试",
+                targetAudience: ["程序员", "开发者"],
+                painPoints: ["编码复杂", "调试困难", "Bug多"],
+                explicitNeeds: ["根据需求自动生成代码片段", "帮助查找和修复代码错误"],
+                implicitNeeds: ["提高开发效率，缩短项目周期", "降低代码错误率，提升软件质量", "减轻开发者的心智负担"],
+                expectations: ["将AI作为'结对编程'伙伴，实时提供代码建议，减少敲键和查文档时间", "快速定位隐蔽的Bug，减少调试的痛苦"],
+                obstacles: ["生成的代码可能存在安全漏洞、性能问题或理解错误", "可能导致开发者对底层原理和代码细节的理解退化"]
+            },
+            {
+                id: 35,
+                category: "编程与技术开发",
+                name: "软件架构与系统设计",
+                targetAudience: ["软件架构师", "开发者"],
+                painPoints: ["设计复杂", "考虑因素多"],
+                explicitNeeds: ["辅助设计系统架构图", "评估架构方案的优缺点"],
+                implicitNeeds: ["构建更稳定、可扩展的系统", "规避技术选型与设计上的风险", "提升团队协作开发的效率"],
+                expectations: ["利用AI的广博知识，评估不同技术栈和架构模式的优劣，做出更优决策", "生成标准化的设计文档，统一团队认知"],
+                obstacles: ["架构设计需要深厚的经验和全局观，AI的建议可能片面或不切实际", "无法理解特定的业务约束和非功能性需求（如合规性）"]
+            },
+            {
+                id: 36,
+                category: "编程与技术开发",
+                name: "跨语言编程与代码转换",
+                targetAudience: ["程序员", "开发者"],
+                painPoints: ["多语言学习成本高", "转换困难"],
+                explicitNeeds: ["将代码从一种语言转换为另一种语言"],
+                implicitNeeds: ["快速复用现有代码资产", "适应多技术栈的项目需求", "降低学习新语言的时间成本"],
+                expectations: ["无缝迁移遗留系统或库，延长其生命周期", "在需要时快速为不同平台（如Web, Mobile）生成代码"],
+                obstacles: ["转换后的代码可能不符合目标语言的最佳实践，显得生硬或低效", "复杂逻辑或语言特定特性的转换可能出错"]
+            },
+            {
+                id: 37,
+                category: "编程与技术开发",
+                name: "代码理解与检索",
+                targetAudience: ["程序员", "开发者"],
+                painPoints: ["代码检索困难", "理解耗时"],
+                explicitNeeds: ["快速定位代码库中的特定功能代码", "解释复杂代码段的功能"],
+                implicitNeeds: ["加速熟悉新项目代码的进程", "提高代码维护和重构的效率", "促进团队间的知识共享"],
+                expectations: ["新成员快速上手，减少项目 onboarding 时间", "轻松理解和维护他人编写的、缺乏注释的'祖传代码'"],
+                obstacles: ["对大型、复杂项目代码的理解可能不完整或不准确", "解释可能流于表面，无法揭示深层的设计意图"]
+            },
+            {
+                id: 38,
+                category: "编程与技术开发",
+                name: "技术学习",
+                targetAudience: ["工程师", "技术人员"],
+                painPoints: ["技术资料复杂", "学习曲线陡峭"],
+                explicitNeeds: ["快速解读技术文档与数据手册", "提供示例代码与应用场景"],
+                implicitNeeds: ["缩短项目前期的技术调研时间", "确保技术方案的正确性与最优性"],
+                expectations: ["拥有一个'永不疲倦的技术导师'，随时解答技术细节问题", "快速获得针对特定芯片/工具的实践代码，加速开发"],
+                obstacles: ["知识可能过时或不准确，尤其对于最新发布的技术", "缺乏动手实践，单纯问答式学习效果有限"]
+            },
+            {
+                id: 39,
+                category: "编程与技术开发",
+                name: "技术测试与鲁棒性优化",
+                targetAudience: ["程序员", "测试人员"],
+                painPoints: ["代码健壮性难保证", "测试复杂"],
+                explicitNeeds: ["自动生成测试用例", "分析代码的潜在脆弱点"],
+                implicitNeeds: ["提升软件的稳定性和用户体验", "构建自动化的质量保障流程", "发现并预防隐蔽的深层缺陷"],
+                expectations: ["实现测试用例的自动生成，提高测试覆盖率，尤其针对边界条件", "进行代码'体检'，提前发现潜在的内存泄漏、并发等问题"],
+                obstacles: ["生成的测试用例可能冗余或无效，需要人工筛选", "对复杂业务逻辑的测试场景构造能力有限"]
+            },
+            // 特定领域与专业服务 (40-46)
+            {
+                id: 40,
+                category: "特定领域与专业服务",
+                name: "战略规划与汇报材料",
+                targetAudience: ["政府官员", "企业高管"],
+                painPoints: ["文档要求高", "压力大", "时间紧迫"],
+                explicitNeeds: ["撰写符合规范的宏观规划文档", "准备各类高规格的汇报材料"],
+                implicitNeeds: ["展现战略眼光与领导能力", "获得上级或相关方的认可与支持", "确保组织发展方向的正确性"],
+                expectations: ["快速整合内外部信息，生成数据支撑、逻辑严谨的战略草案", "提升汇报材料的质量和准备速度，在重要场合自信呈现"],
+                obstacles: ["战略需要真正的洞察和决断力，AI生成的内容可能流于空泛", "高度敏感的内容对安全性要求极高"]
+            },
+            {
+                id: 41,
+                category: "特定领域与专业服务",
+                name: "产品规划与设计",
+                targetAudience: ["产品经理", "项目经理"],
+                painPoints: ["规划复杂", "需求描述细节易遗漏"],
+                explicitNeeds: ["结构化地梳理产品需求", "生成清晰的产品文档"],
+                implicitNeeds: ["精准传递需求，减少开发误解", "推动产品方案在团队内达成共识", "确保产品按预期目标顺利上线"],
+                expectations: ["将模糊的产品想法快速转化为结构化的PRD，对齐团队认知", "利用AI进行竞品分析、用户画像补充，完善产品决策依据"],
+                obstacles: ["对市场、用户的深度理解仍需产品经理把握，AI仅是工具", "生成的需求可能过于理想化，忽略技术实现难度或商业约束"]
+            },
+            {
+                id: 42,
+                category: "特定领域与专业服务",
+                name: "人才招聘与简历筛选",
+                targetAudience: ["HR", "招聘人员"],
+                painPoints: ["简历信息提取耗时", "易遗漏"],
+                explicitNeeds: ["自动解析简历并提取关键信息", "初步匹配岗位与候选人"],
+                implicitNeeds: ["提升招聘效率，快速锁定人才", "减少主观偏见，提升招聘公平性", "优化候选人体验"],
+                expectations: ["实现简历的批量自动筛选，从海量申请中快速找到潜在匹配者", "基于数据而非直觉进行人岗匹配，提高招聘精准度"],
+                obstacles: ["可能因算法偏见（Bias）过滤掉有潜力的非标准简历", "无法评估候选人的软技能、文化契合度等无形特质"]
+            },
+            {
+                id: 43,
+                category: "特定领域与专业服务",
+                name: "园区规划与尽职调查",
+                targetAudience: ["规划师", "投资人员", "政府官员"],
+                painPoints: ["专业性强", "涉及面广", "内容要求严谨"],
+                explicitNeeds: ["生成专业的规划方案或尽调报告"],
+                implicitNeeds: ["确保项目的可行性与投资安全", "满足政策法规的审查要求", "展现专业机构的能力与信誉"],
+                expectations: ["快速生成专业、全面的方案和报告框架，提升项目推进效率", "整合多维度数据（地理、经济、人口），进行更科学的分析"],
+                obstacles: ["实地考察和人际沟通获得的'隐性知识'无法被AI替代", "最终决策责任重大，AI输出仅为参考，需专家负全责"]
+            },
+            {
+                id: 44,
+                category: "特定领域与专业服务",
+                name: "政府与公共事务",
+                targetAudience: ["企业投标人员"],
+                painPoints: ["信息分散", "时效性强"],
+                explicitNeeds: ["监控和汇总发布的招投标信息"],
+                implicitNeeds: ["抓住商业机会，扩大市场份额", "避免因信息滞后而错失良机"],
+                expectations: ["建立信息优势，不错过任何潜在商机", "节省人工搜寻信息的时间，专注于投标策略本身"],
+                obstacles: ["信息来源的权威性和完整性无法完全保证", "关键的'关系'和'人脉'信息无法通过公开渠道获取"]
+            },
+            {
+                id: 45,
+                category: "特定领域与专业服务",
+                name: "通信与网络优化",
+                targetAudience: ["通信工程师"],
+                painPoints: ["技术复杂", "数据处理量大"],
+                explicitNeeds: ["分析网络数据，提出优化建议"],
+                implicitNeeds: ["保障网络服务的质量与稳定", "提升资源利用效率，降低成本"],
+                expectations: ["处理海量网络数据，发现人工难以察觉的优化点和故障隐患", "实现网络运维的智能化、预测性维护"],
+                obstacles: ["优化建议需要在实际复杂网络环境中验证，可能产生意外影响", "对极端情况或突发故障的应对能力有限"]
+            },
+            {
+                id: 46,
+                category: "特定领域与专业服务",
+                name: "专业咨询与解读",
+                targetAudience: ["宗教学者", "法务人员", "咨询顾问"],
+                painPoints: ["理解困难", "背景知识要求高", "问题多样"],
+                explicitNeeds: ["提供专业领域的知识解答与解读"],
+                implicitNeeds: ["为用户提供可靠的精神或法律指引", "提升咨询服务的效率与覆盖范围", "建立专业权威的形象"],
+                expectations: ["作为初级咨询的过滤器，解答常见问题，解放专家资源", "提供7x24小时的即时咨询服务，提升用户满意度"],
+                obstacles: ["在严肃的法律、医疗、精神领域，错误的建议可能带来严重后果", "无法提供基于共情和信任的深度咨询服务"]
+            },
+            // 信息与文件管理 (47-50)
+            {
+                id: 47,
+                category: "信息与文件管理",
+                name: "信息萃取与格式化输出",
+                targetAudience: ["行业研究员", "产品经理", "办公人员"],
+                painPoints: ["信息搜集繁琐", "格式统一困难"],
+                explicitNeeds: ["从复杂信息源中提取关键数据", "按照指定格式（如表格）输出"],
+                implicitNeeds: ["实现信息处理的自动化流水线", "确保信息交付物的规范与统一", "为决策提供即时、结构化的数据支持"],
+                expectations: ["将非结构化信息（网页、报告）自动转化为结构化的数据，直接用于分析", "实现报告、表格的自动生成，确保格式完美统一"],
+                obstacles: ["对来源复杂、格式混乱的信息，提取准确率会下降", "需要明确定义需要提取的数据字段和格式，泛化能力有限"]
+            },
+            {
+                id: 48,
+                category: "信息与文件管理",
+                name: "文件格式转换与排版",
+                targetAudience: ["办公人员", "记者", "学生"],
+                painPoints: ["排版工作繁琐", "转录耗时", "整理繁琐"],
+                explicitNeeds: ["实现不同文件格式间的自动转换", "自动化完成文档排版"],
+                implicitNeeds: ["打破信息孤岛，实现内容无缝流转", "追求文档的视觉规范与专业美感", "极致地提升办公效率"],
+                expectations: ["实现真正的'一站式'文档处理，节省在不同软件间切换和调整的时间", "获得媲美专业出版的排版效果，提升文档品质"],
+                obstacles: ["复杂版式（如学术论文、书籍）的转换和排版效果可能不理想", "转换过程中可能丢失原始格式或引入新的错误"]
+            },
+            {
+                id: 49,
+                category: "信息与文件管理",
+                name: "云存储与文件管理",
+                targetAudience: ["个人用户", "企业用户"],
+                painPoints: ["文件管理混乱", "查找困难"],
+                explicitNeeds: ["智能分类和 tagging 文件", "快速精准地搜索文件"],
+                implicitNeeds: ["构建整洁、有序的数字工作环境", "防止重要文件的丢失与损坏", "实现团队文件的协同与共享"],
+                expectations: ["实现'文件找你'，而非'你找文件'，彻底告别文件混乱", "基于内容而不仅仅是文件名的智能搜索，精准定位所需"],
+                obstacles: ["隐私担忧，是否愿意将全部文件交给AI管理", "分类标签可能不符合个人心智模型，需要人工干预调整"]
+            },
+            {
+                id: 50,
+                category: "信息与文件管理",
+                name: "工作流拆解与优化",
+                targetAudience: ["流程优化师", "管理者"],
+                painPoints: ["流程分析复杂", "优化困难"],
+                explicitNeeds: ["可视化呈现现有工作流程", "识别流程中的瓶颈与浪费"],
+                implicitNeeds: ["实现降本增效的运营目标", "提升团队协作的顺畅度与幸福感", "构建持续优化和改进的企业文化"],
+                expectations: ["客观、数据化地诊断组织效率问题，找到核心优化点", "设计更优的自动化工作流，提升整体运营效率"],
+                obstacles: ["流程涉及的人际关系、部门墙等软性因素，AI难以分析和解决", "变革可能触及既有利益，推行阻力大"]
+            }
+        ];
+
+        // 初始化表格
+        function initializeTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            let currentCategory = '';
+
+            scenarios.forEach(scenario => {
+                // 添加分类标题
+                if (scenario.category !== currentCategory) {
+                    currentCategory = scenario.category;
+                    const categoryRow = document.createElement('tr');
+                    categoryRow.className = 'category-header';
+                    categoryRow.innerHTML = `<td colspan="8">${currentCategory}</td>`;
+                    tableBody.appendChild(categoryRow);
+                }
+
+                // 添加场景行
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="number">${scenario.id}</td>
+                    <td class="scenario-name">${scenario.name}</td>
+                    <td class="target-audience">${scenario.targetAudience.map(item => `<div class="list-item">${item}</div>`).join('')}</td>
+                    <td class="pain-points">${scenario.painPoints.map(item => `<div class="list-item">${item}</div>`).join('')}</td>
+                    <td class="explicit-needs">${scenario.explicitNeeds.map(item => `<div class="list-item">${item}</div>`).join('')}</td>
+                    <td class="implicit-needs">${scenario.implicitNeeds.map(item => `<div class="list-item">${item}</div>`).join('')}</td>
+                    <td class="expectations">${scenario.expectations.map(item => `<div class="list-item">${item}</div>`).join('')}</td>
+                    <td class="obstacles">${scenario.obstacles.map(item => `<div class="list-item">${item}</div>`).join('')}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            updateStats();
+        }
+
+        // 搜索功能
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+
+            const tableBody = document.getElementById('tableBody');
+            const rows = tableBody.getElementsByTagName('tr');
+            let visibleCount = 0;
+            let currentCategory = '';
+            let categoryRow = null;
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+
+                // 处理分类行
+                if (row.classList.contains('category-header')) {
+                    currentCategory = row.cells[0].textContent;
+                    categoryRow = row;
+                    row.style.display = 'none'; // 默认隐藏分类行
+                    continue;
+                }
+
+                // 处理数据行
+                const scenarioName = row.cells[1].textContent.toLowerCase();
+                const targetAudience = row.cells[2].textContent.toLowerCase();
+                const painPoints = row.cells[3].textContent.toLowerCase();
+                const explicitNeeds = row.cells[4].textContent.toLowerCase();
+                const implicitNeeds = row.cells[5].textContent.toLowerCase();
+                const expectations = row.cells[6].textContent.toLowerCase();
+                const obstacles = row.cells[7].textContent.toLowerCase();
+
+                const matchSearch = !searchTerm ||
+                    scenarioName.includes(searchTerm) ||
+                    targetAudience.includes(searchTerm) ||
+                    painPoints.includes(searchTerm) ||
+                    explicitNeeds.includes(searchTerm) ||
+                    implicitNeeds.includes(searchTerm) ||
+                    expectations.includes(searchTerm) ||
+                    obstacles.includes(searchTerm);
+
+                const matchCategory = categoryFilter === 'all' || currentCategory === categoryFilter;
+
+                if (matchSearch && matchCategory) {
+                    row.style.display = '';
+                    visibleCount++;
+
+                    // 显示对应的分类行
+                    if (categoryRow) {
+                        categoryRow.style.display = '';
+                    }
+
+                    // 高亮搜索词
+                    if (searchTerm) {
+                        highlightText(row, searchTerm);
+                    }
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+
+            updateStats(visibleCount, categoryFilter);
+        }
+
+        // 高亮文本
+        function highlightText(row, searchTerm) {
+            const cells = row.cells;
+
+            for (let i = 1; i < cells.length; i++) {
+                const cell = cells[i];
+                const originalHTML = cell.innerHTML;
+                const regex = new RegExp(`(${searchTerm})`, 'gi');
+                const highlightedHTML = originalHTML.replace(regex, '<span class="highlight">$1</span>');
+                cell.innerHTML = highlightedHTML;
+            }
+        }
+
+        // 更新统计信息
+        function updateStats(visibleCount = scenarios.length, category = '所有分类') {
+            document.getElementById('resultsCount').textContent = `共找到 ${visibleCount} 个应用场景`;
+            document.getElementById('selectedCategory').textContent = `当前分类: ${category}`;
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeTable();
+
+            // 搜索事件监听
+            document.getElementById('searchInput').addEventListener('input', performSearch);
+            document.getElementById('categoryFilter').addEventListener('change', performSearch);
+        });
+    </script>
+</body>
+
+</html>

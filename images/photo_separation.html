@@ -520,6 +520,7 @@
             // 应用状态
             var appState = {
                 originalImage: null,
+                originalFileName: '',
                 splitType: 'vertical',
                 splitPieces: [],
                 currentStep: 1
@@ -596,6 +597,9 @@
                     showError('图片大小不能超过3MB');
                     return;
                 }
+
+                // 保存原始文件名
+                appState.originalFileName = file.name.replace(/\.[^/.]+$/, '');
 
                 // 显示文件信息
                 $('#fileInfo').show();
@@ -855,7 +859,7 @@
 
                             var a = document.createElement('a');
                             a.href = img.src;
-                            a.download = 'piece_' + (index + 1) + '.jpg';
+                            a.download = appState.originalFileName + '_' + (index + 1) + '.jpg';
                             document.body.appendChild(a);
                             a.click();
                             document.body.removeChild(a);
@@ -907,7 +911,7 @@
 
                     // 将Canvas转为Blob并添加到ZIP
                     canvas.toBlob(function (blob) {
-                        folder.file("piece_" + (i + 1) + ".png", blob);
+                        folder.file(appState.originalFileName + "_" + (i + 1) + ".png", blob);
                         completed++;
 
                         // 更新进度
