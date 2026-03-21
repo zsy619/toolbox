@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web3梦境解析 - 周公解梦AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a14 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 背景动画 */
+        .background-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+
+            33% {
+                transform: translateY(-30px) translateX(30px) rotate(120deg);
+            }
+
+            66% {
+                transform: translateY(20px) translateX(-20px) rotate(240deg);
+            }
+
+            100% {
+                transform: translateY(0) translateX(0) rotate(360deg);
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(64, 224, 208, 0.3);
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: #40e0d0;
+            filter: drop-shadow(0 0 10px rgba(64, 224, 208, 0.5));
+        }
+
+        .logo-text h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(90deg, #40e0d0, #ff8c00, #ff0080);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .logo-text p {
+            font-size: 0.9rem;
+            color: #a0a0e0;
+            letter-spacing: 3px;
+        }
+
+        .web3-badge {
+            background: rgba(64, 224, 208, 0.1);
+            border: 1px solid rgba(64, 224, 208, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dream-scenes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .scene-card {
+            background: rgba(20, 25, 50, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(64, 224, 208, 0.2);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .scene-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(64, 224, 208, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .scene-card.active {
+            border-color: rgba(64, 224, 208, 0.8);
+            box-shadow: 0 0 30px rgba(64, 224, 208, 0.2);
+        }
+
+        .scene-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .scene-title {
+            font-size: 1.5rem;
+            color: #40e0d0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .scene-number {
+            background: linear-gradient(90deg, #40e0d0, #ff8c00);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .scene-visualization {
+            height: 200px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #scene1-viz {
+            background: linear-gradient(135deg, #1a472a 0%, #0f2d1e 100%);
+        }
+
+        #scene2-viz {
+            background: linear-gradient(135deg, #2d1b69 0%, #1a1033 100%);
+        }
+
+        .snake {
+            position: absolute;
+            width: 40px;
+            height: 10px;
+            background: linear-gradient(90deg, #8b4513, #d2691e, #8b4513);
+            border-radius: 5px;
+            top: 50%;
+            animation: snakeMove 8s infinite linear;
+        }
+
+        .snake-1 {
+            top: 30%;
+            animation-delay: 0s;
+            background: linear-gradient(90deg, #8b4513, #d2691e, #8b4513);
+        }
+
+        .snake-2 {
+            top: 50%;
+            animation-delay: 2.5s;
+            background: linear-gradient(90deg, #4a752c, #6b8e23, #4a752c);
+        }
+
+        .snake-3 {
+            top: 70%;
+            animation-delay: 5s;
+            background: linear-gradient(90deg, #800000, #b22222, #800000);
+        }
+
+        @keyframes snakeMove {
+            0% {
+                left: -50px;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        .pond {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40%;
+            background: rgba(64, 164, 223, 0.2);
+            border-top: 2px solid rgba(64, 164, 223, 0.5);
+        }
+
+        .fog {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            filter: blur(5px);
+            animation: fogPulse 4s infinite alternate;
+        }
+
+        @keyframes fogPulse {
+            0% {
+                opacity: 0.3;
+            }
+
+            100% {
+                opacity: 0.7;
+            }
+        }
+
+        .person {
+            position: absolute;
+            width: 20px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px 10px 0 0;
+            bottom: 20%;
+            animation: personMove 6s infinite;
+        }
+
+        .person-1 {
+            left: 15%;
+            animation-delay: 0s;
+        }
+
+        .person-2 {
+            left: 35%;
+            animation-delay: 1s;
+        }
+
+        .person-3 {
+            left: 55%;
+            animation-delay: 2s;
+        }
+
+        .person-4 {
+            left: 75%;
+            animation-delay: 3s;
+            background: rgba(255, 0, 0, 0.8);
+        }
+
+        @keyframes personMove {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .dog {
+            position: absolute;
+            width: 30px;
+            height: 20px;
+            background: rgba(139, 69, 19, 0.8);
+            border-radius: 10px 10px 0 0;
+            bottom: 20%;
+            left: 75%;
+            display: none;
+        }
+
+        .scene-card.active .dog {
+            display: block;
+            animation: dogMove 3s infinite alternate;
+        }
+
+        @keyframes dogMove {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(30px);
+            }
+        }
+
+        .interpretation-section {
+            background: rgba(20, 25, 50, 0.8);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(64, 224, 208, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #40e0d0;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .symbol-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .symbol-card {
+            background: rgba(30, 35, 70, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 4px solid #40e0d0;
+            transition: all 0.3s ease;
+        }
+
+        .symbol-card:hover {
+            transform: translateY(-5px);
+            background: rgba(40, 45, 80, 0.7);
+        }
+
+        .symbol-title {
+            color: #ff8c00;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .warning-box {
+            background: rgba(255, 69, 0, 0.1);
+            border: 1px solid rgba(255, 69, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .warning-icon {
+            font-size: 2rem;
+            color: #ff4500;
+        }
+
+        .nft-element {
+            background: rgba(64, 224, 208, 0.1);
+            border: 1px solid rgba(64, 224, 208, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .nft-title {
+            color: #40e0d0;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 50px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #40e0d0, #20b2aa);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(64, 224, 208, 0.1);
+            color: #40e0d0;
+            border: 1px solid rgba(64, 224, 208, 0.5);
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid rgba(64, 224, 208, 0.2);
+            color: #a0a0e0;
+            font-size: 0.9rem;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .dream-scenes {
+                grid-template-columns: 1fr;
+            }
+
+            .symbol-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+        }
+    </style>
+    <!-- 微信/OpenGraph 卡片信息 -->
+    <meta property="og:title" content="Web3梦境解析 - 周公解梦AI">
+    <meta property="og:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta property="og:url" content="./dream-interpretation.html">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Web3梦境解析 - 周公解梦AI">
+    <meta name="twitter:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta itemprop="name" content="Web3梦境解析 - 周公解梦AI">
+    <meta itemprop="description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+</head>
+
+<body>
+    <!-- Wechat Share Image Hack -->
+    <div style="display:none; visibility:hidden;">
+        <img src="https://tools.yy24365.com/assets/images/dev-tools-og.png" alt="wechat-share-icon" width="400" height="400">
+    </div>
+    <div class="web3-badge">
+        <i class="fas fa-link"></i>
+        <span>区块链验证梦境 #20251225</span>
+    </div>
+    </header>
+    <section class="dream-scenes">
+        <div class="scene-card active" id="scene1">
+            <div class="scene-header">
+                <div class="scene-title">
+                    <div class="scene-number">1</div>
+                    <h2>田头三蛇渡水</h2>
+                </div>
+                <div class="scene-tag">
+                    <span style="color:#ff8c00;">危机显现</span>
+                </div>
+            </div>
+            <div class="scene-visualization" id="scene1-viz">
+                <!-- 蛇的动画 -->
+                <div class="snake snake-1"></div>
+                <div class="snake snake-2"></div>
+                <div class="snake snake-3"></div>
+                <!-- 池塘 -->
+                <div class="pond"></div>
+            </div>
+            <div class="scene-description">
+                <p><strong>老家田头</strong>象征你的根源与潜意识，<strong>三种毒蛇</strong>代表不同维度的威胁，<strong>游过池塘</strong>意味着危机正从潜意识向意识层面移动。</p>
+            </div>
+        </div>
+        <div class="scene-card" id="scene2">
+            <div class="scene-header">
+                <div class="scene-title">
+                    <div class="scene-number">2</div>
+                    <h2>雾中生死局</h2>
+                </div>
+                <div class="scene-tag">
+                    <span style="color:#ff0080;">系统反噬</span>
+                </div>
+            </div>
+            <div class="scene-visualization" id="scene2-viz">
+                <!-- 雾效果 -->
+                <div class="fog"></div>
+                <!-- 四个人物 -->
+                <div class="person person-1"></div>
+                <div class="person person-2"></div>
+                <div class="person person-3"></div>
+                <div class="person person-4"></div>
+                <!-- 狗 -->
+                <div class="dog"></div>
+            </div>
+            <div class="scene-description">
+                <p><strong>施法排雾</strong>显示你洞察复杂局势的能力，<strong>四人系统</strong>象征稳定结构，<strong>人变狗</strong>提示某些被消除的可能具有守护性。</p>
+            </div>
+        </div>
+    </section>
+    <section class="interpretation-section">
+        <h2 class="section-title">
+            <i class="fas fa-brain"></i>
+            梦境深度解析
+        </h2>
+        <div class="symbol-grid">
+            <div class="symbol-card">
+                <h3 class="symbol-title">
+                    <i class="fas fa-skull-crossbones"></i>
+                    三种毒蛇解析
+                </h3>
+                <p><strong>响尾蛇</strong>：未重视的警示信号<br>
+                    <strong>眼镜蛇</strong>：智慧与危险并存的力量<br>
+                    <strong>蝮蛇</strong>：潜伏的暗敌或慢性消耗
+                </p>
+            </div>
+            <div class="symbol-card">
+                <h3 class="symbol-title">
+                    <i class="fas fa-water"></i>
+                    池塘象征意义
+                </h3>
+                <p>池塘象征情感与潜意识的交汇处，"毒蛇渡水"暗示威胁正从潜意识领域向意识层面移动，而"模糊"说明你虽感知到危机但尚未看清全貌。</p>
+            </div>
+            <div class="symbol-card">
+                <h3 class="symbol-title">
+                    <i class="fas fa-users"></i>
+                    四人系统解析
+                </h3>
+                <p>数字"四"代表稳定结构，四人可能象征你生活中某个完整的系统。"杀一变狗"反映你试图消除某个环节引发的系统性反弹。</p>
+            </div>
+            <div class="symbol-card">
+                <h3 class="symbol-title">
+                    <i class="fas fa-dog"></i>
+                    人变狗的启示
+                </h3>
+                <p>狗象征忠诚与保护，暗示你试图消除的对象可能本质具有守护性。提示那些被你"物化"或"贬低"的关系中或有未被察觉的忠诚。</p>
+            </div>
+        </div>
+        <div class="warning-box">
+            <div class="warning-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div>
+                <h3>核心警示</h3>
+                <p>此梦揭示了一个核心矛盾：你具备看清危机、穿梭迷雾的非凡能力，但当你用"消除"而非"转化"的方式处理问题时，会触发更大的连锁危机。</p>
+            </div>
+        </div>
+        <div class="nft-element">
+            <h3 class="nft-title">
+                <i class="fas fa-gem"></i>
+                梦境灵魂NFT解读
+            </h3>
+            <p>此梦已生成唯一灵魂编码：<strong>#DREAM-20251225-3SNAKE-4PERSON</strong></p>
+            <p style="margin-top:10px; font-size:0.9rem; color:#a0a0e0;">此梦境解析已上链保存，作为你灵魂成长的永恒记录</p>
+        </div>
+    </section>
+    <div class="action-buttons">
+        <button class="btn btn-primary" id="toggleAnimation">
+            <i class="fas fa-play"></i>
+            切换动画效果
+        </button>
+        <button class="btn btn-secondary" id="showInterpretation">
+            <i class="fas fa-eye"></i>
+            显示完整解梦
+        </button>
+        <button class="btn btn-secondary" id="mintNFT">
+            <i class="fas fa-coins"></i>
+            铸造梦境NFT
+        </button>
+    </div>
+    <footer>
+        <p>© 2025 周公解梦AI - Web3梦境解析平台 | 本解析基于传统解梦智慧与AI深度分析融合生成</p>
+        <p style="margin-top:10px;">警告：此梦境解析仅供参考，真实人生仍需理性决策</p>
+    </footer>
+    </div>
+    <script>
+        // 创建背景浮动元素
+        const backgroundEffects = document.getElementById('background-effects');
+        for (let i = 0; i < 20; i++) {
+            const element = document.createElement('div');
+            element.classList.add('floating-element');
+
+            // 随机大小和位置
+            const size = Math.random() * 100 + 20;
+            element.style.width = `${size}px`;
+            element.style.height = `${size}px`;
+            element.style.left = `${Math.random() * 100}%`;
+            element.style.top = `${Math.random() * 100}%`;
+
+            // 随机动画延迟和持续时间
+            element.style.animationDelay = `${Math.random() * 15}s`;
+            element.style.animationDuration = `${15 + Math.random() * 20}s`;
+
+            backgroundEffects.appendChild(element);
+        }
+
+        // 场景切换交互
+        const sceneCards = document.querySelectorAll('.scene-card');
+        sceneCards.forEach(card => {
+            card.addEventListener('click', () => {
+                // 移除所有卡片的active类
+                sceneCards.forEach(c => c.classList.remove('active'));
+                // 给当前点击的卡片添加active类
+                card.classList.add('active');
+            });
+        });
+
+        // 切换动画效果
+        const toggleAnimationBtn = document.getElementById('toggleAnimation');
+        let animationsActive = true;
+
+        toggleAnimationBtn.addEventListener('click', () => {
+            const snakes = document.querySelectorAll('.snake');
+            const persons = document.querySelectorAll('.person');
+            const fog = document.querySelector('.fog');
+            const dog = document.querySelector('.dog');
+
+            if (animationsActive) {
+                // 暂停所有动画
+                snakes.forEach(snake => {
+                    snake.style.animationPlayState = 'paused';
+                });
+                persons.forEach(person => {
+                    person.style.animationPlayState = 'paused';
+                });
+                fog.style.animationPlayState = 'paused';
+                dog.style.animationPlayState = 'paused';
+
+                toggleAnimationBtn.innerHTML = '<i class="fas fa-play"></i> 恢复动画效果';
+                animationsActive = false;
+            } else {
+                // 恢复所有动画
+                snakes.forEach(snake => {
+                    snake.style.animationPlayState = 'running';
+                });
+                persons.forEach(person => {
+                    person.style.animationPlayState = 'running';
+                });
+                fog.style.animationPlayState = 'running';
+                dog.style.animationPlayState = 'running';
+
+                toggleAnimationBtn.innerHTML = '<i class="fas fa-pause"></i> 暂停动画效果';
+                animationsActive = true;
+            }
+        });
+
+        // 显示完整解梦
+        const showInterpretationBtn = document.getElementById('showInterpretation');
+        showInterpretationBtn.addEventListener('click', () => {
+            alert(`梦境完整解析：
+            
+第一幕：田头三蛇渡水
+老家田头代表你的根源与潜意识，三种毒蛇象征不同维度的威胁：
+1. 响尾蛇：生活中发出警示却未被重视的威胁
+2. 眼镜蛇：智慧与危险并存的力量
+3. 蝮蛇：潜伏的暗敌或慢性消耗
+
+毒蛇游过池塘意味着这些威胁正从潜意识领域向意识层面移动。
+
+第二幕：雾中生死局
+你能施法排雾显示你在复杂环境中具有超凡的洞察力与应变力。
+四人系统象征稳定结构，杀一变狗提示某些看似危险的存在或许具有你需要重新认识的保护性面向。
+复仇惊醒反映系统性反弹——当你强行改变某个环节，整个系统会产生连锁反应。
+
+核心启示：
+你具备看清危机、穿梭迷雾的能力，但需避免用"消除"而非"转化"的方式处理问题，否则会触发更大的连锁危机。`);
+        });
+
+        // 模拟铸造NFT
+        const mintNFTBtn = document.getElementById('mintNFT');
+        mintNFTBtn.addEventListener('click', () => {
+            mintNFTBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 铸造中...';
+            mintNFTBtn.disabled = true;
+
+            setTimeout(() => {
+                alert('🎉 梦境NFT铸造成功！\n\n你的梦境解析已永久记录在区块链上。\nNFT ID: #DREAM-20251225-3SNAKE-4PERSON\n持有人: 您的钱包地址');
+                mintNFTBtn.innerHTML = '<i class="fas fa-check"></i> 已铸造NFT';
+            }, 2000);
+        });
+
+        // 初始激活第一个场景
+        document.getElementById('scene1').classList.add('active');
+    </script>
+</body>
+
+</html>

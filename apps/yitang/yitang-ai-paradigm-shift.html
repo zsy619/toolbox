@@ -1,0 +1,2438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一堂AI探索营：从工具到协同的范式迁移</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'yitang-blue': '#3B82F6',
+                        'yitang-purple': '#8B5CF6',
+                        'yitang-pink': '#EC4899',
+                        'yitang-green': '#10B981',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'Noto Sans SC', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.loli.net/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gradient-bg-reverse {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .gradient-border {
+            position: relative;
+            border-radius: 12px;
+        }
+
+        .gradient-border::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #ec4899);
+            border-radius: 14px;
+            z-index: -1;
+        }
+
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .text-balance {
+            text-wrap: balance;
+        }
+
+        .section-padding {
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, #667eea, #764ba2, #ec4899);
+        }
+
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            .timeline-line {
+                left: 30px;
+            }
+
+            .timeline-dot {
+                left: 30px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .knowledge-tree {
+            position: relative;
+        }
+
+        .knowledge-tree::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, #10B981, #3B82F6);
+            transform: translateX(-50%);
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1F2937;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-size: 14px;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+
+        .tooltip-text::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1F2937 transparent transparent transparent;
+        }
+
+        .tab-active {
+            border-bottom: 3px solid #3B82F6;
+            color: #3B82F6;
+            font-weight: 600;
+        }
+
+        .model-layer {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-layer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+    <!-- 导航栏 -->
+    <nav class="sticky-nav shadow-sm border-b border-gray-100">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-xl gradient-text">一堂AI探索营</h1>
+                        <p class="text-xs text-gray-500 hidden md:block">从工具到协同的范式迁移</p>
+                    </div>
+                </div>
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="#intro" class="text-gray-700 hover:text-yitang-blue font-medium transition">探索营介绍</a>
+                    <a href="#warmup" class="text-gray-700 hover:text-yitang-blue font-medium transition">热身思考</a>
+                    <a href="#leaps" class="text-gray-700 hover:text-yitang-blue font-medium transition">四次飞跃</a>
+                    <a href="#models" class="text-gray-700 hover:text-yitang-blue font-medium transition">核心模型</a>
+                    <a href="#practice" class="text-gray-700 hover:text-yitang-blue font-medium transition">实践应用</a>
+                    <a href="#tcp" class="text-gray-700 hover:text-yitang-blue font-medium transition">TCPR模型</a>
+                    <a href="#future" class="text-gray-700 hover:text-yitang-blue font-medium transition">未来计划</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="p-2 rounded-full bg-gray-100 hover:bg-gray-200">
+                        <i class="fas fa-moon text-gray-600"></i>
+                    </button>
+                    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg bg-gray-100 hover:bg-gray-200">
+                        <i class="fas fa-bars text-gray-700"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobileMenu" class="hidden lg:hidden border-t border-gray-100 bg-white">
+            <div class="container mx-auto px-4 py-4 flex flex-col space-y-4">
+                <a href="#intro" class="py-2 text-gray-700 hover:text-yitang-blue font-medium">探索营介绍</a>
+                <a href="#warmup" class="py-2 text-gray-700 hover:text-yitang-blue font-medium">热身思考</a>
+                <a href="#leaps" class="py-2 text-gray-700 hover:text-yitang-blue font-medium">四次飞跃</a>
+                <a href="#models" class="py-2 text-gray-700 hover:text-yitang-blue font-medium">核心模型</a>
+                <a href="#practice" class="py-2 text-gray-700 hover:text-yitang-blue font-medium">实践应用</a>
+                <a href="#tcp" class="py-2 text-gray-700 hover:text-yitang-blue font-medium">TCPR模型</a>
+                <a href="#future" class="py-2 text-gray-700 hover:text-yitang-blue font-medium">未来计划</a>
+            </div>
+        </div>
+    </nav>
+    <!-- 英雄区域 -->
+    <header class="relative overflow-hidden">
+        <div class="absolute inset-0 gradient-bg opacity-10"></div>
+        <div class="absolute top-10 right-10 w-64 h-64 rounded-full bg-yitang-purple opacity-5"></div>
+        <div class="absolute bottom-10 left-10 w-80 h-80 rounded-full bg-yitang-blue opacity-5"></div>
+        <div class="container mx-auto px-4 py-20 md:py-28 relative z-10">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="inline-flex items-center px-4 py-2 rounded-full bg-white shadow-sm mb-6">
+                    <span class="w-2 h-2 rounded-full bg-yitang-blue mr-2"></span>
+                    <span class="text-sm font-medium text-gray-700">AI探索营 · 范式迁移</span>
+                </div>
+                <h1 class="text-4xl md:text-6xl font-bold mb-6 text-balance">
+                    一堂<span class="gradient-text">AI探索营</span>：从工具到协同的范式迁移
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto text-balance">
+                    在过去两年中，AI技术的快速演进让许多人感受到了"一天人家一年"的加速感。我们正在经历从"人类独立工作"到"人机协同"的范式转移。
+                </p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="#intro" class="px-8 py-4 gradient-bg text-white font-semibold rounded-xl hover:shadow-lg transition hover-lift">
+                        开始探索 <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="#leaps" class="px-8 py-4 bg-white text-gray-800 font-semibold rounded-xl border border-gray-200 hover:border-yitang-blue hover:shadow-md transition hover-lift">
+                        四次飞跃
+                    </a>
+                    <a href="#models" class="px-8 py-4 bg-white text-gray-800 font-semibold rounded-xl border border-gray-200 hover:border-yitang-purple hover:shadow-md transition hover-lift">
+                        核心模型
+                    </a>
+                </div>
+                <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold gradient-text">4</div>
+                        <div class="text-sm text-gray-600">次范式飞跃</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold gradient-text">10+</div>
+                        <div class="text-sm text-gray-600">核心模型框架</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold gradient-text">50+</div>
+                        <div class="text-sm text-gray-600">AI原子特性</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold gradient-text">100</div>
+                        <div class="text-sm text-gray-600">先锋官名额</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <!-- 探索营介绍 -->
+        <section id="intro" class="section-padding bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16 fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">探索营介绍</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto text-balance">
+                        本次探索营旨在总结一套相对统一的人机协同工作方法。我们将开源阶段性成果，包括经验、困惑、解决方案，与大家一起探索未来。
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+                    <div class="bg-gray-50 p-8 rounded-2xl hover-lift">
+                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-lightbulb text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">为什么要做这次探索营？</h3>
+                        <p class="text-gray-600">
+                            我们发现很多同学在使用AI时方法各异、缺乏统一的工作流。因此，我们决定发起这次探索营，尝试总结一套相对统一的人机协同工作方法。
+                        </p>
+                    </div>
+                    <div class="bg-gray-50 p-8 rounded-2xl hover-lift">
+                        <div class="w-14 h-14 gradient-bg-reverse rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-bullseye text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">探索营目标</h3>
+                        <p class="text-gray-600">
+                            通过四个阶段的学习与实践，帮助学员完成从碎片到体系、从沮丧到信心、从工具到协同、从随机到AI团队的范式迁移。
+                        </p>
+                    </div>
+                    <div class="bg-gray-50 p-8 rounded-2xl hover-lift">
+                        <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-users text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">探索性质</h3>
+                        <p class="text-gray-600">
+                            本次内容为探索性质，不保证成熟度，鼓励大家积极尝试与反馈。这是一个共同探索的过程，我们都在未知中寻找答案。
+                        </p>
+                    </div>
+                    <div class="bg-gray-50 p-8 rounded-2xl hover-lift">
+                        <div class="w-14 h-14 gradient-bg-reverse rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-graduation-cap text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">学习方式</h3>
+                        <p class="text-gray-600">
+                            启发而非方法，更多的是抛砖引玉。通过实际案例、作业实践、专家分享和集体讨论，共同推进认知边界。
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-2xl border border-blue-100">
+                    <h3 class="text-2xl font-bold mb-6">探索营四阶段结构</h3>
+                    <div class="grid md:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <div class="flex items-center mb-4">
+                                <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center mr-4">
+                                    <span class="text-white font-bold">1</span>
+                                </div>
+                                <h4 class="font-bold text-lg">抛砖引玉</h4>
+                            </div>
+                            <p class="text-gray-600 text-sm">
+                                由我分享个人经验与初步方法，汇报如何解决重大难题，开放我使用AI的思考路径和工作方式。
+                            </p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <div class="flex items-center mb-4">
+                                <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center mr-4">
+                                    <span class="text-white font-bold">2</span>
+                                </div>
+                                <h4 class="font-bold text-lg">初探实践</h4>
+                            </div>
+                            <p class="text-gray-600 text-sm">
+                                学员用一周左右时间照葫芦画瓢，提交体感作业，努力探认知上限，完成第一篇实践报告。
+                            </p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <div class="flex items-center mb-4">
+                                <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center mr-4">
+                                    <span class="text-white font-bold">3</span>
+                                </div>
+                                <h4 class="font-bold text-lg">引喻深化</h4>
+                            </div>
+                            <p class="text-gray-600 text-sm">
+                                邀请AI大航海获奖者花总分享专业实践，讲解背后的专业落地方法，提供可借鉴的最佳实践。
+                            </p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <div class="flex items-center mb-4">
+                                <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center mr-4">
+                                    <span class="text-white font-bold">4</span>
+                                </div>
+                                <h4 class="font-bold text-lg">总结提升</h4>
+                            </div>
+                            <p class="text-gray-600 text-sm">
+                                二次作业与集体交流，交叉学习，看到大量同学一起进步的过程，形成阶段性成果。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 热身思考 -->
+        <section id="warmup" class="section-padding bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16 fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">热身思考：两个本质问题</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto text-balance">
+                        这两个问题决定了你如何与AI相处、如何构建自己的核心竞争力，以及在AI时代保持竞争力的关键。
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 mb-16">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm hover-lift">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-star text-blue-600 text-xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold">第一个问题</h3>
+                        </div>
+                        <p class="text-xl text-gray-700 mb-6">
+                            <strong class="text-blue-600">一堂的课给你最大的价值是什么？</strong>
+                        </p>
+                        <div class="mb-6">
+                            <p class="text-gray-600 mb-4">
+                                一堂的课不只是传递信息差或知识，更在于传递<strong>规律、审美、体系、底层逻辑</strong>。这些能力是面对AI时代变化的基础。
+                            </p>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">规律</span>
+                                <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">审美</span>
+                                <span class="px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm">体系</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">底层逻辑</span>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                            <h4 class="font-bold text-blue-800 mb-3">灵魂拷问：</h4>
+                            <p class="text-blue-700">
+                                随着AI的逐步演化渗透、快速进步，长期来看，这些能力是不重要了（未来AI都接管了）？还是说对未来我们的要求更高了，反而更重要了？那背后的逻辑是什么？
+                            </p>
+                        </div>
+                        <div class="mt-6">
+                            <p class="text-gray-600 text-sm">
+                                <strong>重要性：</strong>这个问题直接决定了你们以后如何跟AI相处，你怎么用AI，你的能力怎么用，AI的能力怎么用。越早想清楚，越早积累，就越有可能积累更多的核心能力红利。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-sm hover-lift">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-eye text-purple-600 text-xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold">第二个问题</h3>
+                        </div>
+                        <p class="text-xl text-gray-700 mb-6">
+                            <strong class="text-purple-600">关于终局的想象</strong>
+                        </p>
+                        <div class="mb-6">
+                            <p class="text-gray-600 mb-4">
+                                在不讨论AGI的前提下，想象一下未来2-5年，高水平的团队将如何与AI协同工作？那个时候我们会怎么跟AI协同？
+                            </p>
+                            <div class="bg-gray-100 p-4 rounded-lg mb-4">
+                                <p class="text-gray-600 text-sm">
+                                    <strong>现状：</strong>现在很多人用AI就当搜索用，最多用个Agent，帮做一点点简单的搜集任务、整理任务、做个PPT也就到头了。
+                                </p>
+                            </div>
+                        </div>
+                        <div class="bg-purple-50 p-5 rounded-xl border border-purple-100">
+                            <h4 class="font-bold text-purple-800 mb-3">核心思考：</h4>
+                            <p class="text-purple-700">
+                                真正往前看三年，高水平的人类团队和高水平的AI团队是怎么在一起工作的？那个最佳实践长什么样？脑子里有那么一个大概的图景吗？
+                            </p>
+                        </div>
+                        <div class="mt-6">
+                            <p class="text-gray-600 text-sm">
+                                <strong>意义：</strong>这个问题帮助你建立对未来的想象和预期，为真正的协同工作做准备，而不是停留在工具使用层面。大胆思考、大胆想象，提升审美和追求。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-blue-100 to-purple-100 p-8 rounded-2xl border border-blue-200">
+                    <h3 class="text-2xl font-bold mb-6 text-center">两个问题的共同价值</h3>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                                <i class="fas fa-compass text-blue-600"></i>
+                            </div>
+                            <h4 class="font-bold text-center mb-3">方向指引</h4>
+                            <p class="text-gray-600 text-sm text-center">
+                                帮助明确在AI时代个人和团队的发展方向，建立长期主义的思维框架。
+                            </p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                                <i class="fas fa-cogs text-purple-600"></i>
+                            </div>
+                            <h4 class="font-bold text-center mb-3">能力识别</h4>
+                            <p class="text-gray-600 text-sm text-center">
+                                识别在AI时代依然重要的人类核心能力，避免被短期工具热潮迷惑。
+                            </p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl">
+                            <div class="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                                <i class="fas fa-rocket text-pink-600"></i>
+                            </div>
+                            <h4 class="font-bold text-center mb-3">范式迁移</h4>
+                            <p class="text-gray-600 text-sm text-center">
+                                推动从"人类独立工作"到"人机协同"的范式转变，提前布局未来工作方式。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 四次飞跃 -->
+        <section id="leaps" class="section-padding bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16 fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">四次飞跃：范式迁移的完整路径</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto text-balance">
+                        过去半年，我完成了从碎片到体系、从沮丧到信心、从工具到协同、从随机到AI团队的四次飞跃，逐步构建了人机协同的工作范式。
+                    </p>
+                </div>
+                <!-- 时间线 -->
+                <div class="relative">
+                    <!-- 时间线轴线 -->
+                    <div class="timeline-line hidden md:block"></div>
+                    <!-- 第一次飞跃 -->
+                    <div class="flex flex-col md:flex-row items-center mb-20 relative">
+                        <div class="md:w-1/2 md:pr-16 md:text-right mb-8 md:mb-0">
+                            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover-lift">
+                                <div class="inline-flex items-center mb-4">
+                                    <div class="timeline-dot bg-blue-500"></div>
+                                    <span class="ml-3 text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">第一次飞跃</span>
+                                </div>
+                                <h3 class="text-2xl md:text-3xl font-bold mb-4">从碎片到体系</h3>
+                                <p class="text-gray-600 mb-6">
+                                    用缪斯模型和双三角模型重构了我的知识体系，从信息过载的焦虑中解脱出来，形成了结构化的认知系统。
+                                </p>
+                                <div class="mb-6">
+                                    <h4 class="font-bold text-gray-800 mb-3">关键方法：</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">缪斯模型</span>
+                                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">知识树学习法</span>
+                                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">科学学习IPO</span>
+                                    </div>
+                                </div>
+                                <div class="bg-blue-50 p-4 rounded-xl">
+                                    <p class="text-blue-700 text-sm">
+                                        <strong>核心洞察：</strong>什么时候是你学习一个复杂课题真正入门的标志？不是读了教材，不是做了实践，甚至不是赚到钱，而是你形成了一套你对于这个课题的基础的、朴素的、底层的、框架性的认识。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 md:pl-16">
+                            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                                <h4 class="font-bold text-lg mb-4 text-gray-800">知识树学习法</h4>
+                                <div class="knowledge-tree p-6">
+                                    <div class="mb-8 text-center">
+                                        <div class="inline-block px-4 py-2 bg-green-100 text-green-800 rounded-lg font-medium">
+                                            树干：编程的核心原理
+                                        </div>
+                                        <p class="text-gray-600 text-sm mt-2">如变量、函数、循环、条件判断</p>
+                                    </div>
+                                    <div class="flex justify-between mb-8">
+                                        <div class="w-5/12 text-right">
+                                            <div class="inline-block px-3 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium">
+                                                树枝：Python
+                                            </div>
+                                            <p class="text-gray-600 text-sm mt-1">具体编程语言</p>
+                                        </div>
+                                        <div class="w-5/12">
+                                            <div class="inline-block px-3 py-2 bg-blue-100 text-blue-800 rounded-lg font-medium">
+                                                树枝：Java
+                                            </div>
+                                            <p class="text-gray-600 text-sm mt-1">具体编程语言</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <div class="w-5/12">
+                                            <div class="bg-white p-3 rounded-lg shadow-sm mb-2">
+                                                <p class="text-gray-700 text-sm">具体的语法规则</p>
+                                            </div>
+                                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                                <p class="text-gray-700 text-sm">库的使用</p>
+                                            </div>
+                                        </div>
+                                        <div class="w-5/12">
+                                            <div class="bg-white p-3 rounded-lg shadow-sm mb-2">
+                                                <p class="text-gray-700 text-sm">项目实践</p>
+                                            </div>
+                                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                                <p class="text-gray-700 text-sm">调试技巧</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 text-sm mt-4">
+                                    <strong>把叶子构建出一棵树，才是高水平学习。</strong> 不断构建知识之间的联系，并且把某一个课题的知识，串成一个体系和树，甚至鼓励找到最底层的"第一性原理"。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 第二次飞跃 -->
+                    <div class="flex flex-col md:flex-row items-center mb-20 relative">
+                        <div class="md:w-1/2 md:pr-16 md:text-right order-2 md:order-1 mb-8 md:mb-0">
+                            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                                <h4 class="font-bold text-lg mb-4 text-gray-800">Feature思维：原子级特性</h4>
+                                <p class="text-gray-600 mb-4 text-sm">
+                                    将AI能力拆解为"原子级特性"，如角色设定、思维链引导、案例参考等，通过掌握这些Feature，可以在不同任务中复用，实现真正的刻意练习。
+                                </p>
+                                <div class="grid grid-cols-2 gap-3 mb-4">
+                                    <div class="bg-white p-3 rounded-lg">
+                                        <p class="text-gray-700 text-sm font-medium">选模型</p>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg">
+                                        <p class="text-gray-700 text-sm font-medium">设定角色</p>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg">
+                                        <p class="text-gray-700 text-sm font-medium">思维链引导</p>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg">
+                                        <p class="text-gray-700 text-sm font-medium">案例参考</p>
+                                    </div>
+                                </div>
+                                <div class="bg-purple-50 p-4 rounded-xl">
+                                    <p class="text-purple-700 text-sm">
+                                        <strong>Feature思维的核心：</strong>将众多工具、大模型框架的共性萃取出来，变成最小原子特性。每一个Feature就是一次打磨机会，是你的子弹和牌。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 md:pl-16 order-1 md:order-2">
+                            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover-lift">
+                                <div class="inline-flex items-center mb-4">
+                                    <div class="timeline-dot bg-purple-500"></div>
+                                    <span class="ml-3 text-sm font-semibold text-purple-600 bg-purple-50 px-3 py-1 rounded-full">第二次飞跃</span>
+                                </div>
+                                <h3 class="text-2xl md:text-3xl font-bold mb-4">从沮丧到信心</h3>
+                                <p class="text-gray-600 mb-6">
+                                    用泛产品设计加上Feature的思路，把刻意练习变成了统一的方法和工作流，解决了实践中的持续沮丧问题。
+                                </p>
+                                <div class="mb-6">
+                                    <h4 class="font-bold text-gray-800 mb-3">关键方法：</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">泛产品设计</span>
+                                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Feature思维</span>
+                                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">刻意练习</span>
+                                    </div>
+                                </div>
+                                <div class="bg-purple-50 p-4 rounded-xl">
+                                    <p class="text-purple-700 text-sm">
+                                        <strong>刻意练习1+4要素：</strong>长期追求为前提，加上固定套路、非舒适区、及时反馈、大量重复四个要素。每增加一个要素，进步速度乘以2；每减少一个要素，速度除以2。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 第三次飞跃 -->
+                    <div class="flex flex-col md:flex-row items-center mb-20 relative">
+                        <div class="md:w-1/2 md:pr-16 md:text-right mb-8 md:mb-0">
+                            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover-lift">
+                                <div class="inline-flex items-center mb-4">
+                                    <div class="timeline-dot bg-pink-500"></div>
+                                    <span class="ml-3 text-sm font-semibold text-pink-600 bg-pink-50 px-3 py-1 rounded-full">第三次飞跃</span>
+                                </div>
+                                <h3 class="text-2xl md:text-3xl font-bold mb-4">从工具到协同</h3>
+                                <p class="text-gray-600 mb-6">
+                                    用Obsidian作为"协同广场"，实现不同AI工具在同一平台上的协作。通过"时间管理AI教练"项目验证了人与AI的平等协同。
+                                </p>
+                                <div class="mb-6">
+                                    <h4 class="font-bold text-gray-800 mb-3">关键方法：</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm">Obsidian广场模型</span>
+                                        <span class="px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm">人在环</span>
+                                        <span class="px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm">协同工作流</span>
+                                    </div>
+                                </div>
+                                <div class="bg-pink-50 p-4 rounded-xl">
+                                    <p class="text-pink-700 text-sm">
+                                        <strong>广场模型的本质：</strong>Obsidian以Markdown为基础、本地存储为核心，允许不同AI工具在同一"广场"上协作，打破了信息孤岛，形成了连贯的工作流。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 md:pl-16">
+                            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                                <h4 class="font-bold text-lg mb-4 text-gray-800">十步工作流：时间管理AI教练</h4>
+                                <div class="space-y-3">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-pink-600 font-bold text-sm">1</span>
+                                        </div>
+                                        <p class="text-gray-700">建文档：建立顶层文档和创意说明</p>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-pink-600 font-bold text-sm">2</span>
+                                        </div>
+                                        <p class="text-gray-700">最佳实践数据包：输入个人案例和方法论</p>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-pink-600 font-bold text-sm">3</span>
+                                        </div>
+                                        <p class="text-gray-700">让AI理解文档：初步分析和理解项目</p>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-pink-600 font-bold text-sm">4-6</span>
+                                        </div>
+                                        <p class="text-gray-700">喂方法论、再次分析、市场分析</p>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-pink-600 font-bold text-sm">7-10</span>
+                                        </div>
+                                        <p class="text-gray-700">里程碑方案、产品内核、五步法、MVP方案</p>
+                                    </div>
+                                </div>
+                                <div class="mt-6 p-4 bg-white rounded-lg">
+                                    <p class="text-gray-700 text-sm">
+                                        <strong>结果：</strong>全程约90分钟，实现了人与AI的平等协同。人类只负责顶层文档和最佳实践数据包，其余工作由AI完成，人类负责判断和审美把控。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 第四次飞跃 -->
+                    <div class="flex flex-col md:flex-row items-center relative">
+                        <div class="md:w-1/2 md:pr-16 md:text-right order-2 md:order-1 mb-8 md:mb-0">
+                            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                                <h4 class="font-bold text-lg mb-4 text-gray-800">TCPR模型：四类AI角色</h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-white p-4 rounded-lg text-center">
+                                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <span class="text-blue-600 font-bold">T</span>
+                                        </div>
+                                        <p class="text-gray-700 text-sm font-medium">教学</p>
+                                        <p class="text-gray-500 text-xs">把我教明白</p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded-lg text-center">
+                                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <span class="text-purple-600 font-bold">C</span>
+                                        </div>
+                                        <p class="text-gray-700 text-sm font-medium">咨询</p>
+                                        <p class="text-gray-500 text-xs">引导我思考</p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded-lg text-center">
+                                        <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <span class="text-pink-600 font-bold">P</span>
+                                        </div>
+                                        <p class="text-gray-700 text-sm font-medium">实践</p>
+                                        <p class="text-gray-500 text-xs">直接动手干活</p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded-lg text-center">
+                                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <span class="text-green-600 font-bold">R</span>
+                                        </div>
+                                        <p class="text-gray-700 text-sm font-medium">研究</p>
+                                        <p class="text-gray-500 text-xs">建模和研究</p>
+                                    </div>
+                                </div>
+                                <div class="mt-6 p-4 bg-white rounded-lg">
+                                    <p class="text-gray-700 text-sm">
+                                        <strong>愿景：</strong>帮助一部分同学配一个属于你们个人的TCPR团队。这个团队对你来说足够专业、足够默契、足够务实、足够具体、足够定制化。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 md:pl-16 order-1 md:order-2">
+                            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover-lift">
+                                <div class="inline-flex items-center mb-4">
+                                    <div class="timeline-dot bg-green-500"></div>
+                                    <span class="ml-3 text-sm font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">第四次飞跃</span>
+                                </div>
+                                <h3 class="text-2xl md:text-3xl font-bold mb-4">从随机到AI团队</h3>
+                                <p class="text-gray-600 mb-6">
+                                    通过TCPR模型将AI工具封装为固定助手，形成了属于自己的"AI团队"，实现了从随机使用到系统化AI协同的转变。
+                                </p>
+                                <div class="mb-6">
+                                    <h4 class="font-bold text-gray-800 mb-3">关键方法：</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">TCPR模型</span>
+                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">AI团队封装</span>
+                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">角色分配</span>
+                                    </div>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded-xl">
+                                    <p class="text-green-700 text-sm">
+                                        <strong>封装的核心：</strong>原本通用的大模型是刚刚睁开眼睛、苏醒的、失忆了的超级天才。你但凡给它配置了一个身份要求配置，它就开始被你固定封装、解决某一类具体的问题，这就是广义的智能体。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 核心模型 -->
+        <section id="models" class="section-padding bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16 fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">核心模型与框架</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto text-balance">
+                        探索营中提出的关键模型与框架，为人机协同提供理论支持和实践指导，帮助构建稳定、系统的认知和工作体系。
+                    </p>
+                </div>
+                <!-- 模型导航 -->
+                <div class="flex flex-wrap justify-center gap-4 mb-12">
+                    <button class="model-tab px-6 py-3 rounded-xl bg-white border border-gray-200 font-medium hover:bg-blue-50 hover:border-blue-200 transition" data-tab="muse">
+                        缪斯模型
+                    </button>
+                    <button class="model-tab px-6 py-3 rounded-xl bg-white border border-gray-200 font-medium hover:bg-purple-50 hover:border-purple-200 transition" data-tab="dual-triangle">
+                        双三角模型
+                    </button>
+                    <button class="model-tab px-6 py-3 rounded-xl bg-white border border-gray-200 font-medium hover:bg-pink-50 hover:border-pink-200 transition" data-tab="learning">
+                        学习模型
+                    </button>
+                    <button class="model-tab px-6 py-3 rounded-xl bg-white border border-gray-200 font-medium hover:bg-green-50 hover:border-green-200 transition" data-tab="framework">
+                        AI学习框架
+                    </button>
+                    <button class="model-tab px-6 py-3 rounded-xl bg-white border border-gray-200 font-medium hover:bg-yellow-50 hover:border-yellow-200 transition" data-tab="feature">
+                        FeatureSet
+                    </button>
+                </div>
+                <!-- 模型内容区域 -->
+                <div id="model-content">
+                    <!-- 缪斯模型 -->
+                    <div class="model-panel active" id="muse-panel">
+                        <div class="bg-white p-8 rounded-2xl shadow-lg">
+                            <div class="flex items-center mb-8">
+                                <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mr-5">
+                                    <i class="fas fa-layer-group text-white text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl md:text-3xl font-bold">一堂人工智能全景图 · MUSE模型</h3>
+                                    <p class="text-gray-600">将人工智能全景分为四层，帮助我们从宏观到微观理解AI生态</p>
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-4 gap-6 mb-8">
+                                <div class="model-layer bg-gradient-to-b from-blue-50 to-white p-6 rounded-2xl border border-blue-100">
+                                    <div class="flex items-center mb-4">
+                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                            <span class="text-blue-600 font-bold text-xl">M</span>
+                                        </div>
+                                        <h4 class="font-bold text-lg text-blue-800">奇迹层</h4>
+                                    </div>
+                                    <p class="text-gray-700 mb-4">AI的大胆设想和科幻</p>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-blue-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">职业变革</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-blue-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">生产力跃迁</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-blue-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">AGI</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-blue-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">法治与伦理</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="model-layer bg-gradient-to-b from-purple-50 to-white p-6 rounded-2xl border border-purple-100">
+                                    <div class="flex items-center mb-4">
+                                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                            <span class="text-purple-600 font-bold text-xl">U</span>
+                                        </div>
+                                        <h4 class="font-bold text-lg text-purple-800">使用层</h4>
+                                    </div>
+                                    <p class="text-gray-700 mb-4">用好AI/降本增效</p>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-purple-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">提示词/库</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-purple-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">Agent智能体</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-purple-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">多模态</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-purple-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">AI编程</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="model-layer bg-gradient-to-b from-pink-50 to-white p-6 rounded-2xl border border-pink-100">
+                                    <div class="flex items-center mb-4">
+                                        <div class="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
+                                            <span class="text-pink-600 font-bold text-xl">S</span>
+                                        </div>
+                                        <h4 class="font-bold text-lg text-pink-800">创业层</h4>
+                                    </div>
+                                    <p class="text-gray-700 mb-4">创造新产品/服务</p>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-pink-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">AI工具库</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-pink-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">工程化</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-pink-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">模型微调/训练</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-pink-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">数据/知识库</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="model-layer bg-gradient-to-b from-green-50 to-white p-6 rounded-2xl border border-green-100">
+                                    <div class="flex items-center mb-4">
+                                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                            <span class="text-green-600 font-bold text-xl">E</span>
+                                        </div>
+                                        <h4 class="font-bold text-lg text-green-800">变革层</h4>
+                                    </div>
+                                    <p class="text-gray-700 mb-4">底层技术的变革性突破</p>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-green-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">芯片</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-green-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">机器人</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-green-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">云</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-green-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">边缘计算</span>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-xs text-green-500 mt-1 mr-2"></i>
+                                            <span class="text-gray-600">数据</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100">
+                                <h4 class="font-bold text-blue-800 mb-4">缪斯模型的价值</h4>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <p class="text-blue-700">
+                                            <strong>应对变化：</strong>市场变化太快，工具层出不穷。缪斯模型足够的抽象、足够的上层，才能够本质和稳定，帮大家应对这些变化。
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-blue-700">
+                                            <strong>长期复利：</strong>如果希望在AI领域积累五年甚至十年尺度复利，这张图就是最好的可以抓在手里的复利工具。尝试把能力、认知构建在这种图上，就能常年积累。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6 text-right">
+                                <p class="text-sm text-gray-500">版本更新于：2026.2.11 @北京一堂实验室</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 双三角模型 -->
+                    <div class="model-panel hidden" id="dual-triangle-panel">
+                        <div class="bg-white p-8 rounded-2xl shadow-lg">
+                            <div class="flex items-center mb-8">
+                                <div class="w-14 h-14 gradient-bg-reverse rounded-xl flex items-center justify-center mr-5">
+                                    <i class="fas fa-project-diagram text-white text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl md:text-3xl font-bold">一堂AI时代的竞争力·双三角模型</h3>
+                                    <p class="text-gray-600">回答在AI时代，人类和AI各自的核心竞争力是什么，以及如何协同</p>
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                                <div class="bg-gradient-to-br from-blue-50 to-white p-8 rounded-2xl border border-blue-100">
+                                    <h4 class="text-2xl font-bold mb-6 text-center text-blue-700">人类三角</h4>
+                                    <div class="space-y-6">
+                                        <div class="flex items-start">
+                                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                                                <i class="fas fa-palette text-blue-600 text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-bold text-lg text-gray-800 mb-2">审美</h5>
+                                                <p class="text-gray-600 mb-2">专业见识、最佳实践、评价标准</p>
+                                                <div class="bg-blue-50 p-3 rounded-lg">
+                                                    <p class="text-blue-700 text-sm">
+                                                        <strong>关键问题：</strong>为什么不同人同样都会用AI，业务结果相差这么大？
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                                                <i class="fas fa-sitemap text-blue-600 text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-bold text-lg text-gray-800 mb-2">体系</h5>
+                                                <p class="text-gray-600 mb-2">科学体系思维、假设验证模型、稳定知识结构</p>
+                                                <div class="bg-blue-50 p-3 rounded-lg">
+                                                    <p class="text-blue-700 text-sm">
+                                                        <strong>关键能力：</strong>理解底层规律、ROI预判、业务拆解
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                                                <i class="fas fa-lightbulb text-blue-600 text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-bold text-lg text-gray-800 mb-2">创造力</h5>
+                                                <p class="text-gray-600 mb-2">提出创造假设、善于解放思想、AI打磨</p>
+                                                <div class="bg-blue-50 p-3 rounded-lg">
+                                                    <p class="text-blue-700 text-sm">
+                                                        <strong>关键产出：</strong>组织部署、创新方案、突破性想法
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-gradient-to-br from-purple-50 to-white p-8 rounded-2xl border border-purple-100">
+                                    <h4 class="text-2xl font-bold mb-6 text-center text-purple-700">AI三角</h4>
+                                    <div class="space-y-6">
+                                        <div class="flex items-start">
+                                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                                                <i class="fas fa-search text-purple-600 text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-bold text-lg text-gray-800 mb-2">场景</h5>
+                                                <p class="text-gray-600 mb-2">业务拆解、ROI预判、灵魂拷问</p>
+                                                <div class="bg-purple-50 p-3 rounded-lg">
+                                                    <p class="text-purple-700 text-sm">
+                                                        <strong>关键问题：</strong>为什么不同人同样都是业务高手，AI结果相差这么大？
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                                                <i class="fas fa-tools text-purple-600 text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-bold text-lg text-gray-800 mb-2">基本功</h5>
+                                                <div class="mb-2">
+                                                    <p class="text-gray-600 text-sm mb-1"><strong>基础：</strong>LLM提示词/智能体</p>
+                                                    <p class="text-gray-600 text-sm mb-1"><strong>宽度：</strong>多模态/AI工具库（∞）</p>
+                                                    <p class="text-gray-600 text-sm"><strong>深度：</strong>模型微调训练/工程化</p>
+                                                </div>
+                                                <div class="bg-purple-50 p-3 rounded-lg">
+                                                    <p class="text-purple-700 text-sm">
+                                                        <strong>关键能力：</strong>工具掌握、技术深度、应用广度
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                                                <i class="fas fa-database text-purple-600 text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-bold text-lg text-gray-800 mb-2">数据</h5>
+                                                <p class="text-gray-600 mb-2">非结构化数据、结构化数据、形成资产</p>
+                                                <div class="bg-purple-50 p-3 rounded-lg">
+                                                    <p class="text-purple-700 text-sm">
+                                                        <strong>关键价值：</strong>数据积累、知识沉淀、持续优化
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-r from-blue-100 to-purple-100 p-8 rounded-2xl border border-blue-200">
+                                <div class="text-center mb-6">
+                                    <h4 class="text-2xl font-bold text-gray-800">双三角协同：人机协同的核心逻辑</h4>
+                                </div>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div class="bg-white p-6 rounded-xl">
+                                        <h5 class="font-bold text-lg mb-3 text-blue-700">人变强了，调教更强AI</h5>
+                                        <p class="text-gray-600">
+                                            人类通过提升审美、体系和创造力，能够更好地指导、评估和优化AI的工作，调教出更强大的AI助手。
+                                        </p>
+                                    </div>
+                                    <div class="bg-white p-6 rounded-xl">
+                                        <h5 class="font-bold text-lg mb-3 text-purple-700">有了强AI，辅助人变得更强</h5>
+                                        <p class="text-gray-600">
+                                            AI通过强大的场景理解、基本功和数据能力，辅助人类完成复杂任务，扩展人类能力边界，让人变得更强大。
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-6 text-center">
+                                    <p class="text-gray-700 font-medium">
+                                        人类三角 × AI三角 = 持续让自己变强 × 持续使用AI更强
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mt-6 text-right">
+                                <p class="text-sm text-gray-500">版本更新于：2026.2.11 @北京一堂实验室</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 学习模型 -->
+                    <div class="model-panel hidden" id="learning-panel">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                                <div class="flex items-center mb-8">
+                                    <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mr-5">
+                                        <i class="fas fa-atom text-white text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-2xl font-bold">一堂·科学学习IPO模型</h3>
+                                        <p class="text-gray-600">主动构建输入、处理、输出的学习循环</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between p-5 bg-gradient-to-r from-blue-50 to-white rounded-xl border border-blue-100">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                                <i class="fas fa-bullseye text-blue-600"></i>
+                                            </div>
+                                            <span class="font-bold text-gray-800">目标</span>
+                                        </div>
+                                        <span class="text-sm text-blue-600 font-medium">明确学习方向</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-5 bg-gradient-to-r from-green-50 to-white rounded-xl border border-green-100">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                                                <i class="fas fa-sign-in-alt text-green-600"></i>
+                                            </div>
+                                            <span class="font-bold text-gray-800">输入</span>
+                                        </div>
+                                        <span class="text-sm text-green-600 font-medium">获取信息与知识</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-5 bg-gradient-to-r from-yellow-50 to-white rounded-xl border border-yellow-100">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                                                <i class="fas fa-cogs text-yellow-600"></i>
+                                            </div>
+                                            <span class="font-bold text-gray-800">处理</span>
+                                        </div>
+                                        <span class="text-sm text-yellow-600 font-medium">加工与内化</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-5 bg-gradient-to-r from-red-50 to-white rounded-xl border border-red-100">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                                                <i class="fas fa-sign-out-alt text-red-600"></i>
+                                            </div>
+                                            <span class="font-bold text-gray-800">输出</span>
+                                        </div>
+                                        <span class="text-sm text-red-600 font-medium">应用与表达</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-5 bg-gradient-to-r from-purple-50 to-white rounded-xl border border-purple-100">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                                                <i class="fas fa-shapes text-purple-600"></i>
+                                            </div>
+                                            <span class="font-bold text-gray-800">模型</span>
+                                        </div>
+                                        <span class="text-sm text-purple-600 font-medium">模式与规律</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-5 bg-gradient-to-r from-indigo-50 to-white rounded-xl border border-indigo-100">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-4">
+                                                <i class="fas fa-comment-alt text-indigo-600"></i>
+                                            </div>
+                                            <span class="font-bold text-gray-800">反馈</span>
+                                        </div>
+                                        <span class="text-sm text-indigo-600 font-medium">调整与优化</span>
+                                    </div>
+                                </div>
+                                <div class="mt-8 p-5 bg-blue-50 rounded-xl">
+                                    <h4 class="font-bold text-blue-800 mb-3">科学学习的三个关键词</h4>
+                                    <div class="grid grid-cols-3 gap-4">
+                                        <div class="text-center">
+                                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <i class="fas fa-user-edit text-blue-600"></i>
+                                            </div>
+                                            <p class="font-medium text-sm">主动</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <i class="fas fa-sitemap text-blue-600"></i>
+                                            </div>
+                                            <p class="font-medium text-sm">体系</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <i class="fas fa-chart-line text-blue-600"></i>
+                                            </div>
+                                            <p class="font-medium text-sm">螺旋上升</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                                <div class="flex items-center mb-8">
+                                    <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mr-5">
+                                        <i class="fas fa-book text-white text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-2xl font-bold">一堂知识管理闭环</h3>
+                                        <p class="text-gray-600">构建外脑，把偶遇变成长期能力</p>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <div class="grid grid-cols-3 gap-4 mb-8">
+                                        <div class="col-span-3">
+                                            <div class="bg-gradient-to-r from-blue-100 to-purple-100 p-6 rounded-xl text-center">
+                                                <h4 class="font-bold text-gray-800 mb-2">输入</h4>
+                                                <p class="text-gray-600 text-sm">信息的获取与收集</p>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3 mx-auto">
+                                                <span class="text-blue-600 font-bold">1</span>
+                                            </div>
+                                            <h4 class="font-bold text-center mb-2 text-sm">偶遇</h4>
+                                            <p class="text-gray-600 text-xs text-center">发现信息</p>
+                                        </div>
+                                        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3 mx-auto">
+                                                <span class="text-green-600 font-bold">2</span>
+                                            </div>
+                                            <h4 class="font-bold text-center mb-2 text-sm">获取</h4>
+                                            <p class="text-gray-600 text-xs text-center">收集信息</p>
+                                        </div>
+                                        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mb-3 mx-auto">
+                                                <span class="text-yellow-600 font-bold">3</span>
+                                            </div>
+                                            <h4 class="font-bold text-center mb-2 text-sm">整理</h4>
+                                            <p class="text-gray-600 text-xs text-center">分类整理</p>
+                                        </div>
+                                        <div class="col-span-3 mt-6">
+                                            <div class="bg-gradient-to-r from-green-100 to-cyan-100 p-6 rounded-xl text-center">
+                                                <h4 class="font-bold text-gray-800 mb-2">处理</h4>
+                                                <p class="text-gray-600 text-sm">信息的加工与内化</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-span-3 grid grid-cols-3 gap-4 mt-4">
+                                            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                                                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mb-3 mx-auto">
+                                                    <span class="text-red-600 font-bold">4</span>
+                                                </div>
+                                                <h4 class="font-bold text-center mb-2 text-sm">消化</h4>
+                                                <p class="text-gray-600 text-xs text-center">理解吸收</p>
+                                            </div>
+                                            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3 mx-auto">
+                                                    <span class="text-purple-600 font-bold">5</span>
+                                                </div>
+                                                <h4 class="font-bold text-center mb-2 text-sm">输出</h4>
+                                                <p class="text-gray-600 text-xs text-center">产出成果</p>
+                                            </div>
+                                            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                                                <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mb-3 mx-auto">
+                                                    <span class="text-indigo-600 font-bold">6</span>
+                                                </div>
+                                                <h4 class="font-bold text-center mb-2 text-sm">应用</h4>
+                                                <p class="text-gray-600 text-xs text-center">实践应用</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-sync-alt text-white text-2xl"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-8 p-5 bg-purple-50 rounded-xl">
+                                    <h4 class="font-bold text-purple-800 mb-3">知识管理的价值</h4>
+                                    <p class="text-purple-700 text-sm">
+                                        如果清单的一笔记对标电脑它是你的内存的话，那知识库就是你的硬盘。你有没有外挂硬盘，还是你每次想完就扔、想完就扔？所以要尝试做一个知识管理，把你的偶遇变成你长期的能力。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-8 bg-white p-8 rounded-2xl shadow-lg">
+                            <div class="flex items-center mb-8">
+                                <div class="w-14 h-14 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl flex items-center justify-center mr-5">
+                                    <i class="fas fa-dumbbell text-white text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-bold">一堂刻意练习策略·全景图</h3>
+                                    <p class="text-gray-600">1+4要素，实现能力的指数级增长</p>
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-5 gap-6">
+                                <div class="md:col-span-1">
+                                    <div class="bg-gradient-to-b from-red-50 to-white p-6 rounded-2xl border border-red-100 h-full">
+                                        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                                            <i class="fas fa-fire text-red-600 text-xl"></i>
+                                        </div>
+                                        <h4 class="font-bold text-center mb-3 text-red-700">前提</h4>
+                                        <p class="text-gray-600 text-center text-sm">长期追求，"刻意"是前提</p>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-4 grid md:grid-cols-4 gap-6">
+                                    <div class="bg-gradient-to-b from-blue-50 to-white p-6 rounded-2xl border border-blue-100">
+                                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                                            <i class="fas fa-road text-blue-600 text-xl"></i>
+                                        </div>
+                                        <h4 class="font-bold text-center mb-3 text-blue-700">A. 固定套路</h4>
+                                        <p class="text-gray-600 text-center text-sm">稳定范式，稳定发挥，"练习"有方法</p>
+                                    </div>
+                                    <div class="bg-gradient-to-b from-yellow-50 to-white p-6 rounded-2xl border border-yellow-100">
+                                        <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                                            <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                                        </div>
+                                        <h4 class="font-bold text-center mb-3 text-yellow-700">B. 非舒适区</h4>
+                                        <p class="text-gray-600 text-center text-sm">避免无脑，能力拉满，加速练习</p>
+                                    </div>
+                                    <div class="bg-gradient-to-b from-green-50 to-white p-6 rounded-2xl border border-green-100">
+                                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                                            <i class="fas fa-comments text-green-600 text-xl"></i>
+                                        </div>
+                                        <h4 class="font-bold text-center mb-3 text-green-700">C. 及时反馈</h4>
+                                        <p class="text-gray-600 text-center text-sm">理解差距，纠正偏差，持续进步</p>
+                                    </div>
+                                    <div class="bg-gradient-to-b from-purple-50 to-white p-6 rounded-2xl border border-purple-100">
+                                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                                            <i class="fas fa-redo text-purple-600 text-xl"></i>
+                                        </div>
+                                        <h4 class="font-bold text-center mb-3 text-purple-700">D. 大量重复</h4>
+                                        <p class="text-gray-600 text-center text-sm">借假修真，10倍重复=10倍进步</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-8 bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-2xl border border-red-100">
+                                <h4 class="font-bold text-red-800 mb-4">刻意练习的速度公式</h4>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div class="bg-white p-5 rounded-xl">
+                                        <p class="text-gray-700">
+                                            <strong>每增加一个要素，你的速度乘以2</strong><br>
+                                            当四个要素齐全时，进步速度达到最大值
+                                        </p>
+                                    </div>
+                                    <div class="bg-white p-5 rounded-xl">
+                                        <p class="text-gray-700">
+                                            <strong>每减少一个要素，你的速度除以2</strong><br>
+                                            要素不全时，进步速度会大幅降低
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-6 text-center">
+                                    <p class="text-red-700 font-medium">
+                                        这就是世界的真相：刻意练习需要完整的1+4要素，缺一不可
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- AI学习框架 -->
+                    <div class="model-panel hidden" id="framework-panel">
+                        <div class="bg-white p-8 rounded-2xl shadow-lg">
+                            <div class="flex items-center mb-8">
+                                <div class="w-14 h-14 bg-gradient-to-r from-green-500 to-teal-500 rounded-xl flex items-center justify-center mr-5">
+                                    <i class="fas fa-layer-group text-white text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl md:text-3xl font-bold">AI学习框架和深度L4层</h3>
+                                    <p class="text-gray-600">AI学习可以分为四个层次，从底层原理到上层应用，帮助我们明确学习路径</p>
+                                </div>
+                            </div>
+                            <div class="space-y-6 mb-8">
+                                <div class="flex items-center p-6 bg-gradient-to-r from-green-50 to-white rounded-2xl border border-green-100 hover-lift">
+                                    <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mr-6">
+                                        <span class="text-2xl font-bold text-green-700">L1</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-xl font-bold text-gray-800 mb-2">底层原理</h4>
+                                        <p class="text-gray-600">Transformer、RLHF... #N大板块 几十个体系</p>
+                                        <div class="mt-3">
+                                            <span class="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm mr-2">抽象</span>
+                                            <span class="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">理论基础</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-2xl font-bold text-green-600">#N大板块</div>
+                                        <div class="text-sm text-gray-500">几十个体系</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center p-6 bg-gradient-to-r from-blue-50 to-white rounded-2xl border border-blue-100 hover-lift">
+                                    <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mr-6">
+                                        <span class="text-2xl font-bold text-blue-700">L2</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-xl font-bold text-gray-800 mb-2">核心组件</h4>
+                                        <p class="text-gray-600">模型、智能体、MCP、工作流、Skills...</p>
+                                        <div class="mt-3">
+                                            <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm mr-2">技术组件</span>
+                                            <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">构建模块</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-2xl font-bold text-blue-600">#数十/数百</div>
+                                        <div class="text-sm text-gray-500">工具集</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center p-6 bg-gradient-to-r from-purple-50 to-white rounded-2xl border border-purple-100 hover-lift">
+                                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mr-6">
+                                        <span class="text-2xl font-bold text-purple-700">L3</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-xl font-bold text-gray-800 mb-2">工具应用</h4>
+                                        <p class="text-gray-600">各个平台、各种工具</p>
+                                        <div class="mt-3">
+                                            <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm mr-2">具体工具</span>
+                                            <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">平台应用</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-2xl font-bold text-purple-600">#数百/数千</div>
+                                        <div class="text-sm text-gray-500">应用层</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center p-6 bg-gradient-to-r from-pink-50 to-white rounded-2xl border border-pink-100 hover-lift">
+                                    <div class="w-16 h-16 bg-pink-100 rounded-xl flex items-center justify-center mr-6">
+                                        <span class="text-2xl font-bold text-pink-700">L4</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-xl font-bold text-gray-800 mb-2">场景教程</h4>
+                                        <p class="text-gray-600">各种媒体、各种知识库</p>
+                                        <div class="mt-3">
+                                            <span class="inline-block px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm mr-2">教程指南</span>
+                                            <span class="inline-block px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm">场景应用</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-2xl font-bold text-pink-600">#十万/百万</div>
+                                        <div class="text-sm text-gray-500">内容海洋</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-r from-green-100 to-blue-100 p-6 rounded-2xl border border-green-200">
+                                <h4 class="font-bold text-gray-800 mb-4">AI学习的关键洞察</h4>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div class="bg-white p-5 rounded-xl">
+                                        <p class="text-gray-700">
+                                            <strong>构建在哪一层？</strong> 构建在底层太抽象难实践，构建在上层太碎片易过时。Feature层（原子级特性）是相对完美的选择：既能指导实践，又能长期稳定。
+                                        </p>
+                                    </div>
+                                    <div class="bg-white p-5 rounded-xl">
+                                        <p class="text-gray-700">
+                                            <strong>应对变化：</strong> 工具一直在变，但是原子级特性相对稳定。只需要把这些特性理解、练得滚瓜烂熟，就可以无视上层工具的变化。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- FeatureSet -->
+                    <div class="model-panel hidden" id="feature-panel">
+                        <div class="bg-white p-8 rounded-2xl shadow-lg">
+                            <div class="flex items-center mb-8">
+                                <div class="w-14 h-14 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mr-5">
+                                    <i class="fas fa-puzzle-piece text-white text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl md:text-3xl font-bold">Truman自用的AI FeatureSet</h3>
+                                    <p class="text-gray-600">用Feature思维高水平刻意练习，将AI能力拆解为原子级特性，实现跨任务的复用</p>
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                <div class="bg-gradient-to-b from-blue-50 to-white p-6 rounded-2xl border border-blue-100">
+                                    <h4 class="font-bold text-lg mb-4 text-blue-700 flex items-center">
+                                        <i class="fas fa-brain mr-2"></i> LLM层
+                                    </h4>
+                                    <ul class="space-y-3">
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-blue-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">选模型</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-blue-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">使用不同版本</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-blue-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">模型的参数</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-blue-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">同时抽卡</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-blue-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">模型组合</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="bg-gradient-to-b from-purple-50 to-white p-6 rounded-2xl border border-purple-100">
+                                    <h4 class="font-bold text-lg mb-4 text-purple-700 flex items-center">
+                                        <i class="fas fa-keyboard mr-2"></i> 提示词
+                                    </h4>
+                                    <ul class="space-y-3">
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-purple-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">设定角色</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-purple-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">用户角色</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-purple-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">任务要求</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-purple-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">背景信息</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-purple-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">行文规则</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="bg-gradient-to-b from-pink-50 to-white p-6 rounded-2xl border border-pink-100">
+                                    <h4 class="font-bold text-lg mb-4 text-pink-700 flex items-center">
+                                        <i class="fas fa-database mr-2"></i> 数据层
+                                    </h4>
+                                    <ul class="space-y-3">
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-pink-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">上下文控制</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-pink-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">增强数据</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-pink-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">给案例集</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-pink-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">专家资料</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-pink-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">用多模态</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="bg-gradient-to-b from-green-50 to-white p-6 rounded-2xl border border-green-100">
+                                    <h4 class="font-bold text-lg mb-4 text-green-700 flex items-center">
+                                        <i class="fas fa-users-cog mr-2"></i> 协作层
+                                    </h4>
+                                    <ul class="space-y-3">
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-green-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">AI高阶角色</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-green-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">拆分任务</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-green-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">反向提示</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-green-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">反向教我</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-check text-green-600 text-xs"></i>
+                                            </div>
+                                            <span class="text-gray-700">多轮确认</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-2xl border border-yellow-100">
+                                <h4 class="font-bold text-gray-800 mb-4">Feature思维的核心价值</h4>
+                                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                    <div class="bg-white p-5 rounded-xl">
+                                        <h5 class="font-bold text-yellow-700 mb-3">理性看待工具</h5>
+                                        <p class="text-gray-700 text-sm">
+                                            市场上很火爆的工具，大概率是有一些Feature做的封装。用Feature的角度去理解，就能辩证看待，不会被工具纠结。
+                                        </p>
+                                    </div>
+                                    <div class="bg-white p-5 rounded-xl">
+                                        <h5 class="font-bold text-yellow-700 mb-3">抛弃工具迷信</h5>
+                                        <p class="text-gray-700 text-sm">
+                                            用扣子搭的东西跟聊天框搭的本质上可能是一样的。如果没用到进阶Feature，结果是一样的，不用太迷信复杂工具。
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-5 rounded-xl">
+                                    <h5 class="font-bold text-yellow-700 mb-3">Feature思维改变刻意练习</h5>
+                                    <p class="text-gray-700 text-sm">
+                                        如果过去大家做各种事都是碎的，感觉很难持续进步，试着切换到Feature思维，你会发现很多事就顺了。你可以把所有的都合并成一套模型，一天就可能练个两三轮，一年恨不得能练500到1000轮。
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mt-6 text-center">
+                                <p class="text-sm text-gray-500">
+                                    注：这是Truman个人使用的FeatureSet，不是一堂官方方法论，仅供参考。豆包AI生成。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- TCPR模型 -->
+        <section id="tcp" class="section-padding bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16 fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">TCPR模型：构建个人AI团队</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto text-balance">
+                        将AI工具封装为四类角色，形成属于自己的"AI团队"，实现个性化的人机协同和系统性能力提升。
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                    <div class="bg-gradient-to-b from-blue-50 to-white p-8 rounded-2xl border border-blue-100 hover-lift">
+                        <div class="w-20 h-20 bg-gradient-to-r from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <span class="text-3xl font-bold text-blue-600">T</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-center mb-4 text-blue-700">教学 (Teach)</h3>
+                        <p class="text-gray-600 text-center mb-6">
+                            负责把我教明白，解释概念，用我擅长的方式让我理解学习
+                        </p>
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-graduation-cap text-blue-600"></i>
+                                </div>
+                                <span class="text-gray-700">解释概念</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-book-open text-blue-600"></i>
+                                </div>
+                                <span class="text-gray-700">深度解读</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-clock text-blue-600"></i>
+                                </div>
+                                <span class="text-gray-700">时间轴解释</span>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-6 border-t border-blue-100">
+                            <p class="text-blue-700 text-sm text-center">
+                                <strong>不干活，只负责让你理解</strong>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-b from-purple-50 to-white p-8 rounded-2xl border border-purple-100 hover-lift">
+                        <div class="w-20 h-20 bg-gradient-to-r from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <span class="text-3xl font-bold text-purple-600">C</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-center mb-4 text-purple-700">咨询 (Consult)</h3>
+                        <p class="text-gray-600 text-center mb-6">
+                            引导我思考，不直接给答案，一步步专业地推进思考过程
+                        </p>
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-search text-purple-600"></i>
+                                </div>
+                                <span class="text-gray-700">洞察需求</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-running text-purple-600"></i>
+                                </div>
+                                <span class="text-gray-700">学习教练</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-comments text-purple-600"></i>
+                                </div>
+                                <span class="text-gray-700">深度引导</span>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-6 border-t border-purple-100">
+                            <p class="text-purple-700 text-sm text-center">
+                                <strong>不给答案，只引导思考</strong>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-b from-pink-50 to-white p-8 rounded-2xl border border-pink-100 hover-lift">
+                        <div class="w-20 h-20 bg-gradient-to-r from-pink-100 to-pink-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <span class="text-3xl font-bold text-pink-600">P</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-center mb-4 text-pink-700">实践 (Practice)</h3>
+                        <p class="text-gray-600 text-center mb-6">
+                            直接动手干活，可以给答案，要非常具体、非常直接
+                        </p>
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-box-open text-pink-600"></i>
+                                </div>
+                                <span class="text-gray-700">知识库抽离</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-image text-pink-600"></i>
+                                </div>
+                                <span class="text-gray-700">图片逆向工程</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-code text-pink-600"></i>
+                                </div>
+                                <span class="text-gray-700">提示词升级</span>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-6 border-t border-pink-100">
+                            <p class="text-pink-700 text-sm text-center">
+                                <strong>直接出结果、给答案</strong>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-b from-green-50 to-white p-8 rounded-2xl border border-green-100 hover-lift">
+                        <div class="w-20 h-20 bg-gradient-to-r from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <span class="text-3xl font-bold text-green-600">R</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-center mb-4 text-green-700">研究 (Research)</h3>
+                        <p class="text-gray-600 text-center mb-6">
+                            建模和研究，从海量信息里找规律、建模、找边界
+                        </p>
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-cube text-green-600"></i>
+                                </div>
+                                <span class="text-gray-700">建模</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-chart-line text-green-600"></i>
+                                </div>
+                                <span class="text-gray-700">深度调研</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-filter text-green-600"></i>
+                                </div>
+                                <span class="text-gray-700">萃取规律</span>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-6 border-t border-green-100">
+                            <p class="text-green-700 text-sm text-center">
+                                <strong>是底层能力基础</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-2xl border border-blue-100 mb-12">
+                    <h3 class="text-2xl font-bold mb-8 text-center">TCPR模型应用示例</h3>
+                    <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">角色</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">核心功能</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">特征</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">示例任务</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 font-medium text-blue-700">T（教学）</td>
+                                    <td class="px-6 py-4">把我教明白</td>
+                                    <td class="px-6 py-4">不干活，只负责让你理解</td>
+                                    <td class="px-6 py-4 text-sm">解释复杂概念、解读专业术语</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 font-medium text-purple-700">C（咨询）</td>
+                                    <td class="px-6 py-4">引导我思考</td>
+                                    <td class="px-6 py-4">不给答案，只引导思考</td>
+                                    <td class="px-6 py-4 text-sm">项目诊断、问题分析、决策支持</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 font-medium text-pink-700">P（实践）</td>
+                                    <td class="px-6 py-4">直接动手干活</td>
+                                    <td class="px-6 py-4">直接出结果、给答案</td>
+                                    <td class="px-6 py-4 text-sm">代码生成、文案写作、设计制作</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 font-medium text-green-700">R（研究）</td>
+                                    <td class="px-6 py-4">建模、找规律、探边界</td>
+                                    <td class="px-6 py-4">是底层能力基础</td>
+                                    <td class="px-6 py-4 text-sm">市场调研、趋势分析、模式识别</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-8 p-6 bg-white rounded-xl border border-blue-100">
+                        <h4 class="font-bold text-gray-800 mb-4">TCPR模型的演进逻辑</h4>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <p class="text-gray-700">
+                                    <strong>从教学到实践：</strong>最早可能只是一个教学助手，帮你理解概念。随着你越来越专业，它可以逐步进化为咨询助手，引导你思考。最终可能变成一个实践助手，直接帮你干活。
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-gray-700">
+                                    <strong>研究是基础：</strong>R（研究）是整个模型的底座，是所有能力的基础支撑。没有研究能力，其他三种角色都会缺乏深度和专业性。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold mb-6">一堂的愿景：为每个人定制TCPR团队</h3>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                        我们希望帮助一部分同学配一个属于你们个人的TCPR团队。这个团队对你来说足够专业、足够默契、足够务实、足够具体、足够定制化。
+                    </p>
+                    <div class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl">
+                        <i class="fas fa-robot mr-3"></i>
+                        <span>每个人都可以在一堂搭建属于你的商业管理领域的TCPR团队</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 实践应用 -->
+        <section id="practice" class="section-padding bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16 fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">实践应用：从理论到落地</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto text-balance">
+                        探索营的实践成果与未来发展方向，将理论模型转化为实际生产力
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8 mb-12">
+                    <div class="bg-white p-8 rounded-2xl shadow-lg hover-lift">
+                        <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fas fa-cube text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">最小原子</h3>
+                        <p class="text-gray-600 mb-6">
+                            既然不能一次性搞个复杂的智能体，不如回到最小单位。一堂把子弹给你准备得足够多，你自己去拼一个流程出来。
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3 mt-1">
+                                    <i class="fas fa-key text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-800">提示词 (Prompt)</h4>
+                                    <p class="text-gray-600 text-sm">围绕某一个课程、某一个小的范围，那个最小的逻辑提示词。</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3 mt-1">
+                                    <i class="fas fa-database text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-800">数据包 (DataPack)</h4>
+                                    <p class="text-gray-600 text-sm">完成某一个任务必须的那些方法论资料，包括上下文、必备的信息、必备的专业性。</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6 p-4 bg-blue-50 rounded-xl">
+                            <p class="text-blue-700 text-sm">
+                                <strong>核心价值：</strong>一堂有足够多最小的逻辑和最小的资料，你们自己去拼。这是我们在下一阶段给大家回答的。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg hover-lift">
+                        <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fas fa-box text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">固定封装</h3>
+                        <p class="text-gray-600 mb-6">
+                            一堂我们认为的智能体边界就是封装。只要你给自己封装了一个AI、那个AI真的是给你自己用的、你给它提了一些要求，那条线我们就姑且可以把它叫做智能体。
+                        </p>
+                        <div class="space-y-4 mb-6">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-quote-right text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-700 font-medium">"你是一个创业教育公司的助手"</p>
+                                    <p class="text-gray-500 text-xs">26个字可以显著提升AI的专业性</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-user-tie text-pink-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-700 font-medium">提示词段位提升官</p>
+                                    <p class="text-gray-500 text-xs">把60分提示词优化到七八十分</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-purple-50 rounded-xl">
+                            <p class="text-purple-700 text-sm">
+                                <strong>封装的核心：</strong>把未来重复的任务封装成稳定的智能体。一句话就能把AI从通用天才变成专业助手。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg hover-lift">
+                        <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fas fa-puzzle-piece text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">灵活组合</h3>
+                        <p class="text-gray-600 mb-6">
+                            当你们未来拿到这些原子之后，你们自己把它用在哪都行。原子最大的好处是它是通用级别的，它是最小的。唯一的缺点就是你需要手工拼接。
+                        </p>
+                        <div class="mb-6">
+                            <h4 class="font-bold text-gray-800 mb-3">可用工具</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Claude</span>
+                                <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">扣子</span>
+                                <span class="px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm">Dify</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Manus</span>
+                                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">ChatGPT</span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-green-50 rounded-xl">
+                            <p class="text-green-700 text-sm">
+                                <strong>应用示例：</strong>在写工作流时发现特别具体，可以把具象阶梯DataPack甩给它说"给我往抽象了改"，它就给你用这三个手指头给你改。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-lg mb-12">
+                    <h3 class="text-2xl font-bold mb-8">一个美好的实践案例</h3>
+                    <p class="text-gray-600 mb-8">
+                        这是一个美好的幻想，我们内部也刚刚实现，但是怎么复刻我们还没有摸得特别清楚，我给你们稍微幻想一下：
+                    </p>
+                    <div class="grid md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-gray-50 p-6 rounded-xl">
+                            <h4 class="font-bold text-gray-800 mb-4">1. 动力三曲线DataPack</h4>
+                            <p class="text-gray-600 text-sm">用户价值分析的核心模型，帮助理解用户动机和驱动力。</p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-xl">
+                            <h4 class="font-bold text-gray-800 mb-4">2. 逐字稿说人话DataPack</h4>
+                            <p class="text-gray-600 text-sm">将专业内容转化为口语化表达，达到四级口语化水平。</p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-xl">
+                            <h4 class="font-bold text-gray-800 mb-4">3. 具象阶梯DataPack</h4>
+                            <p class="text-gray-600 text-sm">避免抽象表达，多用佐证、场景化和数据化，避免升华和痛苦激发。</p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-100">
+                        <h4 class="font-bold text-gray-800 mb-4">如何应用</h4>
+                        <p class="text-gray-700 mb-4">
+                            你可以尝试着去引入这三个模型，然后把这三个"啪"的一下直接扔到你的扣子里，甚至是自动化直接喂给AI，然后你就说"我要做一个什么任务，我需要这三个方法"。
+                        </p>
+                        <div class="bg-white p-5 rounded-lg">
+                            <p class="text-gray-700 text-sm font-mono">
+                                "我要用三曲线里面的利益曲线，而且我只要'名'和'情'，你别给我'利益'。然后说人话你必须要给我写到口语化逐字稿风格，达到四级别。然后你要自己去想，你要具象阶梯，我这个不要抽象，你就多用佐证，而且多用场景化和数据化，避免升华和痛苦激发这个策略——我们的用户不喜欢，我们都是高净值用户。"
+                            </p>
+                        </div>
+                        <div class="mt-6">
+                            <p class="text-gray-700">
+                                <strong>结果：</strong>如果你自己一点点调、一点点从零去搭，估计忙活一两周都不一定搞得出来。但是如果你足够专业、足够懂课、足够懂一堂、且熟练掌握这些DataPack，也许快的话也就30分钟到90分钟工作量就能摸到一个还不错的水准。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 未来计划 -->
+        <section id="future" class="section-padding bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16 fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">未来计划与产品预告</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto text-balance">
+                        一堂在AI协同领域的未来规划，以及即将推出的产品和服务
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8 mb-12">
+                    <div class="bg-gradient-to-b from-blue-50 to-white p-8 rounded-2xl border border-blue-100 hover-lift">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-atom text-blue-600 text-xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold">原子中心</h3>
+                        </div>
+                        <p class="text-gray-600 mb-6">
+                            一个地方可以让大家去里面把原子的Prompt和DataPack拿走。而且我每一个会说清楚边界、这个究竟在哪有效，我尽量尽量把它收敛到一个非常小的场景下，大家不要滥用。
+                        </p>
+                        <div class="bg-blue-100 p-4 rounded-xl">
+                            <p class="text-blue-800 text-sm">
+                                <strong>目标：</strong>提供上百个最小单位的提示词，可能未来有数百个给你们至少会员内部开源的DataPack。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-b from-purple-50 to-white p-8 rounded-2xl border border-purple-100 hover-lift">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-brain text-purple-600 text-xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold">带一堂课程库的商业垂直大模型</h3>
+                        </div>
+                        <p class="text-gray-600 mb-6">
+                            有可能是GPT-4，有可能是别的，不知道。然后你可以直接跟它对话，它是懂一堂各种课的，你可以自己从它身上抽离一些DataPack也行，试试看。
+                        </p>
+                        <div class="bg-purple-100 p-4 rounded-xl">
+                            <p class="text-purple-800 text-sm">
+                                <strong>价值：</strong>你可以自己去试一个有200节课的AI，你可以跟它试试看、找找场景。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-b from-pink-50 to-white p-8 rounded-2xl border border-pink-100 hover-lift">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-user-friends text-pink-600 text-xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold">Partner（趴那）</h3>
+                        </div>
+                        <p class="text-gray-600 mb-6">
+                            我们为了避免大家谈智能体来回吵架，就叫"趴那"。你可以叫它伙伴、朋友，甚至如果你是一人公司，你可以直接在一堂搭建你的TICE团队、你的合伙人团队。
+                        </p>
+                        <div class="bg-pink-100 p-4 rounded-xl">
+                            <p class="text-pink-800 text-sm">
+                                <strong>愿景：</strong>给每一个人用一堂的体系定制一套属于你的TCPR团队。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 mb-16">
+                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 p-8 rounded-2xl border border-yellow-100">
+                        <h3 class="text-2xl font-bold mb-6">先锋官招募计划</h3>
+                        <p class="text-gray-700 mb-6">
+                            招募100名最渴望尝鲜的同学，用现有工具搭建"AI团队"工作流。我们用已有的工具、用一种比较笨的方法先去搭一个工作流，跟研发出来结果差不多的一个东西。
+                        </p>
+                        <div class="space-y-4 mb-8">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-check text-yellow-600"></i>
+                                </div>
+                                <span class="text-gray-700">提供Claude配置工具、系统提示词、官方Partner</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-check text-yellow-600"></i>
+                                </div>
+                                <span class="text-gray-700">教授如何定制个人TICE团队</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-check text-yellow-600"></i>
+                                </div>
+                                <span class="text-gray-700">提供带一堂课程的大模型</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-exclamation-triangle text-red-600"></i>
+                                </div>
+                                <span class="text-gray-700">要求：每周使用、定期打卡、交作业</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-yellow-200">
+                            <p class="text-yellow-700">
+                                <strong>注意：</strong>这是尝鲜计划，奔着失败去的。你们要接受失败，也接受一堂失败，也接受你们失败——就是尝鲜就奔着失败去的。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-50 to-teal-50 p-8 rounded-2xl border border-green-100">
+                        <h3 class="text-2xl font-bold mb-6">专家悬赏计划</h3>
+                        <p class="text-gray-700 mb-6">
+                            招募30-50个专家，试着让大家来写一些你们理解的——当然我们会给你们严格的要求和边界——你们来教、你们来做，把一堂课转化成提示词。
+                        </p>
+                        <div class="grid grid-cols-3 gap-4 mb-8">
+                            <div class="bg-white p-5 rounded-xl text-center border border-green-200">
+                                <div class="text-2xl font-bold text-green-600 mb-2">1年</div>
+                                <p class="text-green-700 text-sm">大会员资格</p>
+                            </div>
+                            <div class="bg-white p-5 rounded-xl text-center border border-green-200">
+                                <div class="text-2xl font-bold text-green-600 mb-2">1年</div>
+                                <p class="text-green-700 text-sm">会员资格</p>
+                            </div>
+                            <div class="bg-white p-5 rounded-xl text-center border border-green-200">
+                                <div class="text-2xl font-bold text-green-600 mb-2">5年</div>
+                                <p class="text-green-700 text-sm">会员资格</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-green-200">
+                            <p class="text-green-700">
+                                <strong>挑战门槛：</strong>需要把提示词调完之后，说清楚这个提示词的价值、使用的场景、边界、正向案例，甚至该怎么调、它哪些问题解决不了，尝试把一个东西真正定义清楚。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-12 rounded-2xl shadow-lg">
+                    <div class="text-center mb-10">
+                        <h3 class="text-3xl font-bold mb-6">结语：长期主义与复利思维</h3>
+                        <p class="text-xl opacity-90 max-w-3xl mx-auto">
+                            在变化非常快的世界里，找到10年稳定的体系，用确定性一点点垒出最终的获胜。
+                        </p>
+                    </div>
+                    <div class="bg-white/20 p-8 rounded-2xl backdrop-blur-sm max-w-3xl mx-auto">
+                        <p class="text-xl text-center italic mb-6">
+                            "我们不奢求毕其功于一役，但我们极度渴望论持久战式的最终获胜。"
+                        </p>
+                        <div class="grid md:grid-cols-3 gap-6 mt-8">
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <p class="font-medium">应对变化</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <p class="font-medium">复利积累</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-white/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <p class="font-medium">最终获胜</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-10 text-center">
+                        <p class="opacity-90">
+                            一堂其实比较喜欢这种相对长一点的、难一点的、相对正确的路——就是它不会走歪，它也不会怎么样，虽然难，但是一个飞轮一旦滚出来会越来越好的路。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- 页脚 -->
+    <footer class="bg-gray-900 text-white">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center mb-6">
+                        <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center mr-3">
+                            <i class="fas fa-brain text-white"></i>
+                        </div>
+                        <h3 class="font-bold text-xl">一堂AI探索营</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        在变化非常快的世界里，找到10年稳定的体系，用确定性一点点垒出最终的获胜。
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6">探索内容</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#intro" class="text-gray-400 hover:text-white transition">探索营介绍</a></li>
+                        <li><a href="#warmup" class="text-gray-400 hover:text-white transition">热身思考</a></li>
+                        <li><a href="#leaps" class="text-gray-400 hover:text-white transition">四次飞跃</a></li>
+                        <li><a href="#models" class="text-gray-400 hover:text-white transition">核心模型</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6">核心模型</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#models" class="text-gray-400 hover:text-white transition">缪斯模型</a></li>
+                        <li><a href="#models" class="text-gray-400 hover:text-white transition">双三角模型</a></li>
+                        <li><a href="#models" class="text-gray-400 hover:text-white transition">TCPR模型</a></li>
+                        <li><a href="#models" class="text-gray-400 hover:text-white transition">FeatureSet</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6">联系与参与</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar-alt text-gray-400 mr-3"></i>
+                            <span class="text-gray-400 text-sm">2月初启动会</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-ship text-gray-400 mr-3"></i>
+                            <span class="text-gray-400 text-sm">商业突围大航海</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-user-plus text-gray-400 mr-3"></i>
+                            <span class="text-gray-400 text-sm">先锋官招募</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-4 mt-6">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fab fa-weixin"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center">
+                <p class="text-gray-500 text-sm">
+                    © 2026 一堂AI探索营. 基于探索营内容整理生成，内容为探索性质，持续更新中。
+                </p>
+                <p class="text-gray-500 text-sm mt-2">
+                    版本更新于：2026.2.11 @北京一堂实验室
+                </p>
+                <p class="text-gray-500 text-sm mt-4">
+                    探索营目标：引领一部分同学往前走，形成专家，一步一步最后变成一个不错的东西。
+                </p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        // 移动端菜单切换
+        document.getElementById('mobileMenuBtn').addEventListener('click', function () {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        });
+
+        // 主题切换
+        document.getElementById('themeToggle').addEventListener('click', function () {
+            const html = document.documentElement;
+            const icon = this.querySelector('i');
+
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                html.classList.add('dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        });
+
+        // 模型标签切换
+        const modelTabs = document.querySelectorAll('.model-tab');
+        const modelPanels = document.querySelectorAll('.model-panel');
+
+        modelTabs.forEach(tab => {
+            tab.addEventListener('click', function () {
+                const tabId = this.getAttribute('data-tab');
+
+                // 移除所有标签的激活状态
+                modelTabs.forEach(t => {
+                    t.classList.remove('tab-active');
+                    t.classList.remove('bg-blue-50', 'border-blue-200');
+                    t.classList.remove('bg-purple-50', 'border-purple-200');
+                    t.classList.remove('bg-pink-50', 'border-pink-200');
+                    t.classList.remove('bg-green-50', 'border-green-200');
+                    t.classList.remove('bg-yellow-50', 'border-yellow-200');
+                });
+
+                // 添加当前标签的激活状态
+                this.classList.add('tab-active');
+
+                // 根据标签设置颜色
+                if (tabId === 'muse') {
+                    this.classList.add('bg-blue-50', 'border-blue-200');
+                } else if (tabId === 'dual-triangle') {
+                    this.classList.add('bg-purple-50', 'border-purple-200');
+                } else if (tabId === 'learning') {
+                    this.classList.add('bg-pink-50', 'border-pink-200');
+                } else if (tabId === 'framework') {
+                    this.classList.add('bg-green-50', 'border-green-200');
+                } else if (tabId === 'feature') {
+                    this.classList.add('bg-yellow-50', 'border-yellow-200');
+                }
+
+                // 隐藏所有面板
+                modelPanels.forEach(panel => {
+                    panel.classList.remove('active');
+                    panel.classList.add('hidden');
+                });
+
+                // 显示当前面板
+                const activePanel = document.getElementById(`${tabId}-panel`);
+                activePanel.classList.remove('hidden');
+                activePanel.classList.add('active');
+            });
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    // 关闭移动端菜单
+                    const menu = document.getElementById('mobileMenu');
+                    if (!menu.classList.contains('hidden')) {
+                        menu.classList.add('hidden');
+                    }
+
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // 滚动时添加导航栏阴影
+        window.addEventListener('scroll', function () {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 10) {
+                nav.classList.add('shadow-md');
+            } else {
+                nav.classList.remove('shadow-md');
+            }
+        });
+
+        // 页面加载时激活第一个模型标签
+        window.addEventListener('DOMContentLoaded', function () {
+            const firstTab = document.querySelector('.model-tab[data-tab="muse"]');
+            if (firstTab) {
+                firstTab.click();
+            }
+
+            // 添加淡入动画
+            const fadeElements = document.querySelectorAll('.fade-in');
+            fadeElements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+            });
+
+            setTimeout(() => {
+                fadeElements.forEach(el => {
+                    el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                });
+            }, 100);
+        });
+
+        // 工具提示
+        const tooltips = document.querySelectorAll('.tooltip');
+        tooltips.forEach(tooltip => {
+            tooltip.addEventListener('mouseenter', function () {
+                const tooltipText = this.querySelector('.tooltip-text');
+                if (tooltipText) {
+                    tooltipText.style.visibility = 'visible';
+                    tooltipText.style.opacity = '1';
+                }
+            });
+
+            tooltip.addEventListener('mouseleave', function () {
+                const tooltipText = this.querySelector('.tooltip-text');
+                if (tooltipText) {
+                    tooltipText.style.visibility = 'hidden';
+                    tooltipText.style.opacity = '0';
+                }
+            });
+        });
+
+        // 浮动的元素
+        const floatingElements = document.querySelectorAll('.floating-element');
+        floatingElements.forEach((el, index) => {
+            el.style.animationDelay = `${index * 0.5}s`;
+        });
+    </script>
+</body>
+
+</html>

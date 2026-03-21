@@ -1,0 +1,511 @@
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .game-header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .game-header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+
+        .main-interface {
+            display: grid;
+            grid-template-columns: 300px 1fr 280px;
+            gap: 20px;
+        }
+
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .panel-section h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 300;
+            font-size: 1.2rem;
+        }
+
+        .resources-display {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .resource-icon {
+            font-size: 1.5rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .resource-info {
+            flex: 1;
+        }
+
+        .resource-amount {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .resource-rate {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .buildings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .building-btn {
+            padding: 15px 10px;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .building-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .building-btn.affordable {
+            border-color: rgba(76, 175, 80, 0.5);
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .building-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .building-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .building-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .building-cost {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .game-area {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 500px;
+            position: relative;
+        }
+
+        .city-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 5px;
+            height: 100%;
+            min-height: 480px;
+        }
+
+        .city-tile {
+            background: rgba(139, 195, 74, 0.3);
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .city-tile:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .city-tile.occupied {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: default;
+        }
+
+        .city-tile.occupied:hover {
+            transform: none;
+        }
+
+        .building-sprite {
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .building-level {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(255, 215, 79, 0.9);
+            color: #333;
+            border-radius: 8px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .production-display {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .production-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .production-item:last-child {
+            border-bottom: none;
+        }
+
+        .production-building {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .production-rate {
+            font-weight: 600;
+            color: #81C784;
+        }
+
+        .research-tree {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .research-item {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .research-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .research-item.completed {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: rgba(76, 175, 80, 0.5);
+        }
+
+        .research-item.researching {
+            background: rgba(255, 193, 7, 0.3);
+            border-color: rgba(255, 193, 7, 0.5);
+            animation: research-pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes research-pulse {
+            from { opacity: 0.7; }
+            to { opacity: 1; }
+        }
+
+        .research-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .research-desc {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .research-cost {
+            font-size: 0.7rem;
+            color: #FFD54F;
+        }
+
+        .achievements-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-item.unlocked {
+            background: rgba(255, 215, 79, 0.3);
+            border: 1px solid rgba(255, 215, 79, 0.5);
+        }
+
+        .achievement-icon {
+            font-size: 1.2rem;
+        }
+
+        .achievement-info {
+            flex: 1;
+        }
+
+        .achievement-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .achievement-desc {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background: #F57C00;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(245, 124, 0, 0.3);
+        }
+
+        .btn:hover {
+            background: #EF6C00;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 124, 0, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.start-btn {
+            background: #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn.start-btn:hover {
+            background: #43A047;
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 弹窗样式 */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .popup.show {
+            display: flex;
+        }
+
+        .popup-content {
+            background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .popup-content h2 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+
+        .popup-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .main-interface {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            
+            .left-panel, .right-panel {
+                flex-direction: row;
+                overflow-x: auto;
+            }
+            
+            .panel-section {
+                flex: 0 0 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .game-header h1 {
+                font-size: 2rem;
+            }
+            
+            .city-grid {
+                grid-template-columns: repeat(6, 1fr);
+                grid-template-rows: repeat(8, 1fr);
+            }
+            
+            .resources-display {
+                grid-template-columns: 1fr;
+            }
+            
+            .buildings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .city-grid {
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(12, 1fr);
+            }
+            
+            .building-sprite {
+                font-size: 1.5rem;
+            }
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }

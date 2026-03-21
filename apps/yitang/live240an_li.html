@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust+OpenGL三维地球引擎产品分析</title>
+    <script>
+        // Polyfill to suppress "window.__chromium_devtools_metrics_reporter is not a function" error
+        // Ensure it is a function even if it was defined as null/object by extensions
+        if (typeof window.__chromium_devtools_metrics_reporter !== 'function') {
+            window.__chromium_devtools_metrics_reporter = function () { };
+        }
+
+        // Suppress Tailwind CDN production warning
+        if (typeof console !== 'undefined') {
+            const originalWarn = console.warn;
+            console.warn = function (...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) {
+                    return;
+                }
+                originalWarn.apply(console, args);
+            };
+
+            // Suppress "injectScript" debug logs
+            const originalLog = console.log;
+            console.log = function (...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('[debug-metadata]')) {
+                    return;
+                }
+                originalLog.apply(console, args);
+            };
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 地球背景动画 */
+        @keyframes rotateEarth {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .earth-bg {
+            background: linear-gradient(90deg, #0f172a 0%, #1e293b 25%, #0f172a 50%, #1e293b 75%, #0f172a 100%);
+            background-size: 200% 100%;
+            animation: rotateEarth 20s linear infinite;
+        }
+
+        /* 三维浮动效果 */
+        @keyframes float3d {
+
+            0%,
+            100% {
+                transform: translateY(0) rotateX(0) rotateY(0);
+            }
+
+            33% {
+                transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+            }
+
+            66% {
+                transform: translateY(5px) rotateX(-5deg) rotateY(-5deg);
+            }
+        }
+
+        .float-3d {
+            animation: float3d 8s ease-in-out infinite;
+        }
+
+        /* 代码高亮 */
+        .code-block {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+    <!-- 微信/OpenGraph 卡片信息 -->
+    <meta property="og:title" content="Rust+OpenGL三维地球引擎产品分析">
+    <meta property="og:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta property="og:url" content="./live240an_li.html">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Rust+OpenGL三维地球引擎产品分析">
+    <meta name="twitter:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta itemprop="name" content="Rust+OpenGL三维地球引擎产品分析">
+    <meta itemprop="description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+</head>
+
+<body class="bg-gray-900 text-gray-100">
+    <!-- Wechat Share Image Hack -->
+    <div style="display:none; visibility:hidden;">
+        <img src="https://tools.yy24365.com/assets/images/dev-tools-og.png" alt="wechat-share-icon" width="400" height="400">
+    </div>
+    <div>
+        <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">GeoVision 3D</h1>
+        <p class="text-xs text-cyan-200/70">Rust + OpenGL 三维引擎</p>
+    </div>
+    <div class="hidden md:flex space-x-6">
+        <a href="#definition" class="text-cyan-300 hover:text-cyan-100 transition-all hover:scale-105">产品定义</a>
+        <a href="#users" class="text-cyan-300 hover:text-cyan-100 transition-all hover:scale-105">用户分析</a>
+        <a href="#scenarios" class="text-cyan-300 hover:text-cyan-100 transition-all hover:scale-105">场景推演</a>
+        <a href="#opportunities" class="text-cyan-300 hover:text-cyan-100 transition-all hover:scale-105">机会评估</a>
+        <a href="#insights" class="text-cyan-300 hover:text-cyan-100 transition-all hover:scale-105">隐藏洞察</a>
+    </div>
+    <div class="md:hidden">
+        <button id="mobile-menu-button" class="text-cyan-300 focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </div>
+    <!-- 移动端菜单 -->
+    <div id="mobile-menu" class="hidden md:hidden mt-4 pb-2">
+        <div class="flex flex-col space-y-3">
+            <a href="#definition" class="text-cyan-300 hover:text-cyan-100 transition">产品定义</a>
+            <a href="#users" class="text-cyan-300 hover:text-cyan-100 transition">用户分析</a>
+            <a href="#scenarios" class="text-cyan-300 hover:text-cyan-100 transition">场景推演</a>
+            <a href="#opportunities" class="text-cyan-300 hover:text-cyan-100 transition">机会评估</a>
+            <a href="#insights" class="text-cyan-300 hover:text-cyan-100 transition">隐藏洞察</a>
+        </div>
+    </div>
+    </div>
+    </nav>
+    <!-- 页面头部 -->
+    <header class="earth-bg relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-blue-900/20 to-gray-900"></div>
+        <div class="container mx-auto px-4 py-16 md:py-24 relative z-10">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="inline-block mb-6">
+                    <div class="flex items-center space-x-2 px-4 py-2 bg-blue-900/30 rounded-full border border-blue-700/30">
+                        <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                        <span class="text-cyan-300 text-sm font-medium">高性能三维地理引擎</span>
+                    </div>
+                </div>
+                <h1 class="text-4xl md:text-6xl font-bold mb-6">
+                    <span class="bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent">Rust+OpenGL三维地球引擎</span>
+                </h1>
+                <p class="text-xl text-cyan-100/80 mb-8 max-w-3xl mx-auto">
+                    面向电力、水利、工程、物联网的可视化三维展示交互解决方案
+                </p>
+                <div class="flex flex-wrap justify-center gap-4 mb-8">
+                    <div class="flex items-center space-x-2 px-4 py-2 bg-gray-800/50 rounded-lg border border-gray-700">
+                        <i class="fas fa-bolt text-yellow-400"></i>
+                        <span class="font-medium">高性能渲染</span>
+                    </div>
+                    <div class="flex items-center space-x-2 px-4 py-2 bg-gray-800/50 rounded-lg border border-gray-700">
+                        <i class="fas fa-shield-alt text-green-400"></i>
+                        <span class="font-medium">内存安全</span>
+                    </div>
+                    <div class="flex items-center space-x-2 px-4 py-2 bg-gray-800/50 rounded-lg border border-gray-700">
+                        <i class="fas fa-cogs text-purple-400"></i>
+                        <span class="font-medium">跨平台部署</span>
+                    </div>
+                    <div class="flex items-center space-x-2 px-4 py-2 bg-gray-800/50 rounded-lg border border-gray-700">
+                        <i class="fas fa-database text-blue-400"></i>
+                        <span class="font-medium">多源数据融合</span>
+                    </div>
+                </div>
+                <div class="text-cyan-200/70 italic border-l-4 border-cyan-500/50 pl-4 py-2 max-w-2xl mx-auto">
+                    "在需要处理大规模地理数据且对实时交互有高要求的专业场景下，实现流畅、稳定、可定制的地理数据三维可视化与交互分析"
+                </div>
+            </div>
+        </div>
+        <!-- 三维地球装饰元素 -->
+        <div class="absolute top-10 right-10 w-40 h-40 opacity-10">
+            <div class="w-full h-full rounded-full border-2 border-cyan-500/30"></div>
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-cyan-400/20"></div>
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-cyan-500/10 to-blue-500/10"></div>
+        </div>
+    </header>
+    <main class="container mx-auto px-4 py-12">
+        <!-- 产品核心定义 -->
+        <section id="definition" class="mb-16 scroll-mt-20">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center mr-4">
+                    <i class="fas fa-crosshairs text-white"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">产品核心定义</h2>
+                    <p class="text-cyan-200/70">产品定位与技术架构</p>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 mb-10">
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6 hover:border-cyan-500/30 transition-all">
+                    <h3 class="text-xl font-bold text-cyan-300 mb-4 flex items-center">
+                        <i class="fas fa-cube mr-2"></i> 产品概述
+                    </h3>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3"></div>
+                            <span><span class="font-medium text-cyan-200">产品名称：</span>Rust+OpenGL三维地球引擎</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3"></div>
+                            <span><span class="font-medium text-cyan-200">核心定位：</span>面向B端企业级用户的高性能三维地理可视化引擎</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3"></div>
+                            <span><span class="font-medium text-cyan-200">技术栈：</span>Rust语言 + OpenGL图形API + 现代GPU计算技术</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-cyan-400 rounded-full mt-2 mr-3"></div>
+                            <span><span class="font-medium text-cyan-200">目标行业：</span>电力电网、水利水电、建筑工程、智慧城市、物联网监控</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6 hover:border-blue-500/30 transition-all">
+                    <h3 class="text-xl font-bold text-blue-300 mb-4 flex items-center">
+                        <i class="fas fa-tasks mr-2"></i> JTBD核心定义
+                    </h3>
+                    <div class="mb-4">
+                        <div class="inline-block px-3 py-1 bg-blue-900/50 text-blue-300 rounded-full text-sm font-medium mb-2">
+                            核心层任务
+                        </div>
+                        <p class="text-gray-300 italic border-l-2 border-blue-500 pl-4 py-2">
+                            在需要处理大规模地理数据且对实时交互有高要求的专业场景下，实现流畅、稳定、可定制的地理数据三维可视化与交互分析
+                        </p>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                            <span class="text-gray-300">限定在"企业级专业应用"场景</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                            <span class="text-gray-300">针对"海量地理数据"的处理需求</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                            <span class="text-gray-300">强调"实时交互"与"高稳定性"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 技术架构展示 -->
+            <div class="bg-gray-800/30 rounded-xl border border-gray-700 p-6 mt-8">
+                <h3 class="text-xl font-bold text-white mb-6 flex items-center">
+                    <i class="fas fa-layer-group mr-2"></i> 技术架构示意
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-gradient-to-br from-blue-900/40 to-cyan-900/40 rounded-lg p-4 border border-blue-700/30">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-code text-blue-300"></i>
+                            </div>
+                            <h4 class="font-bold text-blue-300">Rust核心</h4>
+                            <p class="text-sm text-gray-400 mt-1">内存安全·零成本抽象</p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-cyan-900/40 to-emerald-900/40 rounded-lg p-4 border border-cyan-700/30">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-cyan-600 to-cyan-800 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-cube text-cyan-300"></i>
+                            </div>
+                            <h4 class="font-bold text-cyan-300">OpenGL渲染</h4>
+                            <p class="text-sm text-gray-400 mt-1">高性能·跨平台·GPU加速</p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-emerald-900/40 to-purple-900/40 rounded-lg p-4 border border-emerald-700/30">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-database text-emerald-300"></i>
+                            </div>
+                            <h4 class="font-bold text-emerald-300">数据融合层</h4>
+                            <p class="text-sm text-gray-400 mt-1">GIS·BIM·IoT·业务数据</p>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-900/40 to-blue-900/40 rounded-lg p-4 border border-purple-700/30">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-800 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-sitemap text-purple-300"></i>
+                            </div>
+                            <h4 class="font-bold text-purple-300">应用接口层</h4>
+                            <p class="text-sm text-gray-400 mt-1">API·SDK·插件系统</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 用户拆解 -->
+        <section id="users" class="mb-16 scroll-mt-20">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center mr-4">
+                    <i class="fas fa-users text-white"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">用户拆解分析</h2>
+                    <p class="text-cyan-200/70">目标客户画像与特征分析</p>
+                </div>
+            </div>
+            <!-- 用户画像矩阵 -->
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6 mb-10">
+                <h3 class="text-xl font-bold text-purple-300 mb-6 flex items-center">
+                    <i class="fas fa-table mr-2"></i> 用户画像矩阵
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-900/80">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-cyan-300 uppercase tracking-wider">用户类型</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-cyan-300 uppercase tracking-wider">典型特征</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-cyan-300 uppercase tracking-wider">需求强度</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-cyan-300 uppercase tracking-wider">决策角色</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800">
+                            <tr class="hover:bg-gray-700/30">
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                                        <span class="font-medium text-yellow-300">电力行业</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-gray-300">国网/南网省级公司、电力设计院</td>
+                                <td class="px-4 py-4">
+                                    <div class="flex">
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-gray-300">技术部门主导，领导审批</td>
+                            </tr>
+                            <tr class="hover:bg-gray-700/30">
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                                        <span class="font-medium text-blue-300">水利水电</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-gray-300">大型水电站运营方、水利工程设计院</td>
+                                <td class="px-4 py-4">
+                                    <div class="flex">
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-gray-600"></i>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-gray-300">项目组提出，信息部门评估</td>
+                            </tr>
+                            <tr class="hover:bg-gray-700/30">
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                                        <span class="font-medium text-green-300">建筑工程</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-gray-300">大型工程总包商、建筑设计院</td>
+                                <td class="px-4 py-4">
+                                    <div class="flex">
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-gray-600"></i>
+                                        <i class="fas fa-star text-gray-600"></i>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-gray-300">BIM部门主导，IT部门配合</td>
+                            </tr>
+                            <tr class="hover:bg-gray-700/30">
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-cyan-500 rounded-full mr-2"></div>
+                                        <span class="font-medium text-cyan-300">智慧城市</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-gray-300">城市运营中心、园区管理方</td>
+                                <td class="px-4 py-4">
+                                    <div class="flex">
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <i class="fas fa-star text-gray-600"></i>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-gray-300">信息化领导决策</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- 用户特征深度分析 -->
+            <h3 class="text-xl font-bold text-white mb-6">用户特征深度分析</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700 p-5 hover:border-purple-500/30 transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-purple-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-briefcase text-purple-400"></i>
+                        </div>
+                        <h4 class="font-bold text-purple-300">业务类型</h4>
+                    </div>
+                    <ul class="space-y-2 text-gray-300 text-sm">
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-purple-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>面向客户：2B为主，少量2G</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-purple-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>业务性质：服务型+产品型混合</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-purple-500 rounded-full mt=1.5 mr-2"></div>
+                            <span>线上线下：SaaS服务+本地化部署</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700 p-5 hover:border-blue-500/30 transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-blue-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-chart-line text-blue-400"></i>
+                        </div>
+                        <h4 class="font-bold text-blue-300">规模性质</h4>
+                    </div>
+                    <ul class="space-y-2 text-gray-300 text-sm">
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>行业细分：电力调度、水利工程</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>企业规模：500-5000人</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>营收规模：1亿-100亿</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700 p-5 hover:border-cyan-500/30 transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-cyan-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-sliders-h text-cyan-400"></i>
+                        </div>
+                        <h4 class="font-bold text-cyan-300">标准程度</h4>
+                    </div>
+                    <ul class="space-y-2 text-gray-300 text-sm">
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>数字化水平：中级到高级</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>标准化程度：流程标准化但需求差异大</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>技术债务：普遍存在老旧系统集成需求</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700 p-5 hover:border-green-500/30 transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-green-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-sitemap text-green-400"></i>
+                        </div>
+                        <h4 class="font-bold text-green-300">决策文化</h4>
+                    </div>
+                    <ul class="space-y-2 text-gray-300 text-sm">
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>流程复杂度：跨部门委员会决策</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>决策角色：技术+业务+采购多方参与</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>切换难度：高（数据迁移、培训成本）</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700 p-5 hover:border-yellow-500/30 transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-yellow-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-money-bill-wave text-yellow-400"></i>
+                        </div>
+                        <h4 class="font-bold text-yellow-300">财务特征</h4>
+                    </div>
+                    <ul class="space-y-2 text-gray-300 text-sm">
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>预算周期：年度预算+项目制补充</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>预算额度：20万-200万/项目</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-1.5 mr-2"></div>
+                            <span>支付条件：分阶段付款，30%预付款</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700 p-5 hover:border-red-500/30 transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-red-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-user-tag text-red-400"></i>
+                        </div>
+                        <h4 class="font-bold text-red-300">决策角色分布</h4>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                <span>发起者</span>
+                                <span>业务部门</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full w-3/4"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                <span>决策者</span>
+                                <span>技术总监/CIO</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-yellow-500 h-2 rounded-full w-4/5"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                <span>使用者</span>
+                                <span>技术操作人员</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full w-2/3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 场景推演 -->
+        <section id="scenarios" class="mb-16 scroll-mt-20">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center mr-4">
+                    <i class="fas fa-map-marked-alt text-white"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">场景推演分析</h2>
+                    <p class="text-cyan-200/70">核心应用场景与操作流程</p>
+                </div>
+            </div>
+            <!-- 场景分类标签 -->
+            <div class="flex flex-wrap gap-3 mb-10">
+                <button class="px-4 py-2 bg-gradient-to-r from-blue-900/50 to-cyan-900/50 text-blue-300 rounded-lg border border-blue-700/30 hover:bg-blue-800/30 transition-all active-scenario" data-scenario="power">
+                    电力行业
+                </button>
+                <button class="px-4 py-2 bg-gradient-to-r from-cyan-900/50 to-emerald-900/50 text-cyan-300 rounded-lg border border-cyan-700/30 hover:bg-cyan-800/30 transition-all" data-scenario="water">
+                    水利水电
+                </button>
+                <button class="px-4 py-2 bg-gradient-to-r from-emerald-900/50 to-green-900/50 text-emerald-300 rounded-lg border border-emerald-700/30 hover:bg-emerald-800/30 transition-all" data-scenario="construction">
+                    建筑工程
+                </button>
+                <button class="px-4 py-2 bg-gradient-to-r from-purple-900/50 to-pink-900/50 text-purple-300 rounded-lg border border-purple-700/30 hover:bg-purple-800/30 transition-all" data-scenario="iot">
+                    物联网监控
+                </button>
+            </div>
+            <!-- 电力行业场景 -->
+            <div id="power-scenario" class="scenario-content">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- 场景1 -->
+                    <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-blue-700/30 p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-blue-900/70 flex items-center justify-center mr-3">
+                                <i class="fas fa-bolt text-yellow-400"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-blue-300">电网三维调度监控</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-clock mr-2"></i> 时间节点
+                                </h4>
+                                <div class="px-4 py-2 bg-blue-900/30 rounded-lg border border-blue-800/30">
+                                    <p class="text-gray-300">7×24小时，特别关注用电高峰时段</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-desktop mr-2"></i> 空间环境
+                                </h4>
+                                <div class="px-4 py-2 bg-blue-900/30 rounded-lg border border-blue-800/30">
+                                    <p class="text-gray-300">省级电网调度中心大屏环境</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-users mr-2"></i> 操作流程
+                                </h4>
+                                <ol class="space-y-2 pl-5 list-decimal text-gray-300">
+                                    <li>导入电网GIS数据 + 实时监控数据</li>
+                                    <li>三维展示电网拓扑结构</li>
+                                    <li>实时显示电力负荷分布</li>
+                                    <li>故障点三维定位与影响范围分析</li>
+                                    <li>模拟电力调度方案</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 场景2 -->
+                    <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-blue-700/30 p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-cyan-900/70 flex items-center justify-center mr-3">
+                                <i class="fas fa-road text-cyan-400"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-cyan-300">输电线路巡检规划</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-calendar-alt mr-2"></i> 时间节点
+                                </h4>
+                                <div class="px-4 py-2 bg-cyan-900/30 rounded-lg border border-cyan-800/30">
+                                    <p class="text-gray-300">季度巡检前规划期</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-laptop mr-2"></i> 空间环境
+                                </h4>
+                                <div class="px-4 py-2 bg-cyan-900/30 rounded-lg border border-cyan-800/30">
+                                    <p class="text-gray-300">规划设计办公室，多屏工作环境</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-list-ol mr-2"></i> 操作流程
+                                </h4>
+                                <ol class="space-y-2 pl-5 list-decimal text-gray-300">
+                                    <li>加载高精度地形数据</li>
+                                    <li>三维模拟线路走廊</li>
+                                    <li>碰撞检测（与建筑物、树木）</li>
+                                    <li>自动生成巡检路径</li>
+                                    <li>输出巡检报告与可视化方案</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 水利水电场景 -->
+            <div id="water-scenario" class="scenario-content hidden">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- 场景1 -->
+                    <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-cyan-700/30 p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-cyan-900/70 flex items-center justify-center mr-3">
+                                <i class="fas fa-water text-blue-400"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-cyan-300">水电站安全监测</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i> 关键事件
+                                </h4>
+                                <div class="px-4 py-2 bg-cyan-900/30 rounded-lg border border-cyan-800/30">
+                                    <p class="text-gray-300">水位超过警戒线、设备异常</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-tv mr-2"></i> 空间环境
+                                </h4>
+                                <div class="px-4 py-2 bg-cyan-900/30 rounded-lg border border-cyan-800/30">
+                                    <p class="text-gray-300">水电站中控室，大屏+多监控席位</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-stream mr-2"></i> 操作流程
+                                </h4>
+                                <ol class="space-y-2 pl-5 list-decimal text-gray-300">
+                                    <li>加载水电站三维模型 + 水库地形</li>
+                                    <li>实时接入传感器数据（水位、流量、压力）</li>
+                                    <li>三维可视化显示安全监测点</li>
+                                    <li>模拟洪水淹没范围</li>
+                                    <li>应急预案三维推演</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 场景2 -->
+                    <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-cyan-700/30 p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-blue-900/70 flex items-center justify-center mr-3">
+                                <i class="fas fa-drafting-compass text-blue-300"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-blue-300">水利工程设计评审</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-users mr-2"></i> 人物协作
+                                </h4>
+                                <div class="px-4 py-2 bg-blue-900/30 rounded-lg border border-blue-800/30">
+                                    <p class="text-gray-300">设计团队+专家评审+领导决策</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-vr-cardboard mr-2"></i> 空间环境
+                                </h4>
+                                <div class="px-4 py-2 bg-blue-900/30 rounded-lg border border-blue-800/30">
+                                    <p class="text-gray-300">会议室，投影+VR设备</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-project-diagram mr-2"></i> 操作流程
+                                </h4>
+                                <ol class="space-y-2 pl-5 list-decimal text-gray-300">
+                                    <li>导入BIM+GIS融合数据</li>
+                                    <li>三维展示工程设计全貌</li>
+                                    <li>方案对比（多方案同屏对比）</li>
+                                    <li>淹没分析、水流模拟</li>
+                                    <li>沉浸式VR评审体验</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 建筑工程场景 -->
+            <div id="construction-scenario" class="scenario-content hidden">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- 场景1 -->
+                    <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-emerald-700/30 p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-900/70 flex items-center justify-center mr-3">
+                                <i class="fas fa-hard-hat text-emerald-400"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-emerald-300">大型工程进度管理</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-chart-line mr-2"></i> 时间节点
+                                </h4>
+                                <div class="px-4 py-2 bg-emerald-900/30 rounded-lg border border-emerald-800/30">
+                                    <p class="text-gray-300">月度/季度进度汇报</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-mobile-alt mr-2"></i> 空间环境
+                                </h4>
+                                <div class="px-4 py-2 bg-emerald-900/30 rounded-lg border border-emerald-800/30">
+                                    <p class="text-gray-300">项目部会议室，移动端同步</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-tasks mr-2"></i> 操作流程
+                                </h4>
+                                <ol class="space-y-2 pl-5 list-decimal text-gray-300">
+                                    <li>导入施工BIM模型 + 现场实景模型</li>
+                                    <li>三维展示实际进度 vs 计划进度</li>
+                                    <li>问题区域高亮标记</li>
+                                    <li>工程量自动统计</li>
+                                    <li>移动端现场进度更新</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 场景2 -->
+                    <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-emerald-700/30 p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-green-900/70 flex items-center justify-center mr-3">
+                                <i class="fas fa-sun text-yellow-400"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-green-300">建筑日照与风环境分析</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-cogs mr-2"></i> 技术问题
+                                </h4>
+                                <div class="px-4 py-2 bg-green-900/30 rounded-lg border border-green-800/30">
+                                    <p class="text-gray-300">计算量大，传统软件速度慢</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-desktop mr-2"></i> 空间环境
+                                </h4>
+                                <div class="px-4 py-2 bg-green-900/30 rounded-lg border border-green-800/30">
+                                    <p class="text-gray-300">设计院办公室，高性能工作站</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-wind mr-2"></i> 操作流程
+                                </h4>
+                                <ol class="space-y-2 pl-5 list-decimal text-gray-300">
+                                    <li>加载城市级三维模型</li>
+                                    <li>实时日照阴影分析</li>
+                                    <li>风场模拟与可视化</li>
+                                    <li>多方案快速对比</li>
+                                    <li>生成合规性报告</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 物联网监控场景 -->
+            <div id="iot-scenario" class="scenario-content hidden">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- 场景1 -->
+                    <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-purple-700/30 p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-purple-900/70 flex items-center justify-center mr-3">
+                                <i class="fas fa-city text-purple-400"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-purple-300">智慧园区设备监控</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-2"></i> 重大事件
+                                </h4>
+                                <div class="px-4 py-2 bg-purple-900/30 rounded-lg border border-purple-800/30">
+                                    <p class="text-gray-300">设备故障、安全预警</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-tv mr-2"></i> 空间环境
+                                </h4>
+                                <div class="px-4 py-2 bg-purple-900/30 rounded-lg border border-purple-800/30">
+                                    <p class="text-gray-300">园区运营中心，多屏监控</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-satellite-dish mr-2"></i> 操作流程
+                                </h4>
+                                <ol class="space-y-2 pl-5 list-decimal text-gray-300">
+                                    <li>加载园区三维实景模型</li>
+                                    <li>接入物联网设备实时数据</li>
+                                    <li>三维空间定位设备状态</li>
+                                    <li>告警三维可视化（声光+空间定位）</li>
+                                    <li>应急预案三维指引</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 场景2 -->
+                    <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-pink-700/30 p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-pink-900/70 flex items-center justify-center mr-3">
+                                <i class="fas fa-network-wired text-pink-400"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-pink-300">工业物联网监控</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-industry mr-2"></i> 环境特点
+                                </h4>
+                                <div class="px-4 py-2 bg-pink-900/30 rounded-lg border border-pink-800/30">
+                                    <p class="text-gray-300">工厂车间复杂环境，设备密集</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-temperature-high mr-2"></i> 监控要素
+                                </h4>
+                                <div class="px-4 py-2 bg-pink-900/30 rounded-lg border border-pink-800/30">
+                                    <p class="text-gray-300">温度、压力、振动、能耗等实时数据</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-cyan-300 mb-2 flex items-center">
+                                    <i class="fas fa-chart-bar mr-2"></i> 核心价值
+                                </h4>
+                                <ol class="space-y-2 pl-5 list-decimal text-gray-300">
+                                    <li>设备健康状态三维可视化</li>
+                                    <li>预测性维护分析</li>
+                                    <li>能耗优化三维分析</li>
+                                    <li>生产流程三维优化</li>
+                                    <li>远程专家协助与指导</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 机会评估 -->
+        <section id="opportunities" class="mb-16 scroll-mt-20">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-green-600 to-emerald-500 flex items-center justify-center mr-4">
+                    <i class="fas fa-bullseye text-white"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">机会评估矩阵</h2>
+                    <p class="text-cyan-200/70">优先级排序与产品策略</p>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 mb-10">
+                <!-- 核心机会 -->
+                <div class="bg-gradient-to-br from-red-900/20 to-red-800/10 rounded-xl border-2 border-red-700/50 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-red-300">核心机会</h3>
+                        <div class="px-3 py-1 bg-red-900/50 text-red-300 rounded-full text-sm font-bold">
+                            重点做
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-4">高重要性 + 低满意度</p>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-red-900/20 rounded-lg border border-red-800/30">
+                            <h4 class="font-bold text-red-200 mb-2">高性能渲染</h4>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-red-300">重要性：★★★★★</span>
+                                <span class="text-red-300">满意度：★★☆☆☆</span>
+                            </div>
+                            <p class="text-gray-300 text-sm">Rust核心渲染引擎 + GPU加速</p>
+                            <div class="mt-3 text-xs text-gray-400">
+                                <i class="fas fa-hypothesis text-red-400 mr-1"></i>
+                                <span>假设：客户愿意为性能提升支付溢价</span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-red-900/20 rounded-lg border border-red-800/30">
+                            <h4 class="font-bold text-red-200 mb-2">多源数据融合</h4>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-red-300">重要性：★★★★☆</span>
+                                <span class="text-red-300">满意度：★★☆☆☆</span>
+                            </div>
+                            <p class="text-gray-300 text-sm">统一数据接入平台</p>
+                            <div class="mt-3 text-xs text-gray-400">
+                                <i class="fas fa-hypothesis text-red-400 mr-1"></i>
+                                <span>假设：数据整合时间能减少50%以上</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 竞争红海 -->
+                <div class="bg-gradient-to-br from-yellow-900/20 to-yellow-800/10 rounded-xl border-2 border-yellow-700/50 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-yellow-300">竞争红海</h3>
+                        <div class="px-3 py-1 bg-yellow-900/50 text-yellow-300 rounded-full text-sm font-bold">
+                            谨慎做
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-4">高重要性 + 高满意度</p>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-yellow-900/20 rounded-lg border border-yellow-800/30">
+                            <h4 class="font-bold text-yellow-200 mb-2">基础三维展示</h4>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-yellow-300">重要性：★★★★★</span>
+                                <span class="text-yellow-300">满意度：★★★★☆</span>
+                            </div>
+                            <p class="text-gray-300 text-sm">不做通用功能，聚焦行业深度</p>
+                            <div class="mt-3 text-xs text-gray-400">
+                                <i class="fas fa-exclamation-triangle text-yellow-400 mr-1"></i>
+                                <span>已有成熟竞品，需差异化竞争</span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-yellow-900/20 rounded-lg border border-yellow-800/30">
+                            <h4 class="font-bold text-yellow-200 mb-2">GIS基础功能</h4>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-yellow-300">重要性：★★★★☆</span>
+                                <span class="text-yellow-300">满意度：★★★★☆</span>
+                            </div>
+                            <p class="text-gray-300 text-sm">与成熟GIS厂商合作，集成而非替代</p>
+                            <div class="mt-3 text-xs text-gray-400">
+                                <i class="fas fa-handshake text-yellow-400 mr-1"></i>
+                                <span>建议：建立合作伙伴生态</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 过度服务 -->
+                <div class="bg-gradient-to-br from-blue-900/20 to-blue-800/10 rounded-xl border-2 border-blue-700/50 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-blue-300">过度服务</h3>
+                        <div class="px-3 py-1 bg-blue-900/50 text-blue-300 rounded-full text-sm font-bold">
+                            简化做
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-4">低重要性 + 高满意度</p>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-blue-900/20 rounded-lg border border-blue-800/30">
+                            <h4 class="font-bold text-blue-200 mb-2">精美UI特效</h4>
+                            <p class="text-gray-300 text-sm">简化UI，专注性能与稳定性</p>
+                            <div class="mt-3 text-xs text-gray-400">
+                                <i class="fas fa-cut text-blue-400 mr-1"></i>
+                                <span>策略：MVP阶段只保留核心UI</span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-blue-900/20 rounded-lg border border-blue-800/30">
+                            <h4 class="font-bold text-blue-200 mb-2">复杂编辑工具</h4>
+                            <p class="text-gray-300 text-sm">提供基础编辑，专业编辑与专业软件集成</p>
+                            <div class="mt-3 text-xs text-gray-400">
+                                <i class="fas fa-plug text-blue-400 mr-1"></i>
+                                <span>策略：通过插件/API与专业工具集成</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 技术验证清单 -->
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
+                <h3 class="text-xl font-bold text-cyan-300 mb-6 flex items-center">
+                    <i class="fas fa-vial mr-2"></i> 技术验证清单
+                </h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
+                        <h4 class="font-bold text-green-300 mb-3 flex items-center">
+                            <i class="fas fa-check-circle mr-2"></i> 核心价值假设
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <div class="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-2"></div>
+                                <div>
+                                    <p class="text-gray-300 text-sm">客户愿意为性能支付溢价</p>
+                                    <p class="text-gray-500 text-xs mt-1">验证：与5家目标客户技术负责人访谈</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-2 h-2 bg-green-500 rounded-full mt-1.5 mr-2"></div>
+                                <div>
+                                    <p class="text-gray-300 text-sm">Rust技术栈能被企业接受</p>
+                                    <p class="text-gray-500 text-xs mt-1">验证：技术选型研讨会，70%认可</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
+                        <h4 class="font-bold text-yellow-300 mb-3 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i> 风险假设
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full mt-1.5 mr-2"></div>
+                                <div>
+                                    <p class="text-gray-300 text-sm">Rust人才稀缺</p>
+                                    <p class="text-gray-500 text-xs mt-1">缓解：建立培训体系 + 开发工具链</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full mt-1.5 mr-2"></div>
+                                <div>
+                                    <p class="text-gray-300 text-sm">客户采购周期长</p>
+                                    <p class="text-gray-500 text-xs mt-1">策略：免费试用版 + POC项目先导</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-900/50 rounded-lg border border-gray-700">
+                        <h4 class="font-bold text-blue-300 mb-3 flex items-center">
+                            <i class="fas fa-chart-line mr-2"></i> 增长假设
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full mt-1.5 mr-2"></div>
+                                <div>
+                                    <p class="text-gray-300 text-sm">标杆客户突破</p>
+                                    <p class="text-gray-500 text-xs mt-1">目标：第6个月签约1家省级电网</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full mt-1.5 mr-2"></div>
+                                <div>
+                                    <p class="text-gray-300 text-sm">行业方案标准化</p>
+                                    <p class="text-gray-500 text-xs mt-1">目标：第12个月形成3个行业方案</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 隐藏洞察 -->
+        <section id="insights" class="scroll-mt-20">
+            <div class="flex items-center mb-8">
+                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-500 flex items-center justify-center mr-4">
+                    <i class="fas fa-brain text-white"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold text-white">隐藏洞察挖掘</h2>
+                    <p class="text-cyan-200/70">用户深层动机与情感需求</p>
+                </div>
+            </div>
+            <!-- 四种力量分析 -->
+            <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700 p-6 mb-10">
+                <h3 class="text-xl font-bold text-purple-300 mb-6 flex items-center">
+                    <i class="fas fa-balance-scale mr-2"></i> 四种力量分析（用户转化动力公式）
+                </h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- 动力侧 -->
+                    <div>
+                        <h4 class="text-lg font-bold text-green-400 mb-4">动力侧（推力 + 拉力）</h4>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-gradient-to-r from-green-900/30 to-emerald-900/30 rounded-lg border border-green-800/30">
+                                <h5 class="font-bold text-green-300 mb-2 flex items-center">
+                                    <i class="fas fa-arrow-up mr-2"></i> 推力（现状痛苦）
+                                </h5>
+                                <ul class="space-y-2 text-gray-300 text-sm">
+                                    <li class="flex items-start">
+                                        <div class="w-1.5 h-1.5 bg-green-500 rounded-full mt-1 mr-2"></div>
+                                        <span>性能焦虑：现有系统处理省级数据频繁卡顿</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <div class="w-1.5 h-1.5 bg-green-500 rounded-full mt-1 mr-2"></div>
+                                        <span>数据孤岛：GIS、监控、业务系统数据无法联动</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <div class="w-1.5 h-1.5 bg-green-500 rounded-full mt-1 mr-2"></div>
+                                        <span>决策低效：领导看不懂二维图纸，需要反复解释</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="p-4 bg-gradient-to-r from-blue-900/30 to-cyan-900/30 rounded-lg border border-blue-800/30">
+                                <h5 class="font-bold text-blue-300 mb-2 flex items-center">
+                                    <i class="fas fa-magnet mr-2"></i> 拉力（新方案吸引力）
+                                </h5>
+                                <ul class="space-y-2 text-gray-300 text-sm">
+                                    <li class="flex items-start">
+                                        <div class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1 mr-2"></div>
+                                        <span>性能承诺：Rust引擎承诺10倍渲染性能提升</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <div class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1 mr-2"></div>
+                                        <span>数据融合：一站式解决多源数据融合问题</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <div class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1 mr-2"></div>
+                                        <span>成本优势：一次性采购 + 更低维护成本</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 阻力侧 -->
+                    <div>
+                        <h4 class="text-lg font-bold text-red-400 mb-4">阻力侧（焦虑 + 习惯）</h4>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-gradient-to-r from-red-900/30 to-orange-900/30 rounded-lg border border-red-800/30">
+                                <h5 class="font-bold text-red-300 mb-2 flex items-center">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i> 焦虑（新方案担忧）
+                                </h5>
+                                <ul class="space-y-2 text-gray-300 text-sm">
+                                    <li class="flex items-start">
+                                        <div class="w-1.5 h-1.5 bg-red-500 rounded-full mt-1 mr-2"></div>
+                                        <span>技术风险：Rust技术栈不成熟，人才稀缺</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <div class="w-1.5 h-1.5 bg-red-500 rounded-full mt-1 mr-2"></div>
+                                        <span>项目风险：能否按时交付稳定产品</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <div class="w-1.5 h-1.5 bg-red-500 rounded-full mt-1 mr-2"></div>
+                                        <span>集成风险：与现有系统集成难度大</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="p-4 bg-gradient-to-r from-yellow-900/30 to-amber-900/30 rounded-lg border border-yellow-800/30">
+                                <h5 class="font-bold text-yellow-300 mb-2 flex items-center">
+                                    <i class="fas fa-history mr-2"></i> 习惯（现状惯性）
+                                </h5>
+                                <ul class="space-y-2 text-gray-300 text-sm">
+                                    <li class="flex items-start">
+                                        <div class="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-1 mr-2"></div>
+                                        <span>路径依赖：已熟练使用现有工具</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <div class="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-1 mr-2"></div>
+                                        <span>风险规避："不求有功但求无过"心态</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <div class="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-1 mr-2"></div>
+                                        <span>采购惯性：继续采购知名品牌更保险</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 转化公式 -->
+                <div class="mt-8 p-4 bg-gradient-to-r from-purple-900/30 to-indigo-900/30 rounded-lg border border-purple-800/30">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-white mb-2">
+                            转化动力公式
+                        </div>
+                        <div class="text-3xl font-bold text-cyan-300">
+                            推力 + 拉力 > 焦虑 + 习惯
+                        </div>
+                        <p class="text-gray-400 mt-3">
+                            只有当动力侧的总和显著大于阻力侧的总和时，用户的购买行为才会真正发生
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- 三种任务挖掘 -->
+            <div class="grid md:grid-cols-3 gap-8 mb-10">
+                <div class="bg-gradient-to-br from-blue-900/20 to-blue-800/10 rounded-xl border border-blue-700/30 p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-blue-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-cogs text-blue-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-blue-300">功能任务</h3>
+                    </div>
+                    <p class="text-gray-300 mb-4">解决具体操作（基础需求）</p>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-blue-200">核心需求：</span>流畅展示省级规模三维地理数据</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-blue-200">技术指标：</span>帧率≥30fps，支持千万级三角面片</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-blue-200">功能清单：</span>数据导入、三维渲染、基础交互</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-gradient-to-br from-purple-900/20 to-purple-800/10 rounded-xl border border-purple-700/30 p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-purple-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-heart text-purple-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-purple-300">情感任务</h3>
+                    </div>
+                    <p class="text-gray-300 mb-4">满足心理感受（溢价关键）</p>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-purple-200">掌控感：</span>领导能够直观"看懂"复杂工程</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-purple-200">安全感：</span>系统稳定不崩溃，数据不丢失</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-purple-200">成就感：</span>解决长期困扰的性能问题</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-gradient-to-br from-cyan-900/20 to-cyan-800/10 rounded-xl border border-cyan-700/30 p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-cyan-900/50 flex items-center justify-center mr-3">
+                            <i class="fas fa-user-friends text-cyan-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-cyan-300">社交任务</h3>
+                    </div>
+                    <p class="text-gray-300 mb-4">塑造社交形象（身份认同）</p>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-cyan-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-cyan-200">行业标杆：</span>使用先进三维引擎成为行业领先标志</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-cyan-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-cyan-200">汇报亮点：</span>三维可视化成为工作汇报的亮点</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-cyan-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-cyan-200">合规形象：</span>使用国产软件符合政策导向</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- 微观体感设计 -->
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
+                <h3 class="text-xl font-bold text-amber-300 mb-6 flex items-center">
+                    <i class="fas fa-mouse-pointer mr-2"></i> 微观体感设计点
+                </h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-4 bg-gradient-to-br from-amber-900/20 to-yellow-900/10 rounded-lg border border-amber-700/30">
+                        <h4 class="font-bold text-amber-300 mb-3">加载进度可视化</h4>
+                        <div class="space-y-2">
+                            <div>
+                                <p class="text-sm text-gray-400">现状</p>
+                                <p class="text-gray-300">黑屏等待，用户焦虑</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-400">设计</p>
+                                <p class="text-amber-200">三维地球加载动画 + 进度预估</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gradient-to-br from-green-900/20 to-emerald-900/10 rounded-lg border border-green-700/30">
+                        <h4 class="font-bold text-green-300 mb-3">操作反馈即时性</h4>
+                        <div class="space-y-2">
+                            <div>
+                                <p class="text-sm text-gray-400">现状</p>
+                                <p class="text-gray-300">点击后延迟响应</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-400">设计</p>
+                                <p class="text-green-200">微交互即时反馈 + 操作轨迹可视化</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gradient-to-br from-blue-900/20 to-cyan-900/10 rounded-lg border border-blue-700/30">
+                        <h4 class="font-bold text-blue-300 mb-3">错误处理友好性</h4>
+                        <div class="space-y-2">
+                            <div>
+                                <p class="text-sm text-gray-400">现状</p>
+                                <p class="text-gray-300">崩溃后无提示</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-400">设计</p>
+                                <p class="text-blue-200">优雅降级 + 错误恢复建议</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 结论部分 -->
+        <section class="mt-16 p-8 bg-gradient-to-r from-blue-900/30 to-cyan-900/30 rounded-2xl border border-cyan-700/30">
+            <h2 class="text-2xl font-bold text-cyan-300 mb-4">产品战略结论</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-4 bg-gray-900/50 rounded-lg">
+                    <h3 class="font-bold text-blue-300 mb-3 flex items-center">
+                        <i class="fas fa-bullseye mr-2"></i> 产品定位建议
+                    </h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-blue-200">技术差异化：</span>以Rust高性能渲染为核心卖点</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-blue-200">行业深度：</span>深耕电力行业，形成行业know-how壁垒</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-blue-200">部署灵活：</span>支持本地化部署，满足数据安全需求</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="p-4 bg-gray-900/50 rounded-lg">
+                    <h3 class="font-bold text-green-300 mb-3 flex items-center">
+                        <i class="fas fa-road mr-2"></i> 市场进入建议
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-medium text-green-200 mb-1">第一阶段（0-12个月）</h4>
+                            <p class="text-gray-300 text-sm">聚焦电力行业，打造标杆案例</p>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-green-200 mb-1">第二阶段（12-24个月）</h4>
+                            <p class="text-gray-300 text-sm">扩展水利、工程行业，形成标准化方案</p>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-green-200 mb-1">第三阶段（24-36个月）</h4>
+                            <p class="text-gray-300 text-sm">平台化发展，建立开发者生态</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 bg-gray-900/50 rounded-lg">
+                    <h3 class="font-bold text-amber-300 mb-3 flex items-center">
+                        <i class="fas fa-shield-alt mr-2"></i> 风险控制建议
+                    </h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-amber-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-amber-200">技术风险：</span>保持核心团队稳定性，建立代码质量体系</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-amber-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-amber-200">市场风险：</span>避免过早扩张，坚持行业深耕</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-2 h-2 bg-amber-500 rounded-full mt-2 mr-2"></div>
+                            <span><span class="font-medium text-amber-200">财务风险：</span>控制研发成本，寻求战略投资</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-cyan-800/30">
+                <div class="text-center">
+                    <div class="text-xl font-bold text-white mb-2">最终判断</div>
+                    <p class="text-gray-300 max-w-3xl mx-auto">
+                        Rust+OpenGL三维地球引擎在电力、水利等专业领域存在明确市场机会，核心价值在于解决大规模地理数据的高性能可视化问题。成功关键在于：1）技术性能优势的充分验证；2）行业深度理解的积累；3）从工具到平台的演进路径设计。
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- 页脚 -->
+    <footer class="earth-bg border-t border-blue-900/30 mt-16">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full"></div>
+                        <div>
+                            <h3 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">GeoVision 3D</h3>
+                            <p class="text-cyan-200/70 text-sm">三维地理可视化引擎</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm">基于需求分析框架的产品场景推演分析</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-cyan-300 transition">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-cyan-300 transition">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-cyan-300 transition">
+                        <i class="fab fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
+                <p>© 2026 GeoVision 3D | Rust+OpenGL三维地球引擎产品分析</p>
+                <p class="mt-1">本分析基于需求分析框架完成，仅用于演示目的</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        // 移动端菜单切换
+        document.getElementById('mobile-menu-button').addEventListener('click', function () {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    // 关闭移动端菜单（如果打开）
+                    document.getElementById('mobile-menu').classList.add('hidden');
+
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // 场景切换功能
+        const scenarioButtons = document.querySelectorAll('[data-scenario]');
+        const scenarioContents = document.querySelectorAll('.scenario-content');
+
+        // 默认显示电力行业场景
+        scenarioContents.forEach(content => {
+            if (content.id !== 'power-scenario') {
+                content.classList.add('hidden');
+            }
+        });
+
+        scenarioButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const scenario = this.getAttribute('data-scenario');
+
+                // 更新按钮状态
+                scenarioButtons.forEach(btn => {
+                    btn.classList.remove('active-scenario');
+                    btn.classList.remove('bg-blue-800/30', 'bg-cyan-800/30', 'bg-emerald-800/30', 'bg-purple-800/30');
+                });
+
+                // 添加当前场景按钮的高亮
+                this.classList.add('active-scenario');
+                if (scenario === 'power') this.classList.add('bg-blue-800/30');
+                if (scenario === 'water') this.classList.add('bg-cyan-800/30');
+                if (scenario === 'construction') this.classList.add('bg-emerald-800/30');
+                if (scenario === 'iot') this.classList.add('bg-purple-800/30');
+
+                // 显示对应的场景内容
+                scenarioContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+
+                const targetContent = document.getElementById(`${scenario}-scenario`);
+                if (targetContent) {
+                    targetContent.classList.remove('hidden');
+                }
+            });
+        });
+
+        // 为当前活动部分添加高亮
+        window.addEventListener('scroll', function () {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('nav a');
+
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('text-cyan-100', 'font-bold');
+                link.classList.add('text-cyan-300');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('text-cyan-100', 'font-bold');
+                    link.classList.remove('text-cyan-300');
+                }
+            });
+        });
+
+        // 添加一些交互效果
+        const cards = document.querySelectorAll('.bg-gradient-to-br');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-5px)';
+            });
+
+            card.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // 添加加载动画
+        document.addEventListener('DOMContentLoaded', function () {
+            // 页面加载完成后淡入
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease-in';
+
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+
+            // 添加随机浮动效果
+            const floatingElements = document.querySelectorAll('.float-3d');
+            floatingElements.forEach(el => {
+                // 为每个元素设置不同的动画延迟
+                const delay = Math.random() * 5;
+                el.style.animationDelay = `${delay}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

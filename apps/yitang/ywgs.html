@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一堂 · 业务公式 Pro | 业务逻辑可视化实验室</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --sidebar-bg: rgba(30, 41, 59, 0.8);
+            --card-bg: rgba(51, 65, 85, 0.4);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-blue: #38bdf8;
+            --accent-purple: #a78bfa;
+            --accent-green: #4ade80;
+            --accent-orange: #fb923c;
+            --accent-pink: #f472b6;
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
+            --glass-blur: blur(12px);
+            --secondary-btn-bg: rgba(255, 255, 255, 0.05);
+            --secondary-btn-hover-bg: rgba(255, 255, 255, 0.1);
+            /* Dynamic Palette Variables (Default: Rainbow) */
+            --accent-0: #ef4444;
+            --accent-1: #f97316;
+            --accent-2: #eab308;
+            --accent-3: #22c55e;
+            --accent-4: #06b6d4;
+            --accent-5: #3b82f6;
+            --accent-6: #a855f7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(167, 139, 250, 0.1) 0%, transparent 40%),
+                radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 30px 30px;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 380px;
+            background: var(--sidebar-bg);
+            backdrop-filter: var(--glass-blur);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .logo-container h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .label-row span {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-dim);
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--text-main);
+            font-family: 'ui-monospace', 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: auto;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .template-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--text-main);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .template-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-blue);
+        }
+
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), #0ea5e9);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-btn-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary-btn-hover-bg);
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 12px;
+            border-radius: 8px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas-toolbar {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .tool-btn {
+            background: var(--sidebar-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .tool-btn.active {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--accent-blue);
+        }
+
+        /* Theme Selector */
+        .theme-select {
+            margin-bottom: 24px;
+        }
+
+        .theme-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        .theme-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .theme-circle:hover {
+            transform: scale(1.2);
+        }
+
+        .theme-circle.active {
+            border-color: var(--accent-blue);
+        }
+
+        #diagram-svg {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+        #diagram-svg:active {
+            cursor: grabbing;
+        }
+
+        /* Node Styles */
+        .node-rect {
+            fill: var(--card-bg);
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 1;
+            rx: 12;
+            ry: 12;
+            transition: all 0.3s;
+        }
+
+        .node-text {
+            fill: var(--text-main);
+            font-size: 14px;
+            font-weight: 500;
+            user-select: none;
+        }
+
+        .operator-badge {
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+            transition: transform 0.2s;
+        }
+
+        .operator-badge:hover {
+            transform: scale(1.2);
+        }
+
+        .operator-circle {
+            stroke: rgba(255, 255, 255, 0.2);
+            stroke-width: 2;
+        }
+
+        .operator-text {
+            fill: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            user-select: none;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .op-plus {
+            fill: #10b981;
+        }
+
+        /* Emerald 500 */
+        .op-minus {
+            fill: #ef4444;
+        }
+
+        /* Red 500 */
+        .op-multiply {
+            fill: #8b5cf6;
+        }
+
+        /* Violet 500 */
+        .op-divide {
+            fill: #f59e0b;
+        }
+
+        /* Amber 500 */
+        .op-default {
+            fill: #64748b;
+        }
+
+        /* Slate 500 */
+        .link-path {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 2;
+            transition: stroke 0.3s;
+        }
+
+        .help-tooltip {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            font-size: 12px;
+            color: var(--text-dim);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        /* Color classes using variables for dynamic switching */
+        .accent-0 {
+            stroke: var(--accent-0);
+        }
+
+        .accent-1 {
+            stroke: var(--accent-1);
+        }
+
+        .accent-2 {
+            stroke: var(--accent-2);
+        }
+
+        .accent-3 {
+            stroke: var(--accent-3);
+        }
+
+        .accent-4 {
+            stroke: var(--accent-4);
+        }
+
+        .accent-5 {
+            stroke: var(--accent-5);
+        }
+
+        .accent-6 {
+            stroke: var(--accent-6);
+        }
+
+        /* Purple */
+        /* My Formulas Styles */
+        #my-formulas-list {
+            margin-top: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div class="logo-container">
+                        <i data-lucide="line-chart" class="accent-blue"></i>
+                        <h1>一堂 · 业务公式 Pro</h1>
+                    </div>
+                    <button id="theme-toggle" class="btn-secondary btn-small" style="width: auto; padding: 6px; border: none; background: transparent; color: var(--text-dim); cursor: pointer;" onclick="toggleTheme()" title="切换亮/暗模式">
+                        <i data-lucide="moon" style="width: 16px;"></i>
+                    </button>
+                </div>
+                <p style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">深度解构业务逻辑，发现增长杠杆</p>
+            </div>
+            <div class="sidebar-content">
+                <div class="label-row">
+                    <span>示例模板</span>
+                </div>
+                <div class="template-grid">
+                    <button class="template-btn" onclick="loadTemplate('ecommerce')">
+                        <i data-lucide="shopping-cart" style="width:14px"></i> 电商零售
+                    </button>
+                    <button class="template-btn" onclick="loadTemplate('saas')">
+                        <i data-lucide="cloud" style="width:14px"></i> SaaS增长
+                    </button>
+                    <button class="template-btn" onclick="loadTemplate('retail')">
+                        <i data-lucide="store" style="width:14px"></i> 实体门店
+                    </button>
+                    <button class="template-btn" onclick="loadTemplate('content')">
+                        <i data-lucide="pen-tool" style="width:14px"></i> 内容生态
+                    </button>
+                </div>
+                <div class="input-group">
+                    <div class="label-row">
+                        <span>公式定义</span>
+                        <div class="btn-row">
+                            <button class="btn-secondary btn-small" onclick="formatFormula()" title="自动格式化">
+                                <i data-lucide="align-left" style="width:12px"></i> 格式化 (对齐)
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="dataInput" placeholder="请输入业务公式，例如：&#10;收入 = 流量 * 转化率 * 客单价&#10;流量 = 站内 + 站外" spellcheck="false"></textarea>
+                </div>
+                <div class="label-row" style="margin-top: -10px;">
+                    <span>我的公式</span>
+                    <button class="btn-secondary btn-small" style="width:auto; padding:4px 8px;" onclick="saveFormula()">
+                        <i data-lucide="save" style="width:12px"></i> 保存
+                    </button>
+                </div>
+                <div id="my-formulas-list"></div>
+                <div class="action-btns" style="margin-top: 24px;">
+                    <button class="btn-primary" onclick="renderDiagram()">
+                        <i data-lucide="zap" style="width:18px"></i> 立即生成
+                    </button>
+                    <button class="btn-secondary" onclick="exportImage()">
+                        <i data-lucide="download" style="width:18px"></i> 导出图片 (含公式)
+                    </button>
+                </div>
+            </div>
+            <div style="padding: 24px; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-dim);">
+                Inspired by <a href="https://yitang.top" target="_blank" style="color: var(--accent-blue); text-decoration: none;">yitang.top</a>
+            </div>
+        </aside>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="canvas-toolbar">
+                <button class="tool-btn active" id="btn-layout-horizontal" onclick="setLayout('horizontal')" title="横排视图">
+                    <i data-lucide="arrow-right" style="width:18px"></i>
+                </button>
+                <button class="tool-btn" id="btn-layout-vertical" onclick="setLayout('vertical')" title="竖排视图">
+                    <i data-lucide="arrow-down" style="width:18px"></i>
+                </button>
+                <div style="position: relative; display: inline-block;">
+                    <select id="palette-select" class="tool-btn" style="width: auto; padding: 0 10px; appearance: none; -webkit-appearance: none; padding-right: 30px; font-size: 14px;" onchange="changePalette(this.value)">
+                        <option value="rainbow">🌈 彩虹</option>
+                        <option value="classic">🎨 经典</option>
+                        <option value="business">💼 商务</option>
+                        <option value="warm">🔥 暖色</option>
+                        <option value="cool">❄️ 冷色</option>
+                    </select>
+                    <i data-lucide="chevron-down" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 14px; pointer-events: none; color: var(--text-dim);"></i>
+                </div>
+                <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 10px 0;"></div>
+                <button class="tool-btn" onclick="resetView()" title="居中视图">
+                    <i data-lucide="maximize" style="width:18px"></i>
+                </button>
+                <button class="tool-btn" onclick="zoomIn()" title="放大">
+                    <i data-lucide="zoom-in" style="width:18px"></i>
+                </button>
+                <button class="tool-btn" onclick="zoomOut()" title="缩小">
+                    <i data-lucide="zoom-out" style="width:18px"></i>
+                </button>
+            </div>
+            <svg id="diagram-svg">
+                <g id="viewport-group">
+                    <g id="links-group"></g>
+                    <g id="nodes-group"></g>
+                </g>
+            </svg>
+            <div class="help-tooltip">
+                <i data-lucide="mouse-pointer" style="width:12px; vertical-align: middle; margin-right: 4px;"></i>
+                拖拽画布移动，滚轮缩放视图
+            </div>
+        </main>
+    </div>
+    <script>
+        // --- Configuration & State ---
+        const templates = {
+            "ecommerce": "女装店收入 = 进店人数 * 付费转化率 * 客单价\n进店人数 = 站内流量 + 站外流量\n付费转化率 = 详情页转化 * 支付转化\n客单价 = 平均件单价 * 人均购买件数",
+            "saas": "MRR = 活跃客户数 * ARPU\n活跃客户数 = 上月存量 + 本月新增 - 流失客户数\n本月新增 = 线索量 * 试用转化率 * 成交率\nARPU = 基础订阅 + 增值服务",
+            "retail": "单店产出 = 客流量 * 转化率 * 客单价\n客流量 = 橱窗客流 * 进店率\n转化率 = 试穿率 * 购买率\n客单价 = 连带率 * 平均单价 * 0.8\n平均单价 = 基础价 * 折扣率",
+            "content": "内容总收益 = 阅读量 * 千次阅读收益\n阅读量 = 粉丝分发 + 算法推荐 + 社群传播\n算法推荐 = 内容质量分 * 关键词权重\n内容质量分 = 点击率 + 点赞率 * 2 + 完读率 * 5"
+        };
+
+        const themes = {
+            "dark": {
+                "--bg-color": "#0f172a",
+                "--sidebar-bg": "rgba(30, 41, 59, 0.8)",
+                "--card-bg": "rgba(51, 65, 85, 0.4)",
+                "--text-main": "#f1f5f9",
+                "--text-dim": "#94a3b8",
+                "--border-color": "rgba(255, 255, 255, 0.1)",
+                "--secondary-btn-bg": "rgba(255, 255, 255, 0.05)",
+                "--secondary-btn-hover-bg": "rgba(255, 255, 255, 0.1)"
+            },
+            "obsidian": {
+                "--bg-color": "#000000",
+                "--sidebar-bg": "rgba(20, 20, 20, 0.9)",
+                "--card-bg": "rgba(40, 40, 40, 0.6)",
+                "--text-main": "#e5e5e5",
+                "--text-dim": "#a3a3a3",
+                "--border-color": "rgba(255, 255, 255, 0.15)",
+                "--secondary-btn-bg": "rgba(255, 255, 255, 0.1)",
+                "--secondary-btn-hover-bg": "rgba(255, 255, 255, 0.2)"
+            },
+            "light": {
+                "--bg-color": "#f8fafc",
+                "--sidebar-bg": "rgba(255, 255, 255, 0.8)",
+                "--card-bg": "rgba(255, 255, 255, 0.6)",
+                "--text-main": "#1e293b",
+                "--text-dim": "#64748b",
+                "--border-color": "rgba(0, 0, 0, 0.1)",
+                "--secondary-btn-bg": "rgba(0, 0, 0, 0.05)",
+                "--secondary-btn-hover-bg": "rgba(0, 0, 0, 0.1)"
+            },
+            "navy": {
+                "--bg-color": "#0a192f",
+                "--sidebar-bg": "rgba(17, 34, 64, 0.8)",
+                "--card-bg": "rgba(35, 53, 84, 0.5)",
+                "--text-main": "#ccd6f6",
+                "--text-dim": "#8892b0",
+                "--border-color": "rgba(136, 146, 176, 0.2)",
+                "--secondary-btn-bg": "rgba(136, 146, 176, 0.1)",
+                "--secondary-btn-hover-bg": "rgba(136, 146, 176, 0.2)"
+            }
+        };
+
+        let currentScale = 1;
+        let currentTranslate = { x: 50, y: 50 };
+        let isDragging = false;
+        let startPos = { x: 0, y: 0 };
+        let layoutDirection = 'horizontal'; // 'horizontal' or 'vertical'
+
+        const svg = document.getElementById('diagram-svg');
+        const viewportGroup = document.getElementById('viewport-group');
+        const nodesGroup = document.getElementById('nodes-group');
+        const linksGroup = document.getElementById('links-group');
+        const dataInput = document.getElementById('dataInput');
+
+        // --- Initialization ---
+        window.onload = () => {
+            lucide.createIcons();
+            loadTemplate('ecommerce');
+            setupInteractivity();
+            loadSavedFormulas();
+            changeTheme('light'); // Default to light theme
+
+            let debounceTimer;
+            dataInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(renderDiagram, 500);
+            });
+        };
+
+        let currentTheme = 'light';
+
+        function toggleTheme() {
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            changeTheme(newTheme);
+
+            // Update Icon
+            const btn = document.getElementById('theme-toggle');
+            if (btn) {
+                const iconName = newTheme === 'dark' ? 'moon' : 'sun';
+                btn.innerHTML = `<i data-lucide="${iconName}" style="width: 16px;"></i>`;
+                lucide.createIcons();
+            }
+        }
+
+        function changeTheme(themeName) {
+            currentTheme = themeName;
+            const theme = themes[themeName];
+            const root = document.documentElement;
+
+            for (const key in theme) {
+                root.style.setProperty(key, theme[key]);
+            }
+            renderDiagram();
+        }
+
+        // --- Palette Management ---
+        const palettes = {
+            "rainbow": ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#a855f7'],
+            "classic": ['#3b82f6', '#a855f7', '#10b981', '#f59e0b', '#ec4899', '#6366f1', '#14b8a6'],
+            "business": ['#334155', '#475569', '#64748b', '#94a3b8', '#0f172a', '#1e293b', '#3b82f6'],
+            "warm": ['#f87171', '#fb923c', '#fbbf24', '#facc15', '#e879f9', '#f472b6', '#fb7185'],
+            "cool": ['#22d3ee', '#38bdf8', '#60a5fa', '#818cf8', '#a78bfa', '#c084fc', '#e879f9']
+        };
+
+        let currentPaletteColors = palettes['rainbow'];
+
+        function changePalette(paletteName) {
+            const colors = palettes[paletteName];
+            if (!colors) return;
+            currentPaletteColors = colors;
+
+            const root = document.documentElement;
+            colors.forEach((c, i) => {
+                root.style.setProperty(`--accent-${i}`, c);
+            });
+            // Re-render handled by CSS variables generally, but we need to update for Glow effects if we used JS for that
+            // If drawNode uses `currentPaletteColors`, we need to re-render.
+            renderDiagram();
+        }
+
+        function setLayout(direction) {
+            layoutDirection = direction;
+            document.getElementById('btn-layout-horizontal').classList.toggle('active', direction === 'horizontal');
+            document.getElementById('btn-layout-vertical').classList.toggle('active', direction === 'vertical');
+            renderDiagram();
+        }
+
+        // --- Data Management ---
+        function loadTemplate(key) {
+            dataInput.value = templates[key];
+            formatFormula(); // Auto format on load
+        }
+
+        // --- Enhanced Formatting ---
+        // 1. Parse tree to determine hierarchy (depth)
+        // 2. Identify LHS of each definition
+        // 3. Indent based on depth * 2 spaces
+        // 4. Align '=' signs using padding
+        // --- Enhanced Formatting (Topological & Alignment) ---
+        function formatFormula() {
+            let text = dataInput.value;
+            // 1. Parse all lines into a map
+            const lines = text.split('\n').filter(line => line.includes('='));
+            if (lines.length === 0) return;
+
+            const map = {};
+            const lhsList = [];
+            lines.forEach(line => {
+                const parts = line.split('=');
+                if (parts.length >= 2) {
+                    const lhs = parts[0].trim();
+                    const rhs = parts.slice(1).join('=').trim();
+                    map[lhs] = rhs; // Store raw RHS
+                    lhsList.push(lhs);
+                }
+            });
+
+            // 2. Topological Sort / Dependency Resolution
+            // Find roots: Nodes in LHS that are NOT mentioned in any RHS
+            const rhsTokens = new Set();
+            const tokenRegex = /([^\+\-×\*\/\÷\s\(\)]+)/g;
+            Object.values(map).forEach(rhs => {
+                let match;
+                while ((match = tokenRegex.exec(rhs)) !== null) {
+                    rhsTokens.add(match[0].trim());
+                }
+            });
+
+            // Identify potential roots
+            let roots = lhsList.filter(lhs => !rhsTokens.has(lhs));
+
+            // Fallback for cycle or user input order preference if no clear root
+            if (roots.length === 0 && lhsList.length > 0) {
+                roots = [lhsList[0]];
+            }
+
+            const visited = new Set();
+            const outputLines = [];
+
+            function traverse(node, indent) {
+                if (visited.has(node)) return;
+
+                // RHS map check
+                const rhs = map[node];
+                if (rhs === undefined) return;
+
+                visited.add(node);
+
+                // Formulate line: Indent + Node + " = " + RHS
+                let cleanRhs = rhs.replace(/\s*([+\-*\/×÷])\s*/g, " $1 ");
+                cleanRhs = cleanRhs.replace(/\s+/g, " ");
+
+                // Prefix spacing
+                const prefix = " ".repeat(indent);
+                const lineStr = `${prefix}${node} = ${cleanRhs}`;
+                outputLines.push(lineStr);
+
+                // Calculate position of equals sign for children alignment
+                // Node = ... 
+                // Child LHS should start at the '=' column.
+                // Index of '=' is: indent + node.length + 1
+
+                let nextIndent = indent + node.length + 1;
+
+                // Find children in RHS to traverse
+                let match;
+                const children = [];
+                // Regex for tokens in RHS
+                const localRegex = /([^\+\-×\*\/\÷\s\(\)0-9\.]+|[0-9\.]+%?)/g;
+                while ((match = localRegex.exec(rhs)) !== null) {
+                    const token = match[0].trim();
+                    if (map[token]) {
+                        children.push(token);
+                    }
+                }
+
+                children.forEach(child => traverse(child, nextIndent));
+            }
+
+            // Traverse all roots
+            roots.forEach(r => traverse(r, 0));
+            // Cleanup leftovers
+            lhsList.forEach(lhs => {
+                if (!visited.has(lhs)) traverse(lhs, 0);
+            });
+
+            dataInput.value = outputLines.join('\n');
+            renderDiagram();
+        }
+
+        function saveFormula() {
+            const name = prompt("请输入公式名称：", "我的业务公式 " + new Date().toLocaleDateString());
+            if (!name) return;
+
+            let saved = JSON.parse(localStorage.getItem('yitang_my_formulas') || '[]');
+            saved.push({ name, content: dataInput.value });
+            localStorage.setItem('yitang_my_formulas', JSON.stringify(saved));
+            loadSavedFormulas();
+            alert("保存成功");
+        }
+
+        function loadSavedFormulas() {
+            const saved = JSON.parse(localStorage.getItem('yitang_my_formulas') || '[]');
+            const container = document.getElementById('my-formulas-list');
+            if (!container) return;
+
+            container.innerHTML = '';
+            saved.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'template-btn';
+                div.style.marginBottom = '8px';
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.innerHTML = `<span><i data-lucide="file-text" style="width:12px; display:inline-block; vertical-align:middle"></i> ${item.name}</span> <span style="cursor:pointer; opacity:0.5" onclick="deleteFormula(event, ${index})">✕</span>`;
+                div.onclick = (e) => {
+                    if (e.target.innerText !== '✕') {
+                        dataInput.value = item.content;
+                        formatFormula(); // Format on load specific formulas too
+                    }
+                };
+                container.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        function deleteFormula(e, index) {
+            e.stopPropagation();
+            if (!confirm('确定删除?')) return;
+            let saved = JSON.parse(localStorage.getItem('yitang_my_formulas') || '[]');
+            saved.splice(index, 1);
+            localStorage.setItem('yitang_my_formulas', JSON.stringify(saved));
+            loadSavedFormulas();
+        }
+
+        // --- Parser Logic ---
+        function parseFormulas(text) {
+            const lines = text.split('\n').filter(line => line.includes('='));
+            const map = {};
+            const isCoef = (s) => /^[0-9]+(\.[0-9]+)?%?$/.test(s);
+
+            lines.forEach(line => {
+                const parts = line.split('=');
+                if (parts.length < 2) return;
+                const lhs = parts[0].trim();
+                const rhs = parts[1].trim();
+                const tokenRegex = /([\+\-×\*\/\÷])|([^\+\-×\*\/\÷]+)/g;
+                const rawTokens = [];
+                let match;
+                while ((match = tokenRegex.exec(rhs)) !== null) {
+                    const t = match[0].trim();
+                    if (t) rawTokens.push(t);
+                }
+                const mergedTokens = [];
+                for (let i = 0; i < rawTokens.length; i++) {
+                    const current = rawTokens[i];
+                    if ((current === '*' || current === '×') &&
+                        i + 1 < rawTokens.length &&
+                        isCoef(rawTokens[i + 1]) &&
+                        mergedTokens.length > 0 &&
+                        !['+', '-', '*', '/', '×', '÷'].includes(mergedTokens[mergedTokens.length - 1])) {
+                        const prev = mergedTokens.pop();
+                        const coef = rawTokens[i + 1];
+                        mergedTokens.push(`${prev} × ${coef}`);
+                        i++;
+                    } else {
+                        mergedTokens.push(current);
+                    }
+                }
+                map[lhs] = mergedTokens;
+            });
+
+            if (Object.keys(map).length === 0) return null;
+            const firstLhs = lines[0].split('=')[0].trim();
+            return buildTree(firstLhs, map, 0);
+        }
+
+        function buildTree(name, map, depth) {
+            const node = { name, depth, children: [], operators: [], totalHeight: 0, x: 0, y: 0 }; // totalHeight is conceptual size in cross-axis
+            let lookupName = name;
+            let displayName = name;
+            const splitIndex = name.indexOf(' × ');
+            if (splitIndex > -1 && /^[0-9\.]+%?$/.test(name.substring(splitIndex + 3))) {
+                lookupName = name.substring(0, splitIndex);
+            }
+
+            if (map[lookupName]) {
+                const tokens = map[lookupName];
+                tokens.forEach(token => {
+                    if (['+', '-', '*', '/', '×', '÷'].includes(token)) {
+                        node.operators.push(token);
+                    } else {
+                        if (token !== lookupName && token !== name) {
+                            node.children.push(buildTree(token, map, depth + 1));
+                        }
+                    }
+                });
+            }
+            return node;
+        }
+
+        // --- Layout Logic (Direction Aware) ---
+        // Horizontal: X = Depth, Y = Spread
+        // Vertical: Y = Depth, X = Spread
+        const NODE_W = 180;
+        const NODE_H = 50;
+        const LEVEL_GAP = 120; // Gap between levels
+        const NODE_GAP = 50;   // Gap between siblings
+
+        function calculateLayout(node) {
+            if (node.children.length === 0) {
+                // Cross-axis dimension
+                const size = layoutDirection === 'horizontal' ? (NODE_H + NODE_GAP) : (NODE_W + NODE_GAP);
+                node.totalHeight = size;
+                return size;
+            }
+
+            let total = 0;
+            node.children.forEach(child => {
+                total += calculateLayout(child);
+            });
+
+            const minSize = layoutDirection === 'horizontal' ? (NODE_H + NODE_GAP) : (NODE_W + NODE_GAP);
+            node.totalHeight = Math.max(total, minSize);
+            return node.totalHeight;
+        }
+
+        function assignPositions(node, startMain, startCross) {
+            // Main axis position (Depth)
+            if (layoutDirection === 'horizontal') {
+                node.x = startMain;
+                node.y = startCross;
+            } else {
+                node.y = startMain;
+                node.x = startCross;
+            }
+
+            if (node.children.length > 0) {
+                let currentCross = startCross - node.totalHeight / 2;
+                node.children.forEach(child => {
+                    const childCross = currentCross + child.totalHeight / 2;
+                    // Gap increases for next level
+                    const nextMain = startMain + (layoutDirection === 'horizontal' ? (NODE_W + LEVEL_GAP) : (NODE_H + LEVEL_GAP));
+                    assignPositions(child, nextMain, childCross);
+                    currentCross += child.totalHeight;
+                });
+            }
+        }
+
+        // --- Rendering Logic ---
+        function renderDiagram() {
+            const tree = parseFormulas(dataInput.value);
+            if (!tree) return;
+
+            calculateLayout(tree);
+            // Center roughly
+            assignPositions(tree, 100, (layoutDirection === 'horizontal' ? svg.clientHeight / 2 : svg.clientWidth / 2));
+
+            nodesGroup.innerHTML = '';
+            linksGroup.innerHTML = '';
+
+            drawNode(tree);
+            // Don't reset view every type if dragging? 
+            // Only reset if first render? Or maybe not reset at all, user controls view.
+            // But initial load needs center.
+            // Let's keep resetView logic separate or optional.
+        }
+
+        function drawNode(node) {
+            // Links
+            if (node.children.length > 0) {
+                node.children.forEach((child, index) => {
+                    // Determine anchor points based on direction
+                    let startX, startY, endX, endY;
+                    let cp1x, cp1y, cp2x, cp2y;
+
+                    if (layoutDirection === 'horizontal') {
+                        startX = node.x + NODE_W;
+                        startY = node.y;
+                        endX = child.x;
+                        endY = child.y;
+
+                        const midX = startX + (endX - startX) / 2;
+                        cp1x = midX; cp1y = startY;
+                        cp2x = midX; cp2y = endY;
+                    } else {
+                        // Vertical: Bottom to Top of child
+                        startX = node.x; // Center x since it's vertical flow?
+                        // Wait, node.x/y is top-left or center? 
+                        // Our rect drawing uses y - H/2. So node.y is CENTER of Rect in Vertical?
+                        // Actually in horizontal layout, y is center.
+                        // In vertical layout, x should be center.
+                        // Let's ensure consistency.
+
+                        // Horizontal: node.y is center Y. node.x is Left X.
+                        // Vertical: node.x is center X. node.y is Top Y?
+                        // Let's adjust rect drawing effectively.
+
+                        startX = node.x;
+                        startY = node.y + NODE_H / 2; // Bottom center
+                        endX = child.x;
+                        endY = child.y - NODE_H / 2; // Top center of child
+
+                        const midY = startY + (endY - startY) / 2;
+                        cp1x = startX; cp1y = midY;
+                        cp2x = endX; cp2y = midY;
+                    }
+
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    const d = `M ${startX} ${startY} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${endX} ${endY}`;
+                    path.setAttribute("d", d);
+                    path.setAttribute("class", "link-path");
+
+                    // Rainbow colors (0-6)
+                    const colorIndex = index % 7;
+                    path.classList.add(`accent-${colorIndex}`);
+                    path.style.strokeOpacity = 0.5;
+                    linksGroup.appendChild(path);
+
+                    // Operator Badge
+                    let op = '';
+                    if (node.operators.length > 0) {
+                        if (index === 0) op = node.operators[0];
+                        else op = node.operators[index - 1] || node.operators[node.operators.length - 1];
+                    }
+
+                    if (op) {
+                        // Midpoint of curve roughly
+                        // Bezier at t=0.5
+                        // B(t) = (1-t)^3 P0 + 3(1-t)^2 t P1 + ... 
+                        // Simplified C is usually sufficient approximation with average of CPs
+                        // Actually for C P0 P1 P2 P3 (C uses 2 control points in SVG definitions, cubic)
+                        // P0=(startX, startY), P1=(cp1x, cp1y), P2=(cp2x, cp2y), P3=(endX, endY)
+                        // t=0.5
+                        const t = 0.5;
+                        const mt = 1 - t;
+                        const bx = mt * mt * mt * startX + 3 * mt * mt * t * cp1x + 3 * mt * t * t * cp2x + t * t * t * endX;
+                        const by = mt * mt * mt * startY + 3 * mt * mt * t * cp1y + 3 * mt * t * t * cp2y + t * t * t * endY;
+
+                        const gBadge = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                        gBadge.setAttribute("class", "operator-badge");
+                        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                        circle.setAttribute("cx", bx);
+                        circle.setAttribute("cy", by);
+                        circle.setAttribute("r", "14");
+                        circle.setAttribute("class", "operator-circle");
+
+                        if (op === '*' || op === '×') circle.classList.add('op-multiply');
+                        else if (op === '/' || op === '÷') circle.classList.add('op-divide');
+                        else if (op === '+') circle.classList.add('op-plus');
+                        else if (op === '-') circle.classList.add('op-minus');
+                        else circle.classList.add('op-default');
+                        gBadge.appendChild(circle);
+
+                        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        text.setAttribute("x", bx);
+                        text.setAttribute("y", by + 5);
+                        text.setAttribute("text-anchor", "middle");
+                        text.setAttribute("class", "operator-text");
+                        text.textContent = op === '*' ? '×' : (op === '/' ? '÷' : op);
+                        gBadge.appendChild(text);
+                        linksGroup.appendChild(gBadge);
+                    }
+
+                    drawNode(child);
+                });
+            }
+
+            // Node Rect
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+
+            // Layout specific rect position: Center the rect around the node point
+            if (layoutDirection === 'horizontal') {
+                // node.x is left, node.y is center
+                rect.setAttribute("x", node.x);
+                rect.setAttribute("y", node.y - NODE_H / 2);
+            } else {
+                // vertical: node.x is center, node.y is center? or top? 
+                // assignPositions: y = startMain (center relative to gap?)
+                // Let's assume point is center of usage
+                // node.x is center X, node.y is center Y
+                rect.setAttribute("x", node.x - NODE_W / 2);
+                rect.setAttribute("y", node.y - NODE_H / 2);
+            }
+
+            rect.setAttribute("width", NODE_W);
+            rect.setAttribute("height", NODE_H);
+            rect.setAttribute("class", "node-rect");
+
+            // Color Cycle for Border using Classes
+            rect.classList.add(`accent-${node.depth % 7}`);
+            rect.style.strokeWidth = node.depth === 0 ? "2" : "1";
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            // Text position needs adjustment too
+            if (layoutDirection === 'horizontal') {
+                text.setAttribute("x", node.x + 15);
+                text.setAttribute("y", node.y + 5);
+                text.setAttribute("text-anchor", "start");
+            } else {
+                text.setAttribute("x", node.x);
+                text.setAttribute("y", node.y + 5);
+                text.setAttribute("text-anchor", "middle");
+            }
+            text.setAttribute("class", "node-text");
+
+            let displayName = node.name;
+            if (displayName.length > 20) displayName = displayName.substring(0, 18) + '..';
+            text.textContent = displayName;
+
+            g.appendChild(rect);
+            g.appendChild(text);
+
+            // Dynamic color from variable mapping or JS array?
+            // Since we updated to use JS array for shadow, we simply use the global `currentPaletteColors`
+            const nodeColor = currentPaletteColors[node.depth % 7];
+
+            g.onmouseenter = () => {
+                rect.style.filter = `drop-shadow(0 0 8px ${nodeColor})`;
+                rect.style.fill = "rgba(255,255,255,0.1)";
+            };
+            g.onmouseleave = () => {
+                rect.style.filter = "";
+                rect.style.fill = "";
+            };
+
+            nodesGroup.appendChild(g);
+        }
+
+        // --- Interaction ---
+        function setupInteractivity() {
+            svg.onmousedown = (e) => {
+                if (e.button === 0) {
+                    isDragging = true;
+                    startPos = { x: e.clientX - currentTranslate.x, y: e.clientY - currentTranslate.y };
+                    svg.style.cursor = 'grabbing';
+                }
+            };
+            window.onmousemove = (e) => {
+                if (isDragging) {
+                    currentTranslate.x = e.clientX - startPos.x;
+                    currentTranslate.y = e.clientY - startPos.y;
+                    updateViewport();
+                }
+            };
+            window.onmouseup = () => { isDragging = false; svg.style.cursor = 'grab'; };
+            svg.onwheel = (e) => {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                const newScale = Math.min(Math.max(currentScale * delta, 0.2), 3);
+                const rect = svg.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                currentTranslate.x = mouseX - (mouseX - currentTranslate.x) * (newScale / currentScale);
+                currentTranslate.y = mouseY - (mouseY - currentTranslate.y) * (newScale / currentScale);
+                currentScale = newScale;
+                updateViewport();
+            };
+        }
+        function updateViewport() {
+            viewportGroup.setAttribute('transform', `translate(${currentTranslate.x}, ${currentTranslate.y}) scale(${currentScale})`);
+        }
+        function resetView() {
+            currentScale = 0.8;
+            currentTranslate = { x: layoutDirection === 'horizontal' ? 50 : 0, y: 100 };
+            updateViewport();
+        }
+        function zoomIn() { currentScale *= 1.2; updateViewport(); }
+        function zoomOut() { currentScale *= 0.8; updateViewport(); }
+
+        // --- Custom Export (Enhanced) ---
+        async function exportImage() {
+            const serializer = new XMLSerializer();
+            const cloneSvg = svg.cloneNode(true);
+            const bbox = nodesGroup.getBBox();
+            const contentWidth = (bbox.width || 1000) + 200;
+            const contentHeight = (bbox.height || 600) + 100;
+            const formulas = dataInput.value.split('\n').filter(l => l.trim());
+            const textBlockHeight = formulas.length * 24 + 60;
+            const finalWidth = Math.max(contentWidth, 800);
+            const finalHeight = contentHeight + textBlockHeight;
+
+            const cloneViewport = cloneSvg.getElementById('viewport-group');
+            // If bbox x is negative, we shift it positive.
+            const shiftX = -bbox.x + 50;
+            const shiftY = -bbox.y + 50;
+            cloneViewport.setAttribute('transform', `translate(${shiftX}, ${shiftY}) scale(1)`);
+
+            cloneSvg.setAttribute('width', finalWidth);
+            cloneSvg.setAttribute('height', finalHeight);
+            cloneSvg.setAttribute('viewBox', `0 0 ${finalWidth} ${finalHeight}`);
+
+            const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            bgRect.setAttribute("width", "100%");
+            bgRect.setAttribute("height", "100%");
+            const bgColor = getComputedStyle(document.body).getPropertyValue('--bg-color').trim();
+            bgRect.setAttribute("fill", bgColor);
+            cloneSvg.insertBefore(bgRect, cloneSvg.firstChild);
+
+            const textGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            textGroup.setAttribute("transform", `translate(50, ${contentHeight + 20})`);
+
+            const title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            title.textContent = "业务公式列表：";
+            title.setAttribute("fill", getComputedStyle(document.body).getPropertyValue('--text-main').trim());
+            title.setAttribute("font-size", "18");
+            title.setAttribute("font-weight", "bold");
+            title.setAttribute("y", "0");
+            textGroup.appendChild(title);
+
+            formulas.forEach((line, i) => {
+                const textLine = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                // Text content is already formatted in textarea
+                textLine.textContent = (i + 1) + ". " + line;
+                textLine.setAttribute("fill", getComputedStyle(document.body).getPropertyValue('--text-dim').trim());
+                textLine.setAttribute("font-size", "14");
+                textLine.setAttribute("y", (i + 1) * 24 + 10);
+                // Preserve whitespace in SVG requires xml:space="preserve" or style
+                textLine.setAttribute("xml:space", "preserve");
+                textLine.style.whiteSpace = "pre";
+                textLine.style.fontFamily = "monospace"; // Ensure alignment in export
+                textGroup.appendChild(textLine);
+            });
+
+            cloneSvg.appendChild(textGroup);
+            const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+            style.textContent = document.querySelector('style').textContent;
+            cloneSvg.insertBefore(style, cloneSvg.firstChild);
+
+            const source = serializer.serializeToString(cloneSvg);
+            const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'business-formula-pro.svg';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>如何安装 Codex</title>
+        <!-- Add html2canvas library for DOM capturing -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1920px;
+            height: 100vh;
+            max-height: 1080px;
+            background: #f0f4f8;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            background: #f0f4f8;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide-title {
+            font-size: 64px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 40px;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .step-card {
+            background: white;
+            padding: 60px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 80%;
+            max-width: 800px;
+        }
+
+        .step-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+        }
+
+        .step-number {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .step-heading {
+            font-size: 48px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .step-description {
+            font-size: 24px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+        }
+
+        /* Step specific styles */
+        .code { background: #f8f9fa; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 20px; text-align: left; margin: 20px 0; }
+        .command { color: #d73a49; font-weight: bold; }
+        .highlight { color: #667eea; font-weight: bold; }
+        
+        /* Export button styles */
+        .export-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .export-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .export-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .export-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="video-container">
+            <!-- Slide 1: Title -->
+            <div class="slide active" data-duration="5">
+                <h1 class="slide-title">如何安装 Codex</h1>
+            </div>
+
+            <!-- Slide 2: What is Codex -->
+            <div class="slide" data-duration="8">
+                <div class="step-card">
+                    <div class="step-icon">🤖</div>
+                    <div class="step-number">步骤 1</div>
+                    <h2 class="step-heading">什么是 Codex</h2>
+                    <p class="step-description">
+                        Codex 是一个强大的 AI 代码生成工具，可以帮助开发者更快地编写代码。<br>
+                        它支持多种编程语言，能够理解自然语言描述并生成相应的代码。<br>
+                        通过 Codex，你可以用简单的英语描述你想要的功能，它会生成相应的代码实现。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Slide 3: System Requirements -->
+            <div class="slide" data-duration="7">
+                <div class="step-card">
+                    <div class="step-icon">💻</div>
+                    <div class="step-number">步骤 2</div>
+                    <h2 class="step-heading">系统要求</h2>
+                    <p class="step-description">
+                        在安装 Codex 之前，确保你的系统满足以下要求：<br><br>
+                        • <span class="highlight">Node.js 16.0 或更高版本</span><br>
+                        • npm 或 yarn 包管理器<br>
+                        • 稳定的互联网连接<br>
+                        • 至少 500MB 可用磁盘空间
+                    </p>
+                </div>
+            </div>
+
+            <!-- Slide 4: Installation Steps -->
+            <div class="slide" data-duration="10">
+                <div class="step-card">
+                    <div class="step-icon">📦</div>
+                    <div class="step-number">步骤 3</div>
+                    <h2 class="step-heading">安装过程</h2>
+                    <p class="step-description">
+                        按照以下步骤安装 Codex：
+                    </p>
+                    <div class="code">
+                        <div>1. 打开终端</div>
+                        <div>2. 运行命令：<span class="command">npm install -g codex-cli</span></div>
+                        <div>3. 等待安装完成</div>
+                        <div>4. 验证安装：<span class="command">codex --version</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5: Getting Started -->
+            <div class="slide" data-duration="8">
+                <div class="step-card">
+                    <div class="step-icon">🚀</div>
+                    <div class="step-number">步骤 4</div>
+                    <h2 class="step-heading">开始使用</h2>
+                    <p class="step-description">
+                        安装完成后，你可以开始使用 Codex 生成代码：<br><br>
+                        • 生成简单函数：<span class="command">codex "创建一个计算斐波那契数列的函数"</span><br>
+                        • 创建 React 组件：<span class="command">codex "创建一个响应式的按钮组件"</span><br>
+                        • 解释代码：<span class="command">codex --explain "function add(a,b){return a+b}"</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Slide 6: Conclusion -->
+            <div class="slide" data-duration="6">
+                <div class="step-card">
+                    <div class="step-icon">🎉</div>
+                    <h2 class="step-heading">安装完成！</h2>
+                    <p class="step-description">
+                        恭喜你成功安装了 Codex！<br><br>
+                        开始使用 Codex 提升你的开发效率吧！<br>
+                        探索更多功能，享受 AI 辅助编程的乐趣！
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+
+        <div class="timer">00:00</div>
+
+        <div class="export-controls">
+            <button class="export-btn" id="exportBtn">导出视频</button>
+            <button class="export-btn" id="recordBtn">开始录制</button>
+            <button class="export-btn" id="stopRecordBtn" disabled>停止录制</button>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" id="prevBtn">上一步</button>
+            <button class="control-btn" id="playBtn">播放</button>
+            <button class="control-btn" id="pauseBtn">暂停</button>
+            <button class="control-btn" id="nextBtn">下一步</button>
+            <button class="control-btn" id="restartBtn">重新开始</button>
+        </div>
+    </div>
+
+    <script>
+        // Video player logic
+        const slides = document.querySelectorAll('.slide');
+        const progressFill = document.querySelector('.progress-fill');
+        const timer = document.querySelector('.timer');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const restartBtn = document.getElementById('restartBtn');
+
+        let currentSlide = 0;
+        let isPlaying = false;
+        let timerInterval = null;
+        let elapsedTime = 0;
+        let totalDuration = 0;
+
+        // Calculate total duration
+        slides.forEach(slide => {
+            totalDuration += parseInt(slide.dataset.duration);
+        });
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === index) {
+                    slide.classList.add('active');
+                }
+            });
+            currentSlide = index;
+        }
+
+        function updateProgress() {
+            const progress = (elapsedTime / totalDuration) * 100;
+            progressFill.style.width = `${progress}%`;
+        }
+
+        function updateTimer() {
+            const minutes = Math.floor(elapsedTime / 60);
+            const seconds = elapsedTime % 60;
+            timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function playVideo() {
+            isPlaying = true;
+            timerInterval = setInterval(() => {
+                elapsedTime++;
+                updateTimer();
+                updateProgress();
+
+                // Calculate current slide based on elapsed time
+                let currentTime = 0;
+                let currentIndex = 0;
+                for (let i = 0; i < slides.length; i++) {
+                    currentTime += parseInt(slides[i].dataset.duration);
+                    if (elapsedTime < currentTime) {
+                        currentIndex = i;
+                        break;
+                    }
+                }
+
+                if (currentIndex !== currentSlide) {
+                    showSlide(currentIndex);
+                }
+
+                if (elapsedTime >= totalDuration) {
+                    pauseVideo();
+                }
+            }, 1000);
+        }
+
+        function pauseVideo() {
+            isPlaying = false;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function resetVideo() {
+            pauseVideo();
+            elapsedTime = 0;
+            currentSlide = 0;
+            showSlide(0);
+            updateTimer();
+            updateProgress();
+        }
+
+        function nextSlide() {
+            pauseVideo();
+            const nextIndex = Math.min(currentSlide + 1, slides.length - 1);
+            showSlide(nextIndex);
+            
+            // Update elapsed time to match current slide
+            let time = 0;
+            for (let i = 0; i < nextIndex; i++) {
+                time += parseInt(slides[i].dataset.duration);
+            }
+            elapsedTime = time;
+            updateTimer();
+            updateProgress();
+        }
+
+        function prevSlide() {
+            pauseVideo();
+            const prevIndex = Math.max(currentSlide - 1, 0);
+            showSlide(prevIndex);
+            
+            // Update elapsed time to match current slide
+            let time = 0;
+            for (let i = 0; i < prevIndex; i++) {
+                time += parseInt(slides[i].dataset.duration);
+            }
+            elapsedTime = time;
+            updateTimer();
+            updateProgress();
+        }
+
+        // Video export logic
+        const exportBtn = document.getElementById('exportBtn');
+        const recordBtn = document.getElementById('recordBtn');
+        const stopRecordBtn = document.getElementById('stopRecordBtn');
+        
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let canvas = null;
+        let ctx = null;
+        let frameInterval = null;
+        
+        // Create canvas for video rendering
+        function initCanvas() {
+            if (!canvas) {
+                canvas = document.createElement('canvas');
+                const container = document.querySelector('.container');
+                canvas.width = container.offsetWidth;
+                canvas.height = container.offsetHeight;
+                canvas.style.display = 'none';
+                document.body.appendChild(canvas);
+                ctx = canvas.getContext('2d');
+            }
+            return canvas;
+        }
+        
+        // Capture current frame to canvas (synchronous approach)
+        function captureFrame() {
+            const container = document.querySelector('.container');
+            
+            // Set canvas size to match container
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+            
+            // Fill with container background color
+            ctx.fillStyle = '#f0f4f8';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Get active slide
+            const activeSlide = container.querySelector('.slide.active');
+            if (activeSlide) {
+                // Draw slide content based on slide type
+                const isTitleSlide = activeSlide.querySelector('.slide-title');
+                if (isTitleSlide) {
+                    // Draw title slide
+                    ctx.fillStyle = '#333';
+                    ctx.font = 'bold 64px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(isTitleSlide.textContent, canvas.width / 2, canvas.height / 2);
+                } else {
+                    // Draw step slide
+                    const stepCard = activeSlide.querySelector('.step-card');
+                    if (stepCard) {
+                        // Draw card background
+                        ctx.fillStyle = 'white';
+                        ctx.roundRect(canvas.width * 0.1, canvas.height * 0.2, canvas.width * 0.8, canvas.height * 0.6, 16);
+                        ctx.fill();
+                        
+                        // Draw step icon
+                        const stepIcon = stepCard.querySelector('.step-icon');
+                        if (stepIcon) {
+                            ctx.font = '80px sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(stepIcon.textContent, canvas.width / 2, canvas.height * 0.4);
+                        }
+                        
+                        // Draw step number
+                        const stepNumber = stepCard.querySelector('.step-number');
+                        if (stepNumber) {
+                            ctx.fillStyle = '#667eea';
+                            ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(stepNumber.textContent, canvas.width / 2, canvas.height * 0.5);
+                        }
+                        
+                        // Draw step heading
+                        const stepHeading = stepCard.querySelector('.step-heading');
+                        if (stepHeading) {
+                            ctx.fillStyle = '#333';
+                            ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(stepHeading.textContent, canvas.width / 2, canvas.height * 0.57);
+                        }
+                        
+                        // Draw step description (simplified)
+                        const stepDescription = stepCard.querySelector('.step-description');
+                        if (stepDescription) {
+                            ctx.fillStyle = '#666';
+                            ctx.font = '24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('安装步骤说明', canvas.width / 2, canvas.height * 0.65);
+                        }
+                    }
+                }
+            }
+            
+            return canvas;
+        }
+        
+        // Export video automatically
+        async function exportVideo() {
+            initCanvas();
+            
+            // Reset video to start
+            resetVideo();
+            
+            // Set up MediaRecorder
+            const stream = canvas.captureStream(30); // 30fps
+            const options = {
+                mimeType: 'video/webm;codecs=vp9'
+            };
+            
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options.mimeType = 'video/webm;codecs=vp8';
+            }
+            
+            mediaRecorder = new MediaRecorder(stream, options);
+            recordedChunks = [];
+            
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+            
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'codex-install-video.webm';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                // Reset UI
+                exportBtn.disabled = false;
+                recordBtn.disabled = false;
+            };
+            
+            // Start recording
+            mediaRecorder.start();
+            exportBtn.disabled = true;
+            recordBtn.disabled = true;
+            
+            // Play video and capture frames
+            playVideo();
+            
+            frameInterval = setInterval(() => {
+                captureFrame();
+                
+                // Stop recording when video ends
+                if (!isPlaying) {
+                    clearInterval(frameInterval);
+                    mediaRecorder.stop();
+                }
+            }, 1000 / 30); // 30fps
+        }
+        
+        // Start manual recording
+        function startRecording() {
+            initCanvas();
+            
+            const stream = canvas.captureStream(30);
+            const options = {
+                mimeType: 'video/webm;codecs=vp9'
+            };
+            
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options.mimeType = 'video/webm;codecs=vp8';
+            }
+            
+            mediaRecorder = new MediaRecorder(stream, options);
+            recordedChunks = [];
+            
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+            
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'codex-install-video-recording.webm';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+            
+            mediaRecorder.start();
+            recordBtn.disabled = true;
+            stopRecordBtn.disabled = false;
+            exportBtn.disabled = true;
+            
+            // Capture frames while recording
+            frameInterval = setInterval(() => {
+                captureFrame();
+            }, 1000 / 30);
+        }
+        
+        // Stop manual recording
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            
+            if (frameInterval) {
+                clearInterval(frameInterval);
+                frameInterval = null;
+            }
+            
+            recordBtn.disabled = false;
+            stopRecordBtn.disabled = true;
+            exportBtn.disabled = false;
+        }
+        
+        // Event listeners
+        playBtn.addEventListener('click', playVideo);
+        pauseBtn.addEventListener('click', pauseVideo);
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+        restartBtn.addEventListener('click', resetVideo);
+        exportBtn.addEventListener('click', exportVideo);
+        recordBtn.addEventListener('click', startRecording);
+        stopRecordBtn.addEventListener('click', stopRecording);
+
+        // Initialize
+        showSlide(0);
+        updateTimer();
+        updateProgress();
+    </script>
+</body>
+</html>

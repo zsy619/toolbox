@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球地图GeoTIFF分析报告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e3a8a',
+                        secondary: '#3b82f6',
+                        accent: '#ef4444',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        info: '#06b6d4',
+                        dark: '#1f2937',
+                        light: '#f9fafb'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'monospace']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'bounce-slow': 'bounce 2s infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400&display=swap');
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1d4ed8;
+        }
+
+        /* 打印样式 */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                font-size: 12pt;
+                color: black;
+            }
+
+            .bg-white {
+                background-color: white !important;
+            }
+
+            .shadow-lg {
+                box-shadow: none !important;
+            }
+        }
+
+        /* 地图分辨率可视化 */
+        .map-grid {
+            background-image: linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .map-grid-dense {
+            background-image: linear-gradient(rgba(239, 68, 68, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(239, 68, 68, 0.1) 1px, transparent 1px);
+            background-size: 5px 5px;
+        }
+
+        /* 地球旋转动画 */
+        @keyframes spin-slow {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin-slow {
+            animation: spin-slow 40s linear infinite;
+        }
+    </style>
+    <!-- 微信/OpenGraph 卡片信息 -->
+    <meta property="og:title" content="全球地图GeoTIFF分析报告">
+    <meta property="og:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta property="og:url" content="./geotiff.html">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="全球地图GeoTIFF分析报告">
+    <meta name="twitter:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta itemprop="name" content="全球地图GeoTIFF分析报告">
+    <meta itemprop="description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 to-gray-100 font-sans text-gray-800">
+    <!-- Wechat Share Image Hack -->
+    <div style="display:none; visibility:hidden;">
+        <img src="https://tools.yy24365.com/assets/images/dev-tools-og.png" alt="wechat-share-icon" width="400" height="400">
+    </div>
+    <div class="flex space-x-4">
+        <button id="printBtn" class="px-4 py-2 bg-secondary hover:bg-blue-700 text-white rounded-lg transition flex items-center space-x-2">
+            <i class="fas fa-print"></i>
+            <span>打印报告</span>
+        </button>
+        <button id="themeToggle" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition flex items-center space-x-2">
+            <i class="fas fa-moon"></i>
+            <span>暗色模式</span>
+        </button>
+    </div>
+    </div>
+    </nav>
+    <div class="container mx-auto px-4 py-8">
+        <!-- 标题和摘要 -->
+        <div class="text-center mb-12 animate-fade-in">
+            <h1 class="text-4xl md:text-5xl font-bold text-primary mb-4">全球地图GeoTIFF分析报告</h1>
+            <p class="text-xl text-gray-600 max-w-4xl mx-auto">对两个不同分辨率的全球地图GeoTIFF文件进行详细技术分析、对比和应用评估</p>
+            <div class="mt-8 flex flex-wrap justify-center gap-4">
+                <div class="flex items-center bg-white rounded-lg shadow p-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                        <i class="fas fa-layer-group text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-500">分析文件</div>
+                        <div class="text-lg font-bold">2个GeoTIFF</div>
+                    </div>
+                </div>
+                <div class="flex items-center bg-white rounded-lg shadow p-4">
+                    <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                        <i class="fas fa-expand-arrows-alt text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-500">总像素数</div>
+                        <div class="text-lg font-bold">247.86百万</div>
+                    </div>
+                </div>
+                <div class="flex items-center bg-white rounded-lg shadow p-4">
+                    <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                        <i class="fas fa-map-marked-alt text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-500">覆盖范围</div>
+                        <div class="text-lg font-bold">全球</div>
+                    </div>
+                </div>
+                <div class="flex items-center bg-white rounded-lg shadow p-4">
+                    <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                        <i class="fas fa-ruler-combined text-red-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-500">最高分辨率</div>
+                        <div class="text-lg font-bold">1.85 km/像素</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 文件信息卡片 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- 低分辨率文件 -->
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden animate-slide-up">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-800 p-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-white">world_mapx5400x2700_geo.tif</h2>
+                        <span class="px-4 py-1 bg-white text-blue-800 font-bold rounded-full">低分辨率</span>
+                    </div>
+                    <p class="text-blue-100 mt-2">全球等经纬度投影地图，适用于全球概览和背景地图</p>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-sm text-blue-600 font-medium">图像尺寸</div>
+                            <div class="text-2xl font-bold text-gray-800">5400 × 2700</div>
+                            <div class="text-sm text-gray-500">像素</div>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-sm text-blue-600 font-medium">空间分辨率</div>
+                            <div class="text-2xl font-bold text-gray-800">7.4 km</div>
+                            <div class="text-sm text-gray-500">每像素</div>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-sm text-blue-600 font-medium">总像素数</div>
+                            <div class="text-2xl font-bold text-gray-800">14.58 M</div>
+                            <div class="text-sm text-gray-500">百万像素</div>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-sm text-blue-600 font-medium">数据体积</div>
+                            <div class="text-2xl font-bold text-gray-800">~44 MB</div>
+                            <div class="text-sm text-gray-500">未压缩</div>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center">
+                                <i class="fas fa-cube mr-2 text-blue-600"></i> 文件详情
+                            </h3>
+                            <div class="bg-gray-50 p-4 rounded-lg font-mono text-sm">
+                                <div class="flex justify-between py-1 border-b border-gray-200">
+                                    <span class="text-gray-600">驱动程序:</span>
+                                    <span class="font-medium">GTiff/GeoTIFF</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-gray-200">
+                                    <span class="text-gray-600">坐标系:</span>
+                                    <span class="font-medium">WGS 84 (EPSG:4326)</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-gray-200">
+                                    <span class="text-gray-600">像素大小:</span>
+                                    <span class="font-medium">0.0666667° × 0.0666667°</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-gray-200">
+                                    <span class="text-gray-600">角点精度:</span>
+                                    <span class="font-medium">±0.0000001°</span>
+                                </div>
+                                <div class="flex justify-between py-1">
+                                    <span class="text-gray-600">压缩方式:</span>
+                                    <span class="font-medium">DEFLATE</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center">
+                                <i class="fas fa-compress-alt mr-2 text-blue-600"></i> 存储信息
+                            </h3>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="text-gray-600">块大小:</div>
+                                    <div class="font-medium">5400×1</div>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="text-gray-600">数据类型:</div>
+                                    <div class="font-medium">Byte (8位)</div>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="text-gray-600">交错方式:</div>
+                                    <div class="font-medium">PIXEL</div>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="text-gray-600">波段:</div>
+                                    <div class="font-medium">3 (RGB)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 高分辨率文件 -->
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden animate-slide-up" style="animation-delay: 0.1s">
+                <div class="bg-gradient-to-r from-red-600 to-red-800 p-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-white">world_mapx21600x10800_geo.tif</h2>
+                        <span class="px-4 py-1 bg-white text-red-800 font-bold rounded-full">高分辨率</span>
+                    </div>
+                    <p class="text-red-100 mt-2">高分辨率全球等经纬度投影地图，适用于区域分析和GIS应用</p>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <div class="text-sm text-red-600 font-medium">图像尺寸</div>
+                            <div class="text-2xl font-bold text-gray-800">21600 × 10800</div>
+                            <div class="text-sm text-gray-500">像素</div>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <div class="text-sm text-red-600 font-medium">空间分辨率</div>
+                            <div class="text-2xl font-bold text-gray-800">1.85 km</div>
+                            <div class="text-sm text-gray-500">每像素</div>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <div class="text-sm text-red-600 font-medium">总像素数</div>
+                            <div class="text-2xl font-bold text-gray-800">233.28 M</div>
+                            <div class="text-sm text-gray-500">百万像素</div>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <div class="text-sm text-red-600 font-medium">数据体积</div>
+                            <div class="text-2xl font-bold text-gray-800">~700 MB</div>
+                            <div class="text-sm text-gray-500">未压缩</div>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center">
+                                <i class="fas fa-cube mr-2 text-red-600"></i> 文件详情
+                            </h3>
+                            <div class="bg-gray-50 p-4 rounded-lg font-mono text-sm">
+                                <div class="flex justify-between py-1 border-b border-gray-200">
+                                    <span class="text-gray-600">驱动程序:</span>
+                                    <span class="font-medium">GTiff/GeoTIFF</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-gray-200">
+                                    <span class="text-gray-600">坐标系:</span>
+                                    <span class="font-medium">WGS 84 (EPSG:4326)</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-gray-200">
+                                    <span class="text-gray-600">像素大小:</span>
+                                    <span class="font-medium">0.0166667° × 0.0166667°</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-gray-200">
+                                    <span class="text-gray-600">角点精度:</span>
+                                    <span class="font-medium">±0.0000007°</span>
+                                </div>
+                                <div class="flex justify-between py-1">
+                                    <span class="text-gray-600">压缩方式:</span>
+                                    <span class="font-medium">DEFLATE</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center">
+                                <i class="fas fa-compress-alt mr-2 text-red-600"></i> 存储信息
+                            </h3>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="text-gray-600">块大小:</div>
+                                    <div class="font-medium">21600×1</div>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="text-gray-600">数据类型:</div>
+                                    <div class="font-medium">Byte (8位)</div>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="text-gray-600">交错方式:</div>
+                                    <div class="font-medium">PIXEL</div>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="text-gray-600">波段:</div>
+                                    <div class="font-medium">3 (RGB)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 对比分析部分 -->
+        <div class="bg-white rounded-xl shadow-xl p-6 mb-12">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center mr-4">
+                    <i class="fas fa-balance-scale text-white text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-primary">关键参数对比分析</h2>
+                    <p class="text-gray-600">两个文件在分辨率、数据量和精度方面的详细对比</p>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">参数</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">5400×2700文件</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">21600×10800文件</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">对比差异</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">提升倍数</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr class="hover:bg-blue-50">
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">图像尺寸</td>
+                            <td class="px-6 py-4 whitespace-nowrap">5400 × 2700 像素</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-bold text-red-600">21600 × 10800 像素</td>
+                            <td class="px-6 py-4 whitespace-nowrap">宽度/高度增加</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">4倍</span></td>
+                        </tr>
+                        <tr class="hover:bg-blue-50">
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">总像素数</td>
+                            <td class="px-6 py-4 whitespace-nowrap">14,580,000</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-bold text-red-600">233,280,000</td>
+                            <td class="px-6 py-4 whitespace-nowrap">像素总量增加</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">16倍</span></td>
+                        </tr>
+                        <tr class="hover:bg-blue-50">
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">经度分辨率</td>
+                            <td class="px-6 py-4 whitespace-nowrap">0.0666667°/像素</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-bold text-red-600">0.0166667°/像素</td>
+                            <td class="px-6 py-4 whitespace-nowrap">分辨率提高</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">4倍</span></td>
+                        </tr>
+                        <tr class="hover:bg-blue-50">
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">纬度分辨率</td>
+                            <td class="px-6 py-4 whitespace-nowrap">0.0666667°/像素</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-bold text-red-600">0.0166667°/像素</td>
+                            <td class="px-6 py-4 whitespace-nowrap">分辨率提高</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">4倍</span></td>
+                        </tr>
+                        <tr class="hover:bg-blue-50">
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">地面分辨率</td>
+                            <td class="px-6 py-4 whitespace-nowrap">约 7.4 公里/像素</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-bold text-red-600">约 1.85 公里/像素</td>
+                            <td class="px-6 py-4 whitespace-nowrap">空间细节提高</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">4倍</span></td>
+                        </tr>
+                        <tr class="hover:bg-blue-50">
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">角秒分辨率</td>
+                            <td class="px-6 py-4 whitespace-nowrap">240角秒/像素</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-bold text-red-600">60角秒/像素</td>
+                            <td class="px-6 py-4 whitespace-nowrap">角度分辨率提高</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">4倍</span></td>
+                        </tr>
+                        <tr class="hover:bg-blue-50">
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">数据体积</td>
+                            <td class="px-6 py-4 whitespace-nowrap">约 44 MB</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-bold text-red-600">约 700 MB</td>
+                            <td class="px-6 py-4 whitespace-nowrap">存储需求增加</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">16倍</span></td>
+                        </tr>
+                        <tr class="hover:bg-blue-50">
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">块大小</td>
+                            <td class="px-6 py-4 whitespace-nowrap">5400×1</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-bold text-red-600">21600×1</td>
+                            <td class="px-6 py-4 whitespace-nowrap">行块大小增加</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">4倍</span></td>
+                        </tr>
+                        <tr class="hover:bg-blue-50">
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">角点误差</td>
+                            <td class="px-6 py-4 whitespace-nowrap">±0.0000001°</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-bold text-red-600">±0.0000007°</td>
+                            <td class="px-6 py-4 whitespace-nowrap">误差略有增加</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">7倍</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- 分辨率可视化 -->
+            <div class="mt-10">
+                <h3 class="text-xl font-bold text-primary mb-4">分辨率可视化对比</h3>
+                <div class="flex flex-col md:flex-row items-center justify-between bg-gradient-to-r from-blue-50 to-red-50 p-6 rounded-xl">
+                    <div class="mb-6 md:mb-0 md:w-1/3">
+                        <h4 class="font-bold text-lg text-blue-700 mb-2">低分辨率网格</h4>
+                        <div class="map-grid w-full h-48 rounded-lg border border-blue-300"></div>
+                        <p class="text-sm text-gray-600 mt-2">7.4 km/像素，每个网格代表约55平方公里</p>
+                    </div>
+                    <div class="flex flex-col items-center mb-6 md:mb-0">
+                        <div class="relative w-32 h-32 mb-4">
+                            <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-red-500 rounded-full animate-pulse-slow"></div>
+                            <div class="absolute inset-4 bg-white rounded-full flex items-center justify-center">
+                                <i class="fas fa-exchange-alt text-3xl text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-primary">4×</div>
+                            <div class="text-gray-600">分辨率提升</div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/3">
+                        <h4 class="font-bold text-lg text-red-700 mb-2">高分辨率网格</h4>
+                        <div class="map-grid-dense w-full h-48 rounded-lg border border-red-300"></div>
+                        <p class="text-sm text-gray-600 mt-2">1.85 km/像素，每个网格代表约3.4平方公里</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 坐标系和精度信息 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <div class="bg-white rounded-xl shadow-xl p-6">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center mr-4">
+                        <i class="fas fa-crosshairs text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">坐标系详情</h2>
+                        <p class="text-gray-600">WGS 84 (EPSG:4326) 地理坐标系</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="text-sm text-gray-500 mb-1">坐标系名称</div>
+                        <div class="font-bold text-lg">WGS 84 (EPSG:4326)</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="text-sm text-gray-500 mb-1">椭球体</div>
+                            <div class="font-bold">WGS 84</div>
+                            <div class="text-sm">长半轴: 6378137米</div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="text-sm text-gray-500 mb-1">本初子午线</div>
+                            <div class="font-bold">格林威治</div>
+                            <div class="text-sm">0°经度</div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="text-sm text-gray-500 mb-2">包含的WGS84实现</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">WGS 84 (Transit)</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">WGS 84 (G730)</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">WGS 84 (G873)</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">WGS 84 (G1150)</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">WGS 84 (G1674)</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">WGS 84 (G1762)</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">WGS 84 (G2139)</span>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">WGS 84 (G2296)</span>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-50 to-teal-50 p-4 rounded-lg border border-green-200">
+                        <div class="flex items-center">
+                            <i class="fas fa-bullseye text-green-600 text-xl mr-3"></i>
+                            <div>
+                                <div class="font-bold text-green-800">集成精度: 2.0米</div>
+                                <div class="text-sm text-green-700">多代WGS84实现的平均精度</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-xl p-6">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center mr-4">
+                        <i class="fas fa-map-marked-alt text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">空间范围和精度</h2>
+                        <p class="text-gray-600">全球覆盖范围与地理定位精度</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                        <h3 class="font-bold text-blue-800 mb-2">全球覆盖范围</h3>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div class="bg-white p-3 rounded">
+                                <div class="text-gray-500">经度范围</div>
+                                <div class="font-bold">-180° 到 180°</div>
+                            </div>
+                            <div class="bg-white p-3 rounded">
+                                <div class="text-gray-500">纬度范围</div>
+                                <div class="font-bold">-90° 到 90°</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-3">角点坐标 (实际值)</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <div class="font-medium">左上角</div>
+                                <div class="font-mono text-sm">(-180.0000000, 90.0000000)</div>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <div class="font-medium">右上角</div>
+                                <div class="font-mono text-sm">(180.0000007, 90.0000000)</div>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <div class="font-medium">左下角</div>
+                                <div class="font-mono text-sm">(-180.0000000, -90.0000004)</div>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <div class="font-medium">右下角</div>
+                                <div class="font-mono text-sm">(180.0000007, -90.0000004)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
+                        <h3 class="font-bold text-purple-800 mb-2">地理定位精度评估</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-700">理论精度 (高分辨率):</span>
+                                <span class="font-bold">±1.85 km</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-700">理论精度 (低分辨率):</span>
+                                <span class="font-bold">±7.4 km</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-700">坐标误差:</span>
+                                <span class="font-bold">亚毫米级</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-700">适合应用:</span>
+                                <span class="font-bold text-green-600">全球/区域分析</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 应用场景评估 -->
+        <div class="bg-white rounded-xl shadow-xl p-6 mb-12">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-yellow-500 flex items-center justify-center mr-4">
+                    <i class="fas fa-tasks text-white text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">应用场景评估</h2>
+                    <p class="text-gray-600">不同分辨率地图的适用场景和技术建议</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold text-blue-700 mb-4 flex items-center">
+                        <i class="fas fa-globe-americas mr-2"></i> 低分辨率 (5400×2700)
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-2">✅ 非常适合的用途</h4>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">全球背景地图</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">教学演示用图</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">全球数据可视化</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">网络地图服务</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">快速全球概览</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-2">⚠️ 不适合的用途</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">街道级详细制图</span>
+                                <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">高精度测量</span>
+                                <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">小范围详细规划</span>
+                                <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">区域环境分析</span>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-blue-800 mb-2">🔧 技术建议</h4>
+                            <ul class="space-y-1 text-sm">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>适合快速加载和显示，网络应用友好</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>内存需求低，普通设备即可处理</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr=2"></i>
+                                    <span>可内建金字塔图层加速显示</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-red-700 mb-4 flex items-center">
+                        <i class="fas fa-map-marked-alt mr-2"></i> 高分辨率 (21600×10800)
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-2">✅ 非常适合的用途</h4>
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">区域尺度地理分析</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">GIS项目底图</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">全球环境建模</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">教育科研用图</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">中等分辨率背景</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-2">⚠️ 不适合的用途</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">街道级详细制图</span>
+                                <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">高精度测量</span>
+                                <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">详细城市规划</span>
+                                <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">房产地籍测量</span>
+                            </div>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-red-800 mb-2">🔧 技术建议</h4>
+                            <ul class="space-y-1 text-sm">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>建议构建金字塔图层以加速显示</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>处理时需要较强计算资源，建议分块处理</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>可考虑转换为更高效的存储格式</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 细节可见性对比 -->
+            <div class="mt-8 pt-8 border-t border-gray-200">
+                <h3 class="text-xl font-bold text-primary mb-4">地理特征可见性对比</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">地理特征</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">低分辨率可见性</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">高分辨率可见性</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">改进程度</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-medium">洲际特征</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">清晰可见</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">清晰可见</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-gray-500">-</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-medium">国家边界</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">主要国家</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">清晰可见</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">显著改进</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-medium">主要河流</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">仅大型河流</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">主要河流</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">显著改进</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-medium">湖泊</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium">仅大型湖泊</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">中型湖泊</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">显著改进</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-medium">城市识别</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium">仅特大城市</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">大城市轮廓</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">显著改进</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-medium">海岸线细节</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">基本轮廓</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">细节丰富</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">显著改进</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- 技术总结 -->
+        <div class="bg-gradient-to-r from-primary to-secondary rounded-xl shadow-xl p-8 text-white mb-12">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="mb-6 md:mb-0 md:mr-8">
+                    <div class="relative w-48 h-48 mx-auto">
+                        <div class="absolute inset-0 bg-white/20 rounded-full animate-spin-slow"></div>
+                        <div class="absolute inset-8 bg-white/10 rounded-full animate-spin-slow" style="animation-direction: reverse; animation-duration: 50s;"></div>
+                        <div class="absolute inset-16 bg-white/5 rounded-full flex items-center justify-center">
+                            <i class="fas fa-globe-americas text-4xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-2/3">
+                    <h2 class="text-3xl font-bold mb-4">技术总结</h2>
+                    <p class="text-lg mb-6">这两个全球地图GeoTIFF文件提供了从全球概览到区域分析的不同分辨率选择，采用标准的WGS84坐标系，确保与全球GIS系统的兼容性。</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white/20 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">关键优势</h4>
+                            <ul class="space-y-1 text-sm">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check mt-1 mr-2"></i>
+                                    <span>完整的全球覆盖范围</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check mt-1 mr-2"></i>
+                                    <span>标准WGS84坐标系</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check mt-1 mr-2"></i>
+                                    <span>均匀的等经纬度投影</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check mt-1 mr-2"></i>
+                                    <span>高质量无损压缩</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-white/20 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">使用建议</h4>
+                            <ul class="space-y-1 text-sm">
+                                <li class="flex items-start">
+                                    <i class="fas fa-lightbulb mt-1 mr-2"></i>
+                                    <span>根据应用需求选择分辨率</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-lightbulb mt-1 mr-2"></i>
+                                    <span>高分辨率文件建议分块处理</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-lightbulb mt-1 mr-2"></i>
+                                    <span>两者均可作为GIS项目底图</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-lightbulb mt-1 mr-2"></i>
+                                    <span>注意投影在高纬度的变形</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center mr-3">
+                            <i class="fas fa-globe-americas text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">全球地图GeoTIFF分析报告</h3>
+                            <p class="text-gray-400 text-sm">基于GDAL的专业技术分析</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 max-w-md">本报告对两个不同分辨率的全球地图GeoTIFF文件进行详细技术分析，包括坐标系、分辨率、精度和应用场景评估。</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <div class="mb-4">
+                        <div class="text-gray-400 mb-2">分析工具</div>
+                        <div class="flex space-x-2 justify-center md:justify-end">
+                            <span class="px-3 py-1 bg-gray-700 rounded text-sm">GDAL</span>
+                            <span class="px-3 py-1 bg-gray-700 rounded text-sm">GeoTIFF</span>
+                            <span class="px-3 py-1 bg-gray-700 rounded text-sm">WGS84</span>
+                        </div>
+                    </div>
+                    <div class="text-gray-400">
+                        <i class="far fa-calendar-alt mr-2"></i> 分析日期: 2023年10月
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
+                <p>© 2024 全球地图GeoTIFF分析报告 | 本报告基于实际GDAL分析结果生成，仅供参考和研究使用</p>
+            </div>
+        </div>
+    </footer>
+    <!-- 打印和主题切换功能 -->
+    <script>
+        // 打印功能
+        document.getElementById('printBtn').addEventListener('click', function () {
+            window.print();
+        });
+
+        // 主题切换功能
+        document.getElementById('themeToggle').addEventListener('click', function () {
+            const body = document.body;
+            const icon = this.querySelector('i');
+            const text = this.querySelector('span');
+
+            if (body.classList.contains('dark')) {
+                body.classList.remove('dark');
+                body.classList.remove('bg-gray-900');
+                body.classList.add('bg-gradient-to-br', 'from-blue-50', 'to-gray-100');
+                body.classList.add('text-gray-800');
+                icon.className = 'fas fa-moon';
+                text.textContent = '暗色模式';
+            } else {
+                body.classList.add('dark');
+                body.classList.remove('bg-gradient-to-br', 'from-blue-50', 'to-gray-100');
+                body.classList.add('bg-gray-900');
+                body.classList.add('text-gray-200');
+                icon.className = 'fas fa-sun';
+                text.textContent = '亮色模式';
+            }
+        });
+
+        // 添加动画效果
+        document.addEventListener('DOMContentLoaded', function () {
+            // 为所有卡片添加滚动动画
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-fade-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            // 观察所有需要动画的元素
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+
+</html>

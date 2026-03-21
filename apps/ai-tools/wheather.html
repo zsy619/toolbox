@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天气数据可视化大屏</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .weather-icon-anim {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        
+        .temp-gradient {
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #ef4444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .metric-card {
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .city-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .city-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        /* 天气背景动画 */
+        .weather-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+        
+        .rain-drop {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.6));
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            to { transform: translateY(100vh); }
+        }
+        
+        .cloud {
+            position: absolute;
+            background: rgba(255,255,255,0.1);
+            border-radius: 100px;
+            animation: drift linear infinite;
+        }
+        
+        @keyframes drift {
+            from { transform: translateX(-200px); }
+            to { transform: translateX(calc(100vw + 200px)); }
+        }
+        
+        .sun-ray {
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,223,0,0.3) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <!-- 动态天气背景 -->
+    <div class="weather-bg" id="weatherBg"></div>
+    
+    <div class="max-w-7xl mx-auto relative z-10">
+        <!-- 头部 -->
+        <header class="glass-panel p-6 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">天气数据可视化中心</h1>
+                        <p class="text-gray-500">实时监测 · 智能分析 · 精准预报</p>
+                    </div>
+                </div>
+                
+                <!-- 城市选择 -->
+                <div class="flex gap-2">
+                    <button class="city-btn active px-4 py-2 rounded-xl font-medium" onclick="switchCity('beijing', this)">
+                        <i class="fas fa-map-marker-alt mr-2"></i>北京
+                    </button>
+                    <button class="city-btn px-4 py-2 rounded-xl font-medium bg-gray-100 text-gray-600" onclick="switchCity('shanghai', this)">
+                        <i class="fas fa-map-marker-alt mr-2"></i>上海
+                    </button>
+                    <button class="city-btn px-4 py-2 rounded-xl font-medium bg-gray-100 text-gray-600" onclick="switchCity('guangzhou', this)">
+                        <i class="fas fa-map-marker-alt mr-2"></i>广州
+                    </button>
+                    <button class="city-btn px-4 py-2 rounded-xl font-medium bg-gray-100 text-gray-600" onclick="switchCity('shenzhen', this)">
+                        <i class="fas fa-map-marker-alt mr-2"></i>深圳
+                    </button>
+                    <button class="city-btn px-4 py-2 rounded-xl font-medium bg-gray-100 text-gray-600" onclick="switchCity('zhengzhou', this)">
+                        <i class="fas fa-map-marker-alt mr-2"></i>郑州
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要内容区 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 左侧：当前天气 -->
+            <div class="glass-panel p-6 metric-card">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-700">当前天气</h2>
+                        <p class="text-gray-400 text-sm" id="currentDate">2024年1月15日 星期一</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full bg-green-100 text-green-600 text-sm font-medium" id="aqiBadge">
+                        <i class="fas fa-leaf mr-1"></i>优 45
+                    </span>
+                </div>
+                
+                <div class="text-center py-8">
+                    <div class="weather-icon-anim text-8xl mb-4" id="weatherIcon">
+                        <i class="fas fa-sun text-yellow-400"></i>
+                    </div>
+                    <div class="text-6xl font-bold temp-gradient mb-2" id="currentTemp">24°</div>
+                    <div class="text-xl text-gray-600" id="weatherDesc">晴朗</div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="text-center p-3 rounded-xl bg-blue-50">
+                        <i class="fas fa-temperature-high text-blue-500 mb-1"></i>
+                        <div class="text-sm text-gray-500">最高</div>
+                        <div class="font-bold text-gray-700" id="maxTemp">28°</div>
+                    </div>
+                    <div class="text-center p-3 rounded-xl bg-purple-50">
+                        <i class="fas fa-temperature-low text-purple-500 mb-1"></i>
+                        <div class="text-sm text-gray-500">最低</div>
+                        <div class="font-bold text-gray-700" id="minTemp">16°</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中间：详细指标 -->
+            <div class="glass-panel p-6 metric-card">
+                <h2 class="text-lg font-semibold text-gray-700 mb-6">环境指标</h2>
+                
+                <div class="space-y-4">
+                    <!-- 湿度 -->
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-50 to-blue-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                                <i class="fas fa-tint"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-500">相对湿度</div>
+                                <div class="font-bold text-gray-800" id="humidity">65%</div>
+                            </div>
+                        </div>
+                        <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-500 rounded-full" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 风速 -->
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-green-50 to-green-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center">
+                                <i class="fas fa-wind"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-500">风速</div>
+                                <div class="font-bold text-gray-800" id="windSpeed">12 km/h</div>
+                            </div>
+                        </div>
+                        <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-green-500 rounded-full" style="width: 40%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 气压 -->
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-50 to-purple-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-500">气压</div>
+                                <div class="font-bold text-gray-800" id="pressure">1013 hPa</div>
+                            </div>
+                        </div>
+                        <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-purple-500 rounded-full" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 能见度 -->
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-orange-50 to-orange-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-500">能见度</div>
+                                <div class="font-bold text-gray-800" id="visibility">10 km</div>
+                            </div>
+                        </div>
+                        <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-orange-500 rounded-full" style="width: 90%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- UV指数 -->
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-red-50 to-red-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center">
+                                <i class="fas fa-sun"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm text-gray-500">UV指数</div>
+                                <div class="font-bold text-gray-800" id="uvIndex">中等 5</div>
+                            </div>
+                        </div>
+                        <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-red-500 rounded-full" style="width: 50%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：24小时预报 -->
+            <div class="glass-panel p-6 metric-card">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">24小时预报</h2>
+                <div class="chart-container">
+                    <canvas id="hourlyChart"></canvas>
+                </div>
+                
+                <!-- 小时列表 -->
+                <div class="mt-4 space-y-2 max-h-48 overflow-y-auto" id="hourlyList">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部图表区 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <!-- 7天趋势 -->
+            <div class="glass-panel p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-700">7天天气趋势</h2>
+                    <button class="text-sm text-blue-500 hover:text-blue-600">
+                        <i class="fas fa-calendar-alt mr-1"></i>查看详情
+                    </button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 历史数据对比 -->
+            <div class="glass-panel p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-700">月度气温对比</h2>
+                    <select class="text-sm border rounded-lg px-3 py-1 bg-gray-50">
+                        <option>2024年</option>
+                        <option>2023年</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 天气预警 -->
+        <div class="glass-panel p-6 mt-6" id="warningPanel" style="display: none;">
+            <div class="flex items-center gap-4 text-amber-600">
+                <i class="fas fa-exclamation-triangle text-3xl"></i>
+                <div>
+                    <h3 class="font-bold text-lg">天气预警</h3>
+                    <p id="warningText">黄色高温预警：预计未来三天最高气温将达35°C以上，请注意防暑降温。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 城市数据
+        const cityData = {
+            beijing: {
+                name: '北京',
+                temp: 24,
+                maxTemp: 28,
+                minTemp: 16,
+                weather: 'sunny',
+                desc: '晴朗',
+                humidity: 45,
+                windSpeed: 15,
+                pressure: 1015,
+                visibility: 12,
+                uvIndex: '高 7',
+                aqi: { level: '良', value: 85, color: 'yellow' },
+                hourly: [18, 19, 20, 22, 24, 26, 27, 28, 27, 25, 23, 21, 20, 19, 18, 17, 16, 16, 17, 18, 19, 20, 21, 22],
+                weekly: {
+                    dates: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    high: [28, 30, 29, 27, 25, 26, 28],
+                    low: [16, 18, 17, 15, 14, 15, 16]
+                },
+                monthly: [2, 5, 12, 20, 26, 30, 32, 31, 26, 19, 10, 4],
+                warning: null
+            },
+            shanghai: {
+                name: '上海',
+                temp: 22,
+                maxTemp: 25,
+                minTemp: 19,
+                weather: 'rainy',
+                desc: '小雨',
+                humidity: 82,
+                windSpeed: 18,
+                pressure: 1008,
+                visibility: 6,
+                uvIndex: '低 2',
+                aqi: { level: '优', value: 45, color: 'green' },
+                hourly: [20, 20, 21, 21, 22, 22, 23, 24, 25, 24, 23, 22, 21, 21, 20, 20, 19, 19, 20, 20, 21, 21, 22, 22],
+                weekly: {
+                    dates: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    high: [25, 24, 23, 26, 28, 29, 27],
+                    low: [19, 20, 19, 21, 22, 23, 21]
+                },
+                monthly: [6, 8, 13, 19, 24, 27, 32, 32, 28, 22, 16, 9],
+                warning: '暴雨蓝色预警'
+            },
+            guangzhou: {
+                name: '广州',
+                temp: 31,
+                maxTemp: 34,
+                minTemp: 26,
+                weather: 'cloudy',
+                desc: '多云',
+                humidity: 75,
+                windSpeed: 10,
+                pressure: 1005,
+                visibility: 9,
+                uvIndex: '很高 9',
+                aqi: { level: '良', value: 75, color: 'yellow' },
+                hourly: [27, 28, 29, 30, 31, 32, 33, 34, 33, 32, 31, 30, 29, 28, 27, 27, 26, 26, 27, 28, 29, 30, 30, 29],
+                weekly: {
+                    dates: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    high: [34, 35, 33, 32, 31, 32, 33],
+                    low: [26, 27, 26, 25, 25, 26, 26]
+                },
+                monthly: [15, 17, 21, 26, 29, 31, 33, 33, 32, 28, 23, 18],
+                warning: '高温黄色预警'
+            },
+            shenzhen: {
+                name: '深圳',
+                temp: 30,
+                maxTemp: 32,
+                minTemp: 26,
+                weather: 'cloudy',
+                desc: '多云',
+                humidity: 78,
+                windSpeed: 12,
+                pressure: 1006,
+                visibility: 10,
+                uvIndex: '高 8',
+                aqi: { level: '优', value: 55, color: 'green' },
+                hourly: [26, 27, 28, 29, 30, 31, 32, 32, 31, 30, 29, 28, 27, 27, 26, 26, 26, 26, 27, 28, 29, 29, 28, 27],
+                weekly: {
+                    dates: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    high: [32, 33, 31, 30, 29, 30, 31],
+                    low: [26, 27, 26, 25, 25, 26, 26]
+                },
+                monthly: [16, 18, 22, 26, 29, 31, 32, 32, 31, 28, 24, 19],
+                warning: null
+            }
+        };
+
+        let hourlyChartInstance = null;
+        let weeklyChartInstance = null;
+        let monthlyChartInstance = null;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDate();
+            renderWeather('beijing');
+            initWeatherBg('sunny');
+        });
+
+        // 更新日期
+        function updateDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options);
+        }
+
+        // 切换城市
+        function switchCity(city, btn) {
+            // 更新按钮状态
+            document.querySelectorAll('.city-btn').forEach(b => {
+                b.classList.remove('active');
+                b.classList.add('bg-gray-100', 'text-gray-600');
+            });
+            btn.classList.add('active');
+            btn.classList.remove('bg-gray-100', 'text-gray-600');
+            
+            renderWeather(city);
+        }
+
+        // 渲染天气数据
+        function renderWeather(city) {
+            const data = cityData[city];
+            
+            // 更新基本信息
+            document.getElementById('currentTemp').textContent = data.temp + '°';
+            document.getElementById('weatherDesc').textContent = data.desc;
+            document.getElementById('maxTemp').textContent = data.maxTemp + '°';
+            document.getElementById('minTemp').textContent = data.minTemp + '°';
+            
+            // 更新天气图标
+            const iconMap = {
+                sunny: '<i class="fas fa-sun text-yellow-400"></i>',
+                rainy: '<i class="fas fa-cloud-rain text-blue-400"></i>',
+                cloudy: '<i class="fas fa-cloud text-gray-400"></i>',
+                storm: '<i class="fas fa-bolt text-purple-400"></i>'
+            };
+            document.getElementById('weatherIcon').innerHTML = iconMap[data.weather] || iconMap.sunny;
+            
+            // 更新指标
+            document.getElementById('humidity').textContent = data.humidity + '%';
+            document.getElementById('windSpeed').textContent = data.windSpeed + ' km/h';
+            document.getElementById('pressure').textContent = data.pressure + ' hPa';
+            document.getElementById('visibility').textContent = data.visibility + ' km';
+            document.getElementById('uvIndex').textContent = data.uvIndex;
+            
+            // 更新AQI
+            const aqiColors = {
+                green: 'bg-green-100 text-green-600',
+                yellow: 'bg-yellow-100 text-yellow-600',
+                orange: 'bg-orange-100 text-orange-600',
+                red: 'bg-red-100 text-red-600'
+            };
+            const aqiBadge = document.getElementById('aqiBadge');
+            aqiBadge.className = `px-3 py-1 rounded-full text-sm font-medium ${aqiColors[data.aqi.color]}`;
+            aqiBadge.innerHTML = `<i class="fas fa-leaf mr-1"></i>${data.aqi.level} ${data.aqi.value}`;
+            
+            // 更新背景
+            initWeatherBg(data.weather);
+            
+            // 渲染图表
+            renderHourlyChart(data.hourly);
+            renderWeeklyChart(data.weekly);
+            renderMonthlyChart(data.monthly);
+            
+            // 渲染小时列表
+            renderHourlyList(data.hourly);
+            
+            // 显示/隐藏预警
+            const warningPanel = document.getElementById('warningPanel');
+            if (data.warning) {
+                warningPanel.style.display = 'block';
+                document.getElementById('warningText').textContent = data.warning;
+            } else {
+                warningPanel.style.display = 'none';
+            }
+        }
+
+        // 渲染小时列表
+        function renderHourlyList(hourly) {
+            const container = document.getElementById('hourlyList');
+            const icons = ['fa-moon', 'fa-moon', 'fa-moon', 'fa-sun', 'fa-sun', 'fa-sun', 'fa-sun', 'fa-sun', 'fa-sun', 'fa-sun', 'fa-sun', 'fa-sun'];
+            let html = '';
+            const now = new Date().getHours();
+            
+            hourly.forEach((temp, index) => {
+                const hour = (now + index) % 24;
+                const icon = hour >= 6 && hour < 18 ? 'fa-sun text-yellow-400' : 'fa-moon text-blue-300';
+                html += `
+                    <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                        <div class="flex items-center gap-3">
+                            <span class="text-gray-500 text-sm w-12">${hour}:00</span>
+                            <i class="fas ${icon}"></i>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-20 h-1 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-blue-400 to-red-400 rounded-full" style="width: ${(temp / 40) * 100}%"></div>
+                            </div>
+                            <span class="font-bold text-gray-700 w-8">${temp}°</span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // 渲染24小时图表
+        function renderHourlyChart(hourly) {
+            const ctx = document.getElementById('hourlyChart').getContext('2d');
+            
+            if (hourlyChartInstance) {
+                hourlyChartInstance.destroy();
+            }
+            
+            hourlyChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => `${(new Date().getHours() + i) % 24}:00`),
+                    datasets: [{
+                        label: '温度',
+                        data: hourly,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#667eea',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: { callback: value => value + '°' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { maxTicksLimit: 8 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 渲染7天趋势
+        function renderWeeklyChart(weekly) {
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            
+            if (weeklyChartInstance) {
+                weeklyChartInstance.destroy();
+            }
+            
+            weeklyChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: weekly.dates,
+                    datasets: [
+                        {
+                            label: '最高温',
+                            data: weekly.high,
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                            borderRadius: 8,
+                            barPercentage: 0.6
+                        },
+                        {
+                            label: '最低温',
+                            data: weekly.low,
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                            borderRadius: 8,
+                            barPercentage: 0.6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { usePointStyle: true }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: { callback: value => value + '°' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 渲染月度对比
+        function renderMonthlyChart(monthly) {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            
+            if (monthlyChartInstance) {
+                monthlyChartInstance.destroy();
+            }
+            
+            monthlyChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                    datasets: [{
+                        label: '平均气温',
+                        data: monthly,
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#8b5cf6',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: { callback: value => value + '°' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 初始化天气背景动画
+        function initWeatherBg(weather) {
+            const bg = document.getElementById('weatherBg');
+            bg.innerHTML = '';
+            
+            if (weather === 'rainy') {
+                // 创建雨滴
+                for (let i = 0; i < 50; i++) {
+                    const drop = document.createElement('div');
+                    drop.className = 'rain-drop';
+                    drop.style.left = Math.random() * 100 + '%';
+                    drop.style.animationDuration = (Math.random() * 1 + 0.5) + 's';
+                    drop.style.animationDelay = Math.random() * 2 + 's';
+                    bg.appendChild(drop);
+                }
+            } else if (weather === 'sunny') {
+                // 创建阳光
+                const sun = document.createElement('div');
+                sun.className = 'sun-ray';
+                bg.appendChild(sun);
+            } else if (weather === 'cloudy') {
+                // 创建云朵
+                for (let i = 0; i < 5; i++) {
+                    const cloud = document.createElement('div');
+                    cloud.className = 'cloud';
+                    cloud.style.width = (100 + Math.random() * 100) + 'px';
+                    cloud.style.height = (40 + Math.random() * 40) + 'px';
+                    cloud.style.top = Math.random() * 50 + '%';
+                    cloud.style.left = '-200px';
+                    cloud.style.animationDuration = (15 + Math.random() * 10) + 's';
+                    cloud.style.animationDelay = (i * 3) + 's';
+                    bg.appendChild(cloud);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

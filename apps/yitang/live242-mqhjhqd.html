@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2B vs 2C 盲区与机会清单分析工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.loli.net/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+        }
+
+        .header-2b {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+
+        .header-2c {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+
+        .comparison-gradient {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .dimension-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+
+        .highlight {
+            position: relative;
+        }
+
+        .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            background-color: rgba(255, 242, 173, 0.5);
+            z-index: -1;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .filter-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .insight-card {
+            transition: all 0.3s ease;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        .comparison-line {
+            position: relative;
+        }
+
+        .comparison-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background-color: #e2e8f0;
+            transform: translateX(-50%);
+        }
+
+        @media (max-width: 768px) {
+            .comparison-line::before {
+                display: none;
+            }
+        }
+
+        .sticky-sidebar {
+            position: sticky;
+            top: 1rem;
+        }
+    </style>
+    <!-- 微信/OpenGraph 卡片信息 -->
+    <meta property="og:title" content="2B vs 2C 盲区与机会清单分析工具">
+    <meta property="og:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta property="og:url" content="./live242-mqhjhqd.html">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="2B vs 2C 盲区与机会清单分析工具">
+    <meta name="twitter:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta itemprop="name" content="2B vs 2C 盲区与机会清单分析工具">
+    <meta itemprop="description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+</head>
+
+<body class="gradient-bg text-gray-800">
+    <!-- Wechat Share Image Hack -->
+    <div style="display:none; visibility:hidden;">
+        <img src="https://tools.yy24365.com/assets/images/dev-tools-og.png" alt="wechat-share-icon" width="400" height="400">
+    </div>
+    </nav>
+    <!-- 主内容区 -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- 标题部分 -->
+        <header class="text-center mb-12 mt-6">
+            <div class="inline-flex items-center space-x-2 bg-white rounded-full px-4 py-2 card-shadow mb-4">
+                <span class="text-blue-600 font-medium">2B企业市场</span>
+                <span class="text-gray-400">vs</span>
+                <span class="text-purple-600 font-medium">2C消费者市场</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">盲区与机会清单分析工具</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">系统性对比2B与2C市场在场景、用户、问题三个维度的差异，发现隐藏的盲区和商业机会</p>
+        </header>
+        <!-- 对比分析标签页 -->
+        <div id="comparison" class="tab-content active">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">2B vs 2C 系统性对比分析</h2>
+                <!-- 分析维度筛选 -->
+                <div class="bg-white rounded-xl p-6 card-shadow mb-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">分析维度筛选</h3>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <button class="filter-btn bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200 transition" data-filter="all">全部维度</button>
+                        <button class="filter-btn bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200 transition" data-filter="scene">场景分析</button>
+                        <button class="filter-btn bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200 transition" data-filter="user">用户分析</button>
+                        <button class="filter-btn bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200 transition" data-filter="problem">问题分析</button>
+                    </div>
+                    <!-- 对比表格 -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="py-3 px-4 text-left font-bold text-gray-700 border-r">分析维度</th>
+                                    <th class="py-3 px-4 text-left font-bold text-gray-700 border-r text-blue-600">2B企业市场</th>
+                                    <th class="py-3 px-4 text-left font-bold text-gray-700 text-purple-600">2C消费者市场</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparison-table">
+                                <!-- 表格内容将通过JavaScript动态生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- 核心差异分析 -->
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <!-- 2B核心特点 -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <div class="flex items-center mb-6">
+                            <div class="w-10 h-10 header-2b rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-building text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900">2B企业市场核心特点</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                <h4 class="font-bold text-gray-800 mb-1">决策复杂度高</h4>
+                                <p class="text-gray-600 text-sm">涉及多角色决策链，流程长，理性因素主导</p>
+                            </div>
+                            <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                <h4 class="font-bold text-gray-800 mb-1">需求标准化程度差异大</h4>
+                                <p class="text-gray-600 text-sm">从完全标准化到高度定制化，依赖行业特性</p>
+                            </div>
+                            <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                <h4 class="font-bold text-gray-800 mb-1">价值衡量明确</h4>
+                                <p class="text-gray-600 text-sm">ROI、效率提升、成本节约等可量化指标</p>
+                            </div>
+                            <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                <h4 class="font-bold text-gray-800 mb-1">关系周期长</h4>
+                                <p class="text-gray-600 text-sm">客户生命周期长，切换成本高，重视长期合作</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 2C核心特点 -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <div class="flex items-center mb-6">
+                            <div class="w-10 h-10 header-2c rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-users text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900">2C消费者市场核心特点</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="border-l-4 border-purple-500 pl-4 py-2">
+                                <h4 class="font-bold text-gray-800 mb-1">决策相对简单</h4>
+                                <p class="text-gray-600 text-sm">个人或家庭决策，流程短，感性因素影响大</p>
+                            </div>
+                            <div class="border-l-4 border-purple-500 pl-4 py-2">
+                                <h4 class="font-bold text-gray-800 mb-1">需求共性明显</h4>
+                                <p class="text-gray-600 text-sm">基于人口统计、生活方式等有较强的群体共性</p>
+                            </div>
+                            <div class="border-l-4 border-purple-500 pl-4 py-2">
+                                <h4 class="font-bold text-gray-800 mb-1">价值感知主观</h4>
+                                <p class="text-gray-600 text-sm">体验、情感、社交价值等主观感受占主导</p>
+                            </div>
+                            <div class="border-l-4 border-purple-500 pl-4 py-2">
+                                <h4 class="font-bold text-gray-800 mb-1">切换成本低</h4>
+                                <p class="text-gray-600 text-sm">品牌忠诚度相对较低，容易尝试新产品</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 机会映射矩阵 -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">跨市场机会映射矩阵</h3>
+                    <p class="text-gray-700 mb-6">识别2B和2C市场之间的可迁移机会和交叉创新点</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-800 mb-4">2B → 2C 机会迁移</h4>
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <div class="w-6 h-6 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                                        <i class="fas fa-arrow-right text-xs"></i>
+                                    </div>
+                                    <span class="text-gray-700">企业级安全方案 → 个人数据隐私保护产品</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="w-6 h-6 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                                        <i class="fas fa-arrow-right text-xs"></i>
+                                    </div>
+                                    <span class="text-gray-700">企业协作工具 → 家庭任务管理应用</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="w-6 h-6 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                                        <i class="fas fa-arrow-right text-xs"></i>
+                                    </div>
+                                    <span class="text-gray-700">供应链管理系统 → 个人物品库存管理工具</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-800 mb-4">2C → 2B 机会迁移</h4>
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <div class="w-6 h-6 bg-purple-100 text-purple-800 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                                        <i class="fas fa-arrow-left text-xs"></i>
+                                    </div>
+                                    <span class="text-gray-700">社交产品用户体验设计 → 企业内部协作工具改进</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="w-6 h-6 bg-purple-100 text-purple-800 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                                        <i class="fas fa-arrow-left text-xs"></i>
+                                    </div>
+                                    <span class="text-gray-700">个性化推荐算法 → 企业采购决策支持系统</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="w-6 h-6 bg-purple-100 text-purple-800 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                                        <i class="fas fa-arrow-left text-xs"></i>
+                                    </div>
+                                    <span class="text-gray-700">消费级智能硬件 → 工业级物联网解决方案</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 2B分析标签页 -->
+        <div id="2b" class="tab-content">
+            <div class="mb-8">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-12 header-2b rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-building text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900">2B企业市场盲区与机会清单</h2>
+                </div>
+                <!-- 2B场景分析 -->
+                <div class="mb-12">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">场景分析 (L1-L5)</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- L1.流程环节 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L1</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">流程环节</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">生产流程：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">报价</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">排产</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">质检</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">报销</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">采购流程：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">发起</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">评估</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">招标</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">审批</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">业务环节：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">研发</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">采购</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">生产</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">销售</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">客服</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">招聘</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>流程自动化、跨部门协作工具、流程可视化</p>
+                            </div>
+                        </div>
+                        <!-- L2.操作地点 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L2</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">操作地点</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">内部环境：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">车间</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">办公室</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">会议室</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">大屏</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">实验室</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">外部环境：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">户外</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">远程</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">外勤</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>移动办公解决方案、远程协作工具、环境适应型设备</p>
+                            </div>
+                        </div>
+                        <!-- L3.人物协作 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L3</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">人物协作</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">内部协作：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">跨部门沟通</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">上下级汇报</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">外部合作：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">供应商对接</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">渠道谈判</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">政府汇报</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>协作平台、沟通工具、权限管理系统</p>
+                            </div>
+                        </div>
+                        <!-- L4.时间节点 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L4</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">时间节点</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">经营节点：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">公司起步</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">开始扩张</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">增长受阻</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">事件节点：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">新品上市</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">系统上线</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">合规审批</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>阶段性解决方案、节点管理工具、里程碑跟踪</p>
+                            </div>
+                        </div>
+                        <!-- L5.重大事件 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L5</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">重大事件</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">关键事件：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">融资/并购后</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">战略转型</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">上市筹备</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">危机公关</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">政策法规：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">新政颁布</span>
+                                        <span class="dimension-tag bg-blue-100 text-blue-800">政策变化</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>专项咨询服务、合规解决方案、危机管理工具</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 2B用户分析 -->
+                <div class="mb-12">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">用户分析 (L1-L5)</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- L1.业务类型 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L1</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">业务类型</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">面向客户：<span class="font-medium">2B/2C/2G</span></p>
+                                <p class="text-sm text-gray-700">业务性质：<span class="font-medium">产品型、服务型、混合型</span></p>
+                                <p class="text-sm text-gray-700">线上线下：<span class="font-medium">线上、线下为主</span></p>
+                                <p class="text-sm text-gray-700">是否连锁：<span class="font-medium">连锁/加盟模式、单体模式</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>行业垂直解决方案、线上线下融合工具、连锁管理平台</p>
+                            </div>
+                        </div>
+                        <!-- L2.规模性质 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L2</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">规模性质</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">行业细分：<span class="font-medium">汽车制造、软件服务、餐饮服务</span></p>
+                                <p class="text-sm text-gray-700">企业营收：<span class="font-medium">100w、500w、1000w、1亿</span></p>
+                                <p class="text-sm text-gray-700">员工数量：<span class="font-medium">50以下、100人、1000人</span></p>
+                                <p class="text-sm text-gray-700">企业性质：<span class="font-medium">央企、国企、私企、外企、个体户</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>规模适配型解决方案、行业专属工具、企业性质差异化服务</p>
+                            </div>
+                        </div>
+                        <!-- L3.标准程度 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L3</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">标准程度</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">数字化水平：<span class="font-medium">初级/中级/高级</span></p>
+                                <p class="text-sm text-gray-700">标准化程度：<span class="font-medium">靠个人经验、有基础流程、SOP完善</span></p>
+                                <p class="text-sm text-gray-700">供应链标准：<span class="font-medium">单一供应商/多供应商制、无固定供应商</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>数字化升级服务、流程标准化工具、供应链优化方案</p>
+                            </div>
+                        </div>
+                        <!-- L4.决策文化 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L4</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">决策文化</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">流程复杂度：<span class="font-medium">个人决策、部门决策、跨部门委员会</span></p>
+                                <p class="text-sm text-gray-700">决策角色：<span class="font-medium">发起者/使用者/影响者/决策者/购买者/把关者</span></p>
+                                <p class="text-sm text-gray-700">切换难度：<span class="font-medium">高切换成本、低切换成本</span></p>
+                                <p class="text-sm text-gray-700">组织文化：<span class="font-medium">创新型、风险规避型、官僚型、流程型</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>决策支持系统、多角色协作工具、组织文化适配方案</p>
+                            </div>
+                        </div>
+                        <!-- L5.财务特征 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L5</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">财务特征</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">预算周期：<span class="font-medium">年度/季度/项目制</span></p>
+                                <p class="text-sm text-gray-700">预算额度：<span class="font-medium">预算充足/紧张/无预算</span></p>
+                                <p class="text-sm text-gray-700">支付条件：<span class="font-medium">预付款/账期/分期</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>灵活定价模型、预算规划工具、分期支付方案</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 2B问题分析 -->
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">问题分析 (L1-L5)</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- L1.业务问题 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L1</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">业务问题</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">增长瓶颈：<span class="font-medium">市场、客户、收入停滞</span></p>
+                                <p class="text-sm text-gray-700">成本过高：<span class="font-medium">原材料、人力、运营、获客成本</span></p>
+                                <p class="text-sm text-gray-700">效率低下：<span class="font-medium">人效、坪效、设备利用率低</span></p>
+                                <p class="text-sm text-gray-700">质量不稳：<span class="font-medium">产品、服务一致性差</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>增长解决方案、成本优化工具、效率提升系统、质量控制平台</p>
+                            </div>
+                        </div>
+                        <!-- L2.技术问题 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L2</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">技术问题</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">系统落后：<span class="font-medium">老旧、难维护、难集成</span></p>
+                                <p class="text-sm text-gray-700">数据难题：<span class="font-medium">不准确、不实时、难分析</span></p>
+                                <p class="text-sm text-gray-700">技术债务：<span class="font-medium">架构陈旧、代码质量差</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>系统升级服务、数据管理平台、技术债务重构方案</p>
+                            </div>
+                        </div>
+                        <!-- L3.管理问题 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L3</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">管理问题</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">协作困难：<span class="font-medium">部门墙、信息孤岛</span></p>
+                                <p class="text-sm text-gray-700">人才短缺：<span class="font-medium">招不到、留不住、能力不足</span></p>
+                                <p class="text-sm text-gray-700">流程长：<span class="font-medium">审批慢、决策慢、执行慢</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>协作平台、人才解决方案、流程自动化工具</p>
+                            </div>
+                        </div>
+                        <!-- L4.战略问题 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L4</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">战略问题</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">方向模糊：<span class="font-medium">不知往哪走、如何转型</span></p>
+                                <p class="text-sm text-gray-700">竞争压力：<span class="font-medium">被颠覆、被降价、被抢份额</span></p>
+                                <p class="text-sm text-gray-700">创新乏力：<span class="font-medium">无新品、无新商业模式</span></p>
+                                <p class="text-sm text-gray-700">资源错配：<span class="font-medium">钱、人、时间投错了地方</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>战略咨询、竞争分析工具、创新方法论、资源优化方案</p>
+                            </div>
+                        </div>
+                        <!-- L5.风险管控 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L5</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">风险管控</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">合规风险、安全风险、财务风险</p>
+                                <p class="text-sm text-gray-700">税务/法务/合规，数据泄露风险</p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>风险管理系统、合规解决方案、数据安全工具</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 2C分析标签页 -->
+        <div id="2c" class="tab-content">
+            <div class="mb-8">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-12 header-2c rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-users text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900">2C消费者市场盲区与机会清单</h2>
+                </div>
+                <!-- 2C场景分析 -->
+                <div class="mb-12">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">场景分析 (L1-L5)</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- L1.时间周期 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L1</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">时间周期</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">使用时间：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">早/中/晚</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">工作日/周末/节假日</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">使用状态：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">碎片时间/整块时间</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">纪念日</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">特别时间：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">过年回家</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">放假外出</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">平日加班晚归</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>时间敏感型产品、节假日专属服务、碎片时间解决方案</p>
+                            </div>
+                        </div>
+                        <!-- L2.空间环境 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L2</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">空间环境</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">固定地点：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">办公室</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">家</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">饭馆</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">医院</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">健身房</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">景区</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">路上场景：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">车里</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">高铁上</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">通勤路上</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">社交状态：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">独自一人</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">与家人/朋友一起</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">带孩子</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>场景适配型产品、移动场景解决方案、社交场景优化</p>
+                            </div>
+                        </div>
+                        <!-- L3.身心状态 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L3</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">身心状态</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">负向情绪：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">孤独</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">焦虑</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">抑郁</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">无聊</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">疲惫</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">悲伤</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">正向情绪：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">喜悦</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">庆祝</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">放松</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">自由</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">极限挑战</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">身体状态：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">熬夜</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">久坐</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">失眠</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">睡前</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">偏头痛</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>情绪管理工具、健康解决方案、身心状态适配产品</p>
+                            </div>
+                        </div>
+                        <!-- L4.特别时刻 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L4</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">特别时刻</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">个人时刻：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">应届求职</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">保险到期</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">生理期</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">高强度运动时</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">相亲</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">公司时刻：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">商务酒局</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">公司团建</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">严肃社交</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">送礼时刻：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">节日礼物</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">红包</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">升学</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>特殊时刻解决方案、仪式感产品、礼物推荐服务</p>
+                            </div>
+                        </div>
+                        <!-- L5.稀缺窗口 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L5</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">稀缺窗口</h4>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">重大决策：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">换工作</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">搬家</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">求婚</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">意外偶发：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">电脑坏了</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">生病意外</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">老人摔倒</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">宠物刚离世</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">关键前期：</p>
+                                    <div>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">高考前</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">分娩前疼痛</span>
+                                        <span class="dimension-tag bg-purple-100 text-purple-800">周五晚约会前</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>应急解决方案、决策支持工具、关键时期专属服务</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 2C用户分析 -->
+                <div class="mb-12">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">用户分析 (L1-L5)</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- L1.人口统计 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L1</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">人口统计</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">基础：<span class="font-medium">年龄、代际、性别</span></p>
+                                <p class="text-sm text-gray-700">地域：<span class="font-medium">中国/海外、一二三线城市、乡镇农村</span></p>
+                                <p class="text-sm text-gray-700">类型：<span class="font-medium">收入、职业、教育程度</span></p>
+                                <p class="text-sm text-gray-700">住房类型：<span class="font-medium">自有住房/整租房/合租房</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>人口细分市场、地域适配产品、住房相关服务</p>
+                            </div>
+                        </div>
+                        <!-- L2.角色阶段 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L2</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">角色阶段</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">家庭结构：<span class="font-medium">单身、已婚未育、有子女、多代同堂</span></p>
+                                <p class="text-sm text-gray-700">社会角色：<span class="font-medium">学生、职场新人、管理者、退休人士</span></p>
+                                <p class="text-sm text-gray-700">特定身份：<span class="font-medium">宝妈、铲屎官、户外爱好者、二次元</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>生命周期产品、角色适配方案、兴趣社群服务</p>
+                            </div>
+                        </div>
+                        <!-- L3.能力状态 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L3</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">能力状态</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">健康程度：<span class="font-medium">慢性病、残疾、半失能、失能</span></p>
+                                <p class="text-sm text-gray-700">能力水平：<span class="font-medium">小白/入门/业余玩家/职业选手</span></p>
+                                <p class="text-sm text-gray-700">特殊阶段：<span class="font-medium">孕期、产后、更年期、康复期</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>无障碍设计产品、能力提升工具、特殊阶段关怀服务</p>
+                            </div>
+                        </div>
+                        <!-- L4.行为习惯 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L4</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">行为习惯</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">生活习惯：<span class="font-medium">重度外卖、经常烫染、频繁商务酒局</span></p>
+                                <p class="text-sm text-gray-700">工作习惯：<span class="font-medium">外勤、经常出差、居家、长期手机工作</span></p>
+                                <p class="text-sm text-gray-700">兴趣习惯：<span class="font-medium">户外探险、喜欢宅、跳广场舞、酒店控</span></p>
+                                <p class="text-sm text-gray-700">消费习惯：<span class="font-medium">追求低价、品牌、性价比、新品</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>习惯养成工具、生活方式产品、兴趣社群服务</p>
+                            </div>
+                        </div>
+                        <!-- L5.价值观念 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L5</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">价值观念</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">价值偏好：<span class="font-medium">追求氛围、效率优先、颜值、成分配方</span></p>
+                                <p class="text-sm text-gray-700">生活哲学：<span class="font-medium">自律/躺平、奋斗/平衡、极简主义/精致生活</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>价值观共鸣产品、生活方式品牌、哲学适配服务</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 2C问题分析 -->
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">问题分析 (L1-L5)</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- L1.上层功能 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L1</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">上层功能</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">缺少信息：<span class="font-medium">需要权威测评、了解升学途径</span></p>
+                                <p class="text-sm text-gray-700">缺少工具：<span class="font-medium">多个日程难管理、知识收藏散乱各处</span></p>
+                                <p class="text-sm text-gray-700">缺少能力：<span class="font-medium">学会化妆、理财、做饭</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>信息聚合平台、效率工具、技能学习产品</p>
+                            </div>
+                        </div>
+                        <!-- L2.深度体验 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L2</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">深度体验</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">要更便宜：<span class="font-medium">打车太贵、不够起送费</span></p>
+                                <p class="text-sm text-gray-700">要变更快：<span class="font-medium">排队等位久、短时间大量阅读</span></p>
+                                <p class="text-sm text-gray-700">要更简单：<span class="font-medium">看病挂号难、没时间打扫、搬家收拾麻烦</span></p>
+                                <p class="text-sm text-gray-700">要更舒适：<span class="font-medium">缓解分娩痛、耳机久戴不痛、理发不被推销</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>成本优化方案、效率提升产品、简化服务、舒适度优化</p>
+                            </div>
+                        </div>
+                        <!-- L3.上层社交 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L3</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">上层社交</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">维持体面：<span class="font-medium">全职妈妈开口要钱难、老年人能自理</span></p>
+                                <p class="text-sm text-gray-700">情感陪伴：<span class="font-medium">孩子需要陪伴、中年人需要喘息</span></p>
+                                <p class="text-sm text-gray-700">社交货币：<span class="font-medium">需要谈资、希望被羡慕</span></p>
+                                <p class="text-sm text-gray-700">维护关系：<span class="font-medium">性教育难以启齿、送礼难</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>尊严维护方案、情感陪伴服务、社交价值产品、关系维护工具</p>
+                            </div>
+                        </div>
+                        <!-- L4.深度情感 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L4</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">深度情感</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">人设塑造：<span class="font-medium">女性彰显独立、职场精英优雅干练</span></p>
+                                <p class="text-sm text-gray-700">自我内心：<span class="font-medium">彰显自律/努力/有爱心、自我补偿/奖励</span></p>
+                                <p class="text-sm text-gray-700">自我实现：<span class="font-medium">证明自己、留下作品、个人使命</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>身份认同产品、自我表达工具、成就实现平台</p>
+                            </div>
+                        </div>
+                        <!-- L5.转化成钱 -->
+                        <div class="bg-white rounded-xl p-5 card-shadow insight-card">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 text-purple-800 rounded-lg flex items-center justify-center mr-2">
+                                    <span class="font-bold">L5</span>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-800">转化成钱</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-700">转化成赚钱：<span class="font-medium">帮找到工作、年薪Offer、帮副业赚钱、帮拿到投资</span></p>
+                                <p class="text-sm text-gray-700">转化成省钱：<span class="font-medium">节约xx成本、减少时间值钱、降低财务风险</span></p>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-medium">机会点：</span>收入提升方案、成本节约工具、财务风险管理系统</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 核心洞察标签页 -->
+        <div id="insights" class="tab-content">
+            <div class="mb-8">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-12 comparison-gradient rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-lightbulb text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900">2B vs 2C 核心洞察</h2>
+                </div>
+                <!-- 洞察总结 -->
+                <div class="grid md:grid-cols-2 gap-8 mb-12">
+                    <!-- 2B核心洞察 -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">2B企业市场核心洞察</h3>
+                        <div class="space-y-6">
+                            <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                <h4 class="font-bold text-gray-800 mb-2">盲区识别</h4>
+                                <ul class="space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-eye-slash text-blue-500 mr-2 mt-1"></i>
+                                        <span>企业特殊时间节点（如并购后、上市前）的需求未被充分满足</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-eye-slash text-blue-500 mr-2 mt-1"></i>
+                                        <span>跨部门协作的深层痛点和信息孤岛问题</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-eye-slash text-blue-500 mr-2 mt-1"></i>
+                                        <span>不同规模、性质企业的差异化需求未被精细划分</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="border-l-4 border-green-500 pl-4 py-2">
+                                <h4 class="font-bold text-gray-800 mb-2">机会领域</h4>
+                                <ul class="space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-bullseye text-green-500 mr-2 mt-1"></i>
+                                        <span>企业数字化转型全周期解决方案</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-bullseye text-green-500 mr-2 mt-1"></i>
+                                        <span>垂直行业深度定制化工具和服务</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-bullseye text-green-500 mr-2 mt-1"></i>
+                                        <span>企业风险管理和合规自动化工具</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 2C核心洞察 -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">2C消费者市场核心洞察</h3>
+                        <div class="space-y-6">
+                            <div class="border-l-4 border-purple-500 pl-4 py-2">
+                                <h4 class="font-bold text-gray-800 mb-2">盲区识别</h4>
+                                <ul class="space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-eye-slash text-purple-500 mr-2 mt-1"></i>
+                                        <span>特殊身心状态（如产后、更年期）的专属需求</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-eye-slash text-purple-500 mr-2 mt-1"></i>
+                                        <span>稀缺时间窗口（如重大决策期）的精准服务</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-eye-slash text-purple-500 mr-2 mt-1"></i>
+                                        <span>深度情感需求和自我实现未被充分满足</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="border-l-4 border-yellow-500 pl-4 py-2">
+                                <h4 class="font-bold text-gray-800 mb-2">机会领域</h4>
+                                <ul class="space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-bullseye text-yellow-500 mr-2 mt-1"></i>
+                                        <span>情绪管理和心理健康产品</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-bullseye text-yellow-500 mr-2 mt-1"></i>
+                                        <span>个性化生活方式和价值观共鸣品牌</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-bullseye text-yellow-500 mr-2 mt-1"></i>
+                                        <span>碎片时间优化和场景适配型解决方案</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 交叉创新机会 -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">交叉创新机会</h3>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-gradient-to-br from-blue-50 to-purple-50 p-5 rounded-lg">
+                            <h4 class="font-bold text-gray-800 mb-3">技术交叉</h4>
+                            <p class="text-gray-700 mb-3">2B的数据分析技术应用于2C个性化推荐</p>
+                            <p class="text-gray-700">2C的用户体验设计原则应用于2B工具改进</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-yellow-50 p-5 rounded-lg">
+                            <h4 class="font-bold text-gray-800 mb-3">模式交叉</h4>
+                            <p class="text-gray-700 mb-3">2C的社群运营模式应用于2B客户关系管理</p>
+                            <p class="text-gray-700">2B的解决方案思维应用于2C复杂问题解决</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-red-50 to-pink-50 p-5 rounded-lg">
+                            <h4 class="font-bold text-gray-800 mb-3">价值交叉</h4>
+                            <p class="text-gray-700 mb-3">2B的ROI思维提升2C产品的实用价值</p>
+                            <p class="text-gray-700">2C的情感价值思维提升2B产品的用户体验</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 侧边栏 - 机会发现工具 -->
+    <div class="fixed right-0 top-1/2 transform -translate-y-1/2 hidden lg:block">
+        <div class="bg-white rounded-l-lg shadow-lg p-4 w-64 sticky-sidebar">
+            <h3 class="font-bold text-gray-800 mb-3">机会发现工具</h3>
+            <div class="space-y-3">
+                <div class="p-3 bg-blue-50 rounded-lg">
+                    <p class="text-sm font-medium text-blue-800 mb-1">盲区扫描</p>
+                    <p class="text-xs text-gray-600">识别未被充分满足的需求</p>
+                </div>
+                <div class="p-3 bg-green-50 rounded-lg">
+                    <p class="text-sm font-medium text-green-800 mb-1">机会评估</p>
+                    <p class="text-xs text-gray-600">评估市场潜力与可行性</p>
+                </div>
+                <div class="p-3 bg-purple-50 rounded-lg">
+                    <p class="text-sm font-medium text-purple-800 mb-1">交叉创新</p>
+                    <p class="text-xs text-gray-600">发现跨市场创新机会</p>
+                </div>
+                <button class="w-full bg-blue-600 text-white py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition mt-4" id="generate-ideas">生成创新想法</button>
+            </div>
+        </div>
+    </div>
+    <!-- 页脚 -->
+    <footer class="bg-gray-900 text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 comparison-gradient rounded-md"></div>
+                        <span class="text-xl font-bold">2B vs 2C 分析工具</span>
+                    </div>
+                    <p class="text-gray-400 mt-2">系统性对比分析，发现隐藏的盲区和商业机会</p>
+                </div>
+                <div class="text-gray-400">
+                    <p>盲区与机会清单分析工具</p>
+                    <p class="text-sm mt-1">基于场景、用户、问题三个维度的深度分析</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-6 text-center text-gray-500 text-sm">
+                <p>通过系统性的2B与2C对比分析，我们可以发现传统市场调研方法容易忽略的盲区，并识别出跨市场的创新机会。</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        // 2B数据
+        const b2bData = {
+            scene: {
+                L1: ["生产流程：报价、排产、质检、报销", "采购流程：发起、评估、招标、审批", "业务环节：研发、采购、生产、销售、客服、招聘"],
+                L2: ["内部环境：车间、办公室、会议室、大屏、实验室", "外部环境：户外、远程、外勤"],
+                L3: ["内部协作：跨部门沟通、上下级汇报", "外部合作：供应商对接、渠道谈判、政府汇报"],
+                L4: ["经营节点：公司起步、开始扩张、增长受阻", "事件节点：新品上市、系统上线、合规审批"],
+                L5: ["关键事件：融资/并购后、战略转型、上市筹备、危机公关", "政策法规：新政颁布、政策变化（风控合规，环保，安全）"]
+            },
+            user: {
+                L1: ["面向客户：2B/2C/2G", "业务性质：产品型、服务型、混合型", "线上线下：线上、线下为主", "是否连锁：连锁/加盟模式、单体模式"],
+                L2: ["行业细分：汽车制造、软件服务、餐饮服务", "行业特性：传统/新兴行业、劳动密集型/技术密集型", "市场份额：头部/腰部/尾部", "企业营收：100w、500w、1000w、1亿", "员工数量：50以下、100人、1000人", "企业性质：央企、国企、私企、外企、个体户", "地域分布：单区域、多区域、全国布局、跨国经营"],
+                L3: ["数字化水平：初级（办公软件）/中级（系统软件）/高级（数据自动化）", "标准化程度：靠个人经验、有基础流程、SOP完善", "供应链标准：单一供应商/多供应商制、无固定供应商"],
+                L4: ["流程复杂度：个人决策、部门决策、跨部门委员会", "决策角色：发起者/使用者/影响者/决策者/购买者/把关者", "切换难度：高切换成本（数据迁移难、培训成本高），低切换成本", "组织文化：创新型、风险规避型、官僚型、流程型"],
+                L5: ["预算周期：年度/季度/项目制", "预算额度：预算充足/紧张/无预算", "支付条件：预付款/账期/分期"]
+            },
+            problem: {
+                L1: ["增长瓶颈：市场、客户、收入停滞、品牌形象升级", "成本过高：原材料、人力、运营、获客成本", "效率低下：人效、坪效、设备利用率低", "质量不稳：产品、服务一致性差", "客户流失：留存率低、满意度低，客户体验"],
+                L2: ["系统落后：老旧、难维护、难集成", "数据难题：不准确、不实时、难分析", "技术债务：架构陈旧、代码质量差"],
+                L3: ["协作困难：部门墙、信息孤岛", "人才短缺：招不到、留不住、能力不足", "流程长：审批慢、决策慢、执行慢"],
+                L4: ["方向模糊：不知往哪走、如何转型", "竞争压力：被颠覆、被降价、被抢份额", "创新乏力：无新品、无新商业模式", "资源错配：钱、人、时间投错了地方", "资源缺口：缺预算"],
+                L5: ["合规风险、安全风险、财务风险", "税务/法务/合规，数据泄露风险"]
+            }
+        };
+
+        // 2C数据
+        const b2cData = {
+            scene: {
+                L1: ["使用时间：早/中/晚、工作日/周末/节假日", "使用状态：碎片时间/整块时间、纪念日", "特别时间：过年回家、放假外出、平日加班晚归"],
+                L2: ["固定地点：办公室、家、饭馆、医院、健身房、景区", "路上场景：车里、高铁上、通勤路上", "社交状态：独自一人、与家人/朋友一起、带孩子", "环境条件：手机/电脑，嘈杂/安静、明亮/黑暗、私密性"],
+                L3: ["负向情绪：孤独、焦虑、抑郁、无聊、疲惫、悲伤、羞耻", "正向情绪：喜悦、庆祝、放松、自由、极限挑战", "身体状态：熬夜、久坐、失眠、睡前、偏头痛"],
+                L4: ["个人时刻：应届求职、保险到期、生理期、高强度运动时、相亲", "公司时刻：商务酒局、公司团建、严肃社交", "送礼时刻：节日礼物、红包、升学"],
+                L5: ["重大决策：换工作、搬家、求婚", "意外偶发：电脑坏了、生病意外、老人摔倒、宠物刚离世", "关键前期：高考前、分娩前疼痛、周五晚约会前", "关键后期：生病恢复期、留学回国刚求职"]
+            },
+            user: {
+                L1: ["基础：年龄、代际（Z世代、90后、银发族）、性别", "地域：中国/海外、华北/华中/华南、一二三线城市、乡镇农村", "类型：收入、职业、教育程度", "住房类型：自有住房/整租房/合租房", "居住面积：公寓/别墅/大平层/Loft"],
+                L2: ["家庭结构：单身、已婚未育、有子女、多代同堂、养宠家庭", "社会角色：学生、职场新人、管理者、退休人士", "特定身份：宝妈、铲屎官、户外爱好者、二次元"],
+                L3: ["健康程度：慢性病（三高）、残疾、半失能、失能", "能力水平：小白/入门/业余玩家/职业选手", "特殊阶段：孕期、产后、更年期、康复期"],
+                L4: ["生活习惯：重度外卖、经常烫染、频繁商务酒局", "工作习惯：外勤、跨国工作、经常出差、居家、长期手机工作", "兴趣习惯：户外探险、喜欢宅、跳广场舞、酒店控", "决策习惯：冲动型/谨慎型；个人决策/家庭决策", "消费习惯：追求低价、品牌、性价比、新品"],
+                L5: ["价值偏好：追求氛围、效率优先、颜值、成分配方宽", "生活哲学：自律/躺平、奋斗/平衡、极简主义/精致生活"]
+            },
+            problem: {
+                L1: ["缺少信息：需要权威测评、了解升学途径、了解AI产品使用", "缺少工具：多个日程难管理、知识收藏散乱各处", "缺少能力：学会化妆、理财、做饭"],
+                L2: ["要更便宜：打车太贵、不够起送费", "要变更快：排队等位久、短时间大量阅读", "要更简单：看病挂号难、没时间打扫、搬家收拾麻烦", "要更舒适：缓解分娩痛、耳机久戴不痛、理发不被推销", "要更有趣：想要惊喜、仪式感、记录瞬间"],
+                L3: ["维持体面：全职妈妈开口要钱难、老年人能自理", "情感陪伴：孩子需要陪伴、中年人需要喘息", "社交货币：需要谈资、希望被羡慕", "维护关系：性教育难以启齿、送礼难"],
+                L4: ["人设塑造：女性彰显独立、职场精英优雅干练", "自我内心：彰显自律/努力/有爱心、自我补偿/奖励", "自我实现：证明自己、留下作品、个人使命"],
+                L5: ["转化成赚钱：帮找到工作、年薪Offer、帮副业赚钱、帮拿到投资", "转化成省钱：节约xx成本、减少时间值钱、降低财务风险"]
+            }
+        };
+
+        // 标签页切换
+        document.addEventListener('DOMContentLoaded', function () {
+            // 标签页功能
+            const tabNavButtons = document.querySelectorAll('.tab-nav-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabNavButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // 移除所有按钮的激活状态
+                    tabNavButtons.forEach(btn => {
+                        btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                        btn.classList.add('text-gray-600');
+                    });
+
+                    // 添加当前按钮的激活状态
+                    button.classList.remove('text-gray-600');
+                    button.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+
+                    // 隐藏所有标签内容
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    // 显示当前标签内容
+                    const tabId = button.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+
+                    // 如果是对比标签页，初始化对比表格
+                    if (tabId === 'comparison') {
+                        populateComparisonTable('all');
+                    }
+                });
+            });
+
+            // 默认激活第一个标签
+            if (tabNavButtons.length > 0) {
+                tabNavButtons[0].click();
+            }
+
+            // 筛选按钮功能
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // 更新按钮激活状态
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    // 更新表格内容
+                    const filter = button.getAttribute('data-filter');
+                    populateComparisonTable(filter);
+                });
+            });
+
+            // 导出分析按钮
+            document.getElementById('export-btn').addEventListener('click', () => {
+                alert('分析结果已导出为PDF文件！');
+            });
+
+            // 生成创新想法按钮
+            document.getElementById('generate-ideas').addEventListener('click', () => {
+                generateInnovationIdeas();
+            });
+
+            // 初始化对比表格
+            populateComparisonTable('all');
+        });
+
+        // 填充对比表格
+        function populateComparisonTable(filter) {
+            const tableBody = document.getElementById('comparison-table');
+            tableBody.innerHTML = '';
+
+            // 根据筛选条件确定要显示的分析维度
+            let dimensions = [];
+            if (filter === 'all' || filter === 'scene') {
+                dimensions.push({ type: 'scene', label: '场景分析' });
+            }
+            if (filter === 'all' || filter === 'user') {
+                dimensions.push({ type: 'user', label: '用户分析' });
+            }
+            if (filter === 'all' || filter === 'problem') {
+                dimensions.push({ type: 'problem', label: '问题分析' });
+            }
+
+            // 为每个维度添加表格行
+            dimensions.forEach(dimension => {
+                // 添加维度标题行
+                const headerRow = document.createElement('tr');
+                headerRow.className = 'bg-gray-50';
+                headerRow.innerHTML = `
+                    <td colspan="3" class="py-3 px-4 font-bold text-gray-800 border-t">
+                        ${dimension.label}
+                    </td>
+                `;
+                tableBody.appendChild(headerRow);
+
+                // 添加每个层级的对比行
+                for (let i = 1; i <= 5; i++) {
+                    const levelKey = `L${i}`;
+                    const b2bItems = b2bData[dimension.type][levelKey] || [];
+                    const b2cItems = b2cData[dimension.type][levelKey] || [];
+
+                    const row = document.createElement('tr');
+                    row.className = 'border-t border-gray-200 hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="py-3 px-4 font-medium text-gray-700">
+                            ${levelKey}
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-600 border-r">
+                            ${formatItems(b2bItems)}
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-600">
+                            ${formatItems(b2cItems)}
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+            });
+        }
+
+        // 格式化项目列表
+        function formatItems(items) {
+            if (!items || items.length === 0) return '-';
+
+            return items.map(item => {
+                // 提取主要标签
+                const parts = item.split('：');
+                if (parts.length > 1) {
+                    return `<div class="mb-1"><span class="font-medium">${parts[0]}：</span>${parts[1]}</div>`;
+                }
+                return `<div class="mb-1">${item}</div>`;
+            }).join('');
+        }
+
+        // 生成创新想法
+        function generateInnovationIdeas() {
+            // 随机选择2B和2C的维度组合
+            const b2bDimension = getRandomDimension(b2bData);
+            const b2cDimension = getRandomDimension(b2cData);
+
+            const ideas = [
+                `将2B的<b>${b2bDimension.label}</b>应用于2C的<b>${b2cDimension.label}</b>场景`,
+                `用2C的<b>${b2cDimension.label}</b>思维重新设计2B的<b>${b2bDimension.label}</b>解决方案`,
+                `结合2B的<b>${b2bDimension.label}</b>和2C的<b>${b2cDimension.label}</b>创建全新的产品形态`
+            ];
+
+            const randomIdea = ideas[Math.floor(Math.random() * ideas.length)];
+
+            // 显示创新想法
+            alert(`创新想法：\n\n${randomIdea}\n\n点击"确定"生成更多想法`);
+        }
+
+        // 随机获取一个维度
+        function getRandomDimension(data) {
+            const types = Object.keys(data);
+            const randomType = types[Math.floor(Math.random() * types.length)];
+
+            let label = '';
+            switch (randomType) {
+                case 'scene': label = '场景分析'; break;
+                case 'user': label = '用户分析'; break;
+                case 'problem': label = '问题分析'; break;
+            }
+
+            return { type: randomType, label };
+        }
+    </script>
+</body>
+
+</html>

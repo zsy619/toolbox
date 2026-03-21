@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>需求实操2：推演评估篇 - 学习笔记</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.loli.net/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .section-title:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .step-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .tool-card {
+            border-left: 4px solid #667eea;
+        }
+
+        .tool-card:nth-child(2) {
+            border-left-color: #764ba2;
+        }
+
+        .tool-card:nth-child(3) {
+            border-left-color: #f59e0b;
+        }
+
+        .tool-card:nth-child(4) {
+            border-left-color: #10b981;
+        }
+
+        .task-level-1 {
+            border-left-color: #3b82f6;
+        }
+
+        .task-level-2 {
+            border-left-color: #8b5cf6;
+        }
+
+        .task-level-3 {
+            border-left-color: #10b981;
+        }
+
+        .task-level-4 {
+            border-left-color: #f59e0b;
+        }
+
+        .task-level-5 {
+            border-left-color: #ef4444;
+        }
+
+        .task-level-6 {
+            border-left-color: #6b7280;
+        }
+    </style>
+    <!-- 微信/OpenGraph 卡片信息 -->
+    <meta property="og:title" content="需求实操2：推演评估篇 - 学习笔记">
+    <meta property="og:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta property="og:url" content="./live240.html">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="需求实操2：推演评估篇 - 学习笔记">
+    <meta name="twitter:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta itemprop="name" content="需求实操2：推演评估篇 - 学习笔记">
+    <meta itemprop="description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+    <!-- Wechat Share Image Hack -->
+    <div style="display:none; visibility:hidden;">
+        <img src="https://tools.yy24365.com/assets/images/dev-tools-og.png" alt="wechat-share-icon" width="400" height="400">
+    </div>
+    <!-- 导航栏 / 移动端菜单按钮 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo / Home Link -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="../index.html" class="flex items-center text-gray-800 hover:text-blue-600 transition">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        <span class="font-bold text-lg">一堂工具箱</span>
+                    </a>
+                </div>
+                <!-- Desktop Menu (Hidden on Mobile) -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="#core" class="text-gray-600 hover:text-blue-600 transition font-medium">核心理念</a>
+                    <a href="#framework" class="text-gray-600 hover:text-blue-600 transition font-medium">分析框架</a>
+                    <a href="#tools" class="text-gray-600 hover:text-blue-600 transition font-medium">分析工具</a>
+                    <a href="#insights" class="text-gray-600 hover:text-blue-600 transition font-medium">隐藏洞察</a>
+                    <a href="#example" class="text-gray-600 hover:text-blue-600 transition font-medium">实战示例</a>
+                </div>
+                <!-- Mobile Menu Button -->
+                <div class="flex items-center md:hidden">
+                    <button id="mobile-menu-button" type="button" class="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600" aria-label="Toggle menu">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden border-t">
+            <div class="px-4 py-3 space-y-3 bg-white">
+                <a href="#core" class="block text-gray-600 hover:text-blue-600 transition font-medium">核心理念</a>
+                <a href="#framework" class="block text-gray-600 hover:text-blue-600 transition font-medium">分析框架</a>
+                <a href="#tools" class="block text-gray-600 hover:text-blue-600 transition font-medium">分析工具</a>
+                <a href="#insights" class="block text-gray-600 hover:text-blue-600 transition font-medium">隐藏洞察</a>
+                <a href="#example" class="block text-gray-600 hover:text-blue-600 transition font-medium">实战示例</a>
+            </div>
+        </div>
+    </nav>
+    <!-- 页面头部 -->
+    <header class="container mx-auto px-4 py-8 md:py-12">
+        <div class="text-center max-w-3xl mx-auto">
+            <h1 class="text-3xl md:text-4xl font-bold mb-4 gradient-text">需求实操2：推演评估篇</h1>
+            <p class="text-gray-600 text-lg mb-6">一套能让你扎实上手、系统验证的推演框架，训练下期航海将高频使用的基本功</p>
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
+                <span class="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">拆、推、评、算</span>
+                <span class="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">JTBD思维</span>
+                <span class="px-4 py-2 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">需求分析</span>
+                <span class="px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm font-medium">任务地图</span>
+            </div>
+            <p class="text-gray-500 italic">"在彻底理解'问题空间'之前跳进'解决方案空间'是创业的大忌"</p>
+        </div>
+    </header>
+    <main class="container mx-auto px-4 pb-16">
+        <!-- 核心理念部分 -->
+        <section id="core" class="mb-16 scroll-mt-20">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">一、核心理念</h2>
+            <div class="grid md:grid-cols-2 gap-8 mb-10">
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="flex items-center mb-4">
+                        <div class="step-icon mr-3">JT</div>
+                        <h3 class="text-xl font-bold">JTBD思维</h3>
+                    </div>
+                    <p class="text-gray-700 mb-4">需求不是关于产品本身，而是客户在特定环境下想要达成的"进步"。</p>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                            <span><strong>核心逻辑</strong>：客户"雇佣"产品来完成某项任务</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-lightbulb text-yellow-500 mr-2 mt-1"></i>
+                            <span><strong>关键启发</strong>：真实需求隐藏在客户的挫败感和未完成的任务中</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h3 class="text-xl font-bold mb-4 gradient-text">需求基础公式</h3>
+                    <div class="text-center mb-4">
+                        <div class="text-2xl font-bold bg-gray-100 p-4 rounded-lg">
+                            需求 = 用户 × 场景 × 问题
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="p-3 bg-blue-50 rounded-lg">
+                            <h4 class="font-bold text-blue-800 mb-1">用户</h4>
+                            <p class="text-sm text-gray-700">具备属性和支付/决策能力的载体</p>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <h4 class="font-bold text-purple-800 mb-1">场景</h4>
+                            <p class="text-sm text-gray-700">触发需求的特定环境、时间与状态</p>
+                        </div>
+                        <div class="p-3 bg-amber-50 rounded-lg">
+                            <h4 class="font-bold text-amber-800 mb-1">问题</h4>
+                            <p class="text-sm text-gray-700">现实与预期的差距，是需求的"原动力"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 分析框架部分 -->
+        <section id="framework" class="mb-16 scroll-mt-20">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">二、需求分析四字口诀</h2>
+            <div class="grid md:grid-cols-4 gap-6 mb-10">
+                <div class="tool-card bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="text-3xl font-bold text-blue-600 mb-3">拆</div>
+                    <h3 class="text-lg font-bold mb-2">拆解</h3>
+                    <p class="text-gray-700 text-sm">训练拆解用户需求的意识（基本功）</p>
+                </div>
+                <div class="tool-card bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="text-3xl font-bold text-purple-600 mb-3">推</div>
+                    <h3 class="text-lg font-bold mb-2">推演</h3>
+                    <p class="text-gray-700 text-sm">训练推演用户使用场景，理解问题</p>
+                </div>
+                <div class="tool-card bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="text-3xl font-bold text-amber-600 mb-3">评</div>
+                    <h3 class="text-lg font-bold mb-2">评估</h3>
+                    <p class="text-gray-700 text-sm">训练定性评估需求可行性与价值</p>
+                </div>
+                <div class="tool-card bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="text-3xl font-bold text-emerald-600 mb-3">算</div>
+                    <h3 class="text-lg font-bold mb-2">计算</h3>
+                    <p class="text-gray-700 text-sm">训练定量估算市场规模，理性决策</p>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold mb-6 mt-10">需求分析爬山地图（能力段位）</h3>
+            <div class="overflow-x-auto mb-10">
+                <table class="min-w-full bg-white rounded-xl shadow-md overflow-hidden">
+                    <thead class="gradient-bg text-white">
+                        <tr>
+                            <th class="py-3 px-4 text-left">段位</th>
+                            <th class="py-3 px-4 text-left">核心能力</th>
+                            <th class="py-3 px-4 text-left">关键表现</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr class="task-level-1 hover:bg-blue-50">
+                            <td class="py-3 px-4 font-bold">L1 模糊理解</td>
+                            <td class="py-3 px-4">只谈初心、想服务所有人</td>
+                            <td class="py-3 px-4">开始有意识拆解</td>
+                        </tr>
+                        <tr class="task-level-2 hover:bg-purple-50">
+                            <td class="py-3 px-4 font-bold">L2 主动拆解</td>
+                            <td class="py-3 px-4">能细拆用户、识别差异性、剥离非用户</td>
+                            <td class="py-3 px-4">开始多工具专业分析</td>
+                        </tr>
+                        <tr class="task-level-3 hover:bg-emerald-50">
+                            <td class="py-3 px-4 font-bold">L3 定性可行性</td>
+                            <td class="py-3 px-4">推演场景、三维评估、专业取舍</td>
+                            <td class="py-3 px-4">开始全局战略思考</td>
+                        </tr>
+                        <tr class="task-level-4 hover:bg-amber-50">
+                            <td class="py-3 px-4 font-bold">L4 定量天花板</td>
+                            <td class="py-3 px-4">有效对标、估算规模、交叉验证</td>
+                            <td class="py-3 px-4">动态调整与预判</td>
+                        </tr>
+                        <tr class="task-level-5 hover:bg-red-50">
+                            <td class="py-3 px-4 font-bold">L5 全局决策</td>
+                            <td class="py-3 px-4">需求与产品、商业、增长匹配</td>
+                            <td class="py-3 px-4">战略匹配能力</td>
+                        </tr>
+                        <tr class="task-level-6 hover:bg-gray-50">
+                            <td class="py-3 px-4 font-bold">L6 动态预测</td>
+                            <td class="py-3 px-4">预判规模、竞争与市场变化</td>
+                            <td class="py-3 px-4">长期视角与调整</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <!-- 分析工具部分 -->
+        <section id="tools" class="mb-16 scroll-mt-20">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">三、拆解工具与框架</h2>
+            <div class="grid md:grid-cols-3 gap-6 mb-10">
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h3 class="text-xl font-bold mb-4 gradient-text">用户拆解清单</h3>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-blue-50 rounded-lg">
+                            <h4 class="font-bold text-blue-800">2C用户维度</h4>
+                            <p class="text-sm text-gray-700 mt-1">人口统计、角色阶段、能力状态、行为习惯、价值观念</p>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <h4 class="font-bold text-purple-800">2B用户维度</h4>
+                            <p class="text-sm text-gray-700 mt-1">业务类型、规模性质、标准程度、决策文化、财务特征</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h3 class="text-xl font-bold mb-4 gradient-text">场景拆解清单</h3>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-blue-50 rounded-lg">
+                            <h4 class="font-bold text-blue-800">2C场景维度</h4>
+                            <p class="text-sm text-gray-700 mt-1">时间周期、空间环境、身心状态、特别时刻、稀缺窗口</p>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <h4 class="font-bold text-purple-800">2B场景维度</h4>
+                            <p class="text-sm text-gray-700 mt-1">流程环节、操作地点、人物协作、时间节点、重大事件</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h3 class="text-xl font-bold mb-4 gradient-text">问题拆解清单</h3>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-amber-50 rounded-lg">
+                            <h4 class="font-bold text-amber-800">2C问题维度</h4>
+                            <p class="text-sm text-gray-700 mt-1">上层功能、深度体验、上层社交、深度情感、转化成钱</p>
+                        </div>
+                        <div class="p-3 bg-emerald-50 rounded-lg">
+                            <h4 class="font-bold text-emerald-800">2B问题维度</h4>
+                            <p class="text-sm text-gray-700 mt-1">业务问题、技术问题、管理问题、战略问题、风险管控</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold mb-6 mt-10">任务洞察工具</h3>
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-bold text-lg mb-3">1. 圈定核心执行者</h4>
+                        <p class="text-gray-700 mb-4">产品不是卖给"人口标签"，而是卖给"正在挣扎中、渴望改变的人"。</p>
+                        <p class="text-gray-700">核心执行者是任务的主角，所有洞察围绕其展开。</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg mb-3">2. 圈定核心任务</h4>
+                        <ul class="space-y-2 text-gray-700">
+                            <li class="flex items-start">
+                                <i class="fas fa-arrow-up text-blue-500 mr-2 mt-1"></i>
+                                <span><strong>愿景/抱负</strong> → 大任务 → 小任务 → 微任务</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-balance-scale text-purple-500 mr-2 mt-1"></i>
+                                <span>选择"抽象程度适中"的层级（一般在2-3之间）</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <h4 class="font-bold text-lg mb-4">3. 任务描述公式</h4>
+                <div class="text-center mb-6">
+                    <div class="text-2xl font-bold bg-gray-100 p-4 rounded-lg inline-block">
+                        [动词] + [对象] + [情境]
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-blue-50 rounded-lg">
+                        <h5 class="font-bold text-blue-800 mb-2">动词</h5>
+                        <p class="text-sm text-gray-700">需主动、结果导向</p>
+                    </div>
+                    <div class="p-4 bg-purple-50 rounded-lg">
+                        <h5 class="font-bold text-purple-800 mb-2">对象</h5>
+                        <p class="text-sm text-gray-700">不含产品名称</p>
+                    </div>
+                    <div class="p-4 bg-amber-50 rounded-lg">
+                        <h5 class="font-bold text-amber-800 mb-2">情境</h5>
+                        <p class="text-sm text-gray-700">限定触发边界</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <h4 class="font-bold text-lg mb-4">4. 完整任务地图（8阶段）</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="p-4 bg-blue-50 rounded-lg text-center">
+                        <div class="text-blue-600 font-bold mb-1">1. 定义</div>
+                        <div class="text-sm text-gray-700">制定计划，确立目标</div>
+                    </div>
+                    <div class="p-4 bg-blue-100 rounded-lg text-center">
+                        <div class="text-blue-600 font-bold mb-1">2. 定位</div>
+                        <div class="text-sm text-gray-700">寻找工具、信息或资源</div>
+                    </div>
+                    <div class="p-4 bg-purple-50 rounded-lg text-center">
+                        <div class="text-purple-600 font-bold mb-1">3. 准备</div>
+                        <div class="text-sm text-gray-700">摆放资源，调整环境</div>
+                    </div>
+                    <div class="p-4 bg-purple-100 rounded-lg text-center">
+                        <div class="text-purple-600 font-bold mb-1">4. 确认</div>
+                        <div class="text-sm text-gray-700">再次检查，确保万无一失</div>
+                    </div>
+                    <div class="p-4 bg-amber-50 rounded-lg text-center">
+                        <div class="text-amber-600 font-bold mb-1">5. 执行</div>
+                        <div class="text-sm text-gray-700">真正的核心动作</div>
+                    </div>
+                    <div class="p-4 bg-amber-100 rounded-lg text-center">
+                        <div class="text-amber-600 font-bold mb-1">6. 监测</div>
+                        <div class="text-sm text-gray-700">观察执行是否顺畅</div>
+                    </div>
+                    <div class="p-4 bg-emerald-50 rounded-lg text-center">
+                        <div class="text-emerald-600 font-bold mb-1">7. 调整</div>
+                        <div class="text-sm text-gray-700">补救和调整</div>
+                    </div>
+                    <div class="p-4 bg-emerald-100 rounded-lg text-center">
+                        <div class="text-emerald-600 font-bold mb-1">8. 结束</div>
+                        <div class="text-sm text-gray-700">收尾、清洗、整理、复盘</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h4 class="font-bold text-lg mb-4">5. 机会筛选矩阵</h4>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                        <h5 class="font-bold text-red-800 mb-2">核心机会（重点做）</h5>
+                        <p class="text-sm text-gray-700">高重要性 + 低满意度</p>
+                        <p class="text-sm text-gray-700 mt-1">雪中送炭，如打车前的"不知道车多久来"</p>
+                    </div>
+                    <div class="p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg">
+                        <h5 class="font-bold text-yellow-800 mb-2">竞争红海（谨慎做）</h5>
+                        <p class="text-sm text-gray-700">高重要性 + 高满意度</p>
+                        <p class="text-sm text-gray-700 mt-1">锦上添花，除非有核心壁垒</p>
+                    </div>
+                    <div class="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+                        <h5 class="font-bold text-blue-800 mb-2">过度服务（可砍掉）</h5>
+                        <p class="text-sm text-gray-700">低重要性 + 高满意度</p>
+                        <p class="text-sm text-gray-700 mt-1">可能有颠覆式创新机会</p>
+                    </div>
+                    <div class="p-4 bg-gray-100 border-l-4 border-gray-500 rounded-r-lg">
+                        <h5 class="font-bold text-gray-800 mb-2">机会渺茫（尽量不做）</h5>
+                        <p class="text-sm text-gray-700">低重要性 + 低满意度</p>
+                        <p class="text-sm text-gray-700 mt-1">用户虽然吐槽，但其实不在乎</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 隐藏洞察部分 -->
+        <section id="insights" class="mb-16 scroll-mt-20">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">四、隐藏洞察挖掘</h2>
+            <div class="grid md:grid-cols-3 gap-8 mb-10">
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h3 class="text-xl font-bold mb-4 gradient-text">四种力量</h3>
+                    <div class="text-center mb-6">
+                        <div class="text-2xl font-bold bg-gray-100 p-4 rounded-lg">
+                            推力 + 拉力 > 焦虑 + 习惯
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-green-50 rounded-lg">
+                            <h4 class="font-bold text-green-800 mb-1">推力</h4>
+                            <p class="text-sm text-gray-700">现状的痛苦</p>
+                        </div>
+                        <div class="p-3 bg-blue-50 rounded-lg">
+                            <h4 class="font-bold text-blue-800 mb-1">拉力</h4>
+                            <p class="text-sm text-gray-700">新方案的吸引力</p>
+                        </div>
+                        <div class="p-3 bg-red-50 rounded-lg">
+                            <h4 class="font-bold text-red-800 mb-1">焦虑</h4>
+                            <p class="text-sm text-gray-700">对未知的恐惧</p>
+                        </div>
+                        <div class="p-3 bg-yellow-50 rounded-lg">
+                            <h4 class="font-bold text-yellow-800 mb-1">习惯</h4>
+                            <p class="text-sm text-gray-700">对旧方式的依赖</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h3 class="text-xl font-bold mb-4 gradient-text">三种任务</h3>
+                    <p class="text-gray-700 mb-4">溢价空间来源</p>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-blue-50 rounded-lg">
+                            <h4 class="font-bold text-blue-800 mb-2">功能任务</h4>
+                            <p class="text-sm text-gray-700">解决具体操作（基础）</p>
+                        </div>
+                        <div class="p-4 bg-purple-50 rounded-lg">
+                            <h4 class="font-bold text-purple-800 mb-2">情感任务</h4>
+                            <p class="text-sm text-gray-700">满足心理感受（溢价关键）</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg">
+                            <h4 class="font-bold text-amber-800 mb-2">社交任务</h4>
+                            <p class="text-sm text-gray-700">塑造社交形象（身份认同）</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h3 class="text-xl font-bold mb-4 gradient-text">期望成果公式</h3>
+                    <div class="text-center mb-6">
+                        <div class="text-lg font-bold bg-gray-100 p-4 rounded-lg">
+                            [变化方向] + [衡量单位] + [核心对象] + [相关说明]
+                        </div>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-700 italic">例如："最小化收集文档所需的时间，如工资单、收据等"</p>
+                    </div>
+                    <p class="text-gray-700 text-sm mt-4">在关键瞬间植入"让用户感知到价值"的细微信号，如声音、触感、视觉反馈等，决定产品的"手感"与信任感。</p>
+                </div>
+            </div>
+        </section>
+        <!-- 实战示例部分 -->
+        <section id="example" class="scroll-mt-20">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 section-title">五、实战示例：隔代育儿场景</h2>
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <h3 class="text-xl font-bold mb-4 gradient-text">公司E的洞察</h3>
+                <div class="mb-6">
+                    <h4 class="font-bold text-lg mb-2">核心任务</h4>
+                    <div class="p-4 bg-blue-50 rounded-lg">
+                        <p class="text-gray-700">在无法亲自看护时，确保孩子获得连贯且高质量的家庭教育。</p>
+                    </div>
+                </div>
+                <h4 class="font-bold text-lg mb-4">三种任务挖掘</h4>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-blue-50 rounded-lg">
+                        <h5 class="font-bold text-blue-800 mb-2">功能任务</h5>
+                        <p class="text-sm text-gray-700">远程控制教育一致性</p>
+                    </div>
+                    <div class="p-4 bg-purple-50 rounded-lg">
+                        <h5 class="font-bold text-purple-800 mb-2">情感任务</h5>
+                        <p class="text-sm text-gray-700">减轻焦虑与内疚</p>
+                    </div>
+                    <div class="p-4 bg-amber-50 rounded-lg">
+                        <h5 class="font-bold text-amber-800 mb-2">社交任务</h5>
+                        <p class="text-sm text-gray-700">维持孝道与家庭和谐</p>
+                    </div>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold mb-6 mt-10">公司F的四个机会方向</h3>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h4 class="font-bold text-lg mb-3 text-blue-800">1. 情景化沟通话术生成器</h4>
+                    <p class="text-gray-700 mb-4">将问责转化为协作，将"教育"姿态转化为"求助"姿态</p>
+                    <div class="p-3 bg-blue-50 rounded-lg">
+                        <p class="text-sm text-gray-700">父母输入具体问题、老人性格标签，生成以"感谢"开头、以"求助"结尾的对话脚本</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h4 class="font-bold text-lg mb-3 text-purple-800">2. 祖辈成就"放大器"</h4>
+                    <p class="text-gray-700 mb-4">让老人的付出与进步"被看见"，将隐性劳动转化为家庭认可的显性价值</p>
+                    <div class="p-3 bg-purple-50 rounded-lg">
+                        <p class="text-sm text-gray-700">"家庭育儿高光时刻"共享相册，父母上传孩子好表现并定向感谢，老人可一键分享到社交圈</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h4 class="font-bold text-lg mb-3 text-amber-800">3. 孩子行为"翻译器"与家庭勋章</h4>
+                    <p class="text-gray-700 mb-4">将孩子的行为数据转化为全家共同解读的"故事"，并将集体进步游戏化</p>
+                    <div class="p-3 bg-amber-50 rounded-lg">
+                        <p class="text-sm text-gray-700">"家庭专属的宝宝行为周报"生成器，记录正面/挑战行为，生成报告并推荐全家合力完成的小挑战</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h4 class="font-bold text-lg mb-3 text-emerald-800">4. 祖辈"育儿盟友"社交圈</h4>
+                    <p class="text-gray-700 mb-4">将老人从孤立的家庭育儿执行者，嵌入具有新方法示范效应的同辈社群中</p>
+                    <div class="p-3 bg-emerald-50 rounded-lg">
+                        <p class="text-sm text-gray-700">基于小区或广场舞群的"祖辈育儿妙招快闪群"，由活跃奶奶分享"真管用"的小技巧，发起线下讨论</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 总结部分 -->
+        <section class="mt-16 p-8 gradient-bg rounded-2xl text-white">
+            <h2 class="text-2xl font-bold mb-4">总结</h2>
+            <p class="mb-6">需求分析是一个从模糊到清晰、从定性到定量、从现象到本质的系统工程。掌握"拆、推、评、算"四步法，配合JTBD思维与各类工具，可系统识别真实需求、评估机会价值，并为产品创新提供扎实的洞察基础。</p>
+            <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">系统化思考</span>
+                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">用户为中心</span>
+                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">深度洞察</span>
+                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">理性决策</span>
+            </div>
+        </section>
+    </main>
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i class="fas fa-chart-line text-xl"></i>
+                        <h3 class="text-xl font-bold">需求分析笔记</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm">基于《需求实操2：推演评估篇》内容整理</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i class="fab fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>© 2026 需求分析学习笔记 | 仅用于学习交流目的</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        // 移动端菜单切换
+        document.getElementById('mobile-menu-button').addEventListener('click', function () {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    // 关闭移动端菜单（如果打开）
+                    document.getElementById('mobile-menu').classList.add('hidden');
+
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // 为当前活动部分添加高亮
+        window.addEventListener('scroll', function () {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('nav a');
+
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('text-gray-200', 'font-bold');
+                link.classList.add('text-gray-300');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('text-gray-200', 'font-bold');
+                    link.classList.remove('text-gray-300');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

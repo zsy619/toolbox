@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annual Calendar · 万年历</title>
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Outfit:wght@300;500;700&display=swap');
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --accent-color: #ff6b6b;
+            --weekend-color: #ffbe76;
+            --holiday-bg: rgba(255, 107, 107, 0.3);
+            --current-day-bg: rgba(255, 255, 255, 0.9);
+            --current-day-text: #2c3e50;
+            --control-bg: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Serif SC', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            transition: background 0.5s;
+        }
+
+        /* Dynamic Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.4), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 107, 107, 0.2), transparent 25%);
+            z-index: -1;
+            animation: bgPulse 15s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgPulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1800px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            padding: 3rem;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 2rem;
+            height: 95vh;
+            position: relative;
+        }
+
+        /* Controls - Floating Top Right */
+        .controls-layer {
+            position: absolute;
+            top: 1.5rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 10;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+
+        .container:hover .controls-layer {
+            opacity: 1;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            background: var(--control-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0 0.5rem;
+            transition: transform 0.2s;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.2);
+            color: var(--accent-color);
+        }
+
+        .year-input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            width: 60px;
+            text-align: center;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+        }
+
+        .lang-switch {
+            font-size: 0.9rem;
+            cursor: pointer;
+            width: 60px;
+            text-align: center;
+            user-select: none;
+        }
+
+        /* Header Section */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-left h1 {
+            font-size: 5rem;
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(to right, #ffffff, #a8c0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            /* Click to edit year if needed, but we have controls */
+        }
+
+        .header-left .year-info {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .clock {
+            font-size: 3rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .date-today {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        /* Calendar Grid */
+        .year-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 1.5rem;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        /* Scrollbar styling */
+        .year-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .year-grid::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .year-grid::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .month-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 1rem;
+            transition: transform 0.3s ease, background 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .month-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .month-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .month-sub {
+            font-size: 1rem;
+            font-family: 'Noto Serif SC', serif;
+            opacity: 0.7;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .day-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .date-cell {
+            position: relative;
+            padding: 4px 0;
+            border-radius: 6px;
+            cursor: default;
+            transition: background 0.2s;
+        }
+
+        .date-cell:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .solar-date {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .lunar-date {
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: -2px;
+            transform: scale(0.9);
+            white-space: nowrap;
+        }
+
+        /* Special Dates */
+        .is-weekend .solar-date {
+            color: var(--weekend-color);
+        }
+
+        .is-today {
+            background: var(--current-day-bg) !important;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .is-today .solar-date,
+        .is-today .lunar-date {
+            color: var(--current-day-text);
+            font-weight: bold;
+        }
+
+        .is-holiday .lunar-date {
+            color: var(--accent-color);
+        }
+
+        .festival {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 4px;
+            height: 4px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+        }
+
+        /* Media Queries */
+        @media (max-width: 1400px) {
+            .year-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .year-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header-left h1 {
+                font-size: 3rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .year-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                height: auto;
+                display: block;
+            }
+
+            .header-right {
+                margin-top: 1rem;
+                text-align: left;
+            }
+
+            .controls-layer {
+                top: 0.5rem;
+                right: 0.5rem;
+                opacity: 1;
+            }
+        }
+    </style>
+    <!-- 微信/OpenGraph 卡片信息 -->
+    <meta property="og:title" content="Annual Calendar · 万年历">
+    <meta property="og:description" content="AI万年历日历生成器，支持自定义样式和节日标注。">
+    <meta property="og:url" content="./ai_calendar.html">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Annual Calendar · 万年历">
+    <meta name="twitter:description" content="AI万年历日历生成器，支持自定义样式和节日标注。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta itemprop="name" content="Annual Calendar · 万年历">
+    <meta itemprop="description" content="AI万年历日历生成器，支持自定义样式和节日标注。">
+    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+</head>
+
+<body>
+    <!-- Wechat Share Image Hack -->
+    <div style="display:none; visibility:hidden;"><img src="https://tools.yy24365.com/assets/images/dev-tools-og.png" alt="wechat-share-icon" width="400" height="400"></div>
+    <div class="container">
+        <!-- Controls -->
+        <div class="controls-layer">
+            <div class="control-group">
+                <button class="control-btn" id="prev-year">❮</button>
+                <input type="number" id="year-input" class="year-input" value="2025">
+                <button class="control-btn" id="next-year">❯</button>
+            </div>
+            <div class="control-group">
+                <div class="lang-switch" id="lang-toggle">EN / 中</div>
+            </div>
+        </div>
+        <header>
+            <div class="header-left">
+                <h1 id="year-display">2025</h1>
+                <div class="year-info">
+                    <span id="ganzhi-year">...</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="clock" id="clock">00:00:00</div>
+                <div class="date-today" id="full-date">...</div>
+            </div>
+        </header>
+        <div class="year-grid" id="calendar-grid">
+            <!-- Calendar generated here -->
+        </div>
+    </div>
+    <!-- Initialization Script -->
+    <script>
+        const i18n = {
+            zh: {
+                weekDays: ['日', '一', '二', '三', '四', '五', '六'],
+                months: [
+                    '一月', '二月', '三月', '四月', '五月', '六月',
+                    '七月', '八月', '九月', '十月', '十一月', '十二月'
+                ],
+                monthsFull: [
+                    '一月', '二月', '三月', '四月', '五月', '六月',
+                    '七月', '八月', '九月', '十月', '十一月', '十二月'
+                ],
+                yearSuffix: '年',
+                lunar: '农历',
+                zodiacChar: '【{z}】'
+            },
+            en: {
+                weekDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                months: [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ],
+                monthsFull: [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ],
+                yearSuffix: '',
+                lunar: 'Lunar',
+                zodiacChar: 'Year of {z}'
+            }
+        };
+
+        const state = {
+            year: new Date().getFullYear(),
+            lang: 'zh', // 'zh' or 'en'
+            today: new Date()
+        };
+
+        // DOM Elements
+        const elYearDisplay = document.getElementById('year-display');
+        const elYearInput = document.getElementById('year-input');
+        const elGanZhi = document.getElementById('ganzhi-year');
+        const elClock = document.getElementById('clock');
+        const elFullDate = document.getElementById('full-date');
+        const elGrid = document.getElementById('calendar-grid');
+        const elLangToggle = document.getElementById('lang-toggle');
+
+        // Check Library
+        const checkLibrary = setInterval(() => {
+            if (window.Solar && window.Lunar) {
+                clearInterval(checkLibrary);
+                init();
+            }
+        }, 100);
+
+        function init() {
+            // Setup Listeners
+            document.getElementById('prev-year').addEventListener('click', () => changeYear(-1));
+            document.getElementById('next-year').addEventListener('click', () => changeYear(1));
+
+            elYearInput.addEventListener('change', (e) => {
+                const val = parseInt(e.target.value);
+                if (val && val > 1900 && val < 2100) {
+                    state.year = val;
+                    render();
+                }
+            });
+
+            elLangToggle.addEventListener('click', () => {
+                state.lang = state.lang === 'zh' ? 'en' : 'zh';
+                elLangToggle.textContent = state.lang === 'zh' ? 'EN / 中' : '中 / En';
+                render();
+            });
+
+            // Start Clock
+            renderClock();
+            setInterval(renderClock, 1000);
+
+            // Initial Render - use current year
+            state.year = new Date().getFullYear();
+            elYearInput.value = state.year;
+
+            render();
+        }
+
+        function changeYear(delta) {
+            state.year += delta;
+            elYearInput.value = state.year;
+            render();
+        }
+
+        function render() {
+            renderHeader();
+            renderGrid();
+        }
+
+        function renderHeader() {
+            const txt = i18n[state.lang];
+            elYearDisplay.textContent = state.year;
+
+            // Use middle of year to get Dominant Lunar Year info
+            const solar = Solar.fromYmd(state.year, 6, 1);
+            const lunar = solar.getLunar();
+
+            let zodiac = lunar.getYearShengXiao();
+            if (state.lang === 'en') {
+                // translate zodiac if needed, library returns Chinese. 
+                // Simple mapping or use English method if library supports. 
+                // lunar-javascript primarily Chinese output for some methods.
+                // We'll do a simple map or keep chars. 
+                // Actually Solar/Lunar library might return Chinese char only.
+                const zodiacMap = { '鼠': 'Rat', '牛': 'Ox', '虎': 'Tiger', '兔': 'Rabbit', '龙': 'Dragon', '蛇': 'Snake', '马': 'Horse', '羊': 'Goat', '猴': 'Monkey', '鸡': 'Rooster', '狗': 'Dog', '猪': 'Pig' };
+                zodiac = zodiacMap[zodiac] || zodiac;
+            }
+
+            const ganzhi = lunar.getYearInGanZhi();
+            const yearStr = state.lang === 'zh'
+                ? `${ganzhi}${txt.yearSuffix} · ${txt.zodiacChar.replace('{z}', zodiac)}`
+                : `${ganzhi} Year · ${txt.zodiacChar.replace('{z}', zodiac)}`;
+
+            elGanZhi.textContent = yearStr;
+        }
+
+        function renderClock() {
+            const now = new Date();
+            elClock.textContent = now.toLocaleTimeString('en-GB');
+
+            if (!window.Lunar) return;
+
+            const solar = Solar.fromDate(now);
+            const lunar = solar.getLunar();
+            const txt = i18n[state.lang];
+
+            let dateStr = '';
+            if (state.lang === 'zh') {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                dateStr = now.toLocaleDateString('zh-CN', options);
+                dateStr += ` | ${txt.lunar} ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
+            } else {
+                const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+                dateStr = now.toLocaleDateString('en-US', options);
+                dateStr += ` | ${txt.lunar} ${lunar.getMonthInChinese()} Month ${lunar.getDayInChinese()}`; // Simple trans
+            }
+
+            elFullDate.textContent = dateStr;
+        }
+
+        function renderGrid() {
+            elGrid.innerHTML = '';
+            const txt = i18n[state.lang];
+
+            for (let m = 0; m < 12; m++) {
+                const monthCard = document.createElement('div');
+                monthCard.className = 'month-card';
+
+                // Header
+                const monthHeader = document.createElement('div');
+                monthHeader.className = 'month-name';
+                // Show Primary Lang Month
+                // If EN: January (一月)
+                // If ZH: 一月 (January)
+                const mainMonth = txt.months[m];
+                const subMonth = state.lang === 'zh' ? i18n.en.months[m] : i18n.zh.months[m];
+
+                monthHeader.innerHTML = `${mainMonth} <span class="month-sub">${subMonth}</span>`;
+                monthCard.appendChild(monthHeader);
+
+                // Days Header
+                const daysGrid = document.createElement('div');
+                daysGrid.className = 'days-grid';
+                txt.weekDays.forEach(day => {
+                    const dLabel = document.createElement('div');
+                    dLabel.className = 'day-label';
+                    dLabel.textContent = day;
+                    daysGrid.appendChild(dLabel);
+                });
+
+                // Generate dates
+                const firstDay = new Date(state.year, m, 1).getDay();
+                const daysInMonth = new Date(state.year, m + 1, 0).getDate();
+
+                for (let i = 0; i < firstDay; i++) {
+                    daysGrid.appendChild(document.createElement('div'));
+                }
+
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'date-cell';
+
+                    const checkDate = new Date(state.year, m, d);
+                    const dayOfWeek = checkDate.getDay();
+                    if (dayOfWeek === 0 || dayOfWeek === 6) cell.classList.add('is-weekend');
+
+                    // Today check
+                    const today = new Date();
+                    if (state.year === today.getFullYear() && m === today.getMonth() && d === today.getDate()) {
+                        cell.classList.add('is-today');
+                    }
+
+                    // Lunar
+                    const cellSolar = Solar.fromYmd(state.year, m + 1, d);
+                    const cellLunar = cellSolar.getLunar();
+                    let lunarText = state.lang === 'zh' ? cellLunar.getDayInChinese() : cellLunar.getDayInChinese(); // Library defaults to CN
+
+                    // Festivals
+                    const festivals = cellLunar.getFestivals();
+                    const jieQi = cellLunar.getJieQi();
+                    let isHoliday = false;
+
+                    // Prioritize Festival name -> JieQi -> Day
+                    if (festivals.length > 0) {
+                        lunarText = festivals[0]; // Festivals are usually in Chinese in this lib
+                        isHoliday = true;
+                        // Basic translation map for common festivals if EN mode
+                        if (state.lang === 'en') {
+                            const festMap = { '春节': 'Spring Fest', '中秋节': 'Mid-Autumn', '端午节': 'Dragon Boat', '国庆节': 'National Day', '元旦': 'New Year' };
+                            lunarText = festMap[lunarText] || lunarText;
+                        }
+                    } else if (jieQi) {
+                        lunarText = jieQi;
+                        isHoliday = true;
+                    } else {
+                        if (cellLunar.getDay() === 1) {
+                            lunarText = cellLunar.getMonthInChinese() + (state.lang === 'zh' ? '月' : 'Mo');
+                            isHoliday = true;
+                        }
+                    }
+
+                    if (isHoliday) cell.classList.add('is-holiday');
+
+                    cell.innerHTML = `
+                        <div class="solar-date">${d}</div>
+                        <div class="lunar-date">${lunarText}</div>
+                        ${isHoliday ? '<div class="festival"></div>' : ''}
+                    `;
+
+                    if (festivals.length || jieQi) {
+                        cell.title = `${festivals.join(' ')} ${jieQi || ''}`;
+                    }
+
+                    daysGrid.appendChild(cell);
+                }
+                monthCard.appendChild(daysGrid);
+                elGrid.appendChild(monthCard);
+            }
+        }
+    </script>
+</body>
+
+</html>

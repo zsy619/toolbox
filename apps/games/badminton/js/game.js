@@ -1,0 +1,691 @@
+class BadmintonGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.canvas.width = 900;
+                this.canvas.height = 600;
+                
+                this.gameState = 'menu';
+                this.playerScore = 0;
+                this.aiScore = 0;
+                this.rallyCount = 0;
+                this.winningScore = 21;
+                
+                this.mouse = { x: this.canvas.width / 2, y: this.canvas.height - 100 };
+                this.isCharging = false;
+                this.chargePower = 0;
+                this.maxPower = 100;
+                this.chargeSpeed = 2.5;
+                
+                this.shuttlecock = null;
+                this.shuttlecockTrail = [];
+                this.player = null;
+                this.aiPlayer = null;
+                
+                this.net = {
+                    x: this.canvas.width / 2 - 5,
+                    y: this.canvas.height / 2 - 40,
+                    width: 10,
+                    height: 80
+                };
+                
+                this.court = {
+                    width: this.canvas.width - 40,
+                    height: this.canvas.height - 40,
+                    x: 20,
+                    y: 20
+                };
+                
+                this.initializeGame();
+                this.bindEvents();
+                this.updateUI();
+            }
+
+            initializeGame() {
+                // 初始化羽毛球
+                this.shuttlecock = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height - 150,
+                    radius: 6,
+                    vx: 0,
+                    vy: 0,
+                    gravity: 0.4,
+                    airResistance: 0.98,
+                    rotationAngle: 0,
+                    rotationSpeed: 0.3,
+                    color: '#f8f9fa',
+                    isInPlay: false,
+                    lastHit: 'serve',
+                    hitCount: 0
+                };
+                
+                // 初始化玩家
+                this.player = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height - 80,
+                    radius: 18,
+                    speed: 5,
+                    color: '#a29bfe',
+                    racketLength: 35,
+                    racketAngle: 0,
+                    isMoving: false
+                };
+                
+                // 初始化AI球员
+                this.aiPlayer = {
+                    x: this.canvas.width / 2,
+                    y: 80,
+                    radius: 18,
+                    speed: 4,
+                    color: '#fd79a8',
+                    racketLength: 35,
+                    racketAngle: 0,
+                    targetX: this.canvas.width / 2,
+                    reactionTime: 0,
+                    difficulty: 0.85
+                };
+                
+                this.shuttlecockTrail = [];
+                this.serveTurn = 'player';
+                this.rallyCount = 0;
+                this.resetForServe();
+            }
+
+            resetForServe() {
+                if (this.serveTurn === 'player') {
+                    this.shuttlecock.x = this.player.x;
+                    this.shuttlecock.y = this.player.y - 40;
+                } else {
+                    this.shuttlecock.x = this.aiPlayer.x;
+                    this.shuttlecock.y = this.aiPlayer.y + 40;
+                }
+                this.shuttlecock.vx = 0;
+                this.shuttlecock.vy = 0;
+                this.shuttlecock.isInPlay = false;
+                this.shuttlecock.hitCount = 0;
+                this.rallyCount = 0;
+            }
+
+            bindEvents() {
+                document.getElementById('startButton').addEventListener('click', () => {
+                    this.startGame();
+                });
+                
+                this.canvas.addEventListener('mousemove', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.mouse.x = e.clientX - rect.left;
+                    this.mouse.y = e.clientY - rect.top;
+                });
+                
+                this.canvas.addEventListener('mousedown', (e) => {
+                    if (this.gameState === 'playing') {
+                        this.isCharging = true;
+                        this.chargePower = 0;
+                    }
+                });
+                
+                this.canvas.addEventListener('mouseup', (e) => {
+                    if (this.gameState === 'playing' && this.isCharging) {
+                        this.playerHitShuttlecock();
+                        this.isCharging = false;
+                        this.chargePower = 0;
+                    }
+                });
+                
+                this.canvas.addEventListener('mouseleave', (e) => {
+                    if (this.isCharging) {
+                        this.playerHitShuttlecock();
+                        this.isCharging = false;
+                        this.chargePower = 0;
+                    }
+                });
+            }
+
+            startGame() {
+                this.gameState = 'playing';
+                this.playerScore = 0;
+                this.aiScore = 0;
+                this.initializeGame();
+                this.updateUI();
+                this.hideMessage();
+                document.getElementById('startButton').style.display = 'none';
+                this.gameLoop();
+            }
+
+            gameLoop() {
+                if (this.gameState === 'playing') {
+                    this.update();
+                    this.draw();
+                    requestAnimationFrame(() => this.gameLoop());
+                }
+            }
+
+            update() {
+                this.updatePlayer();
+                this.updateAI();
+                this.updateShuttlecock();
+                this.updatePowerBar();
+                this.checkCollisions();
+                this.checkBounds();
+            }
+
+            updatePlayer() {
+                // 玩家只能在自己的半场移动
+                const minY = this.canvas.height / 2 + 15;
+                const maxY = this.canvas.height - 60;
+                
+                const targetX = Math.max(50, Math.min(this.canvas.width - 50, this.mouse.x));
+                const targetY = Math.max(minY, Math.min(maxY, this.mouse.y));
+                
+                // 平滑移动
+                const dx = targetX - this.player.x;
+                const dy = targetY - this.player.y;
+                
+                if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+                    this.player.x += dx * 0.15;
+                    this.player.y += dy * 0.15;
+                    this.player.isMoving = true;
+                } else {
+                    this.player.isMoving = false;
+                }
+                
+                // 更新蓄力
+                if (this.isCharging) {
+                    this.chargePower += this.chargeSpeed;
+                    if (this.chargePower > this.maxPower) {
+                        this.chargePower = this.maxPower;
+                    }
+                }
+                
+                // 计算球拍角度
+                if (this.shuttlecock.isInPlay) {
+                    const dx = this.shuttlecock.x - this.player.x;
+                    const dy = this.shuttlecock.y - this.player.y;
+                    this.player.racketAngle = Math.atan2(dy, dx);
+                }
+            }
+
+            updateAI() {
+                // AI只能在自己的半场移动
+                const minY = 60;
+                const maxY = this.canvas.height / 2 - 15;
+                
+                // AI预测羽毛球的位置
+                if (this.shuttlecock.isInPlay && this.shuttlecock.vy < 0) {
+                    // 羽毛球朝AI方向移动
+                    const timeToReach = Math.abs((this.aiPlayer.y - this.shuttlecock.y) / this.shuttlecock.vy);
+                    this.aiPlayer.targetX = this.shuttlecock.x + this.shuttlecock.vx * timeToReach;
+                    this.aiPlayer.reactionTime = 15 + Math.random() * 10; // 添加随机反应时间
+                } else if (this.shuttlecock.isInPlay && this.shuttlecock.vy > 0) {
+                    // 羽毛球远离AI，返回中央
+                    this.aiPlayer.targetX = this.canvas.width / 2 + (Math.random() - 0.5) * 100;
+                }
+                
+                // AI移动
+                const dx = this.aiPlayer.targetX - this.aiPlayer.x;
+                if (Math.abs(dx) > 5) {
+                    const direction = dx > 0 ? 1 : -1;
+                    this.aiPlayer.x += direction * this.aiPlayer.speed;
+                }
+                
+                this.aiPlayer.x = Math.max(50, Math.min(this.canvas.width - 50, this.aiPlayer.x));
+                
+                // 计算AI球拍角度
+                if (this.shuttlecock.isInPlay) {
+                    const dx = this.shuttlecock.x - this.aiPlayer.x;
+                    const dy = this.shuttlecock.y - this.aiPlayer.y;
+                    this.aiPlayer.racketAngle = Math.atan2(dy, dx);
+                }
+                
+                // AI击球
+                if (this.aiPlayer.reactionTime > 0) {
+                    this.aiPlayer.reactionTime--;
+                    if (this.aiPlayer.reactionTime === 0) {
+                        this.aiHitShuttlecock();
+                    }
+                }
+            }
+
+            updateShuttlecock() {
+                if (!this.shuttlecock.isInPlay) return;
+                
+                // 保存轨迹
+                this.shuttlecockTrail.push({ 
+                    x: this.shuttlecock.x, 
+                    y: this.shuttlecock.y,
+                    rotation: this.shuttlecock.rotationAngle 
+                });
+                if (this.shuttlecockTrail.length > 12) {
+                    this.shuttlecockTrail.shift();
+                }
+                
+                // 更新位置
+                this.shuttlecock.x += this.shuttlecock.vx;
+                this.shuttlecock.y += this.shuttlecock.vy;
+                
+                // 应用重力和空气阻力
+                this.shuttlecock.vy += this.shuttlecock.gravity;
+                this.shuttlecock.vx *= this.shuttlecock.airResistance;
+                this.shuttlecock.vy *= this.shuttlecock.airResistance;
+                
+                // 更新旋转
+                this.shuttlecock.rotationAngle += this.shuttlecock.rotationSpeed;
+                
+                // 地面碰撞
+                if (this.shuttlecock.y + this.shuttlecock.radius > this.canvas.height - 20) {
+                    this.shuttlecock.y = this.canvas.height - 20 - this.shuttlecock.radius;
+                    this.shuttlecock.vy = 0;
+                    this.shuttlecock.vx *= 0.3;
+                    
+                    // 检查是否得分
+                    this.checkPointScored();
+                }
+            }
+
+            playerHitShuttlecock() {
+                const distance = this.getDistance(this.player, this.shuttlecock);
+                if (distance < this.player.radius + this.shuttlecock.radius + this.player.racketLength) {
+                    this.hitShuttlecock(this.player, 'player');
+                }
+            }
+
+            aiHitShuttlecock() {
+                const distance = this.getDistance(this.aiPlayer, this.shuttlecock);
+                if (distance < this.aiPlayer.radius + this.shuttlecock.radius + this.aiPlayer.racketLength) {
+                    this.hitShuttlecock(this.aiPlayer, 'ai');
+                }
+            }
+
+            hitShuttlecock(player, playerType) {
+                // 增加击球次数
+                this.shuttlecock.hitCount++;
+                this.rallyCount++;
+                
+                // 计算击球方向和力度
+                if (playerType === 'player') {
+                    // 玩家击球：根据蓄力和鼠标位置
+                    const power = Math.max(0.3, this.chargePower / 100);
+                    const baseVelocity = 6 + power * 8;
+                    
+                    // 朝对方半场的角度
+                    const angle = Math.random() * Math.PI / 4 - Math.PI / 8; // ±22.5度随机
+                    
+                    this.shuttlecock.vx = Math.cos(angle) * baseVelocity * (Math.random() > 0.5 ? 1 : -1);
+                    this.shuttlecock.vy = -Math.abs(Math.sin(angle)) * baseVelocity - 3;
+                } else {
+                    // AI击球：智能策略
+                    const corners = [
+                        { x: this.canvas.width * 0.15, y: this.canvas.height * 0.85 },
+                        { x: this.canvas.width * 0.85, y: this.canvas.height * 0.85 },
+                        { x: this.canvas.width * 0.3, y: this.canvas.height * 0.7 },
+                        { x: this.canvas.width * 0.7, y: this.canvas.height * 0.7 }
+                    ];
+                    
+                    // 根据玩家位置选择最远的角落
+                    let bestTarget = corners[0];
+                    let maxDistance = 0;
+                    
+                    corners.forEach(corner => {
+                        const dist = Math.sqrt(
+                            Math.pow(corner.x - this.player.x, 2) + 
+                            Math.pow(corner.y - this.player.y, 2)
+                        );
+                        if (dist > maxDistance) {
+                            maxDistance = dist;
+                            bestTarget = corner;
+                        }
+                    });
+                    
+                    const dx = bestTarget.x - this.shuttlecock.x;
+                    const dy = bestTarget.y - this.shuttlecock.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const velocity = 8 + Math.random() * 4;
+                    
+                    this.shuttlecock.vx = (dx / distance) * velocity;
+                    this.shuttlecock.vy = (dy / distance) * velocity + 1;
+                }
+                
+                this.shuttlecock.isInPlay = true;
+                this.shuttlecock.lastHit = playerType;
+                this.shuttlecock.rotationSpeed = 0.2 + Math.random() * 0.3;
+                
+                // 重置AI反应时间
+                this.aiPlayer.reactionTime = 0;
+                
+                // 显示连击数
+                if (this.rallyCount > 5) {
+                    this.showMessage(`精彩对拉！${this.rallyCount} 回合`, 'rally');
+                    setTimeout(() => this.hideMessage(), 1500);
+                }
+            }
+
+            checkCollisions() {
+                // 网子碰撞
+                if (this.shuttlecock.x >= this.net.x - this.shuttlecock.radius && 
+                    this.shuttlecock.x <= this.net.x + this.net.width + this.shuttlecock.radius &&
+                    this.shuttlecock.y >= this.net.y && 
+                    this.shuttlecock.y <= this.net.y + this.net.height) {
+                    
+                    // 撞网
+                    this.shuttlecock.vx *= -0.3;
+                    this.shuttlecock.vy *= 0.3;
+                    this.checkPointScored();
+                }
+                
+                // 边界碰撞
+                if (this.shuttlecock.x - this.shuttlecock.radius <= this.court.x || 
+                    this.shuttlecock.x + this.shuttlecock.radius >= this.court.x + this.court.width) {
+                    this.shuttlecock.vx *= -0.6;
+                    this.shuttlecock.x = Math.max(this.court.x + this.shuttlecock.radius, 
+                                          Math.min(this.court.x + this.court.width - this.shuttlecock.radius, this.shuttlecock.x));
+                }
+            }
+
+            checkBounds() {
+                // 羽毛球出界检查
+                if (this.shuttlecock.y > this.canvas.height + 50 || 
+                    this.shuttlecock.x < -50 || 
+                    this.shuttlecock.x > this.canvas.width + 50) {
+                    this.checkPointScored();
+                }
+            }
+
+            checkPointScored() {
+                if (!this.shuttlecock.isInPlay) return;
+                
+                let winner = '';
+                
+                // 判断得分逻辑
+                if (this.shuttlecock.y > this.canvas.height / 2) {
+                    // 羽毛球在玩家半场
+                    if (this.shuttlecock.lastHit === 'ai') {
+                        winner = 'ai';
+                    } else {
+                        winner = 'player';
+                    }
+                } else {
+                    // 羽毛球在AI半场
+                    if (this.shuttlecock.lastHit === 'player') {
+                        winner = 'player';
+                    } else {
+                        winner = 'ai';
+                    }
+                }
+                
+                this.scorePoint(winner);
+            }
+
+            scorePoint(winner) {
+                if (winner === 'player') {
+                    this.playerScore++;
+                    this.showMessage('玩家得分！', 'point');
+                } else {
+                    this.aiScore++;
+                    this.showMessage('电脑得分！', 'point');
+                }
+                
+                this.updateUI();
+                
+                // 检查是否获胜
+                if (this.playerScore >= this.winningScore && this.playerScore - this.aiScore >= 2) {
+                    this.endGame('player');
+                } else if (this.aiScore >= this.winningScore && this.aiScore - this.playerScore >= 2) {
+                    this.endGame('ai');
+                } else {
+                    // 继续比赛
+                    this.serveTurn = winner === 'player' ? 'player' : 'ai';
+                    setTimeout(() => {
+                        this.resetForServe();
+                        this.hideMessage();
+                    }, 2000);
+                }
+            }
+
+            endGame(winner) {
+                this.gameState = 'gameOver';
+                
+                let resultText;
+                if (winner === 'player') {
+                    resultText = `🎉 恭喜获胜！比分 ${this.playerScore}:${this.aiScore}`;
+                } else {
+                    resultText = `😔 比赛失败！比分 ${this.playerScore}:${this.aiScore}`;
+                }
+                
+                this.showMessage(resultText, 'game-over');
+                document.getElementById('startButton').style.display = 'block';
+                document.getElementById('startButton').textContent = '重新开始';
+            }
+
+            updatePowerBar() {
+                const powerFill = document.getElementById('powerFill');
+                const percentage = (this.chargePower / this.maxPower) * 100;
+                powerFill.style.width = percentage + '%';
+            }
+
+            getDistance(obj1, obj2) {
+                const dx = obj1.x - obj2.x;
+                const dy = obj1.y - obj2.y;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            draw() {
+                // 清空画布
+                this.ctx.fillStyle = '#00cec9';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 绘制球场
+                this.drawCourt();
+                
+                // 绘制网子
+                this.drawNet();
+                
+                // 绘制球员
+                this.drawPlayer(this.player);
+                this.drawPlayer(this.aiPlayer);
+                
+                // 绘制羽毛球轨迹
+                this.drawShuttlecockTrail();
+                
+                // 绘制羽毛球
+                this.drawShuttlecock();
+                
+                // 绘制蓄力指示器
+                if (this.isCharging) {
+                    this.drawChargeIndicator();
+                }
+            }
+
+            drawCourt() {
+                // 球场边界
+                this.ctx.strokeStyle = 'white';
+                this.ctx.lineWidth = 3;
+                this.ctx.strokeRect(this.court.x, this.court.y, this.court.width, this.court.height);
+                
+                // 中线
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.court.x, this.canvas.height / 2);
+                this.ctx.lineTo(this.court.x + this.court.width, this.canvas.height / 2);
+                this.ctx.stroke();
+                
+                // 发球线
+                const serviceLineY1 = this.canvas.height / 4;
+                const serviceLineY2 = this.canvas.height * 3 / 4;
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.court.x + 100, serviceLineY1);
+                this.ctx.lineTo(this.court.x + this.court.width - 100, serviceLineY1);
+                this.ctx.moveTo(this.court.x + 100, serviceLineY2);
+                this.ctx.lineTo(this.court.x + this.court.width - 100, serviceLineY2);
+                this.ctx.stroke();
+                
+                // 中央发球线
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.canvas.width / 2, serviceLineY1);
+                this.ctx.lineTo(this.canvas.width / 2, serviceLineY2);
+                this.ctx.stroke();
+            }
+
+            drawNet() {
+                // 网柱
+                this.ctx.fillStyle = '#2d3436';
+                this.ctx.fillRect(this.net.x, this.net.y, this.net.width, this.net.height);
+                
+                // 网子纹理
+                this.ctx.strokeStyle = 'white';
+                this.ctx.lineWidth = 1;
+                for (let i = 0; i < 8; i++) {
+                    const y = this.net.y + (this.net.height / 8) * i;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.net.x, y);
+                    this.ctx.lineTo(this.net.x + this.net.width, y);
+                    this.ctx.stroke();
+                }
+                
+                // 垂直网线
+                for (let i = 0; i < 3; i++) {
+                    const x = this.net.x + (this.net.width / 3) * i;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, this.net.y);
+                    this.ctx.lineTo(x, this.net.y + this.net.height);
+                    this.ctx.stroke();
+                }
+            }
+
+            drawPlayer(player) {
+                // 球员阴影
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                this.ctx.beginPath();
+                this.ctx.ellipse(player.x, this.canvas.height - 15, player.radius, player.radius * 0.3, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // 球员身体
+                this.ctx.fillStyle = player.color;
+                this.ctx.beginPath();
+                this.ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // 球员边框
+                this.ctx.strokeStyle = 'white';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+                
+                // 球拍
+                const racketX = player.x + Math.cos(player.racketAngle) * player.racketLength;
+                const racketY = player.y + Math.sin(player.racketAngle) * player.racketLength;
+                
+                this.ctx.strokeStyle = '#8b4513';
+                this.ctx.lineWidth = 6;
+                this.ctx.beginPath();
+                this.ctx.moveTo(player.x, player.y);
+                this.ctx.lineTo(racketX, racketY);
+                this.ctx.stroke();
+                
+                // 球拍网面
+                this.ctx.strokeStyle = 'white';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.arc(racketX, racketY, 12, 0, Math.PI * 2);
+                this.ctx.stroke();
+                
+                // 球拍网线
+                for (let i = -8; i <= 8; i += 4) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(racketX - 8, racketY + i);
+                    this.ctx.lineTo(racketX + 8, racketY + i);
+                    this.ctx.stroke();
+                }
+            }
+
+            drawShuttlecockTrail() {
+                for (let i = 0; i < this.shuttlecockTrail.length; i++) {
+                    const alpha = (i + 1) / this.shuttlecockTrail.length * 0.4;
+                    const size = (i + 1) / this.shuttlecockTrail.length * this.shuttlecock.radius;
+                    
+                    this.ctx.fillStyle = `rgba(248, 249, 250, ${alpha})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.shuttlecockTrail[i].x, this.shuttlecockTrail[i].y, size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+
+            drawShuttlecock() {
+                this.ctx.save();
+                this.ctx.translate(this.shuttlecock.x, this.shuttlecock.y);
+                this.ctx.rotate(this.shuttlecock.rotationAngle);
+                
+                // 羽毛球头部（球头）
+                this.ctx.fillStyle = '#2d3436';
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, this.shuttlecock.radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // 羽毛部分
+                this.ctx.strokeStyle = '#f8f9fa';
+                this.ctx.lineWidth = 2;
+                for (let i = 0; i < 8; i++) {
+                    const angle = (Math.PI * 2 / 8) * i;
+                    const startX = Math.cos(angle) * this.shuttlecock.radius;
+                    const startY = Math.sin(angle) * this.shuttlecock.radius;
+                    const endX = Math.cos(angle) * (this.shuttlecock.radius + 12);
+                    const endY = Math.sin(angle) * (this.shuttlecock.radius + 12);
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(startX, startY);
+                    this.ctx.lineTo(endX, endY);
+                    this.ctx.stroke();
+                }
+                
+                // 羽毛球高光
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                this.ctx.beginPath();
+                this.ctx.arc(-2, -2, this.shuttlecock.radius * 0.3, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.restore();
+            }
+
+            drawChargeIndicator() {
+                const centerX = this.player.x;
+                const centerY = this.player.y - 50;
+                const radius = 25;
+                const percentage = this.chargePower / this.maxPower;
+                
+                // 背景圆
+                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                this.ctx.lineWidth = 4;
+                this.ctx.beginPath();
+                this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                this.ctx.stroke();
+                
+                // 蓄力圆
+                this.ctx.strokeStyle = percentage > 0.8 ? '#e17055' : '#00b894';
+                this.ctx.lineWidth = 4;
+                this.ctx.beginPath();
+                this.ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * percentage);
+                this.ctx.stroke();
+            }
+
+            updateUI() {
+                document.getElementById('playerScore').textContent = this.playerScore;
+                document.getElementById('aiScore').textContent = this.aiScore;
+                document.getElementById('rallyCount').textContent = this.rallyCount;
+            }
+
+            showMessage(text, type) {
+                const message = document.getElementById('message');
+                message.textContent = text;
+                message.className = `message ${type} show`;
+            }
+
+            hideMessage() {
+                const message = document.getElementById('message');
+                message.classList.remove('show');
+            }
+        }
+
+        // 启动游戏
+        window.addEventListener('load', () => {
+            new BadmintonGame();
+        });

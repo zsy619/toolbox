@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>转账明细及剩余款项管理系统</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入图表库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 自定义滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* 打印样式 */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            .print-only {
+                display: block !important;
+            }
+
+            .shadow-lg {
+                box-shadow: none !important;
+            }
+
+            .bg-gray-50 {
+                background-color: transparent !important;
+            }
+
+            .border {
+                border: 1px solid #000 !important;
+            }
+        }
+
+        .print-only {
+            display: none;
+        }
+    </style>
+    <!-- 微信/OpenGraph 卡片信息 -->
+    <meta property="og:title" content="转账明细及剩余款项管理系统">
+    <meta property="og:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta property="og:url" content="./transfer-details.html">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="转账明细及剩余款项管理系统">
+    <meta name="twitter:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta itemprop="name" content="转账明细及剩余款项管理系统">
+    <meta itemprop="description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+    <!-- Wechat Share Image Hack -->
+    <div style="display:none; visibility:hidden;">
+        <img src="https://tools.yy24365.com/assets/images/dev-tools-og.png" alt="wechat-share-icon" width="400" height="400">
+    </div>
+    <!-- 数据汇总卡片 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
+            <div class="flex items-center">
+                <div class="bg-blue-100 p-3 rounded-lg mr-4">
+                    <i class="fas fa-money-bill-wave text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">总欠款金额</p>
+                    <p class="text-2xl font-bold text-gray-800">¥60,000</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-green-500">
+            <div class="flex items-center">
+                <div class="bg-green-100 p-3 rounded-lg mr-4">
+                    <i class="fas fa-exchange-alt text-green-600 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">已转账金额</p>
+                    <p class="text-2xl font-bold text-gray-800">¥40,000</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-red-500">
+            <div class="flex items-center">
+                <div class="bg-red-100 p-3 rounded-lg mr-4">
+                    <i class="fas fa-balance-scale text-red-600 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">剩余款项</p>
+                    <p class="text-2xl font-bold text-gray-800">¥20,000</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 图表和转账记录 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- 图表区域 -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">转账进度分析</h2>
+            <div class="h-64 md:h-72">
+                <canvas id="transferChart"></canvas>
+            </div>
+            <div class="mt-4 text-center text-gray-600 text-sm">
+                <p>已转账: 40,000元 (66.67%) | 剩余: 20,000元 (33.33%)</p>
+            </div>
+        </div>
+        <!-- 统计摘要 -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">转账统计摘要</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span class="text-gray-600">转账总次数</span>
+                    <span class="font-bold">20次</span>
+                </div>
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span class="text-gray-600">首次转账日期</span>
+                    <span class="font-bold">2020-03-27</span>
+                </div>
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span class="text-gray-600">最近转账日期</span>
+                    <span class="font-bold">2024-04-10</span>
+                </div>
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span class="text-gray-600">平均转账间隔</span>
+                    <span class="font-bold">约76天</span>
+                </div>
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span class="text-gray-600">转账频率</span>
+                    <span class="font-bold">约每年5次</span>
+                </div>
+                <div class="pt-2">
+                    <div class="bg-gray-200 h-2 rounded-full overflow-hidden">
+                        <div class="bg-green-500 h-full rounded-full" style="width: 66.67%"></div>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600 mt-1">
+                        <span>已转账: 66.67%</span>
+                        <span>剩余: 33.33%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 转账明细表格 -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b flex flex-col md:flex-row justify-between items-start md:items-center">
+            <h2 class="text-xl font-bold text-gray-800">转账明细记录</h2>
+            <div class="mt-2 md:mt-0">
+                <span class="text-sm text-gray-600">共20条转账记录，每笔2000元</span>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">序号</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">转账日期</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">转账金额</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">年度</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">累计金额</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">剩余款项</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="transfer-table-body">
+                    <!-- 表格数据将通过JavaScript动态生成 -->
+                </tbody>
+                <tfoot class="bg-gray-50 font-bold">
+                    <tr>
+                        <td class="px-6 py-4 text-right" colspan="2">合计：</td>
+                        <td class="px-6 py-4">¥40,000</td>
+                        <td class="px-6 py-4" colspan="2">总欠款金额：</td>
+                        <td class="px-6 py-4">¥60,000</td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 text-right" colspan="5">剩余款项：</td>
+                        <td class="px-6 py-4 text-red-600 font-bold">¥20,000</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <!-- 年度汇总 -->
+    <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">年度转账汇总</h2>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <!-- 年度汇总数据将通过JavaScript动态生成 -->
+        </div>
+    </div>
+    <!-- 底部信息 -->
+    <div class="no-print text-center text-gray-500 text-sm border-t pt-6">
+        <p>© 2026 转账明细管理系统 | 总欠款: ¥60,000 | 已转账: ¥40,000 | 剩余款项: ¥20,000</p>
+        <p class="mt-1">数据最后更新时间: <span id="current-time"></span></p>
+    </div>
+    </div>
+    <script>
+        // 转账数据
+        const transferData = [
+            { id: 1, date: '2020-03-27', amount: 2000 },
+            { id: 2, date: '2020-07-03', amount: 2000 },
+            { id: 3, date: '2020-07-03', amount: 2000 },
+            { id: 4, date: '2020-09-07', amount: 2000 },
+            { id: 5, date: '2020-10-26', amount: 2000 },
+            { id: 6, date: '2020-11-18', amount: 2000 },
+            { id: 7, date: '2021-02-03', amount: 2000 },
+            { id: 8, date: '2021-09-30', amount: 2000 },
+            { id: 9, date: '2022-01-20', amount: 2000 },
+            { id: 10, date: '2022-04-29', amount: 2000 },
+            { id: 11, date: '2022-09-30', amount: 2000 },
+            { id: 12, date: '2022-11-29', amount: 2000 },
+            { id: 13, date: '2023-01-11', amount: 2000 },
+            { id: 14, date: '2023-02-20', amount: 2000 },
+            { id: 15, date: '2023-04-04', amount: 2000 },
+            { id: 16, date: '2023-06-23', amount: 2000 },
+            { id: 17, date: '2023-10-26', amount: 2000 },
+            { id: 18, date: '2023-12-29', amount: 2000 },
+            { id: 19, date: '2024-02-08', amount: 2000 },
+            { id: 20, date: '2024-04-10', amount: 2000 }
+        ];
+
+        // 总欠款
+        const totalDebt = 60000;
+
+        // 计算累计金额和剩余款项
+        function calculateCumulative() {
+            let cumulative = 0;
+            const result = [];
+
+            for (let i = 0; i < transferData.length; i++) {
+                cumulative += transferData[i].amount;
+                const remaining = totalDebt - cumulative;
+                result.push({
+                    ...transferData[i],
+                    cumulative,
+                    remaining
+                });
+            }
+
+            return result;
+        }
+
+        // 按年度汇总转账数据
+        function summarizeByYear() {
+            const yearSummary = {};
+
+            transferData.forEach(transfer => {
+                const year = transfer.date.split('-')[0];
+                if (!yearSummary[year]) {
+                    yearSummary[year] = {
+                        year,
+                        count: 0,
+                        amount: 0
+                    };
+                }
+                yearSummary[year].count++;
+                yearSummary[year].amount += transfer.amount;
+            });
+
+            return Object.values(yearSummary);
+        }
+
+        // 生成表格行
+        function generateTableRows() {
+            const tableBody = document.getElementById('transfer-table-body');
+            tableBody.innerHTML = '';
+
+            const calculatedData = calculateCumulative();
+
+            calculatedData.forEach(item => {
+                const year = item.date.split('-')[0];
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${item.date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">¥${item.amount.toLocaleString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${year}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">¥${item.cumulative.toLocaleString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold ${item.remaining > 0 ? 'text-red-600' : 'text-green-600'}">¥${item.remaining.toLocaleString()}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 生成年度汇总卡片
+        function generateYearlySummary() {
+            const yearlySummary = summarizeByYear();
+            const container = document.querySelector('.grid.grid-cols-2.md\\:grid-cols-5.gap-4');
+            container.innerHTML = '';
+
+            yearlySummary.forEach(yearData => {
+                const card = document.createElement('div');
+                card.className = 'bg-blue-50 p-4 rounded-lg border border-blue-100';
+                card.innerHTML = `
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold text-blue-800">${yearData.year}年</h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-600">转账次数</p>
+                            <p class="text-xl font-bold text-blue-700">${yearData.count}次</p>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-600">转账金额</p>
+                            <p class="text-xl font-bold text-green-700">¥${yearData.amount.toLocaleString()}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 创建图表
+        function createChart() {
+            const ctx = document.getElementById('transferChart').getContext('2d');
+            const calculatedData = calculateCumulative();
+            const dates = calculatedData.map(item => item.date);
+            const cumulativeAmounts = calculatedData.map(item => item.cumulative);
+
+            // 计算剩余款项数据
+            const remainingAmounts = calculatedData.map(item => item.remaining);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: '累计转账金额',
+                            data: cumulativeAmounts,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '剩余款项',
+                            data: remainingAmounts,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '¥' + context.parsed.y.toLocaleString();
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: '转账日期'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '金额 (元)'
+                            },
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return '¥' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新当前时间
+        function updateCurrentTime() {
+            const now = new Date();
+            const formattedTime = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('current-time').textContent = formattedTime;
+        }
+
+        // 打印功能
+        document.getElementById('print-btn').addEventListener('click', function () {
+            // 设置打印时间
+            const now = new Date();
+            const formattedTime = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('print-time').textContent = formattedTime;
+
+            // 触发打印
+            window.print();
+        });
+
+        // 刷新功能
+        document.getElementById('refresh-btn').addEventListener('click', function () {
+            updateCurrentTime();
+            // 添加简单的刷新动画效果
+            const btn = this;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 刷新中...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                // 可以在这里添加重新加载数据的逻辑
+            }, 800);
+        });
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            generateTableRows();
+            generateYearlySummary();
+            createChart();
+            updateCurrentTime();
+
+            // 每30秒更新时间
+            setInterval(updateCurrentTime, 30000);
+        });
+    </script>
+</body>
+
+</html>

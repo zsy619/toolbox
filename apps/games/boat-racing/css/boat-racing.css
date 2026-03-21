@@ -1,0 +1,692 @@
+/* 扁平化赛艇游戏样式 - 严格遵循Material Design */
+
+/* 基础重置和变量 */
+:root {
+    /* Material Design 色彩系统 - 海洋主题 */
+    --ocean-blue: #00BCD4;
+    --boat-white: #FFFFFF;
+    --wave-cyan: #4DD0E1;
+    --fuel-amber: #FFC107;
+    --background-white: #FAFAFA;
+    --text-dark: #212121;
+    --text-secondary: #757575;
+    --surface-white: #FFFFFF;
+    
+    /* 扁平化设计间距系统 */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* 统一圆角 */
+    --border-radius: 16px;
+    --border-radius-small: 8px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', 'Roboto', Arial, sans-serif;
+    background-color: var(--background-white);
+    min-height: 100vh;
+    color: var(--text-dark);
+    padding: var(--spacing-md);
+    line-height: 1.6;
+}
+
+.game-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--surface-white);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-xl);
+    border: 2px solid var(--ocean-blue);
+}
+
+/* 游戏头部 */
+.game-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.game-header h1 {
+    color: var(--ocean-blue);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-lg);
+}
+
+.game-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--spacing-md);
+    background: var(--background-white);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-small);
+    border: 2px solid var(--wave-cyan);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ocean-blue);
+}
+
+.stat-unit {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* 控制面板 */
+.game-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    flex-wrap: wrap;
+}
+
+/* 扁平化按钮设计 */
+.btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: none;
+    border-radius: var(--border-radius-small);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: var(--ocean-blue);
+    color: var(--surface-white);
+}
+
+.btn-primary:hover {
+    background-color: #0097A7;
+}
+
+.btn-secondary {
+    background-color: var(--wave-cyan);
+    color: var(--text-dark);
+}
+
+.btn-secondary:hover {
+    background-color: #26C6DA;
+}
+
+.btn-link {
+    background-color: transparent;
+    color: var(--ocean-blue);
+    border: 2px solid var(--ocean-blue);
+}
+
+.btn-link:hover {
+    background-color: var(--ocean-blue);
+    color: var(--surface-white);
+}
+
+.difficulty-selector {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.difficulty-selector label {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.difficulty-selector select {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 2px solid var(--wave-cyan);
+    border-radius: var(--border-radius-small);
+    background: var(--surface-white);
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+/* 游戏画布区域 */
+.game-canvas-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--spacing-xl);
+    background: var(--ocean-blue);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+}
+
+#gameCanvas {
+    border-radius: var(--border-radius-small);
+    background: var(--wave-cyan);
+    border: 2px solid var(--text-dark);
+}
+
+.wind-indicator {
+    position: absolute;
+    top: var(--spacing-lg);
+    left: var(--spacing-lg);
+    background: var(--surface-white);
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-small);
+    border: 2px solid var(--fuel-amber);
+    text-align: center;
+    min-width: 80px;
+}
+
+.wind-arrow {
+    font-size: 1.5rem;
+    animation: rotate 4s linear infinite;
+}
+
+.wind-info {
+    margin-top: var(--spacing-xs);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.fuel-gauge {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    background: var(--surface-white);
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-small);
+    border: 2px solid var(--fuel-amber);
+    text-align: center;
+    min-width: 100px;
+}
+
+.fuel-bar {
+    width: 80px;
+    height: 8px;
+    background: var(--background-white);
+    border-radius: var(--border-radius-small);
+    margin-bottom: var(--spacing-xs);
+    border: 1px solid var(--text-secondary);
+}
+
+.fuel-fill {
+    height: 100%;
+    background: var(--fuel-amber);
+    border-radius: var(--border-radius-small);
+    transition: width 0.2s ease;
+    width: 100%;
+}
+
+/* 操控面板 */
+.control-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.control-instructions h3 {
+    color: var(--text-dark);
+    margin-bottom: var(--spacing-md);
+    font-weight: 600;
+}
+
+.control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.control-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--spacing-sm);
+    background: var(--background-white);
+    border-radius: var(--border-radius-small);
+    border: 1px solid var(--wave-cyan);
+}
+
+.control-item kbd {
+    background: var(--text-dark);
+    color: var(--surface-white);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-small);
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.control-item span {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* 虚拟方向盘 */
+.steering-wheel {
+    text-align: center;
+}
+
+.steering-wheel h3 {
+    color: var(--text-dark);
+    margin-bottom: var(--spacing-md);
+    font-weight: 600;
+}
+
+.wheel-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.wheel {
+    width: 80px;
+    height: 80px;
+    border: 4px solid var(--ocean-blue);
+    border-radius: 50%;
+    background: var(--surface-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.wheel:hover {
+    transform: scale(1.05);
+}
+
+.wheel-center {
+    font-size: 1.5rem;
+}
+
+.throttle-slider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.throttle-slider input[type="range"] {
+    writing-mode: bt-lr; /* IE */
+    -webkit-appearance: slider-vertical; /* WebKit */
+    width: 20px;
+    height: 80px;
+    background: var(--wave-cyan);
+    outline: none;
+}
+
+/* 触屏控制 */
+.touch-controls {
+    display: none;
+}
+
+.touch-row {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.touch-btn {
+    width: 60px;
+    height: 60px;
+    background: var(--ocean-blue);
+    color: var(--surface-white);
+    border: none;
+    border-radius: var(--border-radius-small);
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.touch-btn:hover,
+.touch-btn:active {
+    background: var(--text-dark);
+}
+
+/* 航海信息 */
+.navigation-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.nav-section {
+    background: var(--background-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    border: 2px solid var(--wave-cyan);
+}
+
+.nav-section h3 {
+    color: var(--ocean-blue);
+    margin-bottom: var(--spacing-md);
+    font-weight: 600;
+}
+
+.nav-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.nav-section li {
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid var(--background-white);
+    color: var(--text-dark);
+}
+
+.nav-section li:before {
+    content: "▶ ";
+    color: var(--wave-cyan);
+    font-weight: 700;
+}
+
+/* 性能面板 */
+.performance-panel {
+    background: var(--background-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-xl);
+    border: 2px solid var(--wave-cyan);
+}
+
+.performance-panel h3 {
+    color: var(--text-dark);
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+    font-weight: 600;
+}
+
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.performance-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    background: var(--surface-white);
+    border-radius: var(--border-radius-small);
+    border: 1px solid var(--wave-cyan);
+}
+
+.performance-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.performance-value {
+    font-weight: 700;
+    color: var(--ocean-blue);
+}
+
+/* 天气系统 */
+.weather-system {
+    background: var(--background-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-xl);
+    border: 2px solid var(--fuel-amber);
+}
+
+.weather-system h3 {
+    color: var(--fuel-amber);
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+    font-weight: 600;
+}
+
+.weather-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.weather-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--spacing-sm);
+    background: var(--surface-white);
+    border-radius: var(--border-radius-small);
+    border: 1px solid var(--fuel-amber);
+}
+
+.weather-icon {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.weather-desc,
+.weather-value {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.weather-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+/* 游戏模态框 */
+.game-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--surface-white);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius);
+    text-align: center;
+    min-width: 300px;
+    border: 2px solid var(--ocean-blue);
+}
+
+.modal-content h2 {
+    color: var(--ocean-blue);
+    margin-bottom: var(--spacing-lg);
+    font-weight: 700;
+}
+
+.result-stats {
+    margin-bottom: var(--spacing-lg);
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--background-white);
+}
+
+.result-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.result-value {
+    font-weight: 700;
+    color: var(--ocean-blue);
+}
+
+.modal-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
+/* 返回链接 */
+.back-link {
+    text-align: center;
+    margin-top: var(--spacing-xl);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    body {
+        padding: var(--spacing-sm);
+    }
+    
+    .game-container {
+        padding: var(--spacing-md);
+    }
+    
+    .game-header h1 {
+        font-size: 2rem;
+    }
+    
+    .game-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .game-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    #gameCanvas {
+        width: 100%;
+        max-width: 400px;
+        height: 250px;
+    }
+    
+    .control-panel {
+        grid-template-columns: 1fr;
+    }
+    
+    .touch-controls {
+        display: block;
+    }
+    
+    .navigation-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .performance-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .weather-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .modal-content {
+        width: 90%;
+        max-width: 400px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .game-stats {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+    }
+    
+    .control-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .touch-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .weather-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 扁平化设计强化 */
+.game-container,
+.btn,
+.stat-item,
+.control-item,
+.nav-section,
+.performance-item,
+.modal-content,
+.weather-system,
+.wind-indicator,
+.fuel-gauge,
+.weather-item {
+    box-shadow: none !important;
+    background-image: none !important;
+    text-shadow: none !important;
+}
+
+/* 动画效果 - 简洁CSS动画 */
+.btn,
+.touch-btn,
+.stat-value,
+.fuel-fill,
+.wheel {
+    transition: all 0.2s ease;
+}
+
+.stat-value {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

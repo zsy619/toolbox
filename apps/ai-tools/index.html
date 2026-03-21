@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ai-tools - 目录索引</title>
+    <link rel="stylesheet" href="../../assets/css/layui.min.css">
+    <link rel="stylesheet" href="../../assets/css/fontawesome.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-light: #5dade2;
+            --secondary: #2ecc71;
+            --accent: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --bg-light: #f8f9fa;
+            --card-bg: #ffffff;
+            --border: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 i {
+            color: var(--primary);
+        }
+
+        .breadcrumbs {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .breadcrumb-item {
+            display: inline-block;
+        }
+
+        .breadcrumb-item a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-secondary);
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+            height: 80px;
+        }
+
+        .item-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary);
+        }
+
+        .dir-card {
+            background: linear-gradient(135deg, #fff5e6 0%, #ffffff 100%);
+        }
+
+        .file-card {
+            background: var(--card-bg);
+        }
+
+        .item-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .item-name {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .item-meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .item-arrow {
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+    <!-- 微信/OpenGraph 卡片信息 -->
+    <meta property="og:title" content="ai-tools - 目录索引">
+    <meta property="og:description" content="AI工具箱目录索引，汇集实用AI工具与分析报告。">
+    <meta property="og:url" content="./index.html">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ai-tools - 目录索引">
+    <meta name="twitter:description" content="AI工具箱目录索引，汇集实用AI工具与分析报告。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta itemprop="name" content="ai-tools - 目录索引">
+    <meta itemprop="description" content="AI工具箱目录索引，汇集实用AI工具与分析报告。">
+    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+</head>
+
+<body>
+    <!-- Wechat Share Image Hack -->
+    <div style="display:none; visibility:hidden;">
+        <img src="https://tools.yy24365.com/assets/images/dev-tools-og.png" alt="wechat-share-icon" width="400" height="400">
+    </div>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-folder-open"></i> ai-tools</h1>
+            <div class="breadcrumbs"><a href="../index.html" class="breadcrumb-item">🏠 首页</a> / <a href="../index.html" class="breadcrumb-item">apps</a> / <span class="breadcrumb-item active">ai-tools</span></div>
+        </div>
+        <!-- 调研与评估 -->
+        <div class="section">
+            <div class="section-title"><i class="fas fa-search"></i> 调研与评估</div>
+            <div class="grid">
+                <a href="202602top.html" class="item-card file-card" title="2026年2月AI工具趋势">
+                    <div class="item-icon">
+                        <i class="fas fa-chart-line" style="color: #e74c3c;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="2026年2月热度最高的AI工具">2026年2月AI工具趋势</div>
+                        <div class="item-meta">趋势报告 • 42.70 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+                <a href="deep-research-tools.html" class="item-card file-card" title="深度调研工具">
+                    <div class="item-icon">
+                        <i class="fas fa-file-code" style="color: #3498db;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="深度调研工具分级指南">深度调研工具分级指南</div>
+                        <div class="item-meta">深度调研工具 • 40.20 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+                <a href="ai_syxr.html" class="item-card file-card" title="HTML文件">
+                    <div class="item-icon">
+                        <i class="fas fa-file-code" style="color: #3498db;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="Web3 AI评估 | 四有信人框架">Web3 AI评估 | 四有信人框架</div>
+                        <div class="item-meta">HTML文件 • 56.58 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <!-- AI生成工具 -->
+        <div class="section">
+            <div class="section-title"><i class="fas fa-robot"></i> AI生成工具</div>
+            <div class="grid">
+                <a href="ai_calendar.html" class="item-card file-card" title="AI日历生成器">
+                    <div class="item-icon">
+                        <i class="fas fa-file-code" style="color: #3498db;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="Annual Calendar · 万年历">Annual Calendar · 万年历</div>
+                        <div class="item-meta">AI日历生成器 • 21.26 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+                <a href="ai_course.html" class="item-card file-card" title="AI课程生成器">
+                    <div class="item-icon">
+                        <i class="fas fa-file-code" style="color: #3498db;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="24节气幼儿园烹饪课程">24节气幼儿园烹饪课程</div>
+                        <div class="item-meta">AI课程生成器 • 86.78 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+                <a href="ai_coursex.html" class="item-card file-card" title="HTML文件">
+                    <div class="item-icon">
+                        <i class="fas fa-file-code" style="color: #3498db;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="24节气幼儿园烹饪课程">24节气幼儿园烹饪课程</div>
+                        <div class="item-meta">HTML文件 • 46.40 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+                <a href="ai_coursey.html" class="item-card file-card" title="HTML文件">
+                    <div class="item-icon">
+                        <i class="fas fa-file-code" style="color: #3498db;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="24节气幼儿园烹饪课程">24节气幼儿园烹饪课程</div>
+                        <div class="item-meta">HTML文件 • 49.60 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+                <a href="ai_dream.html" class="item-card file-card" title="AI梦境分析">
+                    <div class="item-icon">
+                        <i class="fas fa-file-code" style="color: #3498db;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="Web3梦境解析 - 周公解梦AI">Web3梦境解析 - 周公解梦AI</div>
+                        <div class="item-meta">AI梦境分析 • 22.83 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <!-- 场景分析工具 -->
+        <div class="section">
+            <div class="section-title"><i class="fas fa-chart-pie"></i> 场景分析工具</div>
+            <div class="grid">
+                <a href="ai_scene.html" class="item-card file-card" title="AI场景生成器">
+                    <div class="item-icon">
+                        <i class="fas fa-file-code" style="color: #3498db;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="AI应用场景分析表">AI应用场景分析表</div>
+                        <div class="item-meta">AI场景生成器 • 102.83 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+                <a href="ai_scene_chart.html" class="item-card file-card" title="AI场景图表分析">
+                    <div class="item-icon">
+                        <i class="fas fa-file-code" style="color: #3498db;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="AI应用场景深度分析">AI应用场景深度分析</div>
+                        <div class="item-meta">AI场景图表分析 • 14.44 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+                <a href="ai_scene_search.html" class="item-card file-card" title="AI场景搜索">
+                    <div class="item-icon">
+                        <i class="fas fa-file-code" style="color: #3498db;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="AI应用场景分析表">AI应用场景分析表</div>
+                        <div class="item-meta">AI场景搜索 • 60.36 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <!-- 知识与健康 -->
+        <div class="section">
+            <div class="section-title"><i class="fas fa-book-reader"></i> 知识与健康</div>
+            <div class="grid">
+                <a href="seedance2.0.html" class="item-card file-card" title="Seedance 2.0 变现指南">
+                    <div class="item-icon">
+                        <i class="fas fa-money-bill-wave" style="color: #f39c12;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="Seedance 2.0 搞钱路子">Seedance 2.0 变现指南</div>
+                        <div class="item-meta">变现指南 • 40.50 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+                <a href="bzg.html" class="item-card file-card" title="不知不知">
+                    <div class="item-icon">
+                        <i class="fas fa-file-code" style="color: #3498db;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="冬季鼻干综合调理指南">冬季鼻干综合调理指南</div>
+                        <div class="item-meta">不知不知 • 11.97 KB</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <!-- 其他文件 -->
+        <div class="section">
+            <div class="section-title"><i class="fas fa-file-alt"></i> 其他文件</div>
+            <div class="grid">
+                <a href="README.md" class="item-card file-card" title="MD文件">
+                    <div class="item-icon">
+                        <i class="fas fa-file-alt" style="color: #27ae60;"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name" title="README">README</div>
+                        <div class="item-meta">MD文件 • 487.00 B</div>
+                    </div>
+                    <div class="item-arrow">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="footer">
+            <p><a href="../index.html">⬆️ 返回上级</a></p>
+        </div>
+    </div>
+</body>
+
+</html>

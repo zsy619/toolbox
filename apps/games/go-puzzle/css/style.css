@@ -1,0 +1,321 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #DEB887 0%, #F4A460 50%, #CD853F 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-width: 1000px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #8B4513;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .info-card {
+            background: #FFF8DC;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #DEB887;
+        }
+        .info-label {
+            color: #8B4513;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .info-value {
+            color: #4A4A4A;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #8B4513;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #A0522D;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+            min-height: 600px;
+        }
+        .go-board-container {
+            background: #DEB887;
+            border-radius: 15px;
+            padding: 20px;
+            border: 3px solid #8B4513;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .go-board {
+            width: 450px;
+            height: 450px;
+            background: #DEB887;
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            grid-template-rows: repeat(11, 1fr);
+        }
+        .go-cell {
+            border: 1px solid #8B4513;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .go-cell:hover {
+            background: rgba(255, 215, 0, 0.3);
+        }
+        .go-cell.last-move {
+            background: rgba(255, 0, 0, 0.3);
+        }
+        .go-stone {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .go-stone.black {
+            background: radial-gradient(circle at 30% 30%, #666, #111);
+            color: white;
+        }
+        .go-stone.white {
+            background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+            color: black;
+            border: 1px solid #ccc;
+        }
+        .go-stone:hover {
+            transform: scale(1.1);
+        }
+        .control-panel {
+            background: #FFF8DC;
+            border-radius: 15px;
+            padding: 15px;
+            border: 2px solid #DEB887;
+        }
+        .section-title {
+            text-align: center;
+            color: #8B4513;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        .puzzle-info {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #DEB887;
+        }
+        .puzzle-title {
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        .puzzle-description {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .puzzle-type {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+        .type-life { background: #32CD32; }
+        .type-death { background: #DC143C; }
+        .type-tesuji { background: #4169E1; }
+        .move-sequence {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 2px solid #DEB887;
+        }
+        .move-entry {
+            padding: 5px;
+            margin: 2px 0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        .move-entry:nth-child(even) {
+            background: #F5F5F5;
+        }
+        .move-entry.black { color: #333; }
+        .move-entry.white { color: #666; }
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .action-btn {
+            background: #DEB887;
+            color: #8B4513;
+            border: 2px solid #8B4513;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .action-btn:hover {
+            background: #8B4513;
+            color: white;
+            transform: translateY(-1px);
+        }
+        .territory-display {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 15px;
+            border: 2px solid #DEB887;
+        }
+        .territory-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .territory-black { background: #f0f0f0; color: #333; }
+        .territory-white { background: #f8f8f8; color: #666; }
+        .puzzle-list {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 15px;
+            border: 2px solid #DEB887;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .puzzle-item {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #DDD;
+        }
+        .puzzle-item:hover {
+            background: #F0F8FF;
+            transform: scale(1.02);
+        }
+        .puzzle-item.current {
+            background: #FFE4B5;
+            border-color: #DEB887;
+        }
+        .puzzle-item.solved {
+            background: #E6FFE6;
+            border-color: #32CD32;
+        }
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .success-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            animation: successPop 0.5s ease-out;
+            border: 3px solid #8B4513;
+        }
+        @keyframes successPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .coordinate-labels {
+            position: absolute;
+            font-size: 0.8rem;
+            color: #8B4513;
+            font-weight: bold;
+        }
+        .coord-top, .coord-bottom {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+        .coord-left, .coord-right {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            height: 100%;
+        }
+        .coord-top { top: -20px; }
+        .coord-bottom { bottom: -20px; }
+        .coord-left { left: -20px; }
+        .coord-right { right: -20px; }
+        @media (max-width: 768px) {
+            .game-container { padding: 15px; }
+            h1 { font-size: 2rem; }
+            .game-board { grid-template-columns: 1fr; gap: 15px; }
+            .go-board { width: 300px; height: 300px; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); }
+            .go-stone { width: 20px; height: 20px; }
+        }

@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线应用浏览器 - App Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        .app-card {
+            transition: all 0.3s ease;
+        }
+
+        .app-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .iframe-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .sidebar-item {
+            transition: all 0.2s ease;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .sidebar-item::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: transparent;
+            transition: background 0.2s ease;
+        }
+
+        .sidebar-item:hover {
+            background: linear-gradient(to right, rgba(99, 102, 241, 0.05), rgba(99, 102, 241, 0.1));
+            transform: translateX(4px) scale(1.02);
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .sidebar-item:hover::before {
+            background: #6366f1;
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(to right, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.08));
+            transform: translateX(4px) scale(1.02);
+            box-shadow: 3px 3px 10px rgba(99, 102, 241, 0.2);
+            border-left: none;
+        }
+
+        .sidebar-item.active::before {
+            background: #6366f1;
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .loading-overlay {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        /* 标签页样式 */
+        .tab {
+            transition: all 0.2s ease;
+            border-right: 1px solid #e5e7eb;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .tab:hover {
+            background: linear-gradient(to bottom, rgba(99, 102, 241, 0.03), rgba(99, 102, 241, 0.08));
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .tab.active {
+            background: white;
+            border-bottom: 2px solid #6366f1;
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .tab-content {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease;
+        }
+
+        .tab-content.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        /* 侧边栏折叠样式 */
+        .sidebar {
+            transition: width 0.3s ease, transform 0.3s ease;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -4px;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.05), transparent);
+            pointer-events: none;
+        }
+
+        .sidebar::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), transparent);
+            pointer-events: none;
+        }
+
+        .sidebar.collapsed {
+            width: 72px;
+        }
+
+        .sidebar.collapsed .logo-text,
+        .sidebar.collapsed .search-box,
+        .sidebar.collapsed .add-app-text,
+        .sidebar.collapsed .app-name,
+        .sidebar.collapsed .app-url,
+        .sidebar.collapsed .delete-btn {
+            display: none;
+        }
+
+        .sidebar.collapsed .text-xs {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-content {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-item {
+            padding: 8px;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .sidebar-item > div:first-child {
+            width: 40px;
+            height: 40px;
+        }
+
+        .sidebar.collapsed ::-webkit-scrollbar {
+            width: 0;
+            display: none;
+        }
+
+        .toggle-sidebar-btn {
+            position: absolute;
+            right: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 50%;
+            padding: 4px;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .toggle-sidebar-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .toggle-sidebar-btn svg {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.collapsed .toggle-sidebar-btn svg {
+            transform: rotate(180deg);
+        }
+
+        .sidebar.collapsed .sidebar-item {
+            position: relative;
+        }
+
+        .sidebar.collapsed .sidebar-item > div:first-child::after {
+            content: attr(data-name);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #374151;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease;
+            margin-left: 8px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .sidebar.collapsed .sidebar-item:hover > div:first-child::after {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <!-- 侧边栏 -->
+        <aside class="sidebar w-72 bg-white shadow-lg flex flex-col relative">
+            <!-- 折叠按钮 -->
+            <button id="toggleSidebar" class="toggle-sidebar-btn">
+                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+
+            <!-- Logo -->
+            <div class="p-6 border-b flex items-center justify-center">
+                <svg class="w-8 h-8 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <span class="logo-text ml-2 text-2xl font-bold text-indigo-600">App Studio</span>
+            </div>
+
+            <!-- 搜索框 -->
+            <div class="p-4 sidebar-content">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="搜索应用..." class="w-full px-4 py-2 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 应用列表 -->
+            <div class="flex-1 overflow-y-auto px-4 py-2">
+                <div class="text-xs text-gray-500 uppercase tracking-wider mb-2 sidebar-content">常用应用</div>
+                <div id="appList" class="space-y-1">
+                    <!-- 动态生成应用列表 -->
+                </div>
+            </div>
+
+            <!-- 添加应用按钮 -->
+            <div class="p-4 border-t">
+                <button id="addAppBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span class="add-app-text">添加应用</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- 标签页栏 -->
+            <div class="bg-white border-b flex items-center">
+                <div id="tabBar" class="flex-1 flex items-center overflow-x-auto">
+                    <button id="newTabBtn" class="px-4 py-3 flex items-center gap-2 text-gray-600 hover:bg-gray-100 transition min-w-max">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        新标签页
+                    </button>
+                    <div id="tabs" class="flex items-center">
+                        <!-- 动态生成标签页 -->
+                    </div>
+                </div>
+                <!-- 工具栏 -->
+                <div class="flex items-center gap-2 pr-4 border-l pl-4">
+                    <button id="refreshBtn" class="p-2 hover:bg-gray-100 rounded-lg transition" title="刷新">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    </button>
+                    <button id="fullscreenBtn" class="p-2 hover:bg-gray-100 rounded-lg transition" title="全屏">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                        </svg>
+                    </button>
+                    <button id="openExternalBtn" class="p-2 hover:bg-gray-100 rounded-lg transition" title="新窗口打开">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 内容区域 -->
+            <div id="contentArea" class="flex-1 relative overflow-hidden">
+                <!-- 欢迎界面 -->
+                <div id="welcomeScreen" class="absolute inset-0 flex items-center justify-center bg-gray-50">
+                    <div class="text-center max-w-2xl px-8">
+                        <svg class="w-24 h-24 mx-auto mb-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-4">欢迎使用 App Studio</h2>
+                        <p class="text-gray-600 text-lg mb-8">内置 100+ 款 AI 应用，点击「新标签页」或从左侧选择应用开始使用</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110 4m0 4v3m0-6V6m0 4v2"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="font-semibold text-gray-800 mb-2">标签页浏览</h3>
+                                <p class="text-sm text-gray-600">支持多标签页同时打开</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="font-semibold text-gray-800 mb-2">本地应用</h3>
+                                <p class="text-sm text-gray-600">支持加载本地HTML文件</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="font-semibold text-gray-800 mb-2">数据持久化</h3>
+                                <p class="text-sm text-gray-600">应用配置自动保存到本地</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 标签页内容容器 -->
+                <div id="tabsContent" class="absolute inset-0 hidden">
+                    <!-- 动态生成iframe -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加应用弹窗 -->
+    <div id="addAppModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 transform transition-all">
+            <div class="p-6 border-b">
+                <h3 class="text-xl font-bold text-gray-800">添加新应用</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">应用名称 *</label>
+                    <input type="text" id="appNameInput" placeholder="例如：我的待办清单" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">应用地址 *</label>
+                    <input type="url" id="appUrlInput" placeholder="https://example.com 或 file:///..." class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <p class="text-xs text-gray-500 mt-1">支持 http://, https://, file:/// 等协议</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">图标颜色</label>
+                    <div class="flex gap-3">
+                        <button type="button" class="color-btn w-8 h-8 rounded-full bg-indigo-500 border-2 border-transparent hover:border-gray-400" data-color="indigo"></button>
+                        <button type="button" class="color-btn w-8 h-8 rounded-full bg-blue-500 border-2 border-transparent hover:border-gray-400" data-color="blue"></button>
+                        <button type="button" class="color-btn w-8 h-8 rounded-full bg-green-500 border-2 border-transparent hover:border-gray-400" data-color="green"></button>
+                        <button type="button" class="color-btn w-8 h-8 rounded-full bg-yellow-500 border-2 border-transparent hover:border-gray-400" data-color="yellow"></button>
+                        <button type="button" class="color-btn w-8 h-8 rounded-full bg-red-500 border-2 border-transparent hover:border-gray-400" data-color="red"></button>
+                        <button type="button" class="color-btn w-8 h-8 rounded-full bg-purple-500 border-2 border-transparent hover:border-gray-400" data-color="purple"></button>
+                        <button type="button" class="color-btn w-8 h-8 rounded-full bg-pink-500 border-2 border-transparent hover:border-gray-400" data-color="pink"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t flex gap-3">
+                <button id="cancelAddBtn" class="flex-1 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">取消</button>
+                <button id="confirmAddBtn" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 应用数据管理
+        const AppManager = {
+            apps: [],
+
+            init() {
+                const saved = localStorage.getItem('appStudioApps');
+                if (saved) {
+                    this.apps = JSON.parse(saved);
+                } else {
+                    // 100+ 常用应用
+                    this.apps = this.getDefaultApps();
+                    this.save();
+                }
+                this.renderAppList();
+            },
+
+            getDefaultApps() {
+                const baseId = Date.now();
+                const apps = [
+                    // AI 对话类
+                    { id: baseId + 1, name: 'Google AI Studio', url: 'https://aistudio.google.com', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 2, name: 'ChatGPT', url: 'https://chatgpt.com', color: 'green', createdAt: new Date().toISOString() },
+                    { id: baseId + 3, name: 'Claude', url: 'https://claude.ai', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 4, name: 'DeepSeek', url: 'https://chat.deepseek.com', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 5, name: 'Kimi 智能助手', url: 'https://kimi.moonshot.cn', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 6, name: '通义千问', url: 'https://tongyi.aliyun.com', color: 'yellow', createdAt: new Date().toISOString() },
+                    { id: baseId + 7, name: '文心一言', url: 'https://yiyan.baidu.com', color: 'red', createdAt: new Date().toISOString() },
+                    { id: baseId + 8, name: '豆包', url: 'https://www.doubao.com', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 9, name: '智谱清言', url: 'https://chatglm.cn', color: 'green', createdAt: new Date().toISOString() },
+                    { id: baseId + 10, name: '讯飞星火', url: 'https://xinghuo.xfyun.cn', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 11, name: 'Perplexity', url: 'https://www.perplexity.ai', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 12, name: 'You.com', url: 'https://you.com', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 13, name: 'Character.AI', url: 'https://character.ai', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 14, name: 'Poe', url: 'https://poe.com', color: 'yellow', createdAt: new Date().toISOString() },
+                    { id: baseId + 15, name: 'Pi', url: 'https://pi.ai', color: 'teal', createdAt: new Date().toISOString() },
+                    { id: baseId + 16, name: 'HuggingChat', url: 'https://huggingface.co/chat', color: 'yellow', createdAt: new Date().toISOString() },
+                    { id: baseId + 17, name: 'Phind', url: 'https://phind.com', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 18, name: 'Bing Chat', url: 'https://www.bing.com/chat', color: 'cyan', createdAt: new Date().toISOString() },
+                    { id: baseId + 19, name: 'CPIA', url: 'https://cpia.chat', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 20, name: 'Morphic', url: 'https://morphic.sh', color: 'indigo', createdAt: new Date().toISOString() },
+
+                    // AI 图像生成
+                    { id: baseId + 21, name: 'Midjourney', url: 'https://www.midjourney.com', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 22, name: 'DALL·E 3', url: 'https://openai.com/dall-e-3', color: 'green', createdAt: new Date().toISOString() },
+                    { id: baseId + 23, name: 'Stable Diffusion', url: 'https://stability.ai', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 24, name: 'Ideogram', url: 'https://ideogram.ai', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 25, name: 'Leonardo AI', url: 'https://leonardo.ai', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 26, name: 'Adobe Firefly', url: 'https://firefly.adobe.com', color: 'red', createdAt: new Date().toISOString() },
+                    { id: baseId + 27, name: 'Canva AI', url: 'https://www.canva.com', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 28, name: 'Remove.bg', url: 'https://www.remove.bg', color: 'green', createdAt: new Date().toISOString() },
+                    { id: baseId + 29, name: 'Runway ML', url: 'https://runwayml.com', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 30, name: 'Pika Labs', url: 'https://pika.art', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 31, name: 'HeyGen', url: 'https://www.heygen.com', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 32, name: 'D-ID', url: 'https://www.d-id.com', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 33, name: 'Synthesia', url: 'https://www.synthesia.io', color: 'green', createdAt: new Date().toISOString() },
+                    { id: baseId + 34, name: 'Playground AI', url: 'https://playground.com', color: 'yellow', createdAt: new Date().toISOString() },
+                    { id: baseId + 35, name: 'Kling AI', url: 'https://klingai.com', color: 'red', createdAt: new Date().toISOString() },
+                    { id: baseId + 36, name: 'Sora (OpenAI)', url: 'https://openai.com/sora', color: 'black', createdAt: new Date().toISOString() },
+                    { id: baseId + 37, name: 'Magnific AI', url: 'https://magnific.ai', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 38, name: 'Upscayl', url: 'https://upscayl.com', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 39, name: 'Stable Video', url: 'https://stability.ai/svd', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 40, name: 'Scenario.gg', url: 'https://scenario.com', color: 'blue', createdAt: new Date().toISOString() },
+
+                    // AI 代码辅助
+                    { id: baseId + 41, name: 'GitHub Copilot', url: 'https://github.com/features/copilot', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 42, name: 'Cursor', url: 'https://cursor.sh', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 43, name: 'Replit', url: 'https://replit.com', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 44, name: 'Codeium', url: 'https://codeium.com', color: 'yellow', createdAt: new Date().toISOString() },
+                    { id: baseId + 45, name: 'Tabnine', url: 'https://www.tabnine.com', color: 'red', createdAt: new Date().toISOString() },
+                    { id: baseId + 46, name: 'Sourcegraph', url: 'https://sourcegraph.com', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 47, name: 'CodiumAI', url: 'https://codium.ai', color: 'green', createdAt: new Date().toISOString() },
+                    { id: baseId + 48, name: 'Blackbox AI', url: 'https://www.useblackbox.io', color: 'black', createdAt: new Date().toISOString() },
+                    { id: baseId + 49, name: 'Amazon CodeWhisperer', url: 'https://aws.amazon.com/codewhisperer', color: 'orange', createdAt: new Date().toISOString() },
+                    { id: baseId + 50, name: 'Bito', url: 'https://bito.ai', color: 'purple', createdAt: new Date().toISOString() },
+
+                    // AI 写作与文档
+                    { id: baseId + 51, name: 'Jasper', url: 'https://www.jasper.ai', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 52, name: 'Copy.ai', url: 'https://copy.ai', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 53, name: 'Writesonic', url: 'https://writesonic.com', color: 'green', createdAt: new Date().toISOString() },
+                    { id: baseId + 54, name: 'Notion AI', url: 'https://www.notion.so', color: 'gray', createdAt: new Date().toISOString() },
+                    { id: baseId + 55, name: 'Gamma', url: 'https://gamma.app', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 56, name: 'Beautiful.ai', url: 'https://www.beautiful.ai', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 57, name: 'Tome', url: 'https://tome.app', color: 'yellow', createdAt: new Date().toISOString() },
+                    { id: baseId + 58, name: 'SlidesAI', url: 'https://www.slidesai.io', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 59, name: 'Lexica.art', url: 'https://lexica.art', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 60, name: 'Sudowrite', url: 'https://sudowrite.com', color: 'teal', createdAt: new Date().toISOString() },
+
+                    // AI 音频与视频
+                    { id: baseId + 61, name: 'ElevenLabs', url: 'https://elevenlabs.io', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 62, name: 'Murf.ai', url: 'https://murf.ai', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 63, name: 'Descript', url: 'https://www.descript.com', color: 'green', createdAt: new Date().toISOString() },
+                    { id: baseId + 64, name: 'Otter.ai', url: 'https://otter.ai', color: 'yellow', createdAt: new Date().toISOString() },
+                    { id: baseId + 65, name: 'Riverside.fm', url: 'https://riverside.fm', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 66, name: 'Cleanvoice AI', url: 'https://cleanvoice.ai', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 67, name: 'Munch', url: 'https://getmunch.com', color: 'red', createdAt: new Date().toISOString() },
+                    { id: baseId + 68, name: 'Opus Clip', url: 'https://www.opus.pro', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 69, name: 'Vizard.ai', url: 'https://vizard.ai', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 70, name: 'Vidyo.ai', url: 'https://vidyo.ai', color: 'green', createdAt: new Date().toISOString() },
+
+                    // AI 设计与创意
+                    { id: baseId + 71, name: 'Uizard', url: 'https://uizard.io', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 72, name: 'Fotor AI', url: 'https://www.fotor.com', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 73, name: 'Pixlr AI', url: 'https://pixlr.com', color: 'yellow', createdAt: new Date().toISOString() },
+                    { id: baseId + 74, name: 'PhotoAI', url: 'https://photoai.com', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 75, name: 'LetsEnhance', url: 'https://letsenhance.io', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 76, name: 'Vance AI', url: 'https://vanceai.com', color: 'green', createdAt: new Date().toISOString() },
+                    { id: baseId + 77, name: 'Stockimg AI', url: 'https://stockimg.ai', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 78, name: 'Krea AI', url: 'https://krea.ai', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 79, name: 'Recraft AI', url: 'https://recraft.ai', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 80, name: 'LeiaPix', url: 'https://leiapix.com', color: 'yellow', createdAt: new Date().toISOString() },
+
+                    // AI 研究与学习
+                    { id: baseId + 81, name: 'Consensus', url: 'https://consensus.app', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 82, name: 'Elicit', url: 'https://elicit.com', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 83, name: 'Scispace', url: 'https://typeset.io', color: 'green', createdAt: new Date().toISOString() },
+                    { id: baseId + 84, name: 'Connected Papers', url: 'https://www.connectedpapers.com', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 85, name: 'ResearchRabbit', url: 'https://researchrabbit.ai', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 86, name: 'Scholarcy', url: 'https://www.scholarcy.com', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 87, name: 'Litmaps', url: 'https://litmap.app', color: 'yellow', createdAt: new Date().toISOString() },
+                    { id: baseId + 88, name: 'Semantic Scholar', url: 'https://www.semanticscholar.org', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 89, name: 'Zotero + AI', url: 'https://www.zotero.org', color: 'red', createdAt: new Date().toISOString() },
+                    { id: baseId + 90, name: 'QuillBot', url: 'https://quillbot.com', color: 'purple', createdAt: new Date().toISOString() },
+
+                    // AI 办公与效率
+                    { id: baseId + 91, name: 'Zapier AI', url: 'https://zapier.com/ai', color: 'orange', createdAt: new Date().toISOString() },
+                    { id: baseId + 92, name: 'Bardeen AI', url: 'https://www.bardeen.ai', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 93, name: 'AutoGPT', url: 'https://github.com/Significant-Gravitas/Auto-GPT', color: 'green', createdAt: new Date().toISOString() },
+                    { id: baseId + 94, name: 'AgentGPT', url: 'https://agentgpt.reworkd.ai', color: 'blue', createdAt: new Date().toISOString() },
+                    { id: baseId + 95, name: 'BabyAGI', url: 'https://github.com/yoheinakajima/babyagi', color: 'pink', createdAt: new Date().toISOString() },
+                    { id: baseId + 96, name: 'LangChain', url: 'https://langchain.com', color: 'green', createdAt: new Date().toISOString() },
+                    { id: baseId + 97, name: 'FlowiseAI', url: 'https://flowiseai.com', color: 'purple', createdAt: new Date().toISOString() },
+                    { id: baseId + 98, name: 'Dust', url: 'https://dust.tt', color: 'yellow', createdAt: new Date().toISOString() },
+                    { id: baseId + 99, name: 'LlamaIndex', url: 'https://llamaindex.ai', color: 'indigo', createdAt: new Date().toISOString() },
+                    { id: baseId + 100, name: 'Hugging Face', url: 'https://huggingface.co', color: 'yellow', createdAt: new Date().toISOString() }
+                ];
+                return apps;
+            },
+
+            save() {
+                localStorage.setItem('appStudioApps', JSON.stringify(this.apps));
+            },
+
+            add(app) {
+                this.apps.push({
+                    id: Date.now(),
+                    ...app,
+                    createdAt: new Date().toISOString()
+                });
+                this.save();
+                this.renderAppList();
+            },
+
+            delete(id) {
+                this.apps = this.apps.filter(app => app.id !== id);
+                this.save();
+                this.renderAppList();
+            },
+
+            renderAppList(filter = '') {
+                const container = document.getElementById('appList');
+                const filteredApps = filter
+                    ? this.apps.filter(app => app.name.toLowerCase().includes(filter.toLowerCase()))
+                    : this.apps;
+
+                if (filteredApps.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <p>未找到应用</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = filteredApps.map(app => `
+                    <div class="sidebar-item rounded-lg p-3 cursor-pointer mb-2 flex items-center gap-3" data-id="${app.id}">
+                        <div class="w-10 h-10 rounded-lg flex-shrink-0 bg-${app.color}-500 flex items-center justify-center text-white font-bold shadow-lg" data-name="${this.escapeHtml(app.name)}" style="box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);">
+                            ${app.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div class="sidebar-content flex-1 min-w-0">
+                            <div class="font-medium text-gray-800 app-name">${this.escapeHtml(app.name)}</div>
+                            <div class="text-xs text-gray-500 truncate app-url">${this.escapeHtml(app.url)}</div>
+                        </div>
+                        <button class="delete-btn p-1 hover:bg-red-100 rounded opacity-0 group-hover:opacity-100 transition flex-shrink-0" data-id="${app.id}" title="删除">
+                            <svg class="w-4 h-4 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `).join('');
+
+                // 绑定事件
+                container.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        if (!e.target.closest('.delete-btn')) {
+                            const id = parseInt(item.dataset.id);
+                            const app = this.apps.find(a => a.id === id);
+                            if (app) TabManager.openNewTab(app);
+                        }
+                    });
+                });
+
+                container.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (confirm('确定要删除这个应用吗？')) {
+                            this.delete(parseInt(btn.dataset.id));
+                        }
+                    });
+                });
+            },
+
+            escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+        };
+
+        // 标签页管理
+        const TabManager = {
+            tabs: [],
+            activeTabId: null,
+
+            openNewTab(app = null) {
+                // 如果传入应用且已存在对应标签页，则激活它
+                if (app) {
+                    const existingTab = this.tabs.find(t => t.id === app.id);
+                    if (existingTab) {
+                        this.activateTab(existingTab.tabId);
+                        return existingTab;
+                    }
+                }
+
+                const tabId = Date.now();
+                const tab = app ? { ...app, tabId, isLoading: true } : {
+                    tabId,
+                    id: null,
+                    name: '新标签页',
+                    url: '',
+                    color: 'gray',
+                    isLoading: false
+                };
+
+                this.tabs.push(tab);
+                this.renderTabs();
+                this.renderTabContent(tab);
+                this.activateTab(tabId);
+
+                return tab;
+            },
+
+            closeTab(tabId) {
+                const index = this.tabs.findIndex(t => t.tabId === tabId);
+                if (index === -1) return;
+
+                // 移除标签页内容
+                const content = document.getElementById(`tab-content-${tabId}`);
+                if (content) content.remove();
+
+                // 移除标签页
+                this.tabs.splice(index, 1);
+
+                // 如果关闭的是当前激活的标签页，激活前一个或后一个
+                if (this.activeTabId === tabId) {
+                    if (this.tabs.length > 0) {
+                        const newIndex = Math.min(index, this.tabs.length - 1);
+                        this.activateTab(this.tabs[newIndex].tabId);
+                    } else {
+                        this.activeTabId = null;
+                        document.getElementById('welcomeScreen').classList.remove('hidden');
+                        document.getElementById('tabsContent').classList.add('hidden');
+                    }
+                }
+
+                this.renderTabs();
+            },
+
+            activateTab(tabId) {
+                this.activeTabId = tabId;
+
+                // 更新标签页样式
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.toggle('active', parseInt(tab.dataset.tabId) === tabId);
+                });
+
+                // 更新内容显示
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.toggle('active', parseInt(content.dataset.tabId) === tabId);
+                });
+
+                // 显示/隐藏欢迎界面
+                if (this.tabs.length > 0) {
+                    document.getElementById('welcomeScreen').classList.add('hidden');
+                    document.getElementById('tabsContent').classList.remove('hidden');
+                } else {
+                    document.getElementById('welcomeScreen').classList.remove('hidden');
+                    document.getElementById('tabsContent').classList.add('hidden');
+                }
+            },
+
+            refreshTab(tabId) {
+                const tab = this.tabs.find(t => t.tabId === tabId);
+                if (tab && tab.url) {
+                    const frame = document.getElementById(`frame-${tabId}`);
+                    if (frame) {
+                        frame.src = frame.src;
+                    }
+                }
+            },
+
+            renderTabs() {
+                const container = document.getElementById('tabs');
+                container.innerHTML = this.tabs.map(tab => `
+                    <div class="tab flex items-center gap-2 px-4 py-2 cursor-pointer ${tab.tabId === this.activeTabId ? 'active' : ''}" data-tab-id="${tab.tabId}">
+                        ${tab.isLoading ? `
+                            <svg class="w-4 h-4 spinner text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v8m0 0l-4-4m4 4l4-4"></path>
+                            </svg>
+                        ` : `
+                            <div class="w-6 h-6 rounded bg-${tab.color}-500 flex items-center justify-center text-white text-xs font-bold">
+                                ${tab.name.charAt(0).toUpperCase()}
+                            </div>
+                        `}
+                        <span class="text-sm text-gray-700 max-w-32 truncate">${this.escapeHtml(tab.name)}</span>
+                        <button class="close-tab p-1 hover:bg-red-100 rounded opacity-0 group-hover:opacity-100 transition" data-tab-id="${tab.tabId}">
+                            <svg class="w-3 h-3 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `).join('');
+
+                // 绑定点击事件
+                container.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        if (!e.target.closest('.close-tab')) {
+                            this.activateTab(parseInt(tab.dataset.tabId));
+                        }
+                    });
+
+                    tab.addEventListener('mouseenter', () => {
+                        tab.querySelector('.close-tab').classList.remove('opacity-0');
+                    });
+
+                    tab.addEventListener('mouseleave', () => {
+                        tab.querySelector('.close-tab').classList.add('opacity-0');
+                    });
+                });
+
+                container.querySelectorAll('.close-tab').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.closeTab(parseInt(btn.dataset.tabId));
+                    });
+                });
+            },
+
+            renderTabContent(tab) {
+                const container = document.getElementById('tabsContent');
+                const content = document.createElement('div');
+                content.id = `tab-content-${tab.tabId}`;
+                content.className = 'tab-content';
+                content.dataset.tabId = tab.tabId;
+
+                if (tab.url) {
+                    content.innerHTML = `
+                        <iframe id="frame-${tab.tabId}" class="w-full h-full border-0" src="${this.escapeHtml(tab.url)}" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"></iframe>
+                        <div class="loading-overlay absolute inset-0 flex items-center justify-center" id="loading-${tab.tabId}">
+                            <div class="text-center">
+                                <svg class="w-12 h-12 spinner mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v8m0 0l-4-4m4 4l4-4"></path>
+                                </svg>
+                                <p class="text-gray-600">加载中...</p>
+                            </div>
+                        </div>
+                    `;
+
+                    const frame = content.querySelector('iframe');
+                    const loading = content.querySelector('.loading-overlay');
+
+                    frame.onload = () => {
+                        loading.classList.add('hidden');
+                        // 更新标签页加载状态
+                        const tabData = this.tabs.find(t => t.tabId === tab.tabId);
+                        if (tabData) {
+                            tabData.isLoading = false;
+                            this.renderTabs();
+                        }
+                    };
+                }
+
+                container.appendChild(content);
+            },
+
+            getCurrentTab() {
+                return this.tabs.find(t => t.tabId === this.activeTabId);
+            },
+
+            escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+        };
+
+        // 模态框管理
+        const Modal = {
+            show() {
+                document.getElementById('addAppModal').classList.remove('hidden');
+                document.getElementById('appNameInput').value = '';
+                document.getElementById('appUrlInput').value = '';
+            },
+
+            hide() {
+                document.getElementById('addAppModal').classList.add('hidden');
+            },
+
+            getSelectedColor() {
+                const selected = document.querySelector('.color-btn.border-gray-800');
+                return selected ? selected.dataset.color : 'indigo';
+            },
+
+            confirm() {
+                const name = document.getElementById('appNameInput').value.trim();
+                const url = document.getElementById('appUrlInput').value.trim();
+                const color = this.getSelectedColor();
+
+                if (!name || !url) {
+                    alert('请填写应用名称和地址');
+                    return;
+                }
+
+                AppManager.add({ name, url, color });
+                this.hide();
+            }
+        };
+
+        // 工具栏操作
+        const Toolbar = {
+            refresh() {
+                if (TabManager.activeTabId) {
+                    TabManager.refreshTab(TabManager.activeTabId);
+                }
+            },
+
+            openExternal() {
+                const tab = TabManager.getCurrentTab();
+                if (tab && tab.url) {
+                    window.open(tab.url, '_blank');
+                }
+            },
+
+            toggleFullscreen() {
+                if (TabManager.activeTabId) {
+                    const frame = document.getElementById(`frame-${TabManager.activeTabId}`);
+                    if (frame) {
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen();
+                        } else {
+                            frame.requestFullscreen();
+                        }
+                    }
+                }
+            }
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            AppManager.init();
+
+            // 侧边栏折叠
+            document.getElementById('toggleSidebar').addEventListener('click', () => {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('collapsed');
+            });
+
+            // 搜索功能
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                AppManager.renderAppList(e.target.value);
+            });
+
+            // 添加应用按钮
+            document.getElementById('addAppBtn').addEventListener('click', () => Modal.show());
+            document.getElementById('cancelAddBtn').addEventListener('click', () => Modal.hide());
+            document.getElementById('confirmAddBtn').addEventListener('click', () => Modal.confirm());
+
+            // 新标签页按钮
+            document.getElementById('newTabBtn').addEventListener('click', () => {
+                TabManager.openNewTab();
+            });
+
+            // 点击模态框外部关闭
+            document.getElementById('addAppModal').addEventListener('click', (e) => {
+                if (e.target.id === 'addAppModal') {
+                    Modal.hide();
+                }
+            });
+
+            // 颜色选择
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('border-gray-800', 'border-4'));
+                    btn.classList.add('border-gray-800', 'border-4');
+                });
+            });
+
+            // 工具栏按钮
+            document.getElementById('refreshBtn').addEventListener('click', () => Toolbar.refresh());
+            document.getElementById('openExternalBtn').addEventListener('click', () => Toolbar.openExternal());
+            document.getElementById('fullscreenBtn').addEventListener('click', () => Toolbar.toggleFullscreen());
+        });
+    </script>
+</body>
+</html>
