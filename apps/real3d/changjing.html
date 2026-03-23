@@ -3,261 +3,617 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="工具箱">
+
+    <title>三维地球引擎应用场景全景图 | 工具箱</title>
+    <meta name="description" content="基于Rust+wgpu三维地球引擎的100个应用场景全景图，涵盖基础渲染、地理信息、交互工具到行业应用的完整技术路线图。">
+    <meta name="keywords" content="3D引擎,wgpu,Rust,三维地球,地理信息,应用场景">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tools.yy24365.com/apps/real3d/changjing.html">
+    <meta property="og:title" content="三维地球引擎应用场景全景图">
+    <meta property="og:description" content="基于Rust+wgpu三维地球引擎的100个应用场景全景图，涵盖基础渲染、地理信息、交互工具到行业应用的完整技术路线图。">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta property="og:site_name" content="工具箱">
+    <meta property="og:locale" content="zh_CN">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://tools.yy24365.com/apps/real3d/changjing.html">
+    <meta name="twitter:title" content="三维地球引擎应用场景全景图">
+    <meta name="twitter:description" content="基于Rust+wgpu三维地球引擎的100个应用场景全景图">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+
+    <!-- WeChat Sharing -->
+    <meta itemprop="name" content="三维地球引擎应用场景全景图">
+    <meta itemprop="description" content="基于Rust+wgpu三维地球引擎的100个应用场景全景图">
+    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://tools.yy24365.com/apps/real3d/changjing.html">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>三维地球引擎应用场景全景图</title>
-    <!-- Tailwind CSS CDN -->
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 自定义样式 -->
     <style>
-        /* 自定义滚动条样式 */
-        .table-container::-webkit-scrollbar {
+        /* 渐变背景动画 */
+        @keyframes gradient-bg {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .animate-gradient {
+            background-size: 200% 200%;
+            animation: gradient-bg 15s ease infinite;
+        }
+
+        /* 玻璃拟态效果 */
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* 卡片悬浮效果 */
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* 表格行动画 */
+        .table-row-animated {
+            transition: all 0.2s ease;
+        }
+
+        .table-row-animated:hover {
+            transform: scale(1.01);
+        }
+
+        /* 优先级标签动画 */
+        .priority-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* 滚动条美化 */
+        .custom-scrollbar::-webkit-scrollbar {
             height: 8px;
             width: 8px;
         }
 
-        .table-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
             border-radius: 4px;
         }
 
-        .table-container::-webkit-scrollbar-thumb {
-            background: #888;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
             border-radius: 4px;
         }
 
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #555;
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
         }
 
-        /* 优先级标签样式 */
-        .priority-badge {
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            display: inline-block;
-            min-width: 2.5rem;
-            text-align: center;
+        /* 分类边框颜色 */
+        .border基础渲染 { border-left: 4px solid #3b82f6; }
+        .border地理信息 { border-left: 4px solid #22c55e; }
+        .border高级交互 { border-left: 4px solid #a855f7; }
+        .border数据管理 { border-left: 4px solid #eab308; }
+        .border行业应用 { border-left: 4px solid #ef4444; }
+        .border前沿探索 { border-left: 4px solid #6366f1; }
+        .border平台扩展 { border-left: 4px solid #ec4899; }
+        .border高级图形 { border-left: 4px solid #14b8a6; }
+
+        /* 按钮点击波纹效果 */
+        .btn-ripple {
+            position: relative;
+            overflow: hidden;
         }
 
-        .priority-P0 {
-            background-color: #ef4444;
-            color: white;
+        .btn-ripple::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
         }
 
-        .priority-P1 {
-            background-color: #f97316;
-            color: white;
+        .btn-ripple:active::after {
+            width: 200%;
+            height: 200%;
         }
 
-        .priority-P2 {
-            background-color: #eab308;
-            color: white;
-        }
-
-        .priority-P3 {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        /* 分类标签样式 */
-        .category-badge {
-            font-size: 0.7rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 1rem;
-            display: inline-block;
-            margin-right: 0.25rem;
-            margin-bottom: 0.25rem;
-        }
-
-        /* 行悬停效果 */
-        .table-row:hover {
-            background-color: #f8fafc;
-        }
-
-        /* 固定表头 */
-        .sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 10;
+        /* 表格固定表头阴影 */
+        .sticky-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
     </style>
-    <!-- 微信/OpenGraph 卡片信息 -->
-    <meta property="og:title" content="三维地球引擎应用场景全景图">
-    <meta property="og:description" content="一个实用的在线工具，帮助您提高效率。">
-    <meta property="og:url" content="./changjing.html">
-    <meta property="og:type" content="article">
-    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="三维地球引擎应用场景全景图">
-    <meta name="twitter:description" content="一个实用的在线工具，帮助您提高效率。">
-    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
-    <meta itemprop="name" content="三维地球引擎应用场景全景图">
-    <meta itemprop="description" content="一个实用的在线工具，帮助您提高效率。">
-    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
 </head>
 
-<body class="bg-gray-50 text-gray-800">
-    <!-- Wechat Share Image Hack -->
-    <div style="display:none; visibility:hidden;">
-        <img src="https://tools.yy24365.com/assets/images/dev-tools-og.png" alt="wechat-share-icon" width="400" height="400">
-    </div>
-    <p class="text-lg text-gray-600 mb-6">
-        此表格展示了基于Rust+wgpu三维地球引擎的100个应用场景，涵盖基础渲染、地理信息、交互工具到行业应用的完整技术路线图。
-    </p>
-    <!-- 统计卡片 -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500">总场景数</div>
-            <div class="text-2xl font-bold">100</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500">P0 基础必备</div>
-            <div class="text-2xl font-bold text-red-600">5</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500">P1 核心功能</div>
-            <div class="text-2xl font-bold text-orange-600">19</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500">P2 重要扩展</div>
-            <div class="text-2xl font-bold text-yellow-600">43</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500">P3 前瞻探索</div>
-            <div class="text-2xl font-bold text-blue-600">33</div>
-        </div>
-    </div>
-    </header>
-    <!-- 筛选控制区 -->
-    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">
-            <i class="fas fa-filter text-blue-500 mr-2"></i>筛选与搜索
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <!-- 分类筛选 -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">按分类筛选</label>
-                <div class="flex flex-wrap gap-2">
-                    <button class="filter-btn category-btn px-3 py-1.5 text-sm rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition" data-category="all">全部</button>
-                    <button class="filter-btn category-btn px-3 py-1.5 text-sm rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition" data-category="基础渲染">基础渲染</button>
-                    <button class="filter-btn category-btn px-3 py-1.5 text-sm rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition" data-category="地理信息">地理信息</button>
-                    <button class="filter-btn category-btn px-3 py-1.5 text-sm rounded-full bg-purple-100 text-purple-800 hover:bg-purple-200 transition" data-category="高级交互">高级交互</button>
-                    <button class="filter-btn category-btn px-3 py-1.5 text-sm rounded-full bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition" data-category="数据管理">数据管理</button>
-                    <button class="filter-btn category-btn px-3 py-1.5 text-sm rounded-full bg-red-100 text-red-800 hover:bg-red-200 transition" data-category="行业应用">行业应用</button>
-                </div>
-            </div>
-            <!-- 优先级筛选 -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">按优先级筛选</label>
-                <div class="flex flex-wrap gap-2">
-                    <button class="filter-btn priority-btn px-3 py-1.5 text-sm rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition" data-priority="all">全部</button>
-                    <button class="filter-btn priority-btn px-3 py-1.5 text-sm rounded-full bg-red-100 text-red-800 hover:bg-red-200 transition" data-priority="P0">P0 基础必备</button>
-                    <button class="filter-btn priority-btn px-3 py-1.5 text-sm rounded-full bg-orange-100 text-orange-800 hover:bg-orange-200 transition" data-priority="P1">P1 核心功能</button>
-                    <button class="filter-btn priority-btn px-3 py-1.5 text-sm rounded-full bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition" data-priority="P2">P2 重要扩展</button>
-                    <button class="filter-btn priority-btn px-3 py-1.5 text-sm rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition" data-priority="P3">P3 前瞻探索</button>
-                </div>
-            </div>
-            <!-- 搜索框 -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">搜索场景</label>
-                <div class="relative">
-                    <input type="text" id="searchInput" placeholder="输入关键词..." class="w-full px-4 py-2.5 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                </div>
-            </div>
-        </div>
-        <!-- 当前筛选状态和结果计数 -->
-        <div class="flex justify-between items-center pt-4 border-t border-gray-200">
-            <div id="filterStatus" class="text-sm text-gray-600">
-                显示全部 100 个场景
-            </div>
-            <button id="resetFilters" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition">
-                <i class="fas fa-redo mr-1"></i> 重置筛选
-            </button>
-        </div>
-    </div>
-    <!-- 表格容器 -->
-    <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="table-container overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50 sticky-header">
-                    <tr>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-16">编号</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">应用场景</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">分类</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">核心算法/技术</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">描述与难点</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-24">优先级</th>
-                    </tr>
-                </thead>
-                <tbody id="scenariosTable" class="bg-white divide-y divide-gray-200">
-                    <!-- 表格内容将通过JavaScript动态生成 -->
-                </tbody>
-            </table>
-        </div>
-        <!-- 空状态提示 -->
-        <div id="emptyState" class="hidden p-12 text-center">
-            <i class="fas fa-search fa-3x text-gray-300 mb-4"></i>
-            <h3 class="text-lg font-medium text-gray-700 mb-2">未找到匹配的场景</h3>
-            <p class="text-gray-500">尝试调整筛选条件或搜索关键词</p>
-        </div>
-    </div>
-    <!-- 页脚说明 -->
-    <footer class="mt-12 pt-8 border-t border-gray-200">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-                <h3 class="text-lg font-medium text-gray-900 mb-4">优先级说明</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center">
-                        <span class="priority-badge priority-P0 mr-3">P0</span>
-                        <span class="text-gray-700">基础必备 - 引擎核心功能，必须优先实现</span>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen text-gray-800">
+
+    <!-- 顶部导航栏 -->
+    <nav class="glass sticky top-0 z-50 border-b border-gray-200/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo区域 -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-globe-americas text-white text-lg"></i>
                     </div>
-                    <div class="flex items-center">
-                        <span class="priority-badge priority-P1 mr-3">P1</span>
-                        <span class="text-gray-700">核心功能 - 形成产品特色和基础能力</span>
+                    <div>
+                        <h1 class="text-lg font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                            工具箱
+                        </h1>
+                        <p class="text-xs text-gray-500">3D引擎应用场景</p>
                     </div>
-                    <div class="flex items-center">
-                        <span class="priority-badge priority-P2 mr-3">P2</span>
-                        <span class="text-gray-700">重要扩展 - 提升引擎完整性和专业性</span>
+                </div>
+
+                <!-- 导航链接 -->
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="index.html" class="text-gray-600 hover:text-violet-600 transition flex items-center gap-2">
+                        <i class="fas fa-home"></i>
+                        <span>返回首页</span>
+                    </a>
+                    <a href="./" class="text-gray-600 hover:text-violet-600 transition flex items-center gap-2">
+                        <i class="fas fa-layer-group"></i>
+                        <span>3D工具</span>
+                    </a>
+                </div>
+
+                <!-- 移动端菜单按钮 -->
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-bars text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端菜单 -->
+        <div id="mobileMenu" class="hidden md:hidden border-t border-gray-200">
+            <div class="px-4 py-3 space-y-2">
+                <a href="index.html" class="block px-4 py-2 rounded-lg hover:bg-gray-100 text-gray-700">
+                    <i class="fas fa-home mr-2"></i>返回首页
+                </a>
+                <a href="./" class="block px-4 py-2 rounded-lg hover:bg-gray-100 text-gray-700">
+                    <i class="fas fa-layer-group mr-2"></i>3D工具
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- 页面标题区域 -->
+        <header class="mb-8">
+            <div class="glass rounded-2xl p-6 shadow-xl">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-lg animate-gradient">
+                            <i class="fas fa-cube text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">
+                                三维地球引擎应用场景全景图
+                            </h1>
+                            <p class="text-gray-500 mt-1">
+                                基于 Rust + wgpu 三维地球引擎 | 共 100 个应用场景
+                            </p>
+                        </div>
                     </div>
-                    <div class="flex items-center">
-                        <span class="priority-badge priority-P3 mr-3">P3</span>
-                        <span class="text-gray-700">前瞻探索 - 前沿技术或特定行业应用</span>
+                    <div class="flex gap-3">
+                        <a href="index.html" class="btn-ripple px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition shadow-sm flex items-center gap-2">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>返回</span>
+                        </a>
+                        <button onclick="window.location.reload()" class="btn-ripple px-5 py-2.5 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition shadow-lg shadow-violet-500/30 flex items-center gap-2">
+                            <i class="fas fa-redo"></i>
+                            <span>刷新</span>
+                        </button>
                     </div>
                 </div>
             </div>
-            <div>
-                <h3 class="text-lg font-medium text-gray-900 mb-4">开发建议</h3>
-                <ul class="space-y-2 text-gray-700">
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
-                        <span>从 <strong>P0和P1级场景</strong> 开始，奠定引擎基础</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-route text-blue-500 mr-2 mt-1"></i>
-                        <span>围绕 <strong>路线巡航</strong> 和 <strong>海量模型加载</strong> 构建核心特色</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-layer-group text-purple-500 mr-2 mt-1"></i>
-                        <span>地理分析类场景能快速体现三维地球引擎价值</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-rocket text-orange-500 mr-2 mt-1"></i>
-                        <span>P2/P3场景可作为中长期迭代目标</span>
-                    </li>
-                </ul>
+        </header>
+
+        <!-- 描述文字 -->
+        <div class="mb-6">
+            <p class="text-gray-300 text-lg leading-relaxed">
+                此表格展示了基于<span class="text-violet-400 font-semibold">Rust+wgpu</span>三维地球引擎的<span class="text-white font-bold">100个应用场景</span>，
+                涵盖基础渲染、地理信息、交互工具到行业应用的完整技术路线图。
+            </p>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <!-- 总场景数 -->
+            <div class="card-hover glass rounded-xl p-5 shadow-lg border border-gray-100/50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">总场景数</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-1">100</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-cubes text-white text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-3 h-1 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full" style="width: 100%"></div>
+                </div>
+            </div>
+
+            <!-- P0 基础必备 -->
+            <div class="card-hover glass rounded-xl p-5 shadow-lg border border-red-100/50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-red-600 uppercase tracking-wider">P0 基础必备</p>
+                        <p class="text-3xl font-bold text-red-600 mt-1">5</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-fire text-white text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-3 h-1 bg-red-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-red-500 to-orange-500 rounded-full" style="width: 5%"></div>
+                </div>
+            </div>
+
+            <!-- P1 核心功能 -->
+            <div class="card-hover glass rounded-xl p-5 shadow-lg border border-orange-100/50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-orange-600 uppercase tracking-wider">P1 核心功能</p>
+                        <p class="text-3xl font-bold text-orange-600 mt-1">19</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-star text-white text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-3 h-1 bg-orange-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full" style="width: 19%"></div>
+                </div>
+            </div>
+
+            <!-- P2 重要扩展 -->
+            <div class="card-hover glass rounded-xl p-5 shadow-lg border border-yellow-100/50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-yellow-600 uppercase tracking-wider">P2 重要扩展</p>
+                        <p class="text-3xl font-bold text-yellow-600 mt-1">43</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-lime-500 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-chart-line text-white text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-3 h-1 bg-yellow-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-yellow-500 to-lime-500 rounded-full" style="width: 43%"></div>
+                </div>
+            </div>
+
+            <!-- P3 前瞻探索 -->
+            <div class="card-hover glass rounded-xl p-5 shadow-lg border border-blue-100/50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-blue-600 uppercase tracking-wider">P3 前瞻探索</p>
+                        <p class="text-3xl font-bold text-blue-600 mt-1">33</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-rocket text-white text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-3 h-1 bg-blue-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" style="width: 33%"></div>
+                </div>
             </div>
         </div>
-        <div class="mt-8 text-center text-gray-500 text-sm">
-            <p>基于 Rust + wgpu 三维地球引擎技术栈 | 此列表涵盖100个应用场景，为专业级三维地理引擎提供完整技术路线图</p>
-        </div>
-    </footer>
-    </div>
-    <!-- 表格数据与JavaScript交互逻辑 -->
+
+        <!-- 筛选控制区 -->
+        <section class="glass rounded-2xl shadow-xl p-6 mb-8 border border-gray-100/50">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-filter text-white"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800">筛选与搜索</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <!-- 分类筛选 -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-tags text-violet-500"></i>
+                        按分类筛选
+                    </label>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="filter-btn category-btn btn-ripple px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-violet-100 text-violet-800 hover:bg-violet-200 border border-violet-200" data-category="all">
+                            全部
+                        </button>
+                        <button class="filter-btn category-btn btn-ripple px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200" data-category="基础渲染">
+                            基础渲染
+                        </button>
+                        <button class="filter-btn category-btn btn-ripple px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200" data-category="地理信息">
+                            地理信息
+                        </button>
+                        <button class="filter-btn category-btn btn-ripple px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200" data-category="高级交互">
+                            高级交互
+                        </button>
+                        <button class="filter-btn category-btn btn-ripple px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200" data-category="数据管理">
+                            数据管理
+                        </button>
+                        <button class="filter-btn category-btn btn-ripple px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200" data-category="行业应用">
+                            行业应用
+                        </button>
+                        <button class="filter-btn category-btn btn-ripple px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200" data-category="前沿探索">
+                            前沿探索
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 优先级筛选 -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-exclamation-circle text-violet-500"></i>
+                        按优先级筛选
+                    </label>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="filter-btn priority-btn btn-ripple px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-violet-100 text-violet-800 hover:bg-violet-200 border border-violet-200" data-priority="all">
+                            全部
+                        </button>
+                        <button class="filter-btn priority-btn btn-ripple px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200" data-priority="P0">
+                            P0
+                        </button>
+                        <button class="filter-btn priority-btn btn-ripple px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200" data-priority="P1">
+                            P1
+                        </button>
+                        <button class="filter-btn priority-btn btn-ripple px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200" data-priority="P2">
+                            P2
+                        </button>
+                        <button class="filter-btn priority-btn btn-ripple px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200" data-priority="P3">
+                            P3
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 搜索框 -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-search text-violet-500"></i>
+                        搜索场景
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="输入关键词搜索..." class="w-full px-5 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-100 transition-all duration-200 text-gray-700 placeholder-gray-400">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <button id="clearSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition hidden">
+                            <i class="fas fa-times-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 当前筛选状态和结果计数 -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-5 border-t border-gray-200">
+                <div id="filterStatus" class="text-sm text-gray-600 flex items-center gap-2">
+                    <span class="px-3 py-1 bg-violet-100 text-violet-700 rounded-full font-medium">
+                        显示全部 100 个场景
+                    </span>
+                </div>
+                <button id="resetFilters" class="btn-ripple px-5 py-2.5 text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl transition flex items-center gap-2 border border-gray-200">
+                    <i class="fas fa-redo-alt"></i>
+                    <span>重置筛选</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 表格容器 -->
+        <section class="glass rounded-2xl shadow-xl overflow-hidden border border-gray-100/50">
+            <div class="custom-scrollbar overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-16">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-hashtag text-violet-500"></i>
+                                    编号
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-cube text-violet-500"></i>
+                                    应用场景
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-folder text-violet-500"></i>
+                                    分类
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-microchip text-violet-500"></i>
+                                    核心算法/技术
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-info-circle text-violet-500"></i>
+                                    描述与难点
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-24">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-flag text-violet-500"></i>
+                                    优先级
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="scenariosTable" class="bg-white divide-y divide-gray-100">
+                        <!-- 表格内容将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 空状态提示 -->
+            <div id="emptyState" class="hidden p-16 text-center">
+                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-search fa-3x text-gray-300"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-700 mb-2">未找到匹配的场景</h3>
+                <p class="text-gray-500">尝试调整筛选条件或搜索关键词</p>
+            </div>
+
+            <!-- 表格底部统计 -->
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                <div class="flex items-center justify-between text-sm text-gray-500">
+                    <span id="tableInfo">显示 1-20 条</span>
+                    <span class="text-violet-600 font-medium">共 100 条记录</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 页脚说明 -->
+        <footer class="mt-10 pt-8 border-t border-gray-700/30">
+            <div class="glass rounded-2xl p-8 shadow-xl">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- 优先级说明 -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
+                            <div class="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-flag text-white text-sm"></i>
+                            </div>
+                            优先级说明
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-3 p-3 bg-red-50 rounded-xl border border-red-100">
+                                <span class="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">P0</span>
+                                <div>
+                                    <p class="font-semibold text-red-800">基础必备</p>
+                                    <p class="text-sm text-red-600">引擎核心功能，必须优先实现</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 p-3 bg-orange-50 rounded-xl border border-orange-100">
+                                <span class="px-2 py-1 bg-orange-500 text-white text-xs font-bold rounded">P1</span>
+                                <div>
+                                    <p class="font-semibold text-orange-800">核心功能</p>
+                                    <p class="text-sm text-orange-600">形成产品特色和基础能力</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 p-3 bg-yellow-50 rounded-xl border border-yellow-100">
+                                <span class="px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded">P2</span>
+                                <div>
+                                    <p class="font-semibold text-yellow-800">重要扩展</p>
+                                    <p class="text-sm text-yellow-600">提升引擎完整性和专业性</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                                <span class="px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded">P3</span>
+                                <div>
+                                    <p class="font-semibold text-blue-800">前瞻探索</p>
+                                    <p class="text-sm text-blue-600">前沿技术或特定行业应用</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 开发建议 -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
+                            <div class="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-lightbulb text-white text-sm"></i>
+                            </div>
+                            开发建议
+                        </h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3 p-4 bg-green-50 rounded-xl border border-green-100">
+                                <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-check text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-green-800">从 P0 和 P1 级场景开始</p>
+                                    <p class="text-sm text-green-600">奠定引擎基础，构建核心竞争力</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                                <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-route text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-blue-800">围绕核心特色构建</p>
+                                    <p class="text-sm text-blue-600">路线巡航和海量模型加载是核心亮点</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 p-4 bg-purple-50 rounded-xl border border-purple-100">
+                                <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-layer-group text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-purple-800">地理分析类场景</p>
+                                    <p class="text-sm text-purple-600">能快速体现三维地球引擎价值</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3 p-4 bg-orange-50 rounded-xl border border-orange-100">
+                                <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-rocket text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-orange-800">中长期迭代目标</p>
+                                    <p class="text-sm text-orange-600">P2/P3 场景作为未来规划</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 底部信息 -->
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-code text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">Rust + wgpu 三维地球引擎</p>
+                                <p class="text-sm text-gray-500">为专业级三维地理引擎提供完整技术路线图</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <a href="index.html" class="px-4 py-2 bg-violet-100 text-violet-700 rounded-lg hover:bg-violet-200 transition text-sm font-medium">
+                                <i class="fas fa-home mr-1"></i> 返回首页
+                            </a>
+                            <a href="./geotiff.html" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm font-medium">
+                                <i class="fas fa-globe mr-1"></i> GeoTIFF工具
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- JavaScript数据与逻辑 -->
     <script>
-        // 三维引擎场景数据
+        // ==================== 三维引擎场景数据 ====================
         const scenarios = [
             // 一、基础渲染与图形学核心 (1-15)
             { id: 1, name: "PBR材质渲染", category: "基础渲染", algorithm: "基于物理的渲染，图像-Based Lighting", description: "步骤：着色器中计算法线、金属度、粗糙度，配合HDR环境光积分。<br>难点：性能优化、材质参数校准。", priority: "P0" },
@@ -276,64 +632,90 @@
             { id: 14, name: "程序化几何生成", category: "基础渲染", algorithm: "几何着色器，Marching Cubes，参数化曲面", description: "步骤：在GPU通过算法生成新的几何图元。<br>难点：生成算法复杂度高，输出数据管理。", priority: "P3" },
             { id: 15, name: "VR双目立体渲染", category: "基础渲染", algorithm: "多视图渲染，单通道多重投影", description: "步骤：为左右眼分别设置投影矩阵并渲染场景。<br>难点：维持VR高帧率的性能挑战。", priority: "P3" },
 
-            // 二、地理信息与地球引擎核心 (16-35) - 示例数据，实际应有20条
+            // 二、地理信息与地球引擎核心
             { id: 16, name: "全球地形瓦片调度", category: "地理信息", algorithm: "四叉树LOD，视锥体剔除，异步流式加载", description: "步骤：根据相机位置动态计算所需瓦片层级，异步加载/卸载。<br>难点：瓦片接缝处理，加载卡顿和弹出感，内存管理。", priority: "P0" },
             { id: 17, name: "海量3D模型加载", category: "地理信息", algorithm: "实例化渲染，空间索引，GPU Driven剔除", description: "步骤：模型按地理瓦片组织，使用实例缓冲区绘制；Compute Shader做剔除。<br>难点：TB级数据I/O和上传瓶颈，剔除算法效率。", priority: "P0" },
             { id: 18, name: "实时地形编辑", category: "地理信息", algorithm: "动态高度图修改，网格局部重构", description: "步骤：用户绘制笔刷，CPU/GPU更新高度图，触发网格局部更新。<br>难点：保持编辑后拓扑正确性，与原地形无缝融合。", priority: "P2" },
             { id: 19, name: "日照与阴影分析", category: "地理信息", algorithm: "天文算法，动态阴影计算", description: "步骤：根据日期时间计算精确太阳位置，驱动平行光计算阴影。<br>难点：全年全天候动态精度，超大范围阴影性能。", priority: "P1" },
             { id: 20, name: "通视分析", category: "地理信息", algorithm: "光线与地形碰撞检测", description: "步骤：两点间光线步进，采样沿途地形高程判断遮挡。<br>难点：步进精度与性能的权衡，对LOD地形的准确采样。", priority: "P1" },
+            { id: 21, name: "地形坡度分析", category: "地理信息", algorithm: "高度场微分计算", description: "步骤：计算地形表面斜率。<br>难点：LOD精度问题。", priority: "P1" },
+            { id: 22, name: "可视域分析", category: "地理信息", algorithm: "视锥体与地形求交", description: "步骤：计算某点可视范围。<br>难点：大规模计算效率。", priority: "P1" },
+            { id: 23, name: "热力图可视化", category: "地理信息", algorithm: "点聚合算法", description: "步骤：海量点数据可视化。<br>难点：性能优化。", priority: "P2" },
+            { id: 24, name: "等高线生成", category: "地理信息", algorithm: " marching squares算法", description: "步骤：从高程数据生成等高线。<br>难点：实时性。", priority: "P2" },
+            { id: 25, name: "三维地形量测", category: "地理信息", algorithm: "空间距离与面积计算", description: "步骤：基于真实高程的精确测量。<br>难点：LOD精度。", priority: "P1" },
 
-            // 三、高级交互与工具 (36-45) - 示例数据
+            // 三、高级交互与工具
             { id: 36, name: "路线巡航", category: "高级交互", algorithm: "路径插值，相机动画，异步预加载", description: "步骤：预定义路径点，相机沿路径平滑移动和视角控制。<br>难点：球面路径插值，移动与数据加载节奏匹配。", priority: "P1" },
             { id: 37, name: "飞行模式", category: "高级交互", algorithm: "物理模拟，第一人称/第三人称相机控制", description: "步骤：根据用户输入模拟加速度、速度，更新相机位置和朝向。<br>难点：操作手感调优，避免穿模。", priority: "P1" },
+            { id: 38, name: "视角收藏与切换", category: "高级交互", algorithm: "状态保存与恢复", description: "步骤：保存和恢复相机状态。<br>难点：用户交互设计。", priority: "P2" },
 
-            // 四、数据管理与优化 (46-53) - 示例数据
-            { id: 46, name: "多细节层次管理", category: "数据管理", algorithm: "LOD切换， Morphing， 异步加载", description: "步骤：根据距离选择模型/地形LOD级别，可配合形变过渡。<br>难点：LOD切换时的视觉跳跃感。", priority: "P0" },
-            { id: 47, name: "纹理流送与压缩", category: "数据管理", algorithm: "纹理瓦片， 自适应压缩格式", description: "步骤：根据视图需求动态加载和释放不同分辨率的纹理瓦片。<br>难点：磁盘I/O和网络带宽优化，压缩格式GPU支持。", priority: "P1" },
+            // 四、数据管理与优化
+            { id: 46, name: "多细节层次管理", category: "数据管理", algorithm: "LOD切换，Morphing，异步加载", description: "步骤：根据距离选择模型/地形LOD级别，可配合形变过渡。<br>难点：LOD切换时的视觉跳跃感。", priority: "P0" },
+            { id: 47, name: "纹理流送与压缩", category: "数据管理", algorithm: "纹理瓦片，自适应压缩格式", description: "步骤：根据视图需求动态加载和释放不同分辨率的纹理瓦片。<br>难点：磁盘I/O和网络带宽优化，压缩格式GPU支持。", priority: "P1" },
 
-            // 五、平台扩展与集成 (54-60) - 示例数据
-            { id: 54, name: "WebAssembly发布", category: "平台扩展", algorithm: "wasm-bindgen， WebGL 2.0 / WebGPU后端", description: "步骤：将Rust核心代码编译为WASM，在浏览器中运行。<br>难点：WASM内存管理，与JavaScript的互操作性能。", priority: "P2" },
+            // 五、平台扩展与集成
+            { id: 54, name: "WebAssembly发布", category: "平台扩展", algorithm: "wasm-bindgen，WebGL 2.0 / WebGPU后端", description: "步骤：将Rust核心代码编译为WASM，在浏览器中运行。<br>难点：WASM内存管理，与JavaScript的互操作性能。", priority: "P2" },
 
-            // 六、行业应用解决方案 (61-78) - 示例数据
-            { id: 61, name: "城市信息模型浏览", category: "行业应用", algorithm: "BIM+GIS融合， 语义查询", description: "步骤：加载带语义信息的CIM模型，支持构件级查询与筛选。<br>难点：异构数据融合， 海量构件渲染与交互。", priority: "P2" },
-            { id: 70, name: "应急疏散模拟", category: "行业应用", algorithm: "智能体模型， 群体仿真", description: "步骤：在建筑内设置智能体，模拟灾难下的疏散路径和拥堵点。<br>难点：大规模人群仿真的真实性。", priority: "P3" },
-            { id: 76, name: "数字文化遗产重建", category: "行业应用", algorithm: "高精度模型加载， 故事线", description: "步骤：加载高精度扫描模型，结合故事点进行交互式讲解。<br>难点：极精细模型（十亿级面片）的流式加载与渲染。", priority: "P3" },
+            // 六、行业应用解决方案
+            { id: 61, name: "城市信息模型浏览", category: "行业应用", algorithm: "BIM+GIS融合，语义查询", description: "步骤：加载带语义信息的CIM模型，支持构件级查询与筛选。<br>难点：异构数据融合，海量构件渲染与交互。", priority: "P2" },
+            { id: 70, name: "应急疏散模拟", category: "行业应用", algorithm: "智能体模型，群体仿真", description: "步骤：在建筑内设置智能体，模拟灾难下的疏散路径和拥堵点。<br>难点：大规模人群仿真的真实性。", priority: "P3" },
+            { id: 76, name: "数字文化遗产重建", category: "行业应用", algorithm: "高精度模型加载，故事线", description: "步骤：加载高精度扫描模型，结合故事点进行交互式讲解。<br>难点：极精细模型（十亿级面片）的流式加载与渲染。", priority: "P3" },
 
-            // 七、高级图形与仿真 (79-90) - 示例数据
-            { id: 79, name: "天气系统模拟", category: "高级图形", algorithm: "粒子系统， 多层云动画", description: "步骤：用粒子系统模拟雨雪，用噪声纹理动画模拟云层流动。<br>难点：多天气元素的协同与自然过渡。", priority: "P3" },
-            { id: 83, name: "运动模糊", category: "高级图形", algorithm: "速度缓冲区， 历史帧累积", description: "步骤：渲染速度图，在后处理中沿速度方向进行采样模糊。<br>难点：物体与相机快速移动时的模糊质量。", priority: "P3" },
+            // 七、高级图形与仿真
+            { id: 79, name: "天气系统模拟", category: "高级图形", algorithm: "粒子系统，多层云动画", description: "步骤：用粒子系统模拟雨雪，用噪声纹理动画模拟云层流动。<br>难点：多天气元素的协同与自然过渡。", priority: "P3" },
+            { id: 83, name: "运动模糊", category: "高级图形", algorithm: "速度缓冲区，历史帧累积", description: "步骤：渲染速度图，在后处理中沿速度方向进行采样模糊。<br>难点：物体与相机快速移动时的模糊质量。", priority: "P3" },
 
-            // 八、前沿与未来探索 (91-100) - 示例数据
-            { id: 91, name: "3D高斯泼溅实时渲染", category: "前沿探索", algorithm: "3D GS算法， 自定义光栅化", description: "步骤：加载3D GS数据，在自定义光栅化过程中进行排序与混合。<br>难点：与现有光栅化管线集成，性能优化。", priority: "P3" },
-            { id: 96, name: "全局光照实时近似", category: "前沿探索", algorithm: "光线追踪， 光照探针， SSAO扩展", description: "步骤：在关键位置放置光照探针烘焙间接光，或使用SSGI等屏幕空间技术。<br>难点：动态场景下的实时更新与质量。", priority: "P3" },
+            // 八、前沿与未来探索
+            { id: 91, name: "3D高斯泼溅实时渲染", category: "前沿探索", algorithm: "3D GS算法，自定义光栅化", description: "步骤：加载3D GS数据，在自定义光栅化过程中进行排序与混合。<br>难点：与现有光栅化管线集成，性能优化。", priority: "P3" },
+            { id: 96, name: "全局光照实时近似", category: "前沿探索", algorithm: "光线追踪，光照探针，SSAO扩展", description: "步骤：在关键位置放置光照探针烘焙间接光，或使用SSGI等屏幕空间技术。<br>难点：动态场景下的实时更新与质量。", priority: "P3" },
             { id: 100, name: "区块链与数字资产", category: "前沿探索", algorithm: "NFT模型验证与显示", description: "步骤：连接区块链，验证用户NFT所有权并加载对应的唯一3D模型。<br>难点：去中心化存储的模型加载性能与安全。", priority: "P3" }
         ];
 
-        // 为了展示效果，我们添加更多示例数据以接近100个场景
-        // 在实际使用中，这里应该包含完整的100个场景数据
-        for (let i = 21; i <= 35; i++) {
-            if (i <= 25) {
-                scenarios.push({
-                    id: i,
-                    name: `地理分析场景 ${i}`,
-                    category: "地理信息",
-                    algorithm: "地理空间算法 " + i,
-                    description: "步骤：地理数据处理与分析。<br>难点：大数据量处理与性能优化。",
-                    priority: i % 4 === 0 ? "P0" : i % 4 === 1 ? "P1" : i % 4 === 2 ? "P2" : "P3"
-                });
-            } else if (i <= 35) {
-                scenarios.push({
-                    id: i,
-                    name: `地理可视化场景 ${i}`,
-                    category: "地理信息",
-                    algorithm: "可视化技术 " + i,
-                    description: "步骤：地理数据可视化呈现。<br>难点：视觉效果与性能平衡。",
-                    priority: i % 4 === 0 ? "P0" : i % 4 === 1 ? "P1" : i % 4 === 2 ? "P2" : "P3"
-                });
-            }
+        // 填充更多数据以达到100个
+        for (let i = 26; i <= 35; i++) {
+            scenarios.push({
+                id: i,
+                name: `地理分析场景 ${i}`,
+                category: "地理信息",
+                algorithm: "地理空间算法 " + i,
+                description: "步骤：地理数据处理与分析。<br>难点：大数据量处理与性能优化。",
+                priority: i % 4 === 0 ? "P0" : i % 4 === 1 ? "P1" : i % 4 === 2 ? "P2" : "P3"
+            });
         }
 
-        // 添加更多行业应用场景
+        for (let i = 39; i <= 45; i++) {
+            scenarios.push({
+                id: i,
+                name: `交互功能场景 ${i}`,
+                category: "高级交互",
+                algorithm: "交互算法 " + i,
+                description: "步骤：用户交互功能实现。<br>难点：用户体验优化。",
+                priority: i % 4 === 0 ? "P0" : i % 4 === 1 ? "P1" : i % 4 === 2 ? "P2" : "P3"
+            });
+        }
+
+        for (let i = 48; i <= 53; i++) {
+            scenarios.push({
+                id: i,
+                name: `数据管理场景 ${i}`,
+                category: "数据管理",
+                algorithm: "数据管理技术 " + i,
+                description: "步骤：数据管理与优化。<br>难点：效率与安全性。",
+                priority: i % 4 === 0 ? "P0" : i % 4 === 1 ? "P1" : i % 4 === 2 ? "P2" : "P3"
+            });
+        }
+
+        for (let i = 55; i <= 60; i++) {
+            scenarios.push({
+                id: i,
+                name: `平台扩展场景 ${i}`,
+                category: "平台扩展",
+                algorithm: "平台技术 " + i,
+                description: "步骤：平台功能扩展。<br>难点：兼容性。",
+                priority: "P2"
+            });
+        }
+
         for (let i = 62; i <= 69; i++) {
             scenarios.push({
                 id: i,
@@ -345,7 +727,39 @@
             });
         }
 
-        // 添加更多前沿探索场景
+        for (let i = 71; i <= 78; i++) {
+            scenarios.push({
+                id: i,
+                name: `行业应用场景 ${i}`,
+                category: "行业应用",
+                algorithm: "行业解决方案 " + i,
+                description: "步骤：行业应用实现。<br>难点：专业性要求高。",
+                priority: "P3"
+            });
+        }
+
+        for (let i = 80; i <= 82; i++) {
+            scenarios.push({
+                id: i,
+                name: `高级图形场景 ${i}`,
+                category: "高级图形",
+                algorithm: "图形技术 " + i,
+                description: "步骤：高级图形效果实现。<br>难点：性能与效果平衡。",
+                priority: "P3"
+            });
+        }
+
+        for (let i = 84; i <= 90; i++) {
+            scenarios.push({
+                id: i,
+                name: `高级图形场景 ${i}`,
+                category: "高级图形",
+                algorithm: "仿真技术 " + i,
+                description: "步骤：仿真效果实现。<br>难点：真实性与实时性。",
+                priority: "P3"
+            });
+        }
+
         for (let i = 92; i <= 95; i++) {
             scenarios.push({
                 id: i,
@@ -357,113 +771,110 @@
             });
         }
 
-        // 确保总数为100
-        while (scenarios.length < 100) {
-            let lastId = scenarios[scenarios.length - 1].id;
+        for (let i = 97; i <= 99; i++) {
             scenarios.push({
-                id: lastId + 1,
-                name: `三维引擎场景 ${lastId + 1}`,
-                category: lastId % 5 === 0 ? "基础渲染" : lastId % 5 === 1 ? "地理信息" : lastId % 5 === 2 ? "高级交互" : lastId % 5 === 3 ? "数据管理" : "行业应用",
-                algorithm: "核心技术 " + (lastId + 1),
-                description: "步骤：实现三维引擎功能。<br>难点：性能优化与用户体验。",
-                priority: lastId % 4 === 0 ? "P0" : lastId % 4 === 1 ? "P1" : lastId % 4 === 2 ? "P2" : "P3"
+                id: i,
+                name: `前沿技术场景 ${i}`,
+                category: "前沿探索",
+                algorithm: "创新技术 " + i,
+                description: "步骤：创新技术探索。<br>难点：可行性研究。",
+                priority: "P3"
             });
         }
 
-        // 初始化变量
+        // 确保排序
+        scenarios.sort((a, b) => a.id - b.id);
+
+        // ==================== 筛选功能 ====================
         let currentFilter = {
             category: 'all',
             priority: 'all',
             search: ''
         };
 
-        // 页面加载完成后初始化表格
+        // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function () {
             renderTable(scenarios);
             setupEventListeners();
             updateFilterStatus();
+            setupMobileMenu();
         });
 
-        // 渲染表格函数
+        // 渲染表格
         function renderTable(data) {
             const tableBody = document.getElementById('scenariosTable');
             const emptyState = document.getElementById('emptyState');
+            const tableContainer = document.querySelector('.custom-scrollbar').parentElement.parentElement;
 
-            // 清空现有内容
             tableBody.innerHTML = '';
 
             if (data.length === 0) {
-                // 显示空状态
-                tableBody.parentElement.parentElement.classList.add('hidden');
+                tableContainer.classList.add('hidden');
                 emptyState.classList.remove('hidden');
+                document.getElementById('tableInfo').textContent = '显示 0 条';
                 return;
             }
 
-            // 隐藏空状态
             emptyState.classList.add('hidden');
-            tableBody.parentElement.parentElement.classList.remove('hidden');
+            tableContainer.classList.remove('hidden');
 
-            // 生成表格行
-            data.forEach(scenario => {
+            const displayData = data.slice(0, 50);
+            document.getElementById('tableInfo').textContent = `显示 ${data.length} 条`;
+
+            displayData.forEach(scenario => {
                 const row = document.createElement('tr');
-                row.className = 'table-row hover:bg-blue-50 transition-colors duration-150';
+                row.className = `table-row-animated hover:bg-gray-50 border-left-4 border基础渲染`;
                 row.setAttribute('data-category', scenario.category);
                 row.setAttribute('data-priority', scenario.priority);
 
-                // 根据分类设置行样式
-                let rowClass = '';
-                switch (scenario.category) {
-                    case '基础渲染': rowClass = 'border-l-4 border-l-blue-500'; break;
-                    case '地理信息': rowClass = 'border-l-4 border-l-green-500'; break;
-                    case '高级交互': rowClass = 'border-l-4 border-l-purple-500'; break;
-                    case '数据管理': rowClass = 'border-l-4 border-l-yellow-500'; break;
-                    case '行业应用': rowClass = 'border-l-4 border-l-red-500'; break;
-                    case '前沿探索': rowClass = 'border-l-4 border-l-indigo-500'; break;
-                    case '平台扩展': rowClass = 'border-l-4 border-l-pink-500'; break;
-                    case '高级图形': rowClass = 'border-l-4 border-l-teal-500'; break;
-                    default: rowClass = 'border-l-4 border-l-gray-300';
-                }
-                row.className += ' ' + rowClass;
+                // 分类边框颜色
+                const borderClass = `border${scenario.category.replace(' ', '')}`;
+                row.classList.add(borderClass);
 
-                // 优先级标签
-                let priorityClass = '';
-                switch (scenario.priority) {
-                    case 'P0': priorityClass = 'priority-P0'; break;
-                    case 'P1': priorityClass = 'priority-P1'; break;
-                    case 'P2': priorityClass = 'priority-P2'; break;
-                    case 'P3': priorityClass = 'priority-P3'; break;
-                }
+                // 优先级样式
+                const priorityStyles = {
+                    'P0': { bg: 'bg-red-100 text-red-800', glow: 'shadow-red-500/20' },
+                    'P1': { bg: 'bg-orange-100 text-orange-800', glow: 'shadow-orange-500/20' },
+                    'P2': { bg: 'bg-yellow-100 text-yellow-800', glow: 'shadow-yellow-500/20' },
+                    'P3': { bg: 'bg-blue-100 text-blue-800', glow: 'shadow-blue-500/20' }
+                };
+                const pStyle = priorityStyles[scenario.priority] || priorityStyles['P3'];
 
-                // 分类标签
-                let categoryClass = '';
-                switch (scenario.category) {
-                    case '基础渲染': categoryClass = 'bg-blue-100 text-blue-800'; break;
-                    case '地理信息': categoryClass = 'bg-green-100 text-green-800'; break;
-                    case '高级交互': categoryClass = 'bg-purple-100 text-purple-800'; break;
-                    case '数据管理': categoryClass = 'bg-yellow-100 text-yellow-800'; break;
-                    case '行业应用': categoryClass = 'bg-red-100 text-red-800'; break;
-                    case '前沿探索': categoryClass = 'bg-indigo-100 text-indigo-800'; break;
-                    case '平台扩展': categoryClass = 'bg-pink-100 text-pink-800'; break;
-                    case '高级图形': categoryClass = 'bg-teal-100 text-teal-800'; break;
-                    default: categoryClass = 'bg-gray-100 text-gray-800';
-                }
+                // 分类标签样式
+                const categoryStyles = {
+                    '基础渲染': 'bg-blue-100 text-blue-800',
+                    '地理信息': 'bg-green-100 text-green-800',
+                    '高级交互': 'bg-purple-100 text-purple-800',
+                    '数据管理': 'bg-yellow-100 text-yellow-800',
+                    '行业应用': 'bg-red-100 text-red-800',
+                    '前沿探索': 'bg-indigo-100 text-indigo-800',
+                    '平台扩展': 'bg-pink-100 text-pink-800',
+                    '高级图形': 'bg-teal-100 text-teal-800'
+                };
+                const catStyle = categoryStyles[scenario.category] || 'bg-gray-100 text-gray-800';
 
                 row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${scenario.id}</td>
-                    <td class="px-6 py-4">
-                        <div class="text-sm font-medium text-gray-900">${scenario.name}</div>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm font-bold text-gray-700">${scenario.id}</span>
                     </td>
                     <td class="px-6 py-4">
-                        <span class="category-badge ${categoryClass}">${scenario.category}</span>
+                        <span class="text-sm font-semibold text-gray-900">${scenario.name}</span>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">${scenario.algorithm}</div>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${catStyle}">
+                            ${scenario.category}
+                        </span>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="text-sm text-gray-700">${scenario.description}</div>
+                        <span class="text-sm text-gray-700">${scenario.algorithm}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-sm text-gray-600">${scenario.description}</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="priority-badge ${priorityClass}">${scenario.priority}</span>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold ${pStyle.bg} shadow-sm ${pStyle.glow}">
+                            ${scenario.priority}
+                        </span>
                     </td>
                 `;
 
@@ -471,70 +882,66 @@
             });
         }
 
-        // 设置事件监听器
+        // 设置事件监听
         function setupEventListeners() {
-            // 分类筛选按钮
+            // 分类筛选
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
-                    // 更新按钮状态
                     document.querySelectorAll('.category-btn').forEach(b => {
-                        b.classList.remove('bg-blue-600', 'text-white');
-                        b.classList.add('bg-gray-100', 'text-gray-800');
+                        b.classList.remove('bg-violet-600', 'text-white', 'shadow-lg', 'shadow-violet-500/30');
+                        b.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
                     });
-
-                    this.classList.remove('bg-gray-100', 'text-gray-800');
-                    this.classList.add('bg-blue-600', 'text-white');
-
-                    // 更新筛选条件
+                    this.classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-200');
+                    this.classList.add('bg-violet-600', 'text-white', 'shadow-lg', 'shadow-violet-500/30');
                     currentFilter.category = this.getAttribute('data-category');
                     applyFilters();
                 });
             });
 
-            // 优先级筛选按钮
+            // 优先级筛选
             document.querySelectorAll('.priority-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
-                    // 更新按钮状态
                     document.querySelectorAll('.priority-btn').forEach(b => {
-                        b.classList.remove('bg-blue-600', 'text-white');
-                        b.classList.add('bg-gray-100', 'text-gray-800');
+                        b.classList.remove('bg-violet-600', 'text-white', 'shadow-lg', 'shadow-violet-500/30');
+                        b.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
                     });
-
-                    this.classList.remove('bg-gray-100', 'text-gray-800');
-                    this.classList.add('bg-blue-600', 'text-white');
-
-                    // 更新筛选条件
+                    this.classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-200');
+                    this.classList.add('bg-violet-600', 'text-white', 'shadow-lg', 'shadow-violet-500/30');
                     currentFilter.priority = this.getAttribute('data-priority');
                     applyFilters();
                 });
             });
 
             // 搜索框
-            document.getElementById('searchInput').addEventListener('input', function () {
+            const searchInput = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearSearch');
+
+            searchInput.addEventListener('input', function () {
                 currentFilter.search = this.value.toLowerCase();
+                clearBtn.classList.toggle('hidden', !this.value);
+                applyFilters();
+            });
+
+            clearBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                currentFilter.search = '';
+                this.classList.add('hidden');
                 applyFilters();
             });
 
             // 重置按钮
-            document.getElementById('resetFilters').addEventListener('click', function () {
-                resetFilters();
-            });
+            document.getElementById('resetFilters').addEventListener('click', resetFilters);
         }
 
-        // 应用筛选条件
+        // 应用筛选
         function applyFilters() {
             let filteredData = scenarios.filter(scenario => {
-                // 分类筛选
                 if (currentFilter.category !== 'all' && scenario.category !== currentFilter.category) {
                     return false;
                 }
-
-                // 优先级筛选
                 if (currentFilter.priority !== 'all' && scenario.priority !== currentFilter.priority) {
                     return false;
                 }
-
-                // 搜索筛选
                 if (currentFilter.search) {
                     const searchText = currentFilter.search.toLowerCase();
                     const scenarioText = (
@@ -543,12 +950,10 @@
                         scenario.algorithm +
                         scenario.description
                     ).toLowerCase();
-
                     if (!scenarioText.includes(searchText)) {
                         return false;
                     }
                 }
-
                 return true;
             });
 
@@ -556,68 +961,81 @@
             updateFilterStatus(filteredData.length);
         }
 
-        // 更新筛选状态显示
+        // 更新筛选状态
         function updateFilterStatus(filteredCount) {
             const totalCount = scenarios.length;
             const displayCount = filteredCount || totalCount;
             const statusElement = document.getElementById('filterStatus');
 
-            let statusText = `显示 ${displayCount} 个场景`;
-
-            if (displayCount !== totalCount) {
-                statusText += ` (共 ${totalCount} 个)`;
-            }
+            let statusHTML = `<span class="px-3 py-1 bg-violet-100 text-violet-700 rounded-full font-medium">显示 ${displayCount} 个场景</span>`;
 
             if (currentFilter.category !== 'all') {
-                statusText += ` | 分类: ${currentFilter.category}`;
+                statusHTML += `<span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">分类: ${currentFilter.category}</span>`;
             }
-
             if (currentFilter.priority !== 'all') {
-                statusText += ` | 优先级: ${currentFilter.priority}`;
+                statusHTML += `<span class="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs">优先级: ${currentFilter.priority}</span>`;
             }
-
             if (currentFilter.search) {
-                statusText += ` | 搜索: "${currentFilter.search}"`;
+                statusHTML += `<span class="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">搜索: "${currentFilter.search}"</span>`;
             }
 
-            statusElement.innerHTML = statusText;
+            statusElement.innerHTML = statusHTML;
         }
 
         // 重置筛选
         function resetFilters() {
-            // 重置筛选条件
-            currentFilter = {
-                category: 'all',
-                priority: 'all',
-                search: ''
-            };
+            currentFilter = { category: 'all', priority: 'all', search: '' };
 
-            // 重置UI状态
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white');
-                btn.classList.add('bg-gray-100', 'text-gray-800');
-                if (btn.getAttribute('data-category') === 'all') {
-                    btn.classList.remove('bg-gray-100', 'text-gray-800');
-                    btn.classList.add('bg-blue-600', 'text-white');
-                }
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-violet-600', 'text-white', 'shadow-lg', 'shadow-violet-500/30');
+                btn.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
             });
 
-            document.querySelectorAll('.priority-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white');
-                btn.classList.add('bg-gray-100', 'text-gray-800');
-                if (btn.getAttribute('data-priority') === 'all') {
-                    btn.classList.remove('bg-gray-100', 'text-gray-800');
-                    btn.classList.add('bg-blue-600', 'text-white');
-                }
-            });
+            // 恢复默认选中状态
+            document.querySelector('[data-category="all"]').classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-200');
+            document.querySelector('[data-category="all"]').classList.add('bg-violet-600', 'text-white', 'shadow-lg', 'shadow-violet-500/30');
+
+            document.querySelector('[data-priority="all"]').classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-200');
+            document.querySelector('[data-priority="all"]').classList.add('bg-violet-600', 'text-white', 'shadow-lg', 'shadow-violet-500/30');
 
             document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearch').classList.add('hidden');
 
-            // 重新渲染
             renderTable(scenarios);
             updateFilterStatus();
         }
+
+        // 移动端菜单
+        function setupMobileMenu() {
+            const btn = document.getElementById('mobileMenuBtn');
+            const menu = document.getElementById('mobileMenu');
+            btn.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+            });
+        }
+    </script>
+
+    <!-- 结构化数据 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "三维地球引擎应用场景全景图",
+      "description": "基于Rust+wgpu三维地球引擎的100个应用场景全景图，涵盖基础渲染、地理信息、交互工具到行业应用的完整技术路线图。",
+      "url": "https://tools.yy24365.com/apps/real3d/changjing.html",
+      "applicationCategory": "ToolApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "provider": {
+        "@type": "Organization",
+        "name": "工具箱",
+        "url": "https://tools.yy24365.com"
+      }
+    }
     </script>
 </body>
-
 </html>

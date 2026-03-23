@@ -1,426 +1,125 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>排列3智能选号</title>
-    <meta name="description" content="排列3智能选号工具，随机生成符合规则的排列3号码，提供历史记录收藏功能">
-    <meta name="keywords" content="排列3,体彩排列3,选号工具,随机选号">
-    <link rel="stylesheet" href="../../assets/css/layui.min.css">
-    <link rel="stylesheet" href="../../assets/css/fontawesome.min.css">
-    <style>
-        :root {
-            --primary: #3498db;
-            --primary-light: #5dade2;
-            --primary-dark: #2980b9;
-            --secondary: #2ecc71;
-            --accent: #27ae60;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --error: #e74c3c;
-            --danger: #e74c3c;
-            --info: #3498db;
-            --text-primary: #2c3e50;
-            --text-secondary: #7f8c8d;
-            --text-disabled: #bdc3c7;
-            --border: #e0e0e0;
-            --border-light: #f8f9fa;
-            --bg-white: #ffffff;
-            --bg-light: #f8f9fa;
-            --bg-gray: #ecf0f1;
-            --light-bg: #f8f9fa;
-            --dark-text: #2c3e50;
-            --light-text: #7f8c8d;
-            --card-bg: #ffffff;
-            --shadow-none: none;
-            --radius-none: 0;
-            --radius-sm: 2px;
-            --radius-md: 4px;
-            --radius-lg: 6px;
-            --transition: all 0.2s ease;
-        }
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="工具箱">
 
-        /* 主题配色方案 */
-        [data-theme="orange"] {
-            --primary: #e67e22;
-            --primary-light: #eb984e;
-            --primary-dark: #d35400;
-        }
+    <title>排列3智能选号工具 - 免费在线随机生成排列3彩票号码 | 彩票助手</title>
+    <meta name="description" content="免费使用排列3智能选号工具，一键随机生成符合规则的排列3彩票号码。历史记录收藏、号码复制等功能。操作简单，永久免费！">
+    <meta name="keywords" content="排列3选号,排列3智能选号,排列3号码生成器,排列3彩票工具,排列3预测,排列3中奖,体彩排列3,在线选号">
 
-        [data-theme="blue"] {
-            --primary: #3498db;
-            --primary-light: #5dade2;
-            --primary-dark: #2980b9;
-        }
+    <!-- Sitemap -->
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
 
-        [data-theme="green"] {
-            --primary: #27ae60;
-            --primary-light: #58d68d;
-            --primary-dark: #229954;
-        }
-
-        [data-theme="purple"] {
-            --primary: #9b59b6;
-            --primary-light: #bb8fce;
-            --primary-dark: #8e44ad;
-        }
-
-        [data-theme="red"] {
-            --primary: #e74c3c;
-            --primary-light: #ec7063;
-            --primary-dark: #c0392b;
-        }
-
-        [data-theme="yellow"] {
-            --primary: #f1c40f;
-            --primary-light: #f4d03f;
-            --primary-dark: #d4ac0d;
-        }
-
-        [data-theme="contrast-dark"] {
-            --primary: #2c3e50;
-            --primary-light: #566573;
-            --primary-dark: #1b2631;
-        }
-
-        [data-theme="contrast-light"] {
-            --primary: #ecf0f1;
-            --primary-light: #f8f9fa;
-            --primary-dark: #d5dbdb;
-            --text-primary: #2c3e50;
-        }
-
-        body {
-            font-family: 'Noto Sans SC', sans-serif;
-            background-color: var(--light-bg);
-            color: var(--dark-text);
-            line-height: 1.6;
-            padding-bottom: 40px;
-        }
-
-        .header {
-            background-color: var(--primary);
-            color: white;
-            padding: 25px 0;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        /* 颜色选择器样式 */
-        .theme-selector {
-            background: var(--bg-white);
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-        }
-
-        .theme-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .color-options {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .color-option {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid var(--border);
-            cursor: pointer;
-            transition: var(--transition);
-            background: none;
-            position: relative;
-        }
-
-        .color-option:hover {
-            transform: scale(1.1);
-            border-color: var(--text-primary);
-        }
-
-        .color-option.active {
-            border-color: var(--text-primary);
-            transform: scale(1.1);
-        }
-
-        .color-option.active::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: var(--bg-white);
-            font-weight: bold;
-            font-size: 14px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-
-        .card-title {
-            padding: 18px 20px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            background-color: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-        }
-
-        .card-title i {
-            margin-right: 12px;
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            height: 50px;
-            min-width: 120px;
-            padding: 0 20px;
-            border-radius: 4px;
-            font-size: 1rem;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        .btn-generate {
-            background-color: var(--accent);
-            color: white;
-        }
-
-        .btn-reset {
-            background-color: var(--secondary);
-            color: white;
-        }
-
-        .digit {
-            display: inline-flex;
-            width: 50px;
-            height: 50px;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            margin: 0 5px;
-            font-weight: bold;
-            font-size: 1.5rem;
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .batch-results {
-            margin-top: 20px;
-        }
-
-        .batch-item {
-            background-color: white;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .batch-digits {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .batch-actions {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .action-btn {
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-            opacity: 0.9;
-        }
-
-        .save-btn {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .copy-btn {
-            background-color: var(--accent);
-            color: white;
-        }
-
-        .history-list {
-            margin-top: 25px;
-            border-top: 1px solid var(--border);
-            padding-top: 15px;
-        }
-
-        .history-item {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-            background-color: white;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .history-digits {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .history-time {
-            color: #777;
-            font-size: 0.8rem;
-            text-align: center;
-            margin-bottom: 8px;
-        }
-
-        .history-actions {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .delete-btn {
-            background-color: var(--warning);
-            color: white;
-            padding: 6px 12px;
-            font-size: 0.8rem;
-            border-radius: 4px;
-        }
-
-        .empty-history {
-            text-align: center;
-            color: #777;
-            padding: 20px;
-            font-size: 1rem;
-        }
-
-        @media (max-width: 480px) {
-            .header {
-                padding: 20px 0;
-            }
-
-            .header h1 {
-                font-size: 1.5rem;
-            }
-
-            .digit {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem;
-            }
-
-            .btn {
-                width: 100%;
-            }
-        }
-    </style>
-    <!-- 微信/OpenGraph 卡片信息 -->
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tools.yy24365.com/apps/lottery/pl3_smart.html">
     <meta property="og:title" content="排列3智能选号">
     <meta property="og:description" content="排列3智能选号工具，随机生成符合规则的排列3号码，提供历史记录收藏功能">
-    <meta property="og:url" content="./pl3_smart.html">
-    <meta property="og:type" content="article">
     <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta property="og:site_name" content="工具箱">
+    <meta property="og:locale" content="zh_CN">
+
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://tools.yy24365.com/apps/lottery/pl3_smart.html">
     <meta name="twitter:title" content="排列3智能选号">
     <meta name="twitter:description" content="排列3智能选号工具，随机生成符合规则的排列3号码，提供历史记录收藏功能">
     <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+
+    <!-- WeChat Sharing -->
     <meta itemprop="name" content="排列3智能选号">
     <meta itemprop="description" content="排列3智能选号工具，随机生成符合规则的排列3号码，提供历史记录收藏功能">
     <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+
+    <!-- WeChat JSSDK Config -->
+    <meta name="wechat-share-title" content="排列3智能选号">
+    <meta name="wechat-share-desc" content="排列3智能选号工具，随机生成符合规则的排列3号码">
+    <meta name="wechat-share-img" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta name="wechat-share-link" content="https://tools.yy24365.com/apps/lottery/pl3_smart.html">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://tools.yy24365.com/apps/lottery/pl3_smart.html">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        [data-theme="orange"] { --primary: #e67e22; }
+        [data-theme="blue"] { --primary: #3498db; }
+        [data-theme="green"] { --primary: #27ae60; }
+        [data-theme="purple"] { --primary: #9b59b6; }
+        [data-theme="red"] { --primary: #e74c3c; }
+        [data-theme="yellow"] { --primary: #f1c40f; }
+        [data-theme="contrast-dark"] { --primary: #2c3e50; }
+        [data-theme="contrast-light"] { --primary: #ecf0f1; }
+    </style>
 </head>
 
-<body>
+<body class="min-h-screen bg-gray-50 text-gray-800 font-sans pb-10" data-theme="blue">
+    <!-- Header -->
+    <header class="bg-blue-500 text-white py-6 text-center mb-5 shadow-md">
+        <h1 class="text-2xl font-bold mb-2">🎯 排列3智能选号</h1>
+        <p class="text-sm opacity-90">随机生成符合规则的排列3号码</p>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-3xl mx-auto px-4">
+        <!-- Theme Selector -->
+        <section class="bg-white p-4 rounded-lg shadow-sm mb-5 border border-gray-200">
+            <h3 class="text-base font-semibold mb-3 flex items-center gap-2 text-gray-700">
+                <i class="fas fa-palette text-blue-500"></i> 主题颜色
+            </h3>
+            <div class="flex flex-wrap gap-2">
+                <button data-color="orange" class="color-option w-8 h-8 rounded-full border-2 border-gray-300 hover:scale-110 transition-transform cursor-pointer" style="background-color: #e67e22;"></button>
+                <button data-color="blue" class="color-option w-8 h-8 rounded-full border-2 border-gray-300 hover:scale-110 transition-transform cursor-pointer bg-blue-500" title="蓝色"></button>
+                <button data-color="green" class="color-option w-8 h-8 rounded-full border-2 border-gray-300 hover:scale-110 transition-transform cursor-pointer bg-green-500" title="绿色"></button>
+                <button data-color="purple" class="color-option w-8 h-8 rounded-full border-2 border-gray-300 hover:scale-110 transition-transform cursor-pointer bg-purple-500" title="紫色"></button>
+                <button data-color="red" class="color-option w-8 h-8 rounded-full border-2 border-gray-300 hover:scale-110 transition-transform cursor-pointer bg-red-500" title="红色"></button>
+                <button data-color="yellow" class="color-option w-8 h-8 rounded-full border-2 border-gray-300 hover:scale-110 transition-transform cursor-pointer bg-yellow-500" title="黄色"></button>
+                <button data-color="contrast-dark" class="color-option w-8 h-8 rounded-full border-2 border-gray-300 hover:scale-110 transition-transform cursor-pointer bg-gray-800" title="深色"></button>
+                <button data-color="contrast-light" class="color-option w-8 h-8 rounded-full border-2 border-gray-300 hover:scale-110 transition-transform cursor-pointer bg-gray-200" title="浅色"></button>
+            </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-3 justify-center my-5">
+            <button id="generateBtn" class="h-12 min-w-32 px-5 rounded bg-green-600 hover:bg-green-700 text-white font-medium flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 shadow-sm">
+                <i class="fas fa-random"></i> 生成号码
+            </button>
+            <button id="resetBtn" class="h-12 min-w-32 px-5 rounded bg-emerald-500 hover:bg-emerald-600 text-white font-medium flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 shadow-sm">
+                <i class="fas fa-undo"></i> 重置
+            </button>
+        </div>
+
+        <!-- Batch Results -->
+        <section id="batchResults" class="mt-5">
+            <!-- 生成结果将在这里显示 -->
+        </section>
+
+        <!-- History Section -->
+        <section class="mt-8 border-t border-gray-200 pt-5">
+            <h3 class="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-700">
+                <i class="fas fa-history text-gray-500"></i> 历史记录
+            </h3>
+            <div id="historyList">
+                <!-- 历史记录将在这里显示 -->
+            </div>
+        </section>
+    </main>
+
     <!-- Wechat Share Image Hack -->
     <div style="display:none; visibility:hidden;">
         <img src="https://tools.yy24365.com/assets/images/dev-tools-og.png" alt="wechat-share-icon" width="400" height="400">
     </div>
-    <div class="btn-group">
-        <button class="btn btn-generate" id="generateBtn">
-            <i class="fas fa-random"></i> 生成号码
-        </button>
-        <button class="btn btn-reset" id="resetBtn">
-            <i class="fas fa-undo"></i> 重置
-        </button>
-    </div>
-    <div id="batchResults" class="batch-results">
-        <!-- 生成结果将在这里显示 -->
-    </div>
-    <div class="history-list">
-        <h3><i class="fas fa-history"></i> 历史记录</h3>
-        <div id="historyList"></div>
-    </div>
-    </div>
-    </div>
-    </div>
-    <script src="../../assets/js/layui.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/layui/2.8.17/layui.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             layui.use(['layer'], function () {
@@ -455,11 +154,10 @@
                     results.forEach(function (result, index) {
                         var numberStr = result.digits.join('');
 
-                        // 检查是否已收藏
                         var isCollected = isDuplicatePL3Numbers(result.digits);
                         var saveButtonHtml = isCollected ?
-                            '<button class="action-btn save-btn" style="background-color: var(--text-disabled); cursor: not-allowed;"><i class="fas fa-check"></i> 已收藏</button>' :
-                            '<button class="action-btn save-btn" onclick="collectSet(' + index + ')"><i class="fas fa-star"></i> 收藏</button>';
+                            '<button class="action-btn save-btn bg-gray-400 cursor-not-allowed"><i class="fas fa-check"></i> 已收藏</button>' :
+                            '<button class="action-btn save-btn bg-blue-500 hover:bg-blue-600 text-white" onclick="collectSet(' + index + ')"><i class="fas fa-star"></i> 收藏</button>';
 
                         html += '<div class="batch-item">' +
                             '<div class="batch-digits">' +
@@ -467,7 +165,7 @@
                             '</div>' +
                             '<div class="batch-actions">' +
                             saveButtonHtml +
-                            '<button class="action-btn copy-btn" onclick="copyNumbers(\'' + numberStr + '\')">' +
+                            '<button class="action-btn copy-btn bg-green-600 hover:bg-green-700 text-white" onclick="copyNumbers(\'' + numberStr + '\')">' +
                             '<i class="fas fa-copy"></i> 复制' +
                             '</button>' +
                             '</div>' +
@@ -490,10 +188,10 @@
                             '</div>' +
                             '<div class="history-time">' + timeStr + '</div>' +
                             '<div class="history-actions">' +
-                            '<button class="action-btn copy-btn" onclick="copyNumbers(\'' + numberStr + '\')">' +
+                            '<button class="action-btn copy-btn bg-green-600 hover:bg-green-700 text-white" onclick="copyNumbers(\'' + numberStr + '\')">' +
                             '<i class="fas fa-copy"></i> 复制' +
                             '</button>' +
-                            '<button class="action-btn delete-btn" data-index="' + index + '">' +
+                            '<button class="action-btn delete-btn bg-yellow-500 hover:bg-yellow-600 text-white" data-index="' + index + '">' +
                             '<i class="fas fa-trash"></i> 删除' +
                             '</button>' +
                             '</div>' +
@@ -501,7 +199,7 @@
                     });
 
                     document.getElementById('historyList').innerHTML = html ||
-                        '<div class="empty-history">暂无历史记录</div>';
+                        '<div class="empty-history text-center text-gray-500 py-5">暂无历史记录</div>';
 
                     // 绑定删除事件
                     document.querySelectorAll('.delete-btn').forEach(function (btn) {
@@ -511,7 +209,6 @@
                             localStorage.setItem('pl3History', JSON.stringify(historyData));
                             renderHistory();
 
-                            // 更新当前页面所有批量结果的按钮状态
                             var batchItems = document.querySelectorAll('.batch-item');
                             batchItems.forEach(function (item, idx) {
                                 updatePL3CollectButtonState(item, idx);
@@ -532,14 +229,13 @@
                     });
                 }
 
-                // 收藏指定组号码（改进版）
+                // 收藏指定组号码
                 window.collectSet = function (index) {
                     var batchItems = document.querySelectorAll('.batch-item');
                     if (index >= 0 && index < batchItems.length) {
                         var batchItem = batchItems[index];
                         var digits = Array.from(batchItem.querySelectorAll('.digit')).map(function (el) { return parseInt(el.textContent); });
 
-                        // 检查是否重复
                         if (isDuplicatePL3Numbers(digits)) {
                             layer.msg('该号码组合已收藏过了', { icon: 2 });
                             return;
@@ -558,7 +254,6 @@
                         localStorage.setItem('pl3History', JSON.stringify(historyData));
                         renderHistory();
 
-                        // 更新当前页面所有按钮状态
                         batchItems.forEach(function (item, idx) {
                             updatePL3CollectButtonState(item, idx);
                         });
@@ -574,13 +269,13 @@
 
                     if (isDuplicatePL3Numbers(digits)) {
                         saveBtn.innerHTML = '<i class="fas fa-check"></i> 已收藏';
-                        saveBtn.style.backgroundColor = 'var(--text-disabled)';
-                        saveBtn.style.cursor = 'not-allowed';
+                        saveBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                        saveBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
                         saveBtn.onclick = null;
                     } else {
                         saveBtn.innerHTML = '<i class="fas fa-star"></i> 收藏';
-                        saveBtn.style.backgroundColor = '';
-                        saveBtn.style.cursor = 'pointer';
+                        saveBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                        saveBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
                         saveBtn.onclick = function () { collectSet(index); };
                     }
                 }
@@ -608,38 +303,55 @@
                 // 颜色主题切换功能
                 function initThemeSelector() {
                     var colorOptions = document.querySelectorAll('.color-option');
-
-                    if (colorOptions.length === 0) {
-                        console.log('未找到颜色选择器');
-                        return;
-                    }
-
                     var savedTheme = localStorage.getItem('pl3Theme') || 'blue';
 
-                    // 设置初始主题
                     document.documentElement.setAttribute('data-theme', savedTheme);
+                    updateThemeStyles(savedTheme);
+
                     colorOptions.forEach(function (option) {
-                        option.classList.toggle('active', option.dataset.color === savedTheme);
+                        option.classList.toggle('ring-2', option.dataset.color === savedTheme);
+                        option.classList.toggle('ring-offset-2', option.dataset.color === savedTheme);
+                        if (option.dataset.color === savedTheme) {
+                            option.classList.add('ring-gray-800');
+                        }
                     });
 
-                    // 绑定颜色选择事件
                     colorOptions.forEach(function (option) {
                         option.addEventListener('click', function () {
                             var selectedColor = this.dataset.color;
 
-                            // 更新活动状态
-                            colorOptions.forEach(function (opt) { opt.classList.remove('active'); });
-                            this.classList.add('active');
+                            colorOptions.forEach(function (opt) {
+                                opt.classList.remove('ring-2', 'ring-offset-2', 'ring-gray-800');
+                            });
+                            this.classList.add('ring-2', 'ring-offset-2', 'ring-gray-800');
 
-                            // 应用主题
                             document.documentElement.setAttribute('data-theme', selectedColor);
+                            updateThemeStyles(selectedColor);
 
-                            // 保存到本地存储
                             localStorage.setItem('pl3Theme', selectedColor);
 
                             layer.msg('主题已切换', { icon: 1, time: 1000 });
                         });
                     });
+                }
+
+                function updateThemeStyles(theme) {
+                    var colors = {
+                        orange: { bg: 'bg-orange-500', text: 'text-white' },
+                        blue: { bg: 'bg-blue-500', text: 'text-white' },
+                        green: { bg: 'bg-green-500', text: 'text-white' },
+                        purple: { bg: 'bg-purple-500', text: 'text-white' },
+                        red: { bg: 'bg-red-500', text: 'text-white' },
+                        yellow: { bg: 'bg-yellow-500', text: 'text-white' },
+                        'contrast-dark': { bg: 'bg-gray-800', text: 'text-white' },
+                        'contrast-light': { bg: 'bg-gray-200', text: 'text-gray-800' }
+                    };
+
+                    var color = colors[theme] || colors.blue;
+                    var header = document.querySelector('header');
+                    if (header) {
+                        header.className = color.bg + ' ' + color.text + ' py-6 text-center mb-5 shadow-md';
+                    }
                 }
 
                 // 初始化
@@ -648,17 +360,136 @@
             });
         });
     </script>
-    <!-- 结构化数据 -->
+
+    <!-- 结构化数据 - 增强版 -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "排列3智能选号",
-      "description": "智能生成排列3号码的在线工具",
-      "url": "https://tools.hn24365.com/pl3_smart.html",
-      "applicationCategory": "ToolApplication"
+      "name": "排列3智能选号工具",
+      "description": "免费在线排列3智能选号工具，一键随机生成符合规则的排列3彩票号码",
+      "url": "https://tools.yy24365.com/apps/lottery/pl3_smart.html",
+      "applicationCategory": "ToolApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "provider": {
+        "@type": "Organization",
+        "name": "工具箱",
+        "url": "https://tools.yy24365.com"
+      },
+      "image": {
+        "@type": "ImageObject",
+        "url": "https://tools.yy24365.com/assets/images/lottery-pl3.png"
+      }
     }
     </script>
+
+    <!-- 面包屑导航结构化数据 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "首页",
+          "item": "https://tools.yy24365.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "彩票工具",
+          "item": "https://tools.yy24365.com/apps/lottery/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "排列3智能选号",
+          "item": "https://tools.yy24365.com/apps/lottery/pl3_smart.html"
+        }
+      ]
+    }
+    </script>
+
+    <style>
+        .digit {
+            display: inline-flex;
+            width: 50px;
+            height: 50px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 5px;
+            font-weight: bold;
+            font-size: 1.5rem;
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .batch-item, .history-item {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .batch-digits, .history-digits {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .batch-actions, .history-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .history-time {
+            color: #777;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .digit {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .action-btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
 </body>
 
 </html>

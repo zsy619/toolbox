@@ -3,458 +3,372 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket测试工具</title>
+    
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="工具箱">
+
+    <title>多媒体工具大全 - 免费在线多媒体处理工具 | 工具箱</title>
+    <meta name="description" content="免费使用多种多媒体处理工具，包括HLS播放器、WebSocket测试等。操作简单，永久免费！">
+    <meta name="keywords" content="多媒体工具,视频播放器,WebSocket,流媒体,免费工具">
+
+    <!-- Sitemap -->
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tools.yy24365.com/multimedia/ws_websocket.html">
+    <meta property="og:title" content="多媒体工具大全 - 免费在线多媒体处理工具">
+    <meta property="og:description" content="免费使用多种多媒体处理工具，包括HLS播放器、WebSocket测试等。操作简单，永久免费！">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/multimedia-og.png">
+    <meta property="og:site_name" content="工具箱">
+    <meta property="og:locale" content="zh_CN">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://tools.yy24365.com/multimedia/ws_websocket.html">
+    <meta name="twitter:title" content="多媒体工具大全 - 免费在线多媒体处理工具">
+    <meta name="twitter:description" content="免费使用多种多媒体处理工具，包括HLS播放器、WebSocket测试等。操作简单，永久免费！">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/multimedia-og.png">
+
+    <!-- WeChat Sharing -->
+    <meta itemprop="name" content="多媒体工具大全 - 免费在线多媒体处理工具">
+    <meta itemprop="description" content="免费使用多种多媒体处理工具，包括HLS播放器、WebSocket测试等。操作简单，永久免费！">
+    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/multimedia-og.png">
+
+    <!-- WeChat JSSDK Config -->
+    <meta name="wechat-share-title" content="多媒体工具大全 - 免费在线多媒体处理工具">
+    <meta name="wechat-share-desc" content="免费使用多种多媒体处理工具，包括HLS播放器、WebSocket测试等。操作简单，永久免费！">
+    <meta name="wechat-share-img" content="https://tools.yy24365.com/assets/images/multimedia-og.png">
+    <meta name="wechat-share-link" content="https://tools.yy24365.com/multimedia/ws_websocket.html">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://tools.yy24365.com/multimedia/ws_websocket.html"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket 测试工具</title>
+
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 引入 Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 自定义 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 自定义动画样式 -->
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            color: #333;
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1000px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
-
-        header {
-            background: #2c3e50;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            position: relative;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .url-input-container {
-            background: #34495e;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-
-        .url-input {
-            display: flex;
-            gap: 10px;
-        }
-
-        .url-input input {
-            flex: 1;
-            padding: 12px 15px;
-            border: none;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 1rem;
-        }
-
-        .url-input button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            background: #2ecc71;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .url-input button:hover {
-            background: #27ae60;
-        }
-
-        .status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #e74c3c;
-        }
-
-        .status.connected .status-indicator {
-            background: #2ecc71;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
-
-        .control-panel {
-            padding: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            border-bottom: 1px solid #eee;
-            background: #f8f9fa;
-        }
-
-        button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .btn-connect {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .btn-disconnect {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-send {
-            background: #3498db;
-            color: white;
-        }
-
-        .btn-clear {
-            background: #f39c12;
-            color: white;
-        }
-
-        button:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        button:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .message-panel {
-            display: flex;
-            padding: 20px;
-            gap: 20px;
-        }
-
-        .message-input {
-            flex: 1;
-        }
-
-        .message-input h3 {
-            margin-bottom: 10px;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            resize: vertical;
-            min-height: 120px;
-            font-family: monospace;
-            transition: border 0.3s;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-
-        .predefined-messages {
-            width: 250px;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #eee;
-        }
-
-        .predefined-messages h3 {
-            margin-bottom: 15px;
-            font-size: 1rem;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .predefined-messages button {
-            display: block;
-            width: 100%;
-            margin-bottom: 8px;
-            padding: 10px;
-            background: #ecf0f1;
-            color: #34495e;
-            font-size: 0.9rem;
-            text-align: left;
-            justify-content: flex-start;
-        }
-
-        .predefined-messages button:hover {
-            background: #d6dbdf;
-        }
-
-        .messages-container {
-            padding: 20px;
-            background: #f8f9fa;
-            border-top: 1px solid #eee;
-        }
-
-        .messages-container h2 {
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        #messages {
-            height: 300px;
-            overflow-y: auto;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            font-family: monospace;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .message {
-            padding: 10px 15px;
-            border-radius: 8px;
-            animation: fadeIn 0.3s;
-            width: fit-content;
-            max-width: 85%;
-        }
-
         @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(10px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        /* 接收消息 - 左对齐 */
-        .received {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            align-self: flex-start;
-            text-align: left;
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
         }
 
-        /* 发送消息 - 右对齐 */
-        .sent {
-            background: #e8f5e9;
-            border-left: 4px solid #4caf50;
-            align-self: flex-end;
-            text-align: right;
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out;
         }
 
-        .system {
-            background: #fff3e0;
-            border-left: 4px solid #ff9800;
-            align-self: center;
-            font-style: italic;
-            text-align: center;
-            max-width: 70%;
+        .animate-pulse-slow {
+            animation: pulse 1.5s infinite;
         }
 
-        .error {
-            background: #ffebee;
-            border-left: 4px solid #f44336;
-            align-self: center;
-            text-align: center;
+        /* 自定义滚动条 */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .timestamp {
-            font-size: 0.7rem;
-            color: #777;
-            margin-top: 5px;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
         }
 
-        .message-content {
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* JSON 内容样式 */
+        .json-content {
+            background: #f5f5f5;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
             word-break: break-word;
         }
-
-        .message-actions {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 10px;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
-
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        @media (max-width: 768px) {
-            .message-panel {
-                flex-direction: column;
-            }
-
-            .predefined-messages {
-                width: 100%;
-            }
-
-            .message {
-                max-width: 90%;
-            }
-
-            .url-input {
-                flex-direction: column;
-            }
-        }
     </style>
+
     <!-- 微信/OpenGraph 卡片信息 -->
     <meta property="og:title" content="WebSocket测试工具">
-    <meta property="og:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta property="og:description" content="简洁高效的WebSocket连接测试工具，支持预设消息模板和实时统计">
     <meta property="og:url" content="./ws_websocket.html">
     <meta property="og:type" content="article">
     <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="WebSocket测试工具">
-    <meta name="twitter:description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta name="twitter:description" content="简洁高效的WebSocket连接测试工具，支持预设消息模板和实时统计">
     <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
     <meta itemprop="name" content="WebSocket测试工具">
-    <meta itemprop="description" content="一个实用的在线工具，帮助您提高效率。">
+    <meta itemprop="description" content="简洁高效的WebSocket连接测试工具，支持预设消息模板和实时统计">
     <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
 </head>
 
-<body>
+<body class="bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 min-h-screen p-4 md:p-6">
+
     <!-- Wechat Share Image Hack -->
     <div style="display:none; visibility:hidden;">
         <img src="https://tools.yy24365.com/assets/images/dev-tools-og.png" alt="wechat-share-icon" width="400" height="400">
     </div>
-    <div class="status">
-        <div class="status-indicator"></div>
-        <span id="status-text">未连接</span>
-    </div>
-    </header>
-    <div class="control-panel">
-        <button id="connectBtn" class="btn-connect">
-            <i class="fas fa-plug"></i> 连接
-        </button>
-        <button id="disconnectBtn" class="btn-disconnect" disabled>
-            <i class="fas fa-power-off"></i> 断开
-        </button>
-        <button id="clearBtn" class="btn-clear">
-            <i class="fas fa-broom"></i> 清除消息
-        </button>
-        <div style="flex: 1"></div>
-        <div id="connectionStats">
-            <i class="fas fa-chart-line"></i>
-            消息: <span id="sentCount">0</span> 发送 / <span id="receivedCount">0</span> 接收
-        </div>
-    </div>
-    <div class="message-panel">
-        <div class="message-input">
-            <h3><i class="fas fa-paper-plane"></i> 发送消息</h3>
-            <textarea id="messageInput" placeholder="输入要发送的消息..."></textarea>
-            <div class="message-actions">
-                <button id="sendBtn" class="btn-send" disabled>
-                    <i class="fas fa-paper-plane"></i> 发送消息
-                </button>
+
+    <!-- 主容器 -->
+    <div class="max-w-6xl mx-auto bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl overflow-hidden">
+
+        <!-- 头部区域 -->
+        <header class="bg-gradient-to-r from-gray-800 to-gray-900 text-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-wifi text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">WebSocket 测试工具</h1>
+                        <p class="text-gray-400 text-sm mt-1">轻量级双向通信测试解决方案</p>
+                    </div>
+                </div>
+
+                <!-- 连接状态指示器 -->
+                <div id="status-container" class="flex items-center gap-2 px-4 py-2 bg-gray-700/50 rounded-full">
+                    <div id="status-indicator" class="w-3 h-3 rounded-full bg-red-500 animate-pulse-slow"></div>
+                    <span id="status-text" class="text-sm font-medium">未连接</span>
+                </div>
+            </div>
+
+            <!-- URL 输入框 -->
+            <div class="bg-gray-700/50 p-4 rounded-xl">
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="flex-1 relative">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <input
+                            type="text"
+                            id="urlInput"
+                            value="ws://localhost:6060/online/heartbeat"
+                            placeholder="输入 WebSocket URL (ws:// 或 wss://)"
+                            class="w-full pl-12 pr-4 py-3 bg-gray-600 border border-gray-500 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                        >
+                    </div>
+                    <button
+                        id="urlSetBtn"
+                        class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                        <i class="fas fa-save"></i>
+                        <span>设置URL</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 控制面板 -->
+        <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex flex-wrap items-center gap-3">
+            <button
+                id="connectBtn"
+                class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-all hover:scale-105 hover:shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+                <i class="fas fa-plug"></i>
+                <span>连接</span>
+            </button>
+
+            <button
+                id="disconnectBtn"
+                class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all hover:scale-105 hover:shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                disabled
+            >
+                <i class="fas fa-power-off"></i>
+                <span>断开</span>
+            </button>
+
+            <button
+                id="clearBtn"
+                class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all hover:scale-105 hover:shadow-lg flex items-center gap-2"
+            >
+                <i class="fas fa-broom"></i>
+                <span>清除消息</span>
+            </button>
+
+            <div class="flex-1"></div>
+
+            <!-- 统计信息 -->
+            <div class="flex items-center gap-4 text-sm text-gray-600 bg-white px-4 py-2 rounded-lg shadow-sm">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-paper-plane text-blue-500"></i>
+                    <span>发送: <span id="sentCount" class="font-bold text-blue-600">0</span></span>
+                </div>
+                <div class="w-px h-4 bg-gray-300"></div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-inbox text-green-500"></i>
+                    <span>接收: <span id="receivedCount" class="font-bold text-green-600">0</span></span>
+                </div>
+                <div class="w-px h-4 bg-gray-300"></div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-clock text-purple-500"></i>
+                    <span id="connectionTime" class="font-medium">连接时间: --</span>
+                </div>
             </div>
         </div>
-        <div class="predefined-messages">
-            <h3><i class="fas fa-bolt"></i> 预设消息</h3>
-            <button class="predefined-msg" data-msg='{"type": "heartbeat", "data": "ping"}'>
-                <i class="fas fa-heartbeat"></i> 心跳检测
-            </button>
-            <button class="predefined-msg" data-msg='{"type": "status", "data": "check"}'>
-                <i class="fas fa-info-circle"></i> 状态查询
-            </button>
-            <button class="predefined-msg" data-msg='{"user": "admin", "action": "get_online"}'>
-                <i class="fas fa-users"></i> 获取在线用户
-            </button>
-            <button class="predefined-msg" data-msg='{"test": "message", "value": 123}'>
-                <i class="fas fa-vial"></i> 测试消息
-            </button>
-        </div>
-    </div>
-    <div class="messages-container">
-        <h2><i class="fas fa-envelope"></i> 接收消息</h2>
-        <div id="messages">
-            <div class="message system">
-                <div class="message-content">准备就绪，请点击连接按钮开始测试WebSocket服务</div>
-                <div class="timestamp">系统消息</div>
+
+        <!-- 消息区域 -->
+        <div class="flex flex-col lg:flex-row">
+
+            <!-- 消息输入区域 -->
+            <div class="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-50 p-6">
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-paper-plane text-blue-500"></i>
+                        发送消息
+                    </h3>
+
+                    <!-- 消息输入框 -->
+                    <textarea
+                        id="messageInput"
+                        placeholder="输入要发送的消息..."
+                        class="w-full p-4 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-gray-700 font-mono text-sm h-32"
+                    ></textarea>
+
+                    <!-- 发送按钮 -->
+                    <div class="mt-4 flex justify-end">
+                        <button
+                            id="sendBtn"
+                            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all hover:scale-105 hover:shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                            disabled
+                        >
+                            <i class="fas fa-paper-plane"></i>
+                            <span>发送消息</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 预设消息 -->
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-bolt text-yellow-500"></i>
+                        预设消息
+                    </h4>
+                    <div class="space-y-2">
+                        <button
+                            class="predefined-msg w-full px-4 py-3 bg-white hover:bg-red-50 border border-gray-200 hover:border-red-300 rounded-lg text-left transition-all flex items-center gap-3 text-sm text-gray-700 hover:text-red-600"
+                            data-msg='{"type": "heartbeat", "data": "ping"}'
+                        >
+                            <i class="fas fa-heartbeat text-red-500 w-5"></i>
+                            <span>心跳检测</span>
+                        </button>
+
+                        <button
+                            class="predefined-msg w-full px-4 py-3 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-lg text-left transition-all flex items-center gap-3 text-sm text-gray-700 hover:text-blue-600"
+                            data-msg='{"type": "status", "data": "check"}'
+                        >
+                            <i class="fas fa-info-circle text-blue-500 w-5"></i>
+                            <span>状态查询</span>
+                        </button>
+
+                        <button
+                            class="predefined-msg w-full px-4 py-3 bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 rounded-lg text-left transition-all flex items-center gap-3 text-sm text-gray-700 hover:text-purple-600"
+                            data-msg='{"user": "admin", "action": "get_online"}'
+                        >
+                            <i class="fas fa-users text-purple-500 w-5"></i>
+                            <span>获取在线用户</span>
+                        </button>
+
+                        <button
+                            class="predefined-msg w-full px-4 py-3 bg-white hover:bg-green-50 border border-gray-200 hover:border-green-300 rounded-lg text-left transition-all flex items-center gap-3 text-sm text-gray-700 hover:text-green-600"
+                            data-msg='{"test": "message", "value": 123}'
+                        >
+                            <i class="fas fa-vial text-green-500 w-5"></i>
+                            <span>测试消息</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 消息显示区域 -->
+            <div class="flex-1 bg-white p-6">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-envelope text-indigo-500"></i>
+                    接收消息
+                    <span id="messagesCount" class="text-sm font-normal text-gray-500 ml-2">(0 条消息)</span>
+                </h2>
+
+                <!-- 消息列表 -->
+                <div id="messages" class="h-96 overflow-y-auto bg-gray-50 border border-gray-200 rounded-xl p-4 font-mono text-sm custom-scrollbar flex flex-col gap-3">
+                    <!-- 欢迎消息 -->
+                    <div class="message system bg-amber-50 border-l-4 border-amber-500 rounded-xl p-4 mx-auto max-w-[70%] animate-fadeIn">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-info-circle text-amber-600"></i>
+                            <span class="text-xs text-amber-700 font-semibold">系统消息</span>
+                        </div>
+                        <div class="text-amber-800 text-sm">准备就绪，请点击连接按钮开始测试 WebSocket 服务</div>
+                    </div>
+                </div>
+
+                <!-- 底部提示 -->
+                <div class="mt-4 flex items-center justify-between text-xs text-gray-500">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-keyboard text-gray-400"></i>
+                            <span>Ctrl + Enter 发送</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-emerald-600">
+                        <i class="fas fa-check-circle"></i>
+                        <span>系统就绪</span>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="stats">
-            <span id="messagesCount">消息数: 0</span>
-            <span id="connectionTime">连接时间: --</span>
-        </div>
     </div>
-    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // DOM 元素引用
             const connectBtn = document.getElementById('connectBtn');
             const disconnectBtn = document.getElementById('disconnectBtn');
             const clearBtn = document.getElementById('clearBtn');
@@ -462,8 +376,8 @@
             const messageInput = document.getElementById('messageInput');
             const messagesContainer = document.getElementById('messages');
             const statusText = document.getElementById('status-text');
-            const statusIndicator = document.querySelector('.status-indicator');
-            const statusContainer = document.querySelector('.status');
+            const statusIndicator = document.getElementById('status-indicator');
+            const statusContainer = document.getElementById('status-container');
             const predefinedMsgButtons = document.querySelectorAll('.predefined-msg');
             const sentCountEl = document.getElementById('sentCount');
             const receivedCountEl = document.getElementById('receivedCount');
@@ -472,6 +386,7 @@
             const urlInput = document.getElementById('urlInput');
             const urlSetBtn = document.getElementById('urlSetBtn');
 
+            // 状态变量
             let websocket = null;
             let sentCount = 0;
             let receivedCount = 0;
@@ -479,17 +394,21 @@
             let connectionTimer = null;
             let currentUrl = 'ws://localhost:6060/online/heartbeat';
 
-            // 更新状态显示
+            // 更新连接状态显示
             function updateStatus(connected) {
                 if (connected) {
                     statusText.textContent = '已连接';
-                    statusContainer.classList.add('connected');
+                    statusIndicator.className = 'w-3 h-3 rounded-full bg-emerald-500 animate-pulse-slow';
+                    statusContainer.classList.remove('bg-gray-700/50');
+                    statusContainer.classList.add('bg-emerald-700/50');
                     connectBtn.disabled = true;
                     disconnectBtn.disabled = false;
                     sendBtn.disabled = false;
                 } else {
                     statusText.textContent = '未连接';
-                    statusContainer.classList.remove('connected');
+                    statusIndicator.className = 'w-3 h-3 rounded-full bg-red-500 animate-pulse-slow';
+                    statusContainer.classList.remove('bg-emerald-700/50');
+                    statusContainer.classList.add('bg-gray-700/50');
                     connectBtn.disabled = false;
                     disconnectBtn.disabled = true;
                     sendBtn.disabled = true;
@@ -499,17 +418,84 @@
             // 添加消息到消息容器
             function addMessage(content, type = 'system', sender = '系统') {
                 const messageEl = document.createElement('div');
-                messageEl.classList.add('message', type);
+                messageEl.classList.add('message', type, 'animate-fadeIn', 'rounded-xl', 'p-4');
+
+                let bgColor, borderColor, alignClass, textColor;
+
+                switch(type) {
+                    case 'received':
+                        bgColor = 'bg-blue-50';
+                        borderColor = 'border-l-4 border-blue-500';
+                        alignClass = 'self-start';
+                        textColor = 'text-blue-800';
+                        break;
+                    case 'sent':
+                        bgColor = 'bg-green-50';
+                        borderColor = 'border-l-4 border-green-500';
+                        alignClass = 'self-end';
+                        textColor = 'text-green-800';
+                        break;
+                    case 'error':
+                        bgColor = 'bg-red-50';
+                        borderColor = 'border-l-4 border-red-500';
+                        alignClass = 'self-center';
+                        textColor = 'text-red-800';
+                        break;
+                    default: // system
+                        bgColor = 'bg-amber-50';
+                        borderColor = 'border-l-4 border-amber-500';
+                        alignClass = 'self-center';
+                        textColor = 'text-amber-800';
+                }
+
+                messageEl.classList.add(bgColor, borderColor, alignClass);
+
+                if (type === 'system') {
+                    messageEl.classList.add('max-w-[70%]', 'mx-auto');
+                } else {
+                    messageEl.classList.add('max-w-[85%]');
+                }
 
                 const now = new Date();
                 const timestamp = now.toLocaleTimeString();
 
+                let icon, senderLabel;
+                switch(type) {
+                    case 'received':
+                        icon = '<i class="fas fa-server text-blue-500"></i>';
+                        senderLabel = sender;
+                        break;
+                    case 'sent':
+                        icon = '<i class="fas fa-user text-green-500"></i>';
+                        senderLabel = sender;
+                        break;
+                    case 'error':
+                        icon = '<i class="fas fa-exclamation-circle text-red-500"></i>';
+                        senderLabel = '错误';
+                        break;
+                    default:
+                        icon = '<i class="fas fa-info-circle text-amber-600"></i>';
+                        senderLabel = '系统消息';
+                }
+
+                // 检查是否是 JSON
+                let contentHtml;
+                try {
+                    const parsed = JSON.parse(content);
+                    contentHtml = `<div class="json-content">${JSON.stringify(parsed, null, 2)}</div>`;
+                } catch (e) {
+                    contentHtml = `<div class="whitespace-pre-wrap">${content}</div>`;
+                }
+
                 messageEl.innerHTML = `
-                    <div class="message-header">
-                        <span class="sender">${sender}</span>
-                        <span class="timestamp">${timestamp}</span>
+                    <div class="flex items-center gap-2 mb-2 text-xs ${textColor}">
+                        ${icon}
+                        <span class="font-semibold">${senderLabel}</span>
+                        <span class="ml-auto">${timestamp}</span>
                     </div>
-                    <div class="message-content">${content}</div>
+                    <div class="text-sm ${textColor}">
+                        ${contentHtml}
+                    </div>
                 `;
 
                 messagesContainer.appendChild(messageEl);
@@ -517,7 +503,7 @@
 
                 // 更新消息计数
                 const totalMessages = messagesContainer.children.length;
-                messagesCountEl.textContent = `消息数: ${totalMessages}`;
+                messagesCountEl.textContent = `(${totalMessages} 条消息)`;
             }
 
             // 更新连接时间
@@ -527,33 +513,31 @@
                     const elapsed = Math.floor((now - connectionStartTime) / 1000);
                     const minutes = Math.floor(elapsed / 60);
                     const seconds = elapsed % 60;
-                    connectionTimeEl.textContent = `连接时间: ${minutes}分${seconds}秒`;
+                    connectionTimeEl.textContent = `${minutes}分${seconds}秒`;
                 }
             }
 
-            // 设置URL
+            // 设置 URL
             function setUrl() {
                 const newUrl = urlInput.value.trim();
                 if (newUrl) {
-                    // 简单的URL验证
                     if (newUrl.startsWith('ws://') || newUrl.startsWith('wss://')) {
                         currentUrl = newUrl;
-                        addMessage(`已设置URL: ${currentUrl}`, 'system');
+                        addMessage(`已设置 URL: ${currentUrl}`, 'system');
 
-                        // 如果已连接，先断开
                         if (websocket && websocket.readyState === WebSocket.OPEN) {
                             disconnect();
-                            addMessage('URL已更改，请重新连接', 'system');
+                            addMessage('URL 已更改，请重新连接', 'system');
                         }
                     } else {
-                        addMessage('URL必须以ws://或wss://开头', 'error');
+                        addMessage('URL 必须以 ws:// 或 wss:// 开头', 'error');
                     }
                 } else {
-                    addMessage('请输入有效的URL', 'error');
+                    addMessage('请输入有效的 URL', 'error');
                 }
             }
 
-            // 连接到WebSocket
+            // 连接到 WebSocket
             function connect() {
                 try {
                     addMessage('正在连接到: ' + currentUrl, 'system');
@@ -563,7 +547,6 @@
                         addMessage('成功连接到: ' + currentUrl, 'system');
                         updateStatus(true);
 
-                        // 启动连接计时器
                         connectionStartTime = new Date();
                         connectionTimer = setInterval(updateConnectionTime, 1000);
                     };
@@ -572,7 +555,6 @@
                         addMessage('连接已关闭', 'system');
                         updateStatus(false);
 
-                        // 停止连接计时器
                         if (connectionTimer) {
                             clearInterval(connectionTimer);
                             connectionTimer = null;
@@ -596,14 +578,13 @@
                 }
             }
 
-            // 断开WebSocket连接
+            // 断开 WebSocket 连接
             function disconnect() {
                 if (websocket) {
                     websocket.close();
                     websocket = null;
                     addMessage('已断开连接', 'system');
 
-                    // 停止连接计时器
                     if (connectionTimer) {
                         clearInterval(connectionTimer);
                         connectionTimer = null;
@@ -629,10 +610,6 @@
 
             clearBtn.addEventListener('click', function () {
                 messagesContainer.innerHTML = '';
-                const totalMessages = messagesContainer.children.length;
-                messagesCountEl.textContent = `消息数: ${totalMessages}`;
-
-                // 添加系统消息
                 addMessage('消息已清除', 'system');
             });
 
@@ -653,7 +630,6 @@
             });
 
             urlSetBtn.addEventListener('click', setUrl);
-
             urlInput.addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     setUrl();
@@ -663,10 +639,44 @@
             // 初始状态
             updateStatus(false);
 
-            // 添加一些使用提示
-            addMessage('提示: 使用Ctrl+Enter快速发送消息', 'system');
+            // 添加使用提示
+            addMessage('提示: 使用 Ctrl+Enter 快速发送消息', 'system');
             addMessage('提示: 点击预设消息可以快速填充消息框', 'system');
         });
+    </script>
+    <!-- 结构化数据 - 增强版 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "多媒体工具大全",
+      "description": "免费使用多种多媒体处理工具，包括HLS播放器、WebSocket测试等。操作简单，永久免费！",
+      "url": "https://tools.yy24365.com/multimedia/ws_websocket.html",
+      "applicationCategory": "ToolApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "provider": {
+        "@type": "Organization",
+        "name": "工具箱",
+        "url": "https://tools.yy24365.com"
+      }
+    }
+    </script>
+
+    <!-- 面包屑导航结构化数据 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "首页", "item": "https://tools.yy24365.com"},
+        {"@type": "ListItem", "position": 2, "name": "多媒体工具大全", "item": "https://tools.yy24365.com/apps/multimedia/"}
+      ]
+    }
     </script>
 </body>
 

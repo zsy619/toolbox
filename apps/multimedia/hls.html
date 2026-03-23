@@ -3,623 +3,141 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="工具箱">
+
+    <title>多媒体工具大全 - 免费在线多媒体处理工具 | 工具箱</title>
+    <meta name="description" content="免费使用多种多媒体处理工具，包括HLS播放器、WebSocket测试等。操作简单，永久免费！">
+    <meta name="keywords" content="多媒体工具,视频播放器,WebSocket,流媒体,免费工具">
+
+    <!-- Sitemap -->
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tools.yy24365.com/multimedia/hls.html">
+    <meta property="og:title" content="多媒体工具大全 - 免费在线多媒体处理工具">
+    <meta property="og:description" content="免费使用多种多媒体处理工具，包括HLS播放器、WebSocket测试等。操作简单，永久免费！">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/multimedia-og.png">
+    <meta property="og:site_name" content="工具箱">
+    <meta property="og:locale" content="zh_CN">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://tools.yy24365.com/multimedia/hls.html">
+    <meta name="twitter:title" content="多媒体工具大全 - 免费在线多媒体处理工具">
+    <meta name="twitter:description" content="免费使用多种多媒体处理工具，包括HLS播放器、WebSocket测试等。操作简单，永久免费！">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/multimedia-og.png">
+
+    <!-- WeChat Sharing -->
+    <meta itemprop="name" content="多媒体工具大全 - 免费在线多媒体处理工具">
+    <meta itemprop="description" content="免费使用多种多媒体处理工具，包括HLS播放器、WebSocket测试等。操作简单，永久免费！">
+    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/multimedia-og.png">
+
+    <!-- WeChat JSSDK Config -->
+    <meta name="wechat-share-title" content="多媒体工具大全 - 免费在线多媒体处理工具">
+    <meta name="wechat-share-desc" content="免费使用多种多媒体处理工具，包括HLS播放器、WebSocket测试等。操作简单，永久免费！">
+    <meta name="wechat-share-img" content="https://tools.yy24365.com/assets/images/multimedia-og.png">
+    <meta name="wechat-share-link" content="https://tools.yy24365.com/multimedia/hls.html">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://tools.yy24365.com/multimedia/hls.html"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>高级HLS播放器 - 悬停操作 & 倍速播放</title>
-    <meta name="description" content="支持.m3u8流解析、实时码率切换，内置开发者调试模式，适用于在线教育/企业直播场景" />
-    <link rel="stylesheet" href="../../assets/css/layui.min.css">
-    <script src="../../assets/js/layui.min.js"></script>
-    <script src="../../assets/js/vendor/hls.min.js"></script>
-    <script src="../../assets/js/vendor/sortable.min.js"></script>
-    <link rel="stylesheet" href="../../assets/css/fontawesome.min.css">
+
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 引入 Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 引入 HLS.js -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <!-- 引入 Sortable.js -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <!-- 自定义 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 自定义动画样式 -->
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background: linear-gradient(135deg, #f0f6ff 0%, #e6f0ff 100%);
-            min-height: 100vh;
-            padding: 15px;
-            color: #333;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            border-radius: 16px;
-            overflow: hidden;
-            background: white;
-        }
-
-        .header {
-            background: linear-gradient(120deg, #1E9FFF 0%, #0d8bf2 100%);
-            color: white;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
-            min-width: 250px;
-        }
-
-        .logo i {
-            font-size: 28px;
-            background: rgba(255, 255, 255, 0.2);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo h1 {
-            font-size: 22px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .logo p {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-top: 4px;
-        }
-
-        .header-info {
-            flex: 1;
-            min-width: 250px;
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 50px;
-            max-width: 300px;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #95a5a6;
-        }
-
-        .status-dot.playing {
-            background: #5FB878;
-            animation: pulse 1.5s infinite;
-        }
-
         @keyframes pulse {
-            0% {
+            0%, 100% {
                 opacity: 1;
             }
-
             50% {
                 opacity: 0.4;
             }
-
-            100% {
-                opacity: 1;
-            }
         }
 
-        .main-content {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 0;
-        }
-
-        .player-section {
-            flex: 2;
-            min-width: 300px;
-            padding: 20px;
-            border-right: 1px solid #eee;
-        }
-
-        .control-section {
-            flex: 1;
-            min-width: 300px;
-            padding: 20px;
-            background: #fafbfc;
-        }
-
-        .section-title {
-            font-size: 18px;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #1E9FFF;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-title i {
-            color: #1E9FFF;
-            background: rgba(30, 159, 255, 0.1);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #video-container {
-            width: 100%;
-            height: 0;
-            padding-bottom: 56.25%;
-            /* 16:9 aspect ratio */
-            position: relative;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        #video-player {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            outline: none;
-        }
-
-        .url-input {
-            display: flex;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(30, 159, 255, 0.15);
-        }
-
-        .url-input input {
-            flex: 1;
-            height: 46px;
-            border: none;
-            padding: 0 18px;
-            font-size: 15px;
-            outline: none;
-            background: #f8fafc;
-        }
-
-        .url-input button {
-            background: #1E9FFF;
-            color: white;
-            border: none;
-            padding: 0 22px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .url-input button:hover {
-            background: #0d8bf2;
-        }
-
-        .player-controls {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .player-controls button {
-            height: 46px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 500;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .player-controls button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .player-controls .play-btn {
-            background: #1E9FFF;
-            color: white;
-        }
-
-        .player-controls .pause-btn {
-            background: #FFB800;
-            color: white;
-        }
-
-        .player-controls .mute-btn {
-            background: #5FB878;
-            color: white;
-        }
-
-        .player-controls .fullscreen-btn {
-            background: #2F4056;
-            color: white;
-        }
-
-        .speed-control {
-            grid-column: span 4;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 0 15px;
-            height: 46px;
-        }
-
-        .speed-control label {
-            font-weight: 500;
-            color: #1E9FFF;
-            white-space: nowrap;
-        }
-
-        .speed-control select {
-            flex: 1;
-            height: 36px;
-            border: none;
-            background: transparent;
-            font-size: 14px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .video-info {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 10px;
-            border-left: 3px solid #1E9FFF;
-            font-size: 14px;
-        }
-
-        .info-item {
-            display: flex;
-            margin-bottom: 10px;
-        }
-
-        .info-label {
-            width: 90px;
-            font-weight: 600;
-            color: #1E9FFF;
-        }
-
-        .info-value {
-            flex: 1;
-            color: #555;
-            word-break: break-all;
-        }
-
-        .favorites-container {
-            margin-top: 15px;
-        }
-
-        .favorites-list {
-            max-height: 300px;
-            overflow-y: auto;
-            padding-right: 8px;
-        }
-
-        .favorite-item {
-            display: flex;
-            background: white;
-            border-radius: 10px;
-            padding: 14px 60px 14px 40px;
-            /* 右侧留出操作按钮空间 */
-            margin-bottom: 12px;
-            align-items: center;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e8e8e8;
-            transition: all 0.3s;
-            cursor: move;
-            /* 拖拽光标 */
-            position: relative;
-        }
-
-        .favorite-item:hover {
-            transform: translateY(-3px);
-            border-color: #1E9FFF;
-            box-shadow: 0 5px 15px rgba(30, 159, 255, 0.15);
-        }
-
-        .fav-icon {
-            width: 38px;
-            height: 38px;
-            background: rgba(30, 159, 255, 0.1);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #1E9FFF;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-
-        .fav-content {
-            flex: 1;
-            min-width: 0;
-            /* 防止内容溢出 */
-            overflow: hidden;
-        }
-
-        .fav-content .title {
-            font-weight: 500;
-            margin-bottom: 5px;
-            color: #2c3e50;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .fav-content .url {
-            font-size: 12px;
-            color: #7f8c8d;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .fav-actions {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            gap: 8px;
-            background: white;
-            padding: 5px;
-            border-radius: 20px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
-        }
-
-        .favorite-item:hover .fav-actions {
-            opacity: 1;
-            transform: translateY(-50%) translateX(0);
-        }
-
-        .fav-actions button {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .fav-actions button:hover {
-            transform: scale(1.1);
-        }
-
-        .fav-actions .play-btn {
-            background: rgba(30, 159, 255, 0.1);
-            color: #1E9FFF;
-        }
-
-        .fav-actions .download-btn {
-            background: rgba(95, 184, 120, 0.1);
-            color: #5FB878;
-        }
-
-        .fav-actions .delete-btn {
-            background: rgba(255, 87, 34, 0.1);
-            color: #FF5722;
-        }
-
-        .add-favorite {
-            display: flex;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(95, 184, 120, 0.2);
-        }
-
-        .add-favorite input {
-            flex: 1;
-            height: 46px;
-            border: none;
-            padding: 0 18px;
-            font-size: 14px;
-            outline: none;
-            background: #f8fafc;
-        }
-
-        .add-favorite button {
-            background: #5FB878;
-            color: white;
-            border: none;
-            padding: 0 22px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .add-favorite button:hover {
-            background: #4caa6a;
-        }
-
-        .empty-list {
-            text-align: center;
-            padding: 30px 15px;
-            color: #95a5a6;
-        }
-
-        .empty-list i {
-            font-size: 42px;
-            margin-bottom: 12px;
-            color: #dce4e9;
-        }
-
-        .empty-list p {
-            font-size: 15px;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: #7f8c8d;
-            font-size: 14px;
-            background: #f8fafc;
-            border-top: 1px solid #eee;
-        }
-
-        /* 移动端适配 */
-        @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
-            }
-
-            .player-section {
-                border-right: none;
-                border-bottom: 1px solid #eee;
-            }
-
-            .player-controls {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .header {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
-                padding: 15px;
-            }
-
-            .logo {
-                justify-content: center;
-                text-align: center;
-            }
-
-            .status-indicator {
-                max-width: 100%;
-                justify-content: center;
-            }
-
-            .section-title {
-                font-size: 17px;
-            }
-
-            .url-input button,
-            .add-favorite button {
-                padding: 0 15px;
-                font-size: 14px;
-            }
-
-            .player-controls button {
-                font-size: 13px;
-                padding: 0 8px;
-            }
-
-            .fav-actions {
-                opacity: 1;
-                /* 在移动端始终显示操作按钮 */
-                transform: translateY(-50%) scale(0.9);
-                right: 5px;
-            }
-
-            .favorite-item {
-                padding: 12px 55px 12px 35px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                border-radius: 12px;
-            }
-
-            .player-section,
-            .control-section {
-                padding: 15px;
-            }
-
-            .player-controls {
-                gap: 10px;
-            }
-
-            .favorite-item {
-                padding: 10px 50px 10px 30px;
-            }
-
-            .footer {
-                padding: 15px;
-                font-size: 13px;
-            }
+        .animate-pulse-slow {
+            animation: pulse 1.5s infinite;
         }
 
         /* 拖拽排序样式 */
         .sortable-ghost {
             opacity: 0.6;
             background: #f0f8ff;
-            border: 1px dashed #1E9FFF;
+            border: 1px dashed #3b82f6;
         }
 
         .sortable-chosen {
-            box-shadow: 0 0 15px rgba(30, 159, 255, 0.2);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
         }
 
-        .drag-handle {
-            position: absolute;
-            left: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #ccc;
-            cursor: move;
-            opacity: 0.5;
-            transition: opacity 0.3s;
+        /* 自定义滚动条 */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .favorite-item:hover .drag-handle {
-            opacity: 1;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
         }
 
-        .speed-indicator {
-            display: inline-block;
-            background: #1E9FFF;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-left: 5px;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
     </style>
-    <!-- 微信/OpenGraph 卡片信息 -->
+
+    <!-- SEO 和分享标签 -->
+    <meta name="description" content="支持.m3u8流解析、实时码率切换，内置开发者调试模式，适用于在线教育/企业直播场景">
+    <meta name="keywords" content="HLS播放器, m3u8, 视频流播放, 倍速播放, 在线教育, 企业直播">
     <meta property="og:title" content="高级HLS播放器 - 悬停操作 & 倍速播放">
     <meta property="og:description" content="支持.m3u8流解析、实时码率切换，内置开发者调试模式，适用于在线教育/企业直播场景">
-    <meta property="og:url" content="./hls.html">
-    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://tools.yy24365.com/apps/multimedia/hls.html">
+    <meta property="og:type" content="video.other">
     <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="YY工具箱">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="高级HLS播放器 - 悬停操作 & 倍速播放">
     <meta name="twitter:description" content="支持.m3u8流解析、实时码率切换，内置开发者调试模式，适用于在线教育/企业直播场景">
@@ -629,50 +147,118 @@
     <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
 </head>
 
-<body>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen p-4 md:p-6">
+
     <!-- Wechat Share Image Hack -->
     <div style="display:none; visibility:hidden;">
         <img src="https://tools.yy24365.com/assets/images/dev-tools-og.png" alt="wechat-share-icon" width="400" height="400">
     </div>
-    <div class="header-info">
-        <div class="status-indicator">
-            <span class="status-dot" id="status-dot"></span>
-            <span id="player-status">等待播放</span>
-            <span class="speed-indicator" id="speed-indicator">1.0x</span>
-        </div>
-    </div>
-    </div>
-    <div class="main-content">
-        <div class="player-section">
-            <div class="section-title">
-                <i class="fas fa-play"></i>
-                <span>视频播放器</span>
+
+    <!-- 主容器 -->
+    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+        <!-- 头部区域 -->
+        <header class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-6">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-play-circle text-4xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">高级HLS播放器</h1>
+                        <p class="text-blue-100 text-sm mt-1">悬停操作 & 倍速播放优化版</p>
+                    </div>
+                </div>
+
+                <!-- 状态指示器 -->
+                <div class="flex items-center gap-3 px-5 py-3 bg-white/20 backdrop-blur-sm rounded-full">
+                    <div id="status-dot" class="w-3 h-3 rounded-full bg-gray-300"></div>
+                    <span id="player-status" class="text-sm font-medium">等待播放</span>
+                    <span id="speed-indicator" class="px-3 py-1 bg-white/30 rounded text-xs font-bold">1.0x</span>
+                </div>
             </div>
-            <div id="video-container">
-                <video id="video-player" controls playsinline></video>
-            </div>
-            <div class="url-input">
-                <input type="text" id="video-url" placeholder="请输入.m3u8视频地址..." value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">
-                <button id="play-btn">
-                    <i class="fas fa-play"></i> 播放
-                </button>
-            </div>
-            <div class="player-controls">
-                <button class="play-btn" id="start-play">
-                    <i class="fas fa-play"></i> 播放
-                </button>
-                <button class="pause-btn" id="pause-play">
-                    <i class="fas fa-pause"></i> 暂停
-                </button>
-                <button class="mute-btn" id="toggle-mute">
-                    <i class="fas fa-volume-up"></i> 静音
-                </button>
-                <button class="fullscreen-btn" id="fullscreen">
-                    <i class="fas fa-expand"></i> 全屏
-                </button>
-                <div class="speed-control">
-                    <label for="playback-speed"><i class="fas fa-tachometer-alt"></i> 倍速:</label>
-                    <select id="playback-speed">
+        </header>
+
+        <!-- 主内容区域 -->
+        <div class="flex flex-col lg:flex-row">
+
+            <!-- 播放器区域 -->
+            <div class="flex-1 p-6 border-b lg:border-b-0 lg:border-r border-gray-200">
+                <div class="section-title mb-6 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-play text-blue-600"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">视频播放器</h2>
+                </div>
+
+                <!-- 视频容器 -->
+                <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-lg mb-6">
+                    <video id="video-player" controls playsinline class="w-full h-full outline-none"></video>
+                </div>
+
+                <!-- URL 输入框 -->
+                <div class="flex flex-col sm:flex-row gap-3 mb-6">
+                    <input
+                        type="text"
+                        id="video-url"
+                        value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+                        placeholder="请输入.m3u8视频地址..."
+                        class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    >
+                    <button
+                        id="play-btn"
+                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                        <i class="fas fa-play"></i>
+                        <span>播放</span>
+                    </button>
+                </div>
+
+                <!-- 播放控制按钮 -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                    <button
+                        id="start-play"
+                        class="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                        <i class="fas fa-play"></i>
+                        <span>播放</span>
+                    </button>
+
+                    <button
+                        id="pause-play"
+                        class="px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg transition-all hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                        <i class="fas fa-pause"></i>
+                        <span>暂停</span>
+                    </button>
+
+                    <button
+                        id="toggle-mute"
+                        class="px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                        <i class="fas fa-volume-up"></i>
+                        <span>静音</span>
+                    </button>
+
+                    <button
+                        id="fullscreen"
+                        class="px-4 py-3 bg-gray-700 hover:bg-gray-800 text-white font-semibold rounded-lg transition-all hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                        <i class="fas fa-expand"></i>
+                        <span>全屏</span>
+                    </button>
+                </div>
+
+                <!-- 倍速控制 -->
+                <div class="bg-gray-50 rounded-lg px-4 py-3 mb-6 flex items-center gap-3">
+                    <label for="playback-speed" class="flex items-center gap-2 text-blue-600 font-semibold whitespace-nowrap">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>倍速:</span>
+                    </label>
+                    <select
+                        id="playback-speed"
+                        class="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    >
                         <option value="0.5">0.5x - 慢速</option>
                         <option value="1.0" selected>1.0x - 正常</option>
                         <option value="1.5">1.5x - 稍快</option>
@@ -681,446 +267,444 @@
                         <option value="3.0">3.0x - 极速</option>
                     </select>
                 </div>
-            </div>
-            <div class="video-info">
-                <div class="info-item">
-                    <span class="info-label">视频格式：</span>
-                    <span class="info-value">HLS (HTTP Live Streaming)</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">支持格式：</span>
-                    <span class="info-value">.m3u8, .mp4, .webm, .ogg</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">当前地址：</span>
-                    <span class="info-value" id="current-url">未加载视频</span>
-                </div>
-            </div>
-        </div>
-        <div class="control-section">
-            <div class="section-title">
-                <i class="fas fa-star"></i>
-                <span>收藏功能</span>
-            </div>
-            <div class="add-favorite">
-                <input type="text" id="favorite-title" placeholder="输入收藏名称...">
-                <button id="add-favorite">
-                    <i class="fas fa-plus"></i> 添加
-                </button>
-            </div>
-            <div class="favorites-container">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <h3 style="color: #2c3e50; font-weight: 500;">
-                        <i class="fas fa-list"></i> 我的收藏列表
+
+                <!-- 视频信息 -->
+                <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 space-y-3">
+                    <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-blue-500"></i>
+                        视频信息
                     </h3>
-                    <span style="font-size: 13px; color: #7f8c8d;">拖拽可排序 | 悬停显示操作</span>
-                </div>
-                <div class="favorites-list" id="favorites-container">
-                    <div class="favorite-item">
-                        <div class="drag-handle">
-                            <i class="fas fa-grip-lines"></i>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                        <div class="flex items-start gap-2">
+                            <span class="font-semibold text-blue-600 min-w-[80px]">视频格式:</span>
+                            <span class="text-gray-700">HLS (HTTP Live Streaming)</span>
                         </div>
-                        <div class="fav-icon">
-                            <i class="fas fa-film"></i>
+                        <div class="flex items-start gap-2">
+                            <span class="font-semibold text-blue-600 min-w-[80px]">支持格式:</span>
+                            <span class="text-gray-700">.m3u8, .mp4, .webm, .ogg</span>
                         </div>
-                        <div class="fav-content">
-                            <div class="title">示例收藏：测试视频流</div>
-                            <div class="url">https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8</div>
-                        </div>
-                        <div class="fav-actions">
-                            <button class="play-btn" title="播放">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <button class="download-btn" title="下载">
-                                <i class="fas fa-download"></i>
-                            </button>
-                            <button class="delete-btn" title="删除">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="favorite-item">
-                        <div class="drag-handle">
-                            <i class="fas fa-grip-lines"></i>
-                        </div>
-                        <div class="fav-icon">
-                            <i class="fas fa-video"></i>
-                        </div>
-                        <div class="fav-content">
-                            <div class="title">演示收藏：Big Buck Bunny</div>
-                            <div class="url">https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_640x360_1mbps.f4v</div>
-                        </div>
-                        <div class="fav-actions">
-                            <button class="play-btn" title="播放">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <button class="download-btn" title="下载">
-                                <i class="fas fa-download"></i>
-                            </button>
-                            <button class="delete-btn" title="删除">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                        <div class="flex items-start gap-2 md:col-span-1">
+                            <span class="font-semibold text-blue-600 min-w-[80px]">当前地址:</span>
+                            <span id="current-url" class="text-gray-700 break-all">未加载视频</span>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- 收藏功能区域 -->
+            <div class="w-full lg:w-96 bg-gray-50 p-6">
+                <div class="section-title mb-6 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-star text-purple-600"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">收藏功能</h2>
+                </div>
+
+                <!-- 添加收藏 -->
+                <div class="flex flex-col gap-3 mb-6">
+                    <input
+                        type="text"
+                        id="favorite-title"
+                        placeholder="输入收藏名称..."
+                        class="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    >
+                    <button
+                        id="add-favorite"
+                        class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                        <i class="fas fa-plus"></i>
+                        <span>添加收藏</span>
+                    </button>
+                </div>
+
+                <!-- 收藏列表标题 -->
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-list text-purple-500"></i>
+                        我的收藏列表
+                    </h3>
+                    <span class="text-xs text-gray-500">拖拽可排序 | 悬停显示操作</span>
+                </div>
+
+                <!-- 收藏列表容器 -->
+                <div id="favorites-container" class="space-y-3 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
+                    <!-- 收藏项将由 JavaScript 动态生成 -->
+                </div>
+            </div>
         </div>
+
+        <!-- 底部 -->
+        <footer class="bg-gray-50 border-t border-gray-200 px-6 py-4 text-center text-sm text-gray-600">
+            <p>© 2025 高级HLS播放器 | 悬停操作与倍速播放优化版 | 基于 hls.js 和 Sortable.js 开发</p>
+        </footer>
     </div>
-    <div class="footer">
-        <p>© 2025 高级HLS播放器 | 悬停操作与倍速播放优化版 | 基于LayUI和hls.js开发</p>
-    </div>
-    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // 初始化layui模块
-            layui.use(['layer'], function () {
-                const layer = layui.layer;
+            // 获取DOM元素
+            const video = document.getElementById('video-player');
+            const videoUrlInput = document.getElementById('video-url');
+            const playBtn = document.getElementById('play-btn');
+            const startPlayBtn = document.getElementById('start-play');
+            const pausePlayBtn = document.getElementById('pause-play');
+            const toggleMuteBtn = document.getElementById('toggle-mute');
+            const fullscreenBtn = document.getElementById('fullscreen');
+            const playerStatus = document.getElementById('player-status');
+            const statusDot = document.getElementById('status-dot');
+            const currentUrl = document.getElementById('current-url');
+            const addFavoriteBtn = document.getElementById('add-favorite');
+            const favoriteTitleInput = document.getElementById('favorite-title');
+            const favoritesContainer = document.getElementById('favorites-container');
+            const speedSelect = document.getElementById('playback-speed');
+            const speedIndicator = document.getElementById('speed-indicator');
 
-                // 获取DOM元素
-                const video = document.getElementById('video-player');
-                const videoUrlInput = document.getElementById('video-url');
-                const playBtn = document.getElementById('play-btn');
-                const startPlayBtn = document.getElementById('start-play');
-                const pausePlayBtn = document.getElementById('pause-play');
-                const toggleMuteBtn = document.getElementById('toggle-mute');
-                const fullscreenBtn = document.getElementById('fullscreen');
-                const playerStatus = document.getElementById('player-status');
-                const statusDot = document.getElementById('status-dot');
-                const currentUrl = document.getElementById('current-url');
-                const addFavoriteBtn = document.getElementById('add-favorite');
-                const favoriteTitleInput = document.getElementById('favorite-title');
-                const favoritesContainer = document.getElementById('favorites-container');
-                const speedSelect = document.getElementById('playback-speed');
-                const speedIndicator = document.getElementById('speed-indicator');
+            let hls = null;
+            let sortable = null;
+            let currentPlaybackRate = 1.0;
 
-                let hls = null;
-                let sortable = null;
-                let currentPlaybackRate = 1.0; // 默认1倍速
-
-                // 初始化HLS播放器
-                function initPlayer(url) {
-                    if (hls) {
-                        hls.destroy();
-                    }
-
-                    currentUrl.textContent = url;
-
-                    if (Hls.isSupported()) {
-                        hls = new Hls();
-                        hls.loadSource(url);
-                        hls.attachMedia(video);
-                        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                            // 设置倍速
-                            video.playbackRate = currentPlaybackRate;
-                            speedIndicator.textContent = currentPlaybackRate.toFixed(1) + 'x';
-
-                            updateStatus('已加载视频，准备播放');
-                            video.play().catch(e => {
-                                updateStatus('自动播放被阻止，请手动点击播放');
-                            });
-                        });
-                    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                        // 对于Safari浏览器
-                        video.src = url;
-                        video.addEventListener('loadedmetadata', function () {
-                            // 设置倍速
-                            video.playbackRate = currentPlaybackRate;
-                            speedIndicator.textContent = currentPlaybackRate.toFixed(1) + 'x';
-
-                            updateStatus('已加载视频，准备播放');
-                            video.play().catch(e => {
-                                updateStatus('自动播放被阻止，请手动点击播放');
-                            });
-                        });
-                    } else {
-                        layer.msg('您的浏览器不支持HLS播放', { icon: 5 });
-                    }
+            // 初始化HLS播放器
+            function initPlayer(url) {
+                if (hls) {
+                    hls.destroy();
                 }
 
-                // 更新播放状态
-                function updateStatus(text) {
-                    playerStatus.textContent = text;
+                currentUrl.textContent = url;
 
-                    if (text.includes('播放中')) {
-                        statusDot.className = 'status-dot playing';
-                    } else if (text.includes('暂停') || text.includes('等待')) {
-                        statusDot.className = 'status-dot';
-                    } else {
-                        statusDot.className = 'status-dot';
-                    }
+                if (Hls.isSupported()) {
+                    hls = new Hls();
+                    hls.loadSource(url);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                        video.playbackRate = currentPlaybackRate;
+                        speedIndicator.textContent = currentPlaybackRate.toFixed(1) + 'x';
+                        updateStatus('已加载视频，准备播放');
+                        video.play().catch(e => {
+                            updateStatus('自动播放被阻止，请手动点击播放');
+                        });
+                    });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = url;
+                    video.addEventListener('loadedmetadata', function () {
+                        video.playbackRate = currentPlaybackRate;
+                        speedIndicator.textContent = currentPlaybackRate.toFixed(1) + 'x';
+                        updateStatus('已加载视频，准备播放');
+                        video.play().catch(e => {
+                            updateStatus('自动播放被阻止，请手动点击播放');
+                        });
+                    });
+                } else {
+                    alert('您的浏览器不支持HLS播放');
                 }
+            }
 
-                // 播放按钮事件
-                playBtn.addEventListener('click', function () {
-                    const url = videoUrlInput.value.trim();
-                    if (url) {
-                        updateStatus('正在加载视频...');
-                        initPlayer(url);
-                    } else {
-                        layer.msg('请输入有效的视频地址', { icon: 5 });
-                    }
-                });
-
-                // 开始播放
-                startPlayBtn.addEventListener('click', function () {
-                    if (video.src) {
-                        video.play();
-                        updateStatus('播放中... (' + currentPlaybackRate.toFixed(1) + 'x)');
-                    } else {
-                        layer.msg('请先加载视频', { icon: 5 });
-                    }
-                });
-
-                // 暂停播放
-                pausePlayBtn.addEventListener('click', function () {
-                    video.pause();
-                    updateStatus('已暂停');
-                });
-
-                // 静音切换
-                toggleMuteBtn.addEventListener('click', function () {
-                    video.muted = !video.muted;
-                    if (video.muted) {
-                        toggleMuteBtn.innerHTML = '<i class="fas fa-volume-mute"></i> 取消静音';
-                        updateStatus('已静音');
-                    } else {
-                        toggleMuteBtn.innerHTML = '<i class="fas fa-volume-up"></i> 静音';
-                        updateStatus('播放中... (' + currentPlaybackRate.toFixed(1) + 'x)');
-                    }
-                });
-
-                // 全屏模式
-                fullscreenBtn.addEventListener('click', function () {
-                    if (video.requestFullscreen) {
-                        video.requestFullscreen();
-                    } else if (video.mozRequestFullScreen) {
-                        video.mozRequestFullScreen();
-                    } else if (video.webkitRequestFullscreen) {
-                        video.webkitRequestFullscreen();
-                    } else if (video.msRequestFullscreen) {
-                        video.msRequestFullscreen();
-                    }
-                });
-
-                // 倍速控制
-                speedSelect.addEventListener('change', function () {
-                    const speed = parseFloat(this.value);
-                    currentPlaybackRate = speed; // 更新当前倍速
-                    video.playbackRate = speed;
-                    speedIndicator.textContent = speed.toFixed(1) + 'x';
-
-                    if (!video.paused) {
-                        updateStatus('播放中... (' + speed.toFixed(1) + 'x)');
-                    }
-                });
-
-                // 视频事件监听
-                video.addEventListener('play', function () {
-                    updateStatus('播放中... (' + currentPlaybackRate.toFixed(1) + 'x)');
-                });
-
-                video.addEventListener('pause', function () {
-                    updateStatus('已暂停');
-                });
-
-                video.addEventListener('ended', function () {
-                    updateStatus('播放结束');
-                });
-
-                video.addEventListener('error', function () {
-                    updateStatus('播放出错，请检查视频地址');
-                });
-
-                // 收藏功能
-                function loadFavorites() {
-                    favoritesContainer.innerHTML = '';
-                    const favorites = JSON.parse(localStorage.getItem('videoFavorites')) || [];
-
-                    if (favorites.length === 0) {
-                        favoritesContainer.innerHTML = `
-                            <div class="empty-list">
-                                <i class="fas fa-star"></i>
-                                <p>暂无收藏内容</p>
-                            </div>
-                        `;
-                        initSortable(); // 初始化空列表的Sortable
-                        return;
-                    }
-
-                    favorites.forEach((fav, index) => {
-                        const item = document.createElement('div');
-                        item.className = 'favorite-item';
-                        item.innerHTML = `
-                            <div class="drag-handle">
-                                <i class="fas fa-grip-lines"></i>
-                            </div>
-                            <div class="fav-icon">
-                                <i class="fas fa-film"></i>
-                            </div>
-                            <div class="fav-content">
-                                <div class="title">${fav.title}</div>
-                                <div class="url">${fav.url}</div>
-                            </div>
-                            <div class="fav-actions">
-                                <button class="play-btn play-fav" data-url="${fav.url}" title="播放">
-                                    <i class="fas fa-play"></i>
-                                </button>
-                                <button class="download-btn download-fav" data-url="${fav.url}" title="下载">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                                <button class="delete-btn delete-fav" data-index="${index}" title="删除">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        `;
-                        favoritesContainer.appendChild(item);
-                    });
-
-                    // 添加收藏项事件
-                    document.querySelectorAll('.play-fav').forEach(btn => {
-                        btn.addEventListener('click', function () {
-                            const url = this.getAttribute('data-url');
-                            videoUrlInput.value = url;
-                            updateStatus('正在加载收藏的视频...');
-                            initPlayer(url);
-                        });
-                    });
-
-                    document.querySelectorAll('.download-fav').forEach(btn => {
-                        btn.addEventListener('click', function () {
-                            const url = this.getAttribute('data-url');
-                            downloadVideo(url);
-                        });
-                    });
-
-                    document.querySelectorAll('.delete-fav').forEach(btn => {
-                        btn.addEventListener('click', function () {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            const favorites = JSON.parse(localStorage.getItem('videoFavorites')) || [];
-                            favorites.splice(index, 1);
-                            localStorage.setItem('videoFavorites', JSON.stringify(favorites));
-                            loadFavorites();
-                            layer.msg('已删除收藏', { icon: 1 });
-                        });
-                    });
-
-                    // 初始化拖拽排序
-                    initSortable();
+            // 更新播放状态
+            function updateStatus(text) {
+                playerStatus.textContent = text;
+                if (text.includes('播放中')) {
+                    statusDot.className = 'w-3 h-3 rounded-full bg-green-400 animate-pulse-slow';
+                } else if (text.includes('暂停') || text.includes('等待')) {
+                    statusDot.className = 'w-3 h-3 rounded-full bg-yellow-400';
+                } else {
+                    statusDot.className = 'w-3 h-3 rounded-full bg-gray-400';
                 }
+            }
 
-                // 下载视频函数
-                function downloadVideo(url) {
-                    if (url) {
-                        // 创建下载链接
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = url.split('/').pop() || 'video_stream';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-
-                        layer.msg('已开始下载视频', { icon: 1 });
-                    } else {
-                        layer.msg('没有可下载的视频地址', { icon: 5 });
-                    }
-                }
-
-                // 初始化拖拽排序功能
-                function initSortable() {
-                    if (sortable) {
-                        sortable.destroy();
-                    }
-
-                    sortable = new Sortable(favoritesContainer, {
-                        animation: 150,
-                        ghostClass: 'sortable-ghost',
-                        chosenClass: 'sortable-chosen',
-                        handle: '.drag-handle',
-                        onEnd: function (evt) {
-                            // 获取当前收藏列表
-                            const favorites = JSON.parse(localStorage.getItem('videoFavorites')) || [];
-
-                            // 重新排序数组
-                            const newIndex = evt.newIndex;
-                            const oldIndex = evt.oldIndex;
-
-                            if (newIndex >= favorites.length) {
-                                var k = newIndex - favorites.length + 1;
-                                while (k--) {
-                                    favorites.push(undefined);
-                                }
-                            }
-                            favorites.splice(newIndex, 0, favorites.splice(oldIndex, 1)[0]);
-
-                            // 保存更新后的收藏列表
-                            localStorage.setItem('videoFavorites', JSON.stringify(favorites));
-                        }
-                    });
-                }
-
-                // 添加收藏
-                addFavoriteBtn.addEventListener('click', function () {
-                    const url = videoUrlInput.value.trim();
-                    const title = favoriteTitleInput.value.trim();
-
-                    if (!url) {
-                        layer.msg('请先输入视频地址', { icon: 5 });
-                        return;
-                    }
-
-                    if (!title) {
-                        layer.msg('请输入收藏名称', { icon: 5 });
-                        return;
-                    }
-
-                    // 检查是否是有效的URL
-                    if (!url.startsWith('http')) {
-                        layer.msg('请输入有效的视频地址', { icon: 5 });
-                        return;
-                    }
-
-                    const favorites = JSON.parse(localStorage.getItem('videoFavorites')) || [];
-
-                    // 检查是否已存在
-                    if (favorites.some(fav => fav.url === url)) {
-                        layer.msg('该视频已在收藏列表中', { icon: 5 });
-                        return;
-                    }
-
-                    favorites.push({ title, url });
-                    localStorage.setItem('videoFavorites', JSON.stringify(favorites));
-                    favoriteTitleInput.value = '';
-                    loadFavorites();
-                    layer.msg('已添加到收藏', { icon: 1 });
-                });
-
-                // 初始化页面
-                loadFavorites();
-                updateStatus('等待播放');
-
-                // 设置默认视频
-                setTimeout(() => {
-                    if (videoUrlInput.value) {
-                        updateStatus('正在加载默认视频...');
-                        initPlayer(videoUrlInput.value);
-                    }
-                }, 1000);
-
-                // 移动端触摸事件优化
-                if ('ontouchstart' in window) {
-                    // 为控制按钮添加触摸反馈
-                    const buttons = document.querySelectorAll('button');
-                    buttons.forEach(btn => {
-                        btn.addEventListener('touchstart', function () {
-                            this.classList.add('active');
-                        });
-                        btn.addEventListener('touchend', function () {
-                            this.classList.remove('active');
-                        });
-                    });
+            // 播放按钮事件
+            playBtn.addEventListener('click', function () {
+                const url = videoUrlInput.value.trim();
+                if (url) {
+                    updateStatus('正在加载视频...');
+                    initPlayer(url);
+                } else {
+                    alert('请输入有效的视频地址');
                 }
             });
+
+            // 开始播放
+            startPlayBtn.addEventListener('click', function () {
+                if (video.src) {
+                    video.play();
+                    updateStatus('播放中... (' + currentPlaybackRate.toFixed(1) + 'x)');
+                } else {
+                    alert('请先加载视频');
+                }
+            });
+
+            // 暂停播放
+            pausePlayBtn.addEventListener('click', function () {
+                video.pause();
+                updateStatus('已暂停');
+            });
+
+            // 静音切换
+            toggleMuteBtn.addEventListener('click', function () {
+                video.muted = !video.muted;
+                if (video.muted) {
+                    toggleMuteBtn.innerHTML = '<i class="fas fa-volume-mute"></i><span>取消静音</span>';
+                    updateStatus('已静音');
+                } else {
+                    toggleMuteBtn.innerHTML = '<i class="fas fa-volume-up"></i><span>静音</span>';
+                    updateStatus('播放中... (' + currentPlaybackRate.toFixed(1) + 'x)');
+                }
+            });
+
+            // 全屏模式
+            fullscreenBtn.addEventListener('click', function () {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.mozRequestFullScreen) {
+                    video.mozRequestFullScreen();
+                } else if (video.webkitRequestFullscreen) {
+                    video.webkitRequestFullscreen();
+                } else if (video.msRequestFullscreen) {
+                    video.msRequestFullscreen();
+                }
+            });
+
+            // 倍速控制
+            speedSelect.addEventListener('change', function () {
+                const speed = parseFloat(this.value);
+                currentPlaybackRate = speed;
+                video.playbackRate = speed;
+                speedIndicator.textContent = speed.toFixed(1) + 'x';
+                if (!video.paused) {
+                    updateStatus('播放中... (' + speed.toFixed(1) + 'x)');
+                }
+            });
+
+            // 视频事件监听
+            video.addEventListener('play', function () {
+                updateStatus('播放中... (' + currentPlaybackRate.toFixed(1) + 'x)');
+            });
+
+            video.addEventListener('pause', function () {
+                updateStatus('已暂停');
+            });
+
+            video.addEventListener('ended', function () {
+                updateStatus('播放结束');
+            });
+
+            video.addEventListener('error', function () {
+                updateStatus('播放出错，请检查视频地址');
+            });
+
+            // 加载收藏列表
+            function loadFavorites() {
+                favoritesContainer.innerHTML = '';
+                const favorites = JSON.parse(localStorage.getItem('videoFavorites')) || [];
+
+                if (favorites.length === 0) {
+                    favoritesContainer.innerHTML = `
+                        <div class="text-center py-12 text-gray-400">
+                            <i class="fas fa-star text-5xl mb-4 opacity-30"></i>
+                            <p class="text-sm">暂无收藏内容</p>
+                        </div>
+                    `;
+                    initSortable();
+                    return;
+                }
+
+                favorites.forEach((fav, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'favorite-item bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-400 transition-all cursor-move relative group';
+                    item.dataset.index = index;
+                    item.innerHTML = `
+                        <div class="drag-handle absolute left-2 top-1/2 -translate-y-1/2 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity cursor-move">
+                            <i class="fas fa-grip-lines"></i>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-film text-blue-600"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="font-medium text-gray-800 truncate">${fav.title}</div>
+                                <div class="text-xs text-gray-500 truncate">${fav.url}</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="play-fav flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-all" data-url="${fav.url}">
+                                <i class="fas fa-play mr-1"></i>播放
+                            </button>
+                            <button class="download-fav px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-all" data-url="${fav.url}">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="delete-fav px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-all" data-index="${index}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    favoritesContainer.appendChild(item);
+                });
+
+                // 添加事件监听
+                document.querySelectorAll('.play-fav').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const url = this.getAttribute('data-url');
+                        videoUrlInput.value = url;
+                        updateStatus('正在加载收藏的视频...');
+                        initPlayer(url);
+                    });
+                });
+
+                document.querySelectorAll('.download-fav').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const url = this.getAttribute('data-url');
+                        downloadVideo(url);
+                    });
+                });
+
+                document.querySelectorAll('.delete-fav').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        const favorites = JSON.parse(localStorage.getItem('videoFavorites')) || [];
+                        favorites.splice(index, 1);
+                        localStorage.setItem('videoFavorites', JSON.stringify(favorites));
+                        loadFavorites();
+                        alert('已删除收藏');
+                    });
+                });
+
+                initSortable();
+            }
+
+            // 下载视频函数
+            function downloadVideo(url) {
+                if (url) {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = url.split('/').pop() || 'video_stream';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    alert('已开始下载视频');
+                } else {
+                    alert('没有可下载的视频地址');
+                }
+            }
+
+            // 初始化拖拽排序功能
+            function initSortable() {
+                if (sortable) {
+                    sortable.destroy();
+                }
+
+                sortable = new Sortable(favoritesContainer, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    handle: '.drag-handle',
+                    onEnd: function (evt) {
+                        const favorites = JSON.parse(localStorage.getItem('videoFavorites')) || [];
+                        const newIndex = evt.newIndex;
+                        const oldIndex = evt.oldIndex;
+
+                        if (newIndex >= favorites.length) {
+                            var k = newIndex - favorites.length + 1;
+                            while (k--) {
+                                favorites.push(undefined);
+                            }
+                        }
+                        favorites.splice(newIndex, 0, favorites.splice(oldIndex, 1)[0]);
+
+                        localStorage.setItem('videoFavorites', JSON.stringify(favorites));
+                    }
+                });
+            }
+
+            // 添加收藏
+            addFavoriteBtn.addEventListener('click', function () {
+                const url = videoUrlInput.value.trim();
+                const title = favoriteTitleInput.value.trim();
+
+                if (!url) {
+                    alert('请先输入视频地址');
+                    return;
+                }
+
+                if (!title) {
+                    alert('请输入收藏名称');
+                    return;
+                }
+
+                if (!url.startsWith('http')) {
+                    alert('请输入有效的视频地址');
+                    return;
+                }
+
+                const favorites = JSON.parse(localStorage.getItem('videoFavorites')) || [];
+
+                if (favorites.some(fav => fav.url === url)) {
+                    alert('该视频已在收藏列表中');
+                    return;
+                }
+
+                favorites.push({ title, url });
+                localStorage.setItem('videoFavorites', JSON.stringify(favorites));
+                favoriteTitleInput.value = '';
+                loadFavorites();
+                alert('已添加到收藏');
+            });
+
+            // 初始化页面
+            loadFavorites();
+            updateStatus('等待播放');
+
+            // 设置默认视频
+            setTimeout(() => {
+                if (videoUrlInput.value) {
+                    updateStatus('正在加载默认视频...');
+                    initPlayer(videoUrlInput.value);
+                }
+            }, 1000);
+
+            // 移动端触摸事件优化
+            if ('ontouchstart' in window) {
+                const buttons = document.querySelectorAll('button');
+                buttons.forEach(btn => {
+                    btn.addEventListener('touchstart', function () {
+                        this.classList.add('scale-95');
+                    });
+                    btn.addEventListener('touchend', function () {
+                        this.classList.remove('scale-95');
+                    });
+                });
+            }
         });
+    </script>
+    <!-- 结构化数据 - 增强版 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "多媒体工具大全",
+      "description": "免费使用多种多媒体处理工具，包括HLS播放器、WebSocket测试等。操作简单，永久免费！",
+      "url": "https://tools.yy24365.com/multimedia/hls.html",
+      "applicationCategory": "ToolApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "provider": {
+        "@type": "Organization",
+        "name": "工具箱",
+        "url": "https://tools.yy24365.com"
+      }
+    }
+    </script>
+
+    <!-- 面包屑导航结构化数据 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "首页", "item": "https://tools.yy24365.com"},
+        {"@type": "ListItem", "position": 2, "name": "多媒体工具大全", "item": "https://tools.yy24365.com/apps/multimedia/"}
+      ]
+    }
     </script>
 </body>
 
