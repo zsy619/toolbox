@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人生红点 - 深度诊断与终局分析报告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.2);
+        }
+        
+        .red-dot {
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        
+        .archetype-card {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .question-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .answer-bubble {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .category-realism-result {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border-left: 4px solid #ef4444;
+        }
+        
+        .category-idealism-result {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border-left: 4px solid #a855f7;
+        }
+        
+        .category-realism-process {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border-left: 4px solid #22c55e;
+        }
+        
+        .category-idealism-process {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .insight-highlight {
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.1) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(59, 130, 246, 0.1) 100%);
+            border-left: 3px solid #ef4444;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        
+        .matrix-cell {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .matrix-cell.active {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border: 2px solid rgba(239, 68, 68, 0.5);
+        }
+        
+        .scroll-indicator {
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- 顶部导航 -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-effect">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="red-dot"></div>
+                    <span class="text-xl font-bold text-white">红九点架构</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-4 text-sm overflow-x-auto pb-2">
+                    <a href="#metadata" class="text-gray-300 hover:text-white transition whitespace-nowrap">00. 基本信息</a>
+                    <a href="#intro" class="text-gray-300 hover:text-white transition whitespace-nowrap">01. 介绍</a>
+                    <a href="#archetypes" class="text-gray-300 hover:text-white transition whitespace-nowrap">02. 红九模型</a>
+                    <a href="#diagnosis" class="text-gray-300 hover:text-white transition whitespace-nowrap">03. 诊断流程</a>
+                    <a href="#finale" class="text-gray-300 hover:text-white transition whitespace-nowrap">04. 终局宣告</a>
+                    <a href="#sourcetrace" class="text-gray-300 hover:text-white transition whitespace-nowrap">05. 生命溯源</a>
+                    <a href="#matrix" class="text-gray-300 hover:text-white transition whitespace-nowrap">06. 象限对标</a>
+                    <a href="#conflict" class="text-gray-300 hover:text-white transition whitespace-nowrap">07. 残酷取舍</a>
+                    <a href="#hardtruth" class="text-gray-300 hover:text-white transition whitespace-nowrap">08. 硬核反馈</a>
+                    <a href="#pathmap" class="text-gray-300 hover:text-white transition whitespace-nowrap">09. 迈向直线</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="pt-24 pb-20">
+        <div class="max-w-4xl mx-auto px-6">
+            
+            <!-- 报告标题 -->
+            <section class="mb-12">
+                <div class="glass-effect rounded-3xl p-8 md:p-12 card-hover">
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center">
+                            <span class="text-2xl font-bold">红点</span>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">人生红点：深度诊断与终局分析报告</h1>
+                            <p class="text-gray-400 text-sm">The Red-Dot Architect System | Final Diagnostic Report</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 00. 基本信息 -->
+            <section id="metadata" class="mb-16">
+                <div class="glass-effect rounded-2xl p-6 md:p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <span class="text-red-400 font-bold text-xl">00.</span>
+                        <h2 class="text-xl md:text-2xl font-bold text-white">基本信息</h2>
+                        <span class="text-gray-500 text-sm">(Metadata)</span>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                            <span class="text-gray-400">报告编号</span>
+                            <span class="text-white font-mono">RD-ARCHITECT-2025-SH-MEDIA-001</span>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                            <span class="text-gray-400">诊断周期</span>
+                            <span class="text-white">95分钟深度对话</span>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                            <span class="text-gray-400">架构师评语</span>
+                            <span class="text-white">「第一人生红点深度自诊」接受第一红点</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-400">生命象限状态</span>
+                            <span class="text-green-400">从「被意义的困局」到「被能力滋养的直线」完成「塔尖蜕变」</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 01. 介绍部分 -->
+            <section id="intro" class="mb-16">
+                <div class="glass-effect rounded-2xl p-6 md:p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <span class="text-red-400 font-bold text-xl">01.</span>
+                        <h2 class="text-xl md:text-2xl font-bold text-white">第一人生红点架构 1.1</h2>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 rounded-2xl p-6 mb-6">
+                        <p class="text-gray-300 leading-relaxed">
+                            欢迎来到红九点架构！这是一套帮助你找到人生核心驱动力的系统。
+                            通过7个关键问题的深度对话，我们将帮你定位那个真正让你心动的"红点"——
+                            你的人生核心方向。
+                        </p>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4 text-sm text-gray-400">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                <span class="text-xs font-bold">用</span>
+                            </div>
+                            <span>用户：25岁 · 上海 · 自媒体 · 刚毕业</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 02. 红九模型介绍 -->
+            <section id="archetypes" class="mb-16">
+                <div class="glass-effect rounded-2xl p-6 md:p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <span class="text-red-400 font-bold text-xl">02.</span>
+                        <h2 class="text-xl md:text-2xl font-bold text-white">红九模型</h2>
+                        <span class="text-gray-500 text-sm">9种原型，分为4大类</span>
+                    </div>
+
+                    <div class="space-y-6">
+                        
+                        <!-- 现实主义·结果导向 -->
+                        <div class="category-realism-result rounded-2xl p-6">
+                            <h3 class="text-lg font-bold text-red-400 mb-4 flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-red-500 mr-3"></span>
+                                现实主义·结果导向
+                            </h3>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="archetype-card rounded-xl p-4">
+                                    <div class="text-2xl mb-2">1️⃣</div>
+                                    <div class="font-semibold text-white mb-1">战略家</div>
+                                    <div class="text-sm text-gray-400">目标明确，擅长规划</div>
+                                </div>
+                                <div class="archetype-card rounded-xl p-4">
+                                    <div class="text-2xl mb-2">2️⃣</div>
+                                    <div class="font-semibold text-white mb-1">执行者</div>
+                                    <div class="text-sm text-gray-400">行动力强，结果导向</div>
+                                </div>
+                                <div class="archetype-card rounded-xl p-4">
+                                    <div class="text-2xl mb-2">3️⃣</div>
+                                    <div class="font-semibold text-white mb-1">守护者</div>
+                                    <div class="text-sm text-gray-400">稳健可靠，注重安全</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 理想主义·结果导向 -->
+                        <div class="category-idealism-result rounded-2xl p-6">
+                            <h3 class="text-lg font-bold text-purple-400 mb-4 flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-purple-500 mr-3"></span>
+                                理想主义·结果导向
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="archetype-card rounded-xl p-4">
+                                    <div class="text-2xl mb-2">4️⃣</div>
+                                    <div class="font-semibold text-white mb-1">梦想家</div>
+                                    <div class="text-sm text-gray-400">追求理想，富有远见</div>
+                                </div>
+                                <div class="archetype-card rounded-xl p-4">
+                                    <div class="text-2xl mb-2">5️⃣</div>
+                                    <div class="font-semibold text-white mb-1">倡导者</div>
+                                    <div class="text-sm text-gray-400">传播理念，影响他人</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 现实主义·过程导向 -->
+                        <div class="category-realism-process rounded-2xl p-6">
+                            <h3 class="text-lg font-bold text-green-400 mb-4 flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-green-500 mr-3"></span>
+                                现实主义·过程导向
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="archetype-card rounded-xl p-4">
+                                    <div class="text-2xl mb-2">6️⃣</div>
+                                    <div class="font-semibold text-white mb-1">匠人</div>
+                                    <div class="text-sm text-gray-400">精益求精，注重细节</div>
+                                </div>
+                                <div class="archetype-card rounded-xl p-4">
+                                    <div class="text-2xl mb-2">7️⃣</div>
+                                    <div class="font-semibold text-white mb-1">探索者</div>
+                                    <div class="text-sm text-gray-400">喜欢体验，享受过程</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 理想主义·过程导向 -->
+                        <div class="category-idealism-process rounded-2xl p-6">
+                            <h3 class="text-lg font-bold text-blue-400 mb-4 flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-blue-500 mr-3"></span>
+                                理想主义·过程导向
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="archetype-card rounded-xl p-4">
+                                    <div class="text-2xl mb-2">8️⃣</div>
+                                    <div class="font-semibold text-white mb-1">艺术家</div>
+                                    <div class="text-sm text-gray-400">追求美感，表达自我</div>
+                                </div>
+                                <div class="archetype-card rounded-xl p-4">
+                                    <div class="text-2xl mb-2">9️⃣</div>
+                                    <div class="font-semibold text-white mb-1">诗人</div>
+                                    <div class="text-sm text-gray-400">敏感细腻，追求意义</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 03. 诊断流程 -->
+            <section id="diagnosis" class="mb-16">
+                <div class="glass-effect rounded-2xl p-6 md:p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <span class="text-red-400 font-bold text-xl">03.</span>
+                        <h2 class="text-xl md:text-2xl font-bold text-white">7步诊断流程</h2>
+                        <span class="text-gray-500 text-sm">深度对话，发现你的红点</span>
+                    </div>
+
+                    <div class="space-y-8">
+                        
+                        <!-- 问题1：职业溯源 -->
+                        <div class="glass-effect rounded-2xl p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center font-bold text-lg">
+                                    1
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-white mb-3">职业溯源</h3>
+                                    
+                                    <div class="question-card rounded-xl p-4 mb-4">
+                                        <p class="text-gray-200">
+                                            让我们从你的童年开始。回忆一下，小时候的你最喜欢做什么事情？
+                                            学生时代呢？还有你的第一份工作，是什么让你选择了它？
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="answer-bubble rounded-xl p-4 ml-4">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold">用</div>
+                                            <span class="text-sm text-gray-400">用户回答</span>
+                                        </div>
+                                        <p class="text-gray-200 leading-relaxed">
+                                            小时候最喜欢画画和讲故事，经常自己编漫画。学生时代是文学社的，喜欢写文章。
+                                            第一份工作选择了新媒体运营，因为觉得可以把内容创作和工作结合起来。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 问题2：高峰体验 -->
+                        <div class="glass-effect rounded-2xl p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center font-bold text-lg">
+                                    2
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-white mb-3">高峰体验</h3>
+                                    
+                                    <div class="question-card rounded-xl p-4 mb-4">
+                                        <p class="text-gray-200">
+                                            回忆一下，你人生中最有成就感的时刻是什么？
+                                            那时候你在做什么？为什么那件事让你感到如此满足？
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="answer-bubble rounded-xl p-4 ml-4">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold">用</div>
+                                            <span class="text-sm text-gray-400">用户回答</span>
+                                        </div>
+                                        <p class="text-gray-200 leading-relaxed">
+                                            是我第一篇10万+文章的时候！那篇文章我写了整整一周，改了无数遍。
+                                            发布后看到数据不断上涨，后台收到很多读者的留言说被我的文章打动了，
+                                            那种感觉真的太美妙了，觉得自己的内容真的能够影响别人。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 问题3：低谷痛点 -->
+                        <div class="glass-effect rounded-2xl p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center font-bold text-lg">
+                                    3
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-white mb-3">低谷痛点</h3>
+                                    
+                                    <div class="question-card rounded-xl p-4 mb-4">
+                                        <p class="text-gray-200">
+                                            反过来想，你做过的最痛苦的事情是什么？
+                                            那是什么样的经历？为什么让你感到如此难受？
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="answer-bubble rounded-xl p-4 ml-4">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold">用</div>
+                                            <span class="text-sm text-gray-400">用户回答</span>
+                                        </div>
+                                        <p class="text-gray-200 leading-relaxed">
+                                            是做那种纯数据搬运、没有灵魂的内容。比如为了追热点而追热点，
+                                            写一些自己都不相信的话，只是为了流量。那种感觉特别煎熬，
+                                            觉得自己在浪费时间，没有创造真正的价值。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 问题4：偶像对标 -->
+                        <div class="glass-effect rounded-2xl p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center font-bold text-lg">
+                                    4
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-white mb-3">偶像对标</h3>
+                                    
+                                    <div class="question-card rounded-xl p-4 mb-4">
+                                        <p class="text-gray-200">
+                                            列举3个你最崇拜的人。可以是历史人物、名人，
+                                            也可以是你身边的人。他们身上的什么特质最吸引你？
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="answer-bubble rounded-xl p-4 ml-4">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold">用</div>
+                                            <span class="text-sm text-gray-400">用户回答</span>
+                                        </div>
+                                        <div class="space-y-3">
+                                            <div class="bg-slate-800/50 rounded-lg p-3">
+                                                <div class="font-semibold text-white mb-1">1. 曹雪芹</div>
+                                                <div class="text-sm text-gray-400">用一辈子写一本书，那种对作品的极致追求</div>
+                                            </div>
+                                            <div class="bg-slate-800/50 rounded-lg p-3">
+                                                <div class="font-semibold text-white mb-1">2. 村上春树</div>
+                                                <div class="text-sm text-gray-400">每天坚持写作，把创作变成生活方式</div>
+                                            </div>
+                                            <div class="bg-slate-800/50 rounded-lg p-3">
+                                                <div class="font-semibold text-white mb-1">3. 我高中语文老师</div>
+                                                <div class="text-sm text-gray-400">她总能看到我文字里的闪光点，给我鼓励</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 问题5：极限推演 -->
+                        <div class="glass-effect rounded-2xl p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center font-bold text-lg">
+                                    5
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-white mb-3">极限推演</h3>
+                                    
+                                    <div class="question-card rounded-xl p-4 mb-4">
+                                        <p class="text-gray-200">
+                                            现在来做一个思想实验：如果你有无限的金钱和时间，
+                                            完全不用考虑生存问题，你会想做什么？
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="answer-bubble rounded-xl p-4 ml-4">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold">用</div>
+                                            <span class="text-sm text-gray-400">用户回答</span>
+                                        </div>
+                                        <p class="text-gray-200 leading-relaxed">
+                                            我会找一个安静的地方，每天写作。写我真正想写的东西，
+                                            不用考虑数据，不用迎合任何人。可能会写小说，写散文，
+                                            甚至可能会做一个系列的深度人物专访。
+                                            就是单纯地享受创作本身，用文字去触碰人心。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 问题6：餐巾纸排序 -->
+                        <div class="glass-effect rounded-2xl p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center font-bold text-lg">
+                                    6
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-white mb-3">餐巾纸排序</h3>
+                                    
+                                    <div class="question-card rounded-xl p-4 mb-4">
+                                        <p class="text-gray-200">
+                                            现在，请把红九模型的9个点，按照你的心动程度排序。
+                                            1是最让你心动的，9是最不心动的。
+                                            相信你的第一直觉！
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="answer-bubble rounded-xl p-4 ml-4">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold">用</div>
+                                            <span class="text-sm text-gray-400">用户排序</span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-3 mt-3">
+                                            <div class="bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-center">
+                                                <div class="text-2xl font-bold text-red-400">1</div>
+                                                <div class="text-sm text-gray-300">艺术家</div>
+                                            </div>
+                                            <div class="bg-purple-500/20 border border-purple-500/30 rounded-lg p-3 text-center">
+                                                <div class="text-2xl font-bold text-purple-400">2</div>
+                                                <div class="text-sm text-gray-300">诗人</div>
+                                            </div>
+                                            <div class="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3 text-center">
+                                                <div class="text-2xl font-bold text-blue-400">3</div>
+                                                <div class="text-sm text-gray-300">倡导者</div>
+                                            </div>
+                                            <div class="bg-green-500/20 border border-green-500/30 rounded-lg p-3 text-center">
+                                                <div class="text-2xl font-bold text-green-400">4</div>
+                                                <div class="text-sm text-gray-300">梦想家</div>
+                                            </div>
+                                            <div class="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3 text-center">
+                                                <div class="text-2xl font-bold text-yellow-400">5</div>
+                                                <div class="text-sm text-gray-300">匠人</div>
+                                            </div>
+                                            <div class="bg-orange-500/20 border border-orange-500/30 rounded-lg p-3 text-center">
+                                                <div class="text-2xl font-bold text-orange-400">6</div>
+                                                <div class="text-sm text-gray-300">探索者</div>
+                                            </div>
+                                            <div class="bg-gray-500/20 border border-gray-500/30 rounded-lg p-3 text-center">
+                                                <div class="text-2xl font-bold text-gray-400">7</div>
+                                                <div class="text-sm text-gray-300">战略家</div>
+                                            </div>
+                                            <div class="bg-gray-500/20 border border-gray-500/30 rounded-lg p-3 text-center">
+                                                <div class="text-2xl font-bold text-gray-400">8</div>
+                                                <div class="text-sm text-gray-300">执行者</div>
+                                            </div>
+                                            <div class="bg-gray-500/20 border border-gray-500/30 rounded-lg p-3 text-center">
+                                                <div class="text-2xl font-bold text-gray-400">9</div>
+                                                <div class="text-sm text-gray-300">守护者</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 问题7：红点微调 -->
+                        <div class="glass-effect rounded-2xl p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center font-bold text-lg">
+                                    7
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-white mb-3">红点微调</h3>
+                                    
+                                    <div class="question-card rounded-xl p-4 mb-4">
+                                        <p class="text-gray-200">
+                                            基于前面的对话，你心中的那个红点开始清晰了。
+                                            现在，请用一句话描述你的红点。
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="answer-bubble rounded-xl p-4 ml-4">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold">用</div>
+                                            <span class="text-sm text-gray-400">用户红点</span>
+                                        </div>
+                                        <div class="bg-gradient-to-r from-red-500/20 to-purple-500/20 rounded-xl p-4 mt-3">
+                                            <p class="text-lg text-white font-medium leading-relaxed">
+                                                "用有温度的文字，触碰人心最柔软的地方"
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- 04. 终局宣告 -->
+            <section id="finale" class="mb-16">
+                <div class="glass-effect rounded-2xl p-6 md:p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <span class="text-red-400 font-bold text-xl">04.</span>
+                        <h2 class="text-xl md:text-2xl font-bold text-white">终局宣告：你的第一红点</h2>
+                        <span class="text-gray-500 text-sm">(The Final Red Dot)</span>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="insight-highlight rounded-xl p-5">
+                            <div class="text-sm text-gray-400 mb-2">锁定红点原型</div>
+                            <div class="flex items-center space-x-3">
+                                <span class="text-2xl">⭐</span>
+                                <div>
+                                    <span class="text-xl font-bold text-red-400">【出名型】</span>
+                                    <span class="text-gray-300 ml-2">(The Fame Seeker)</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-800/50 rounded-xl p-5">
+                            <div class="text-sm text-gray-400 mb-2">核心生命信条</div>
+                            <p class="text-lg text-white leading-relaxed">
+                                在这个注意力稀缺的时代，我看见是第一人权。我不追求虚名的桂冠，我追求能够当下的共鸣。
+                            </p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-red-500/10 to-purple-500/10 rounded-xl p-5">
+                            <div class="text-sm text-gray-400 mb-2">红点底层语义</div>
+                            <p class="text-gray-200 leading-relaxed">
+                                你渴望成为「舞台的那个个体」，被看见是刚需，而不仅仅是为了赚钱（虽然钱随之而来）。
+                                为了撕掉「曾经」的标签，你把努力的每一个字都不是一篇独立的随笔，而是让自己（或你的IP）
+                                成为一个「IP符号」。聚光灯下，是要做世界关注、讨论甚至争议的议题。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 05. 生命溯源 -->
+            <section id="sourcetrace" class="mb-16">
+                <div class="glass-effect rounded-2xl p-6 md:p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <span class="text-red-400 font-bold text-xl">05.</span>
+                        <h2 class="text-xl md:text-2xl font-bold text-white">生命溯源：底层动力分析</h2>
+                        <span class="text-gray-500 text-sm">(Life Source Trace)</span>
+                    </div>
+                    
+                    <p class="text-gray-400 mb-6 text-sm">
+                        通过对「十二岁」及过往经历的深度拆解，我们识别出以下解码：
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div class="archetype-card rounded-xl p-5">
+                            <div class="text-lg font-semibold text-white mb-3 flex items-center">
+                                <span class="text-green-400 mr-2">✓</span>
+                                核心动力特征
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex items-start space-x-2">
+                                    <span class="text-red-400 mt-1">•</span>
+                                    <p class="text-gray-300">低谷卡点分析：你无法忍受的是「数据搬运」而不是「平庸」或「穷」，而是「存在感」。这暗示了「不被看见」，这是比「不名一文」更大的恐惧。</p>
+                                </div>
+                                <div class="flex items-start space-x-2">
+                                    <span class="text-red-400 mt-1">•</span>
+                                    <p class="text-gray-300">也不是要成名，这是典型的【出名型】人与生俱来。</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="archetype-card rounded-xl p-5">
+                            <div class="text-lg font-semibold text-white mb-3 flex items-center">
+                                <span class="text-purple-400 mr-2">•</span>
+                                偶像象征：你在《红楼梦》的「名垂青史」与《红与黑》之间纠结，但最终选择了前者。
+                            </div>
+                            <p class="text-gray-300 ml-6">
+                                他们写得好，这固然是他们耀眼的理由，但才华只是手段，「成星」和「影响」才是目的。你想要的不是「内容写得死」，而是「红」。
+                            </p>
+                        </div>
+                        
+                        <div class="archetype-card rounded-xl p-5">
+                            <div class="text-lg font-semibold text-white mb-3 flex items-center">
+                                <span class="text-blue-400 mr-2">•</span>
+                                极端推演：在「隐形操盘手」与「台前网红」之间，你选了后者。
+                            </div>
+                            <p class="text-gray-300 ml-6">
+                                「期待被看见」这一力量压过了「得体感」的边界，为了不仅仅是要「名」，你接受「名利双收」中的「名」。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 06. 红九模型象限对标 -->
+            <section id="matrix" class="mb-16">
+                <div class="glass-effect rounded-2xl p-6 md:p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <span class="text-red-400 font-bold text-xl">06.</span>
+                        <h2 class="text-xl md:text-2xl font-bold text-white">红九模型：象限对标</h2>
+                        <span class="text-gray-500 text-sm">(The Matrix 9 Positioning)</span>
+                    </div>
+                    
+                    <p class="text-gray-400 mb-6 text-sm">
+                        根据诊断，用户在「红九模型」中的定位逻辑如下：
+                    </p>
+                    
+                    <div class="grid grid-cols-3 gap-4 mb-8">
+                        <div class="matrix-cell rounded-xl p-4">
+                            <div class="text-center text-sm text-gray-400 mb-2"></div>
+                            <div class="text-center font-semibold text-white">定位逻辑</div>
+                        </div>
+                        <div class="matrix-cell rounded-xl p-4">
+                            <div class="text-center text-sm text-gray-400 mb-2">现实</div>
+                            <div class="text-center font-semibold text-white">现实主义</div>
+                        </div>
+                        <div class="matrix-cell rounded-xl p-4">
+                            <div class="text-center text-sm text-gray-400 mb-2">理想</div>
+                            <div class="text-center font-semibold text-white">理想主义</div>
+                        </div>
+                        
+                        <div class="matrix-cell rounded-xl p-4">
+                            <div class="text-center text-sm text-gray-400 mb-2">结果</div>
+                            <div class="text-center font-semibold text-white">结果导向 (Result)</div>
+                        </div>
+                        <div class="matrix-cell active rounded-xl p-4">
+                            <div class="text-center text-sm text-gray-400 mb-2">主象限</div>
+                            <div class="text-center font-bold text-red-400">【出名型】</div>
+                            <div class="text-xs text-gray-400 mt-1">你选择了「世俗的成名」（名/利），而非纯粹的「精神遗产」</div>
+                        </div>
+                        <div class="matrix-cell rounded-xl p-4">
+                            <div class="text-center text-sm text-gray-400 mb-2"></div>
+                            <div class="text-center"></div>
+                        </div>
+                        
+                        <div class="matrix-cell rounded-xl p-4">
+                            <div class="text-center text-sm text-gray-400 mb-2">导向</div>
+                            <div class="text-center font-semibold text-white">导向维度 (Orient)</div>
+                        </div>
+                        <div class="matrix-cell rounded-xl p-4">
+                            <div class="text-center text-sm text-gray-400 mb-2"></div>
+                            <div class="text-center text-gray-300">你厌恶「埋头写就」这个位置，而在「写与被关注」的过程中，多年获益。</div>
+                        </div>
+                        <div class="matrix-cell active rounded-xl p-4">
+                            <div class="text-center text-sm text-gray-400 mb-2"></div>
+                            <div class="text-center font-bold text-red-400">【过程享受】</div>
+                            <div class="text-xs text-gray-400 mt-1">在「被看见」这一点上，你最终放弃了「作品」和「隐形财富」，选择了「做网红」。</div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between bg-slate-800/50 rounded-lg p-4">
+                            <span class="text-gray-400">核心红点</span>
+                            <span class="text-xl font-bold text-red-400">【出名型】</span>
+                        </div>
+                        <div class="warning-box rounded-lg p-4">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="text-yellow-400">⚠️</span>
+                                <span class="text-yellow-400 font-semibold">潜在冲突</span>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <span class="text-gray-400 text-sm">【作品型】vs【出名型】</span>
+                                    <p class="text-gray-300 mt-1">这是你在挣扎的核心！你总想「写得深一点」，但这往往会牺牲「被看见」的速度。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 07. 残酷取舍 -->
+            <section id="conflict" class="mb-16">
+                <div class="glass-effect rounded-2xl p-6 md:p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <span class="text-red-400 font-bold text-xl">07.</span>
+                        <h2 class="text-xl md:text-2xl font-bold text-white">残酷取舍：餐巾纸决策复盘</h2>
+                        <span class="text-gray-500 text-sm">(Conflict Resolution)</span>
+                    </div>
+                    
+                    <p class="text-gray-400 mb-6">
+                        记录用户在面临极端资源限制时的真实选择，这是红点真实性的唯一铁证。
+                    </p>
+                    
+                    <div class="space-y-5">
+                        <div class="bg-slate-800/50 rounded-xl p-5">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <span class="text-gray-400">•</span>
+                                <span class="font-semibold text-white">决策冲突场景：</span>
+                                <span class="text-purple-300">隐形操盘手（闷声发大财）vs 台前超级网红（承受争议但红透半边天）</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <span class="text-gray-400">•</span>
+                                <span class="font-semibold text-white">用户抉择：</span>
+                                <span class="text-red-400 font-bold">选择 Y：台前超级网红</span>
+                            </div>
+                        </div>
+                        
+                        <div class="insight-highlight rounded-xl p-6">
+                            <div class="text-sm text-gray-400 mb-3">• 真相洞察：</div>
+                            <p class="text-gray-200 leading-relaxed text-lg">
+                                「当剥离了「文人清高」的社会面具后，你诚实地拥抱了对关注度的渴望。这不可耻，这很强大。承认自己想红，是自媒体人最顶级的觉悟。」
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 08. 架构师硬核反馈 -->
+            <section id="hardtruth" class="mb-16">
+                <div class="glass-effect rounded-2xl p-6 md:p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <span class="text-red-400 font-bold text-xl">08.</span>
+                        <h2 class="text-xl md:text-2xl font-bold text-white">架构师硬核反馈</h2>
+                        <span class="text-gray-500 text-sm">(The Hard Truths)</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between bg-slate-800/50 rounded-xl p-5 mb-6">
+                        <div>
+                            <span class="text-gray-400 text-sm">当前 LRM (Life Red-Dot Match) 匹配评分：</span>
+                        </div>
+                        <div class="text-3xl font-bold text-cyan-400">
+                            65<span class="text-xl text-gray-500">/100</span>
+                        </div>
+                        <span class="text-gray-400 text-sm ml-4">（意识已觉醒，但行动仍有惯性）</span>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="warning-box rounded-xl p-5">
+                            <div class="flex items-center space-x-2 mb-4">
+                                <span class="text-2xl">⚠️</span>
+                                <span class="text-yellow-400 font-bold text-lg">潜在风险警示 (Risk Warning)</span>
+                            </div>
+                            <div class="space-y-4 ml-6">
+                                <div>
+                                    <div class="text-white font-semibold mb-1">• 【风险1：假清高枷锁】</div>
+                                    <p class="text-gray-300">你目前可能还在用「作品型」的标准要求自己（比如纠结字句、追求深度），这会导致你「产能低下」且「内容不接地气」。</p>
+                                </div>
+                                <div>
+                                    <div class="text-white font-semibold mb-1">• 【风险2：路径依赖】</div>
+                                    <p class="text-gray-300">你是「编辑」出身，习惯了「为他人做嫁衣」。但【出名型】红点要求你必须走到台前，建立个人 IP，这需要极大的勇气去突破「打工人思维」。</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="insight-highlight rounded-xl p-6">
+                            <div class="flex items-center space-x-2 mb-4">
+                                <span class="text-2xl">💡</span>
+                                <span class="text-red-400 font-bold text-lg">核心洞察 (Architect's Insights)</span>
+                            </div>
+                            <p class="text-gray-200 leading-relaxed text-lg">
+                                「25岁，上海。你最大的敌人不是才华不够，而是『放不下身段』。从今天起，别再把『写出一篇传世好文』当作第一目标，要把『如何让 10 万人看到我』当作第一目标。在这条路上，流量不是羞耻，没流量才是最大的羞耻。」
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 09. 迈向直线 -->
+            <section id="pathmap" class="mb-16">
+                <div class="glass-effect rounded-2xl p-6 md:p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <span class="text-red-400 font-bold text-xl">09.</span>
+                        <h2 class="text-xl md:text-2xl font-bold text-white">迈向直线：下一步指引</h2>
+                        <span class="text-gray-500 text-sm">(Transition to Pathmapping)</span>
+                    </div>
+                    
+                    <p class="text-gray-400 mb-6">
+                        红点已定，坐标系已校准。现在，我们需要将「点」连成「线」，启动【人生五步法】。
+                    </p>
+                    
+                    <div class="space-y-4">
+                        <div class="archetype-card rounded-xl p-5 flex items-start space-x-4">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mt-1">
+                                <input type="checkbox" class="w-4 h-4">
+                            </div>
+                            <div>
+                                <div class="font-semibold text-white mb-1">动作 1：撕掉标签</div>
+                                <p class="text-gray-400">停止以「文字工作者」自居，开始以「流量操盘手」或「个人品牌主理人」自居。</p>
+                            </div>
+                        </div>
+                        
+                        <div class="archetype-card rounded-xl p-5 flex items-start space-x-4">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mt-1">
+                                <input type="checkbox" class="w-4 h-4">
+                            </div>
+                            <div>
+                                <div class="font-semibold text-white mb-1">动作 2：建立 IP</div>
+                                <p class="text-gray-400">不要在公司的账号上耗尽所有才华。立刻、马上，在小红书/抖音/公众号上日更你的个人账号，哪怕从模仿开始。</p>
+                            </div>
+                        </div>
+                        
+                        <div class="archetype-card rounded-xl p-5 flex items-start space-x-4">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mt-1">
+                                <input type="checkbox" class="w-4 h-4">
+                            </div>
+                            <div>
+                                <div class="font-semibold text-white mb-1">动作 3：换助手继续</div>
+                                <p class="text-gray-400">请寻找我的伙伴来帮你完成【出名型红点的具体路径规划】。</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t border-white/10">
+                        <p class="text-gray-400 text-sm italic">
+                            架构师签名： 人生红点架构师系统 (Red-Dot Architect System) 
+                            <span class="text-gray-300">「想红的人，必须先学会站在舞台中央，忍受聚光灯的灼热。」欢迎你随时回来，我们继续来聊第一红点。</span>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 底部 -->
+            <footer class="glass-effect rounded-2xl p-8">
+                <div class="text-center">
+                    <div class="flex items-center justify-center space-x-2 mb-4">
+                        <div class="red-dot"></div>
+                        <span class="text-white font-semibold">第一人生红点架构 1.1</span>
+                    </div>
+                    <p class="text-gray-500 text-sm">
+                        发现你的红点，活出你的人生
+                    </p>
+                </div>
+            </footer>
+
+        </div>
+    </main>
+
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 滚动时导航栏效果
+        let lastScroll = 0;
+        const nav = document.querySelector('nav');
+        
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > lastScroll && currentScroll > 100) {
+                nav.style.transform = 'translateY(-100%)';
+            } else {
+                nav.style.transform = 'translateY(0)';
+            }
+            
+            lastScroll = currentScroll;
+        });
+        
+        nav.style.transition = 'transform 0.3s ease';
+    </script>
+</body>
+</html>
