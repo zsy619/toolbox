@@ -1,0 +1,387 @@
+/**
+ * 设计系统 - Design System
+ * 统一阅读页面所有样式
+ *
+ * 版本: v1.1.0
+ * 更新日志:
+ *   v1.1.0 - 添加CSS变量回退值、修复全局字体选择器、移除重复类、添加B-F分组主题机制
+ *   v1.0.0 - 初始版本
+ *
+ * 使用方法:
+ *   1. 在HTML <head> 中添加:
+ *      <link href="assets/fonts/noto-sans-sc.css" rel="stylesheet">
+ *      <link href="assets/styles/design-system.css" rel="stylesheet">
+ *   2. 如需特殊配色分组(B-F)，额外添加对应主题CSS:
+ *      <link href="assets/styles/themes/分组名.css" rel="stylesheet">
+ *   3. 使用CSS变量: style="background: var(--brand-gradient)"
+ *
+ * 分组说明:
+ *   A组 (紫色系): 默认，无需额外主题CSS
+ *   B组 (深蓝): meditations.html
+ *   C组 (蓝粉紫): power-vs-force.html, yinianli.html
+ *   D组 (蓝绿紫): liangyu.html
+ *   E组 (橙红紫): dangxiadeliliang.html, openclaw-wechat.html
+ *   F组 (霓虹): ai-service-value-map.html
+ */
+
+/* ============================================
+   CSS 变量 - Design Tokens (带回退值)
+   ============================================ */
+
+:root {
+  /* ---- 品牌色 ---- */
+  --brand-primary: #667eea;
+  --brand-secondary: #764ba2;
+  --brand-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  /* ---- 文字渐变 ---- */
+  --text-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --text-gradient-yellow: linear-gradient(135deg, #f6e05e 0%, #ecc94b 50%, #d69e2e 100%);
+
+  /* ---- 进度条 ---- */
+  --progress-gradient: linear-gradient(90deg, #667eea, #764ba2);
+  --progress-gradient-yellow: linear-gradient(90deg, #ecc94b, #d69e2e);
+
+  /* ---- 辅助色 ---- */
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+  --color-danger: #ef4444;
+  --color-success: #10b981;
+
+  /* ---- 卡片背景 ---- */
+  --card-bg: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+
+  /* ---- 特殊卡片 ---- */
+  --quote-bg: linear-gradient(135deg, #fef9e7 0%, #fefcbf 100%);
+  --quote-border: #d69e2e;
+  --insight-bg: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  --insight-border: #3b82f6;
+  --danger-bg: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  --danger-border: #ef4444;
+  --success-bg: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  --success-border: #10b981;
+
+  /* ---- 字体 ---- */
+  --font-sans: 'Noto Sans SC', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Noto Serif SC', Georgia, serif;
+
+  /* ---- 阴影 ---- */
+  --shadow-card: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-card-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover-brand: 0 20px 25px -5px rgba(102, 126, 234, 0.1);
+
+  /* ---- 过渡 ---- */
+  --transition-default: all 0.3s ease;
+  --transition-transform: transform 0.3s ease;
+
+  /* ---- 圆角 ---- */
+  --radius-full: 9999px;
+  --radius-card: 1rem;
+}
+
+/* ============================================
+   基础样式
+   ============================================ */
+
+/* 作用域限定在body，避免与Tailwind等框架冲突 */
+body {
+  font-family: var(--font-sans);
+}
+
+/* ============================================
+   文本渐变
+   ============================================ */
+
+.text-gradient {
+  background: var(--text-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-yellow {
+  background: var(--text-gradient-yellow, linear-gradient(135deg, #f6e05e 0%, #ecc94b 50%, #d69e2e 100%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   背景渐变
+   ============================================ */
+
+.bg-gradient-brand {
+  background: var(--brand-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+}
+
+/* ============================================
+   进度条
+   ============================================ */
+
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 4px;
+  background: var(--progress-gradient, linear-gradient(90deg, #667eea, #764ba2));
+  z-index: 100;
+  transition: width 0.1s ease-out;
+}
+
+/* ============================================
+   卡片悬浮效果
+   ============================================ */
+
+.card-hover {
+  transition: var(--transition-default, all 0.3s ease);
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-card-hover, 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04));
+}
+
+.book-card {
+  background: var(--card-bg, linear-gradient(135deg, #ffffff 0%, #f8fafc 100%));
+  border: 1px solid #e2e8f0;
+  transition: var(--transition-default, all 0.3s ease);
+}
+
+.book-card:hover {
+  border-color: var(--brand-primary, #667eea);
+  box-shadow: var(--shadow-card-hover-brand, 0 20px 25px -5px rgba(102, 126, 234, 0.1));
+}
+
+/* ============================================
+   徽章
+   ============================================ */
+
+.category-badge {
+  background: var(--brand-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.level-badge {
+  background: linear-gradient(135deg, var(--color-success, #10b981) 0%, #059669 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.reading-time {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  background: #f1f5f9;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* ============================================
+   引言卡片
+   ============================================ */
+
+.quote-card {
+  background: var(--quote-bg, linear-gradient(135deg, #fef9e7 0%, #fefcbf 100%));
+  border-left: 4px solid var(--quote-border, #d69e2e);
+  padding: 1.5rem;
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+
+.quote-highlight {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-left: 4px solid var(--color-warning, #f59e0b);
+}
+
+/* ============================================
+   洞察卡片
+   ============================================ */
+
+.insight-card {
+  background: var(--insight-bg, linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%));
+  border-left: 4px solid var(--insight-border, #3b82f6);
+}
+
+/* ============================================
+   警告卡片
+   ============================================ */
+
+.warning-card {
+  background: var(--danger-bg, linear-gradient(135deg, #fee2e2 0%, #fecaca 100%));
+  border-left: 4px solid var(--color-danger, #ef4444);
+}
+
+/* ============================================
+   成功卡片
+   ============================================ */
+
+.success-card {
+  background: var(--success-bg, linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%));
+  border-left: 4px solid var(--color-success, #10b981);
+}
+
+/* ============================================
+   动画
+   ============================================ */
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.floating {
+  animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.hover-lift {
+  transition: var(--transition-transform, transform 0.3s ease);
+}
+
+.hover-lift:hover {
+  transform: translateY(-3px);
+}
+
+.pulse-dot {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ============================================
+   Stagger 动画延迟
+   ============================================ */
+
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+.stagger-6 { animation-delay: 0.6s; }
+.stagger-7 { animation-delay: 0.7s; }
+.stagger-8 { animation-delay: 0.8s; }
+.stagger-9 { animation-delay: 0.9s; }
+
+/* ============================================
+   导航
+   ============================================ */
+
+.sticky-nav {
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* ============================================
+   金句高亮
+   ============================================ */
+
+.golden-quote {
+  background: linear-gradient(135deg, #f6e05e 0%, #ecc94b 100%);
+  color: #1a365d;
+  padding: 2rem;
+  border-radius: 1rem;
+  font-size: 1.25rem;
+  line-height: 1.8;
+}
+
+/* ============================================
+   原则卡片
+   ============================================ */
+
+.principle-card {
+  background: white;
+  border-radius: var(--radius-card, 1rem);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card, 0 4px 6px rgba(0, 0, 0, 0.1));
+  border-left: 4px solid var(--color-info, #3b82f6);
+}
+
+/* ============================================
+   层级结构
+   ============================================ */
+
+.hierarchy {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hierarchy-item {
+  background: var(--brand-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  color: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  text-align: center;
+}
+
+/* ============================================
+   背景网格
+   ============================================ */
+
+.grid-bg {
+  background-image:
+    radial-gradient(circle, rgba(102, 126, 234, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* ============================================
+   荧光文字效果 (neon)
+   ============================================ */
+
+.text-gradient-neon {
+  background: linear-gradient(135deg, #00f5ff 0%, #bf00ff 50%, #ff00ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   荧光背景
+   ============================================ */
+
+.bg-gradient-neon {
+  background: linear-gradient(135deg, #00f5ff 0%, #bf00ff 50%, #ff00ff 100%);
+}
+
+/* ============================================
+   高亮下划线
+   ============================================ */
+
+.highlight-underline {
+  background: linear-gradient(transparent 60%, #fef08a 60%);
+}
+
+/* ============================================
+   平板金字塔
+   ============================================ */
+
+.pyramid-level {
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  text-align: center;
+}
