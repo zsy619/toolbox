@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Seedream4.0 + N8N：2步搞定工作流自动化！</title>
+  <meta name="description" content="随着 Seedream4.0 热度持续攀升，今天手把手教大家如何将它与 N8N 结合，解锁更灵活的自动化场景。只需 2 步，小白能入门、老手能落地！">
+  <meta name="author" content="AI助手">
+  
+  <style>
+    /* ========== 基础重置 ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html {
+      font-size: 16px;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+      background-color: #f7f7f7;
+      color: #3e3e3e;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+    
+    /* ========== 响应式容器 ========== */
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: #fff;
+      min-height: 100vh;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    }
+    
+    @media (min-width: 769px) {
+      body {
+        padding: 20px 0;
+        background-color: #e8e8e8;
+      }
+      .container {
+        border-radius: 8px;
+        overflow: hidden;
+      }
+    }
+    
+    /* ========== 封面 ========== */
+    .cover-section {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    
+    @media (max-width: 480px) {
+      .cover-section {
+        aspect-ratio: 4 / 3;
+      }
+    }
+    
+    /* 装饰光效 */
+    .cover-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -20%;
+      width: 60%;
+      height: 200%;
+      background: radial-gradient(ellipse, rgba(37, 99, 235, 0.3) 0%, transparent 70%);
+      animation: glowMove 8s ease-in-out infinite;
+    }
+    
+    .cover-section::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      right: -10%;
+      width: 50%;
+      height: 150%;
+      background: radial-gradient(ellipse, rgba(124, 58, 237, 0.25) 0%, transparent 70%);
+      animation: glowMove 8s ease-in-out infinite reverse;
+    }
+    
+    @keyframes glowMove {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(5%, 3%); }
+    }
+    
+    .cover-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px 30px;
+      width: 100%;
+    }
+    
+    .cover-title {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 800;
+      color: #fff;
+      white-space: nowrap;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+    
+    @media (max-width: 480px) {
+      .cover-title {
+        white-space: normal;
+        letter-spacing: 0;
+      }
+    }
+    
+    .cover-subtitle {
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      color: #10B981;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    
+    @media (max-width: 480px) {
+      .cover-subtitle {
+        white-space: normal;
+      }
+    }
+    
+    /* ========== 内容区域 ========== */
+    .content {
+      padding: 32px 24px;
+    }
+    
+    @media (min-width: 769px) {
+      .content {
+        padding: 48px 40px;
+      }
+    }
+    
+    /* 引导语 */
+    .intro-box {
+      background: linear-gradient(135deg, #f0f4ff 0%, #fafafa 100%);
+      border-left: 4px solid #2563EB;
+      padding: 18px 20px;
+      margin-bottom: 28px;
+      border-radius: 0 12px 12px 0;
+    }
+    
+    .intro-box p {
+      font-size: 1.05rem;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .intro-box p:last-child {
+      margin-bottom: 0;
+      color: #2563EB;
+      font-weight: 600;
+    }
+    
+    /* 标签 */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    
+    .tag {
+      background: #f0f4ff;
+      color: #576b95;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+    
+    /* ========== 章节标题 ========== */
+    .section-title {
+      display: flex;
+      align-items: center;
+      margin: 40px 0 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #eee;
+    }
+    
+    .section-title::before {
+      content: '';
+      width: 5px;
+      height: 28px;
+      background: linear-gradient(180deg, #2563EB, #7C3AED);
+      border-radius: 3px;
+      margin-right: 14px;
+      flex-shrink: 0;
+    }
+    
+    .section-title h2 {
+      font-size: clamp(1.2rem, 4vw, 1.5rem);
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    
+    /* ========== 工具介绍 ========== */
+    .tool-intro {
+      margin-bottom: 32px;
+    }
+    
+    .tool-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 16px;
+      transition: transform 0.2s;
+    }
+    
+    .tool-item:active {
+      transform: scale(0.98);
+    }
+    
+    .tool-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-right: 16px;
+      flex-shrink: 0;
+    }
+    
+    .tool-icon.seedream {
+      background: linear-gradient(135deg, #2563EB, #1d4ed8);
+    }
+    
+    .tool-icon.n8n {
+      background: linear-gradient(135deg, #7C3AED, #6d28d9);
+    }
+    
+    .tool-info h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+    }
+    
+    .tool-info p {
+      font-size: 0.95rem;
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    /* ========== 核心公式 ========== */
+    .formula-box {
+      text-align: center;
+      padding: 28px 20px;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border-radius: 20px;
+      margin: 28px 0;
+    }
+    
+    .formula-line {
+      font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+      white-space: nowrap;
+    }
+    
+    .formula-result {
+      font-size: clamp(1.3rem, 4vw, 1.8rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, #2563EB, #7C3AED);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    /* ========== 功能卡片 ========== */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin: 24px 0;
+    }
+    
+    @media (min-width: 769px) {
+      .features-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+      }
+    }
+    
+    .feature-card {
+      background: #f8f9fa;
+      border-radius: 14px;
+      padding: 20px 14px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .feature-card:active {
+      transform: scale(0.97);
+    }
+    
+    .feature-card .icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    
+    .feature-card .title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+    }
+    
+    .feature-card .desc {
+      font-size: 0.85rem;
+      color: #888;
+    }
+    
+    /* ========== 步骤卡片 ========== */
+    .step-card {
+      background: linear-gradient(135deg, #2563EB, #7C3AED);
+      border-radius: 18px;
+      padding: 24px 20px;
+      margin-bottom: 18px;
+      color: #fff;
+    }
+    
+    .step-card.step-2 {
+      background: linear-gradient(135deg, #7C3AED, #2563EB);
+    }
+    
+    .step-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    
+    .step-number {
+      font-size: 3.5rem;
+      font-weight: 900;
+      opacity: 0.25;
+      line-height: 1;
+      margin-right: 18px;
+    }
+    
+    .step-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    
+    .step-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    
+    @media (max-width: 400px) {
+      .step-list {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .step-list li {
+      position: relative;
+      padding-left: 26px;
+      font-size: 0.95rem;
+      opacity: 0.95;
+    }
+    
+    .step-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #10B981;
+      font-weight: bold;
+    }
+    
+    /* ========== 效果展示 ========== */
+    .results-section {
+      background: linear-gradient(135deg, #f0f4ff, #fafafa);
+      border-radius: 18px;
+      padding: 28px 20px;
+      margin: 28px 0;
+    }
+    
+    .results-title {
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 24px;
+    }
+    
+    .results-list {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+    }
+    
+    .result-item .icon {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+    
+    .result-item .text {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    
+    .result-item.efficiency .text { color: #2563EB; }
+    .result-item.automation .text { color: #7C3AED; }
+    .result-item.visual .text { color: #10B981; }
+    
+    /* ========== CTA ========== */
+    .cta-section {
+      background: linear-gradient(135deg, #0F172A, #1E293B);
+      border-radius: 18px;
+      padding: 36px 24px;
+      text-align: center;
+      margin: 32px 0;
+    }
+    
+    .cta-section h3 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    
+    .cta-section p {
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+    
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #2563EB, #7C3AED);
+      color: #fff;
+      padding: 16px 36px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .cta-button:active {
+      transform: scale(0.97);
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    }
+    
+    /* ========== 底部 ========== */
+    .original-link {
+      text-align: center;
+      padding: 28px 24px;
+      border-top: 1px solid #eee;
+    }
+    
+    .original-link p {
+      color: #999;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+    
+    .original-link a {
+      color: #576b95;
+      text-decoration: none;
+      font-size: 0.9rem;
+      word-break: break-all;
+    }
+    
+    /* ========== 分割线 ========== */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #ddd, transparent);
+      margin: 32px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 封面 -->
+    <header class="cover-section">
+      <div class="cover-content">
+        <h1 class="cover-title">Seedream4.0 + N8N</h1>
+        <p class="cover-subtitle">2步搞定工作流自动化！</p>
+      </div>
+    </header>
+    
+    <!-- 内容 -->
+    <main class="content">
+      
+      <!-- 引导语 -->
+      <div class="intro-box">
+        <p>🤔 AI工具层出不穷，如何打通自动化工作流？</p>
+        <p>今天手把手教大家 Seedream4.0 + N8N 结合，只需 2 步，小白能入门、老手能落地！</p>
+      </div>
+      
+      <!-- 标签 -->
+      <div class="tags">
+        <span class="tag">#Seedream4.0</span>
+        <span class="tag">#N8N</span>
+        <span class="tag">#工作流自动化</span>
+        <span class="tag">#AI工具</span>
+        <span class="tag">#效率提升</span>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <!-- 工具介绍 -->
+      <section class="tool-intro">
+        <div class="section-title">
+          <h2>为什么是这两个工具？</h2>
+        </div>
+        
+        <div class="tool-item">
+          <div class="tool-icon seedream">🌊</div>
+          <div class="tool-info">
+            <h3>Seedream4.0</h3>
+            <p>当前最火的 AI 图像生成工具之一，热度持续攀升</p>
+          </div>
+        </div>
+        
+        <div class="tool-item">
+          <div class="tool-icon n8n">⚡</div>
+          <div class="tool-info">
+            <h3>N8N</h3>
+            <p>强大的开源工作流自动化平台，拖拽式操作，告别繁琐代码</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- 核心公式 -->
+      <div class="formula-box">
+        <div class="formula-line">🌊 Seedream4.0 + ⚡ N8N</div>
+        <div class="formula-result">= 无限可能</div>
+      </div>
+      
+      <!-- 功能卡片 -->
+      <section class="features-section">
+        <div class="section-title">
+          <h2>核心功能</h2>
+        </div>
+        
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="icon">🚀</div>
+            <div class="title">快速接入</div>
+            <div class="desc">只需 2 步</div>
+          </div>
+          <div class="feature-card">
+            <div class="icon">⚡</div>
+            <div class="title">自动化执行</div>
+            <div class="desc">告别手动</div>
+          </div>
+          <div class="feature-card">
+            <div class="icon">📊</div>
+            <div class="title">可视化监控</div>
+            <div class="desc">实时查看</div>
+          </div>
+          <div class="feature-card">
+            <div class="icon">🔧</div>
+            <div class="title">灵活定制</div>
+            <div class="desc">满足复杂</div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- 步骤 -->
+      <section class="steps-section">
+        <div class="section-title">
+          <h2>操作步骤</h2>
+        </div>
+        
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-number">1</span>
+            <span class="step-title">配置 Seedream4.0 API</span>
+          </div>
+          <ul class="step-list">
+            <li>获取 API Key</li>
+            <li>设置回调地址</li>
+            <li>完成认证配置</li>
+          </ul>
+        </div>
+        
+        <div class="step-card step-2">
+          <div class="step-header">
+            <span class="step-number">2</span>
+            <span class="step-title">创建 N8N 工作流</span>
+          </div>
+          <ul class="step-list">
+            <li>新建工作流</li>
+            <li>添加 HTTP 节点</li>
+            <li>配置 API 参数</li>
+            <li>测试并启用</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- 效果 -->
+      <section class="results-section">
+        <div class="results-title">🚀 效果显著</div>
+        <div class="results-list">
+          <div class="result-item efficiency">
+            <div class="icon">🚀</div>
+            <div class="text">效率提升</div>
+          </div>
+          <div class="result-item automation">
+            <div class="icon">⚡</div>
+            <div class="text">自动化</div>
+          </div>
+          <div class="result-item visual">
+            <div class="icon">📊</div>
+            <div class="text">可视化</div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- CTA -->
+      <div class="cta-section">
+        <h3>立即行动</h3>
+        <p>关注公众号，回复「N8N」获取完整配置教程</p>
+        <a href="#" class="cta-button">🚀 获取示例工作流</a>
+      </div>
+      
+      <!-- 原文 -->
+      <div class="original-link">
+        <p>原文链接</p>
+        <a href="https://zhuanlan.zhihu.com/p/1955740131987297250" target="_blank">https://zhuanlan.zhihu.com/p/1955740131987297250</a>
+      </div>
+      
+    </main>
+  </div>
+</body>
+</html>

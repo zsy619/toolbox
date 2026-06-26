@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>
+      Docker 安全加固规范 | AI 工具箱 Docker 规则库
+    </title>
+    <meta name="description" content="覆盖镜像、容器、网络、运行时 4 层面 15 条安全加固规则,包括 rootless、seccomp、apparmor、capability、镜像扫描等实战方案。">
+    <meta name="keywords" content="Docker, 镜像安全 5 规则, Docker 安全加固规范, Docker 规范, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/34-security-hardening-rules.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker 安全加固规范">
+    <meta property="og:description" content="覆盖镜像、容器、网络、运行时 4 层面 15 条安全加固规则,包括 rootless、seccomp、apparmor、capability、镜像扫描等实战方案。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/34-security-hardening-rules.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Docker 安全加固规范">
+    <meta name="twitter:description" content="覆盖镜像、容器、网络、运行时 4 层面 15 条安全加固规则,包括 rootless、seccomp、apparmor、capability、镜像扫描等实战方案。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Docker 安全加固规范","description":"覆盖镜像、容器、网络、运行时 4 层面 15 条安全加固规则,包括 rootless、seccomp、apparmor、capability、镜像扫描等实战方案。","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN","keywords":"Docker, 镜像安全 5 规则"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 规则库","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"Docker 安全加固规范","item":"https://tools.yy24365.com/ai-tools/docker/34-security-hardening-rules.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            D
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 规则库
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Docker 安全加固规范
+            </span>
+          </nav>
+          <h1 id="hero-title">
+            Docker 安全加固规范
+          </h1>
+          <p class="hero-sub">
+            15 条铁律 · 镜像/容器/网络/运行时
+          </p>
+          <p class="hero-desc">
+            覆盖镜像、容器、网络、运行时 4 层面 15 条安全加固规则,包括 rootless、seccomp、apparmor、capability、镜像扫描等实战方案。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                编号
+              </strong>
+              第 22 号规则
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                分类
+              </strong>
+              安全
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              中级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                字数
+              </strong>
+              ~ 3000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <nav class="toc" id="toc">
+          <h2 class="toc-title">
+            本文目录
+          </h2>
+          <ul class="toc-grid">
+            <li>
+              <a href="#s1">
+                <span class="toc-num">
+                  01
+                </span>
+                镜像安全 5 规则
+              </a>
+            </li>
+            <li>
+              <a href="#s2">
+                <span class="toc-num">
+                  02
+                </span>
+                容器运行时 5 规则
+              </a>
+            </li>
+            <li>
+              <a href="#s3">
+                <span class="toc-num">
+                  03
+                </span>
+                网络安全 3 规则
+              </a>
+            </li>
+            <li>
+              <a href="#s4">
+                <span class="toc-num">
+                  04
+                </span>
+                主机安全 2 规则
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">
+            Chapter 01
+          </span>
+          <h2 id="s1-title">
+            镜像安全 5 规则
+          </h2>
+          <div class="rules-grid">
+            <div class="rule-card">
+              <span class="rule-num">
+                01
+              </span>
+              <p>
+                使用可信镜像:Official Image / Verified Publisher
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                02
+              </span>
+              <p>
+                扫描漏洞:trivy image / docker scout cves
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                03
+              </span>
+              <p>
+                多阶段构建:构建工具不进入最终镜像
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                04
+              </span>
+              <p>
+                最小化安装:apk add --no-cache 而非 apk add + rm
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                05
+              </span>
+              <p>
+                签名验证:cosign verify --key cosign.pub <image>
+              </p>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">
+            Chapter 02
+          </span>
+          <h2 id="s2-title">
+            容器运行时 5 规则
+          </h2>
+          <div class="rules-grid">
+            <div class="rule-card">
+              <span class="rule-num">
+                01
+              </span>
+              <p>
+                USER:非 root 用户(node / appuser)
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                02
+              </span>
+              <p>
+                --read-only:只读根 + tmpfs(/tmp /run)
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                03
+              </span>
+              <p>
+                --cap-drop ALL:移除所有 capability + --cap-add 必要项
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                04
+              </span>
+              <p>
+                --security-opt no-new-privileges:禁止提权
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                05
+              </span>
+              <p>
+                --security-opt seccomp=custom.json:自定义 seccomp 规则
+              </p>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">
+            Chapter 03
+          </span>
+          <h2 id="s3-title">
+            网络安全 3 规则
+          </h2>
+          <div class="rules-grid">
+            <div class="rule-card">
+              <span class="rule-num">
+                01
+              </span>
+              <p>
+                --network=自定义网络,避免 default bridge
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                02
+              </span>
+              <p>
+                端口最小暴露:仅暴露必要端口
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                03
+              </span>
+              <p>
+                加密通信:TLS / mTLS(尤其 Swarm overlay 自动加密)
+              </p>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">
+            Chapter 04
+          </span>
+          <h2 id="s4-title">
+            主机安全 2 规则
+          </h2>
+          <div class="rules-grid">
+            <div class="rule-card">
+              <span class="rule-num">
+                01
+              </span>
+              <p>
+                Rootless 模式:dockerd-rootless.sh(无需 root)
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                02
+              </span>
+              <p>
+                AppArmor/SELinux:--security-opt apparmor=docker-default
+              </p>
+            </div>
+          </div>
+        </section>
+        <div class="alert alert-tip">
+          <span class="alert-icon">
+            💡 默认 seccomp
+          </span>
+          <div class="alert-body">
+            <p>
+              Docker 默认启用 seccomp,可通过 --security-opt seccomp=unconfined 关闭(慎用)
+            </p>
+          </div>
+        </div>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">
+            FAQ
+          </span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                镜像安全 5 规则
+              </h3>
+              <p class="faq-a">
+                使用可信镜像:Official Image / Verified Publisher
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                容器运行时 5 规则
+              </h3>
+              <p class="faq-a">
+                USER:非 root 用户(node / appuser)
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                网络安全 3 规则
+              </h3>
+              <p class="faq-a">
+                --network=自定义网络,避免 default bridge
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                主机安全 2 规则
+              </h3>
+              <p class="faq-a">
+                Rootless 模式:dockerd-rootless.sh(无需 root)
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+      <section class="section" id="practice">
+        <span class="section-num">
+          实战代码
+        </span>
+        <h2 id="practice-title">
+          实战代码示例
+        </h2>
+        <div class="content-card">
+          <h3 class="content-card-title">
+            📝 Trivy 扫描
+          </h3>
+          <p class="content-card-body">
+            完整可执行代码,直接复制即可在生产环境使用:
+          </p>
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">
+              Trivy 扫描 · bash
+            </span>
+            <button class="code-copy" aria-label="复制代码">
+              复制
+            </button>
+          </div>
+          <pre>
+            <code class="language-bash">
+trivy image --severity HIGH,CRITICAL --exit-code 1 myapp:v1.2.3
+trivy fs --security-checks vuln,config .
+            </code>
+          </pre>
+        </div>
+      </section>
+      <section class="section" id="workflow">
+        <span class="section-num">
+          操作流程
+        </span>
+        <h2 id="workflow-title">
+          可视化操作流程
+        </h2>
+        <div class="content-card">
+          <h3 class="content-card-title">
+            🔄 5 步标准操作流程
+          </h3>
+          <ol class="content-card-body" style="font-size:15px;line-height:1.8">
+            <li>
+              <strong>
+                集成到 CI
+              </strong>
+              → 启动容器或检查环境
+            </li>
+            <li>
+              <strong>
+                设 CRITICAL 阈值
+              </strong>
+              → 拉取依赖或配置
+            </li>
+            <li>
+              <strong>
+                定期全量扫描
+              </strong>
+              → 启动核心服务
+            </li>
+            <li>
+              <strong>
+                修复漏洞
+              </strong>
+              → 验证运行状态
+            </li>
+            <li>
+              <strong>
+                报告审计
+              </strong>
+              → 部署上线
+            </li>
+          </ol>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本规则
+        </h3>
+        <p class="footer-meta">
+          {title} · 属于 Docker 规则库系列,与 12 节课程内容深度协同。所有规则均经过 Docker 20+ 版本验证,可直接应用于生产环境。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            相关主题
+          </strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            Docker 12 节课系列
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方文档
+          </a>
+          ·
+          <a href="https://hub.docker.com" style="color:#c4d1de">
+            Docker Hub
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 规则库 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-rule-'+22;
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="工具箱">
+    
+    <title>AI双三角编辑器 · 一堂</title>
+    <meta name="description" content="在线AI双三角编辑器 - 一堂原创双三角模型：人类三角（创造力·审美·体系）× AI三角（场景·基本功·数据），构建无视表象、无限迁移、十年有效的AI操作系统。">
+    <meta name="keywords" content="AI双三角,编辑器,一堂,AI操作系统,提示词,场景,基本功,数据">
+    
+    <meta property="og:title" content="AI双三角编辑器 · 一堂">
+    <meta property="og:description" content="人类三角 × AI三角 = 无限应用">
+    <meta property="og:type" content="website">
+    
+    <link rel="canonical" href="https://tools.yy24365.com/apps/yitang/dual-triangle-editor.html">
+    
+    <link rel="stylesheet" href="../../assets/fonts/noto-sans-sc/noto-sans-sc.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/design-system.css">
+    <link rel="stylesheet" href="../../assets/css/fontawesome.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+        }
+        
+        :root {
+            --purple-primary: #a855f7;
+            --cyan-primary: #06b6d4;
+            --amber-primary: #f59e0b;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: #f1f5f9;
+        }
+        
+        .page-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+            min-height: 100vh;
+        }
+        
+        .container-custom {
+            max-width: 100%;
+            padding: 0 1.5rem;
+        }
+        
+        textarea {
+            background: #fafafa;
+            border: 1px solid #e5e7eb;
+            color: #1f2937;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            min-height: 70px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            transition: all 0.2s ease;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--purple-primary);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+        }
+        
+        textarea:hover:not(:focus) {
+            border-color: #d1d5db;
+        }
+        
+        .editor-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        
+        .preview-section {
+            background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            position: sticky;
+            top: 5rem;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+        
+        .triangle-card {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            min-height: 90px;
+            transition: all 0.2s ease;
+            cursor: default;
+        }
+        
+        .triangle-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .ai-card {
+            background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
+            border: 2px solid #22d3ee;
+        }
+        
+        .human-card {
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            border: 2px solid #d8b4fe;
+        }
+        
+        .center-card {
+            background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+            border: 2px solid #fcd34d;
+            padding: 1.25rem;
+        }
+        
+        .preview-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+        
+        .preview-content {
+            font-size: 0.85rem;
+            color: #475569;
+            line-height: 1.5;
+            min-height: 45px;
+            word-break: break-word;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #6b7280;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+        }
+        
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+        
+        .input-group {
+            margin-bottom: 0.75rem;
+        }
+        
+        .input-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+        
+        .input-hint {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 0.25rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .desktop-layout {
+                flex-direction: column !important;
+            }
+            
+            .preview-section {
+                position: relative;
+                top: 0;
+            }
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            .page-wrapper {
+                box-shadow: none;
+                max-width: 100%;
+            }
+            
+            .preview-section {
+                box-shadow: none;
+                border: 1px solid #e5e7eb;
+            }
+        }
+        
+        .auto-save-indicator {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+        
+        .save-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper bg-white">
+        <!-- 顶部导航 -->
+        <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 no-print">
+            <div class="container-custom py-3">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <div class="flex items-center gap-3">
+                        <a href="index.html" class="text-gray-700 hover:text-purple-600 transition-colors">
+                            <span class="text-xl font-bold">AI双三角</span>
+                        </a>
+                        <span class="px-2.5 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs rounded-full font-medium">
+                            编辑器
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center gap-3">
+                        <span class="auto-save-indicator">
+                            <span class="save-dot"></span>自动保存
+                        </span>
+                        
+                        <button onclick="loadExample()" class="btn-secondary text-sm">
+                            📝 加载示例
+                        </button>
+                        
+                        <button onclick="saveData()" class="btn-secondary text-sm">
+                            💾 保存
+                        </button>
+                        
+                        <button onclick="exportJSON()" class="btn-primary text-sm">
+                            ⬇️ 导出
+                        </button>
+                        
+                        <button onclick="window.print()" class="btn-secondary text-sm">
+                            🖨️ 打印
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 主内容 -->
+        <main class="container-custom py-6">
+            <div class="flex gap-6 desktop-layout">
+                <!-- 左侧：编辑器 -->
+                <div class="flex-1 space-y-6">
+                    <!-- AI三角 -->
+                    <div class="editor-section">
+                        <h2 class="section-title text-cyan-600">
+                            🤖 AI三角 <span class="text-sm font-normal text-gray-500 ml-2">场景 × 基本功 × 数据</span>
+                        </h2>
+                        
+                        <div class="input-group">
+                            <label class="input-label">🎯 场景</label>
+                            <textarea id="ai-scene" data-field="scene" placeholder="描述你的使用场景和任务类型..."></textarea>
+                            <p class="input-hint">选对AI任务类型 - 不同任务应该用不同AI工具</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">✨ 基本功</label>
+                            <textarea id="ai-basic" data-field="basic" placeholder="描述你的提示词和任务指令..."></textarea>
+                            <p class="input-hint">提示词工程 - 决定AI输出质量</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">📊 数据</label>
+                            <textarea id="ai-data" data-field="data" placeholder="描述你需要给AI喂的数据和背景信息..."></textarea>
+                            <p class="input-hint">喂对内容 - AI是能力放大器，需要正确输入</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 人类三角 -->
+                    <div class="editor-section">
+                        <h2 class="section-title text-purple-600">
+                            👤 人类三角 <span class="text-sm font-normal text-gray-500 ml-2">创造力 × 审美 × 体系</span>
+                        </h2>
+                        
+                        <div class="input-group">
+                            <label class="input-label">💡 创造力</label>
+                            <textarea id="human-creativity" data-field="creativity" placeholder="描述你的创意方向和想法..."></textarea>
+                            <p class="input-hint">设计、写作、策略 - AI无法原创</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">❤️ 审美</label>
+                            <textarea id="human-aesthetic" data-field="aesthetic" placeholder="描述你的审美标准和要求..."></textarea>
+                            <p class="input-hint">视觉拉满、细节、风格 - 人类独有的判断力</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">📐 体系</label>
+                            <textarea id="human-system" data-field="system" placeholder="描述你的方法论和工作流程..."></textarea>
+                            <p class="input-hint">方法论、流程、系统 - 十年有效的能力</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 核心 -->
+                    <div class="editor-section">
+                        <h2 class="section-title text-amber-600">
+                            ⚡ 核心 <span class="text-sm font-normal text-gray-500 ml-2">双三角关系</span>
+                        </h2>
+                        
+                        <div class="input-group">
+                            <label class="input-label">💎 核心原则</label>
+                            <textarea id="core-principle" data-field="principle" placeholder="描述AI与人类的关系原则..."></textarea>
+                            <p class="input-hint">AI是能力放大器，人类负责创意和判断</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">🎓 核心心法</label>
+                            <textarea id="core-mentality" data-field="mentality" placeholder="描述核心心法..."></textarea>
+                            <p class="input-hint">AI放大人，不是替代人</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧：实时预览 -->
+                <div class="w-full lg:w-[420px] xl:w-[480px]">
+                    <div class="preview-section">
+                        <h2 class="section-title text-gray-800">
+                            👁️ 实时预览
+                        </h2>
+                        
+                        <div class="mb-4">
+                            <h3 class="text-lg font-bold text-center mb-4 text-gray-700">
+                                AI双三角 × 人类三角
+                            </h3>
+                            
+                            <div class="flex items-center justify-center gap-3 mb-4">
+                                <!-- 人类三角 -->
+                                <div class="flex flex-col gap-2 flex-1">
+                                    <div class="triangle-card human-card">
+                                        <div class="preview-label text-purple-600">💡 创造力</div>
+                                        <div id="preview-creativity" class="preview-content"></div>
+                                    </div>
+                                    <div class="triangle-card human-card">
+                                        <div class="preview-label text-purple-600">❤️ 审美</div>
+                                        <div id="preview-aesthetic" class="preview-content"></div>
+                                    </div>
+                                    <div class="triangle-card human-card">
+                                        <div class="preview-label text-purple-600">📐 体系</div>
+                                        <div id="preview-system" class="preview-content"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 中心符号 -->
+                                <div class="center-card flex items-center justify-center py-0">
+                                    <span class="text-2xl font-bold text-amber-500">×</span>
+                                </div>
+                                
+                                <!-- AI三角 -->
+                                <div class="flex flex-col gap-2 flex-1">
+                                    <div class="triangle-card ai-card">
+                                        <div class="preview-label text-cyan-600">🎯 场景</div>
+                                        <div id="preview-scene" class="preview-content"></div>
+                                    </div>
+                                    <div class="triangle-card ai-card">
+                                        <div class="preview-label text-cyan-600">✨ 基本功</div>
+                                        <div id="preview-basic" class="preview-content"></div>
+                                    </div>
+                                    <div class="triangle-card ai-card">
+                                        <div class="preview-label text-cyan-600">📊 数据</div>
+                                        <div id="preview-data" class="preview-content"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 核心公式 -->
+                            <div class="center-card">
+                                <div class="preview-label text-amber-600 text-center mb-2">💎 核心原则</div>
+                                <div id="preview-principle" class="preview-content text-center"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 使用指南折叠 -->
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <button onclick="toggleGuide()" class="w-full text-left text-sm font-semibold text-gray-600 hover:text-gray-800 flex items-center justify-between">
+                                <span>📚 使用指南</span>
+                                <span id="guide-arrow">▼</span>
+                            </button>
+                            <div id="guide-content" class="mt-3 text-xs text-gray-600 space-y-2 hidden">
+                                <p><strong class="text-purple-600">人类三角</strong>：创造力、审美、体系是AI无法替代的人类核心能力</p>
+                                <p><strong class="text-cyan-600">AI三角</strong>：场景、基本功、数据决定AI输出的质量</p>
+                                <p><strong class="text-amber-600">核心</strong>：AI是能力放大器，人类负责创意和判断</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 页脚 -->
+        <footer class="py-4 text-center text-gray-400 text-sm border-t border-gray-100">
+            <p>AI双三角编辑器 · 一堂原创 · <a href="dual_triangle_ai_system.html" class="text-purple-600 hover:underline">课程详情</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // 示例数据
+        const exampleData = {
+            ai: {
+                scene: "电商选品：分析市场趋势，挖掘潜力产品\n\n任务类型：市场调研 + 数据分析 + 趋势预测",
+                basic: "请作为专业电商选品专家，根据以下市场数据...\n\n要求：\n1. 分析数据趋势\n2. 识别潜力品类\n3. 给出具体建议",
+                data: "近30天销售数据\n竞品价格分析\n用户评价汇总\n行业报告摘要"
+            },
+            human: {
+                creativity: "新品差异化定位策略\n\n独特卖点：品质 + 设计 + 性价比\n\n目标用户：25-35岁都市女性",
+                aesthetic: "风格：简约现代 + 轻奢感\n\n视觉要求：高级感、自然光、场景化\n\n细节：包装、开箱体验、品牌故事",
+                system: "选品漏斗模型：\n1. 市场调研（需求验证）\n2. 竞品分析（差异化）\n3. 供应链评估（稳定性）\n4. 财务测算（利润空间）"
+            },
+            core: {
+                principle: "AI是能力放大器，不是替代者。\n\n人类负责：创意方向 + 判断决策\nAI负责：数据分析 + 方案生成",
+                mentality: "AI放大人，不是替代人\n\n核心竞争力 = 判断力 × 体系 × 审美"
+            }
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            updatePreview();
+            
+            // 监听所有输入框变化
+            const inputs = document.querySelectorAll('textarea[data-field]');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    updatePreview();
+                    debounceSave();
+                });
+            });
+        });
+
+        // 防抖保存
+        let saveTimeout;
+        function debounceSave() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveData(false); // 静默保存，不显示提示
+            }, 1000);
+        }
+
+        // 更新预览
+        function updatePreview() {
+            document.getElementById('preview-scene').textContent = document.getElementById('ai-scene').value || '请填写场景...';
+            document.getElementById('preview-basic').textContent = document.getElementById('ai-basic').value || '请填写基本功...';
+            document.getElementById('preview-data').textContent = document.getElementById('ai-data').value || '请填写数据...';
+            document.getElementById('preview-creativity').textContent = document.getElementById('human-creativity').value || '请填写创造力...';
+            document.getElementById('preview-aesthetic').textContent = document.getElementById('human-aesthetic').value || '请填写审美...';
+            document.getElementById('preview-system').textContent = document.getElementById('human-system').value || '请填写体系...';
+            document.getElementById('preview-principle').textContent = document.getElementById('core-principle').value || 'AI是能力放大器，人类负责创意和判断';
+        }
+
+        // 保存数据
+        function saveData(showAlert = true) {
+            const data = {
+                ai: {
+                    scene: document.getElementById('ai-scene').value,
+                    basic: document.getElementById('ai-basic').value,
+                    data: document.getElementById('ai-data').value
+                },
+                human: {
+                    creativity: document.getElementById('human-creativity').value,
+                    aesthetic: document.getElementById('human-aesthetic').value,
+                    system: document.getElementById('human-system').value
+                },
+                core: {
+                    principle: document.getElementById('core-principle').value,
+                    mentality: document.getElementById('core-mentality').value
+                },
+                savedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('ai-dual-triangle-data', JSON.stringify(data));
+            
+            if (showAlert) {
+                alert('✅ 保存成功！');
+            }
+        }
+
+        // 加载数据
+        function loadData() {
+            const saved = localStorage.getItem('ai-dual-triangle-data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('ai-scene').value = data.ai?.scene || '';
+                document.getElementById('ai-basic').value = data.ai?.basic || '';
+                document.getElementById('ai-data').value = data.ai?.data || '';
+                document.getElementById('human-creativity').value = data.human?.creativity || '';
+                document.getElementById('human-aesthetic').value = data.human?.aesthetic || '';
+                document.getElementById('human-system').value = data.human?.system || '';
+                document.getElementById('core-principle').value = data.core?.principle || '';
+                document.getElementById('core-mentality').value = data.core?.mentality || '';
+            }
+        }
+
+        // 加载示例
+        function loadExample() {
+            if (confirm('加载示例数据将覆盖当前内容，确定继续吗？')) {
+                document.getElementById('ai-scene').value = exampleData.ai.scene;
+                document.getElementById('ai-basic').value = exampleData.ai.basic;
+                document.getElementById('ai-data').value = exampleData.ai.data;
+                document.getElementById('human-creativity').value = exampleData.human.creativity;
+                document.getElementById('human-aesthetic').value = exampleData.human.aesthetic;
+                document.getElementById('human-system').value = exampleData.human.system;
+                document.getElementById('core-principle').value = exampleData.core.principle;
+                document.getElementById('core-mentality').value = exampleData.core.mentality;
+                
+                updatePreview();
+                saveData();
+                alert('✅ 示例数据已加载！');
+            }
+        }
+
+        // 导出JSON
+        function exportJSON() {
+            const data = {
+                ai: {
+                    scene: document.getElementById('ai-scene').value,
+                    basic: document.getElementById('ai-basic').value,
+                    data: document.getElementById('ai-data').value
+                },
+                human: {
+                    creativity: document.getElementById('human-creativity').value,
+                    aesthetic: document.getElementById('human-aesthetic').value,
+                    system: document.getElementById('human-system').value
+                },
+                core: {
+                    principle: document.getElementById('core-principle').value,
+                    mentality: document.getElementById('core-mentality').value
+                },
+                exportedAt: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ai-dual-triangle-' + new Date().toISOString().slice(0, 10) + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 切换指南显示
+        function toggleGuide() {
+            const content = document.getElementById('guide-content');
+            const arrow = document.getElementById('guide-arrow');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                arrow.textContent = '▲';
+            } else {
+                content.classList.add('hidden');
+                arrow.textContent = '▼';
+            }
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + S 保存
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                saveData();
+            }
+            // Ctrl/Cmd + E 导出
+            if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                e.preventDefault();
+                exportJSON();
+            }
+        });
+    </script>
+</body>
+</html>

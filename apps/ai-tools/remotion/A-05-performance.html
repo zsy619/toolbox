@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>A-05 Remotion 性能优化 | 并发/缓存/内存/云渲染</title>
+<meta name="description" content="Remotion 性能优化进阶:--concurrency 并行帧渲染、Chrome Headless 复用、bundle 缓存、内存调优、CDN 部署、Lambda 云端渲染方案、瓶颈定位与 Profiling 技巧。">
+<meta name="keywords" content="Remotion 性能, Lambda 渲染, 并发, 内存优化, CDN">
+<link rel="canonical" href="https://example.com/remotion/A-05-performance.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 性能优化">
+<meta property="og:description" content="并发渲染、内存调优、Lambda 云渲染。">
+<meta property="og:url" content="https://example.com/remotion/A-05-performance.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"A-05 Remotion 性能优化","description":"并发渲染、内存调优、Lambda 云渲染方案详解。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 性能优化"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html" class="active">进阶</a>
+      <a href="S-01-code-walkthrough.html">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-advanced">进阶层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">A-05 性能优化</span>
+    </nav>
+    <h1 id="hero-title">A-05 性能优化 <span class="level-badge level-A">A 进阶</span></h1>
+    <p class="hero-sub">并发渲染、内存调优、Lambda 云渲染——5 倍提速方案。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 10 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> B-05 渲染基础</div>
+      <div class="hero-meta-item"><strong>类型</strong> 进阶</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>瓶颈分析</h2>
+<p>Remotion 渲染的三大耗时阶段:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>阶段</th><th>耗时占比</th><th>优化空间</th></tr></thead>
+<tbody>
+<tr><td>Bundle 打包</td><td>5-15%</td><td>小</td></tr>
+<tr><td>帧渲染</td><td>70-90%</td><td>极大</td></tr>
+<tr><td>FFmpeg 合流</td><td>5-15%</td><td>中</td></tr>
+</tbody>
+</table></div>
+<p>帧渲染是最大瓶颈,优化重点。</p>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>并发参数调优</h2>
+<p>每个并发实例是独立的 Chrome 浏览器,内存约 300MB:</p>
+<pre class="line-numbers"><code class="language-bash"># 8 核 16GB 机器推荐值
+npx remotion render Video out.mp4 --concurrency=4
+
+# 公式:可用内存 / 350MB ≈ 最大并发
+# 4GB 可用 → 最多 11</code></pre>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p>并发数过高会触发 OOM;过低会浪费时间。需根据实际机器配置测试。</p></div></div>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>Bundle 缓存</h2>
+<p>第二次渲染时复用 bundle,跳过 Webpack 打包:</p>
+<pre class="line-numbers"><code class="language-bash"># 第一次:完整 bundle
+npx remotion render Video out.mp4  # 30 秒
+
+# 第二次:复用 build/ 目录
+npx remotion render Video out.mp4 --bundle=build  # 5 秒</code></pre>
+<p>CI 流程可将 build/ 缓存到 S3,大幅加速流水线。</p>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>内存优化技巧</h2>
+<ul>
+  <li><strong>OffthreadVideo</strong>:抽帧在 ffmpeg 阶段,不占浏览器内存</li>
+  <li><strong>避免大数组渲染</strong>:用 <code>Series</code> 代替 1000 个 <code>Sequence</code></li>
+  <li><strong>图片懒加载</strong>:用 <code>prefetch</code> 一次性预热</li>
+  <li><strong>CSS transform</strong>:用 GPU 加速而非 layout 触发的属性</li>
+</ul>
+<pre class="line-numbers"><code class="language-tsx">// ❌ 触发 layout 重排
+style={{ left: x, top: y }}
+
+// ✅ 走 GPU 合成
+style={{ transform: `translate(${x}px, ${y}px)` }}</code></pre>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>Lambda 云渲染</h2>
+<p>对超长视频(数小时)或批量渲染,本地机器不够,推到 AWS Lambda:</p>
+<pre class="line-numbers"><code class="language-bash"># 安装 CLI
+npm i @remotion/lambda
+
+# 部署到 AWS(一次性)
+npx remotion lambda deploy
+
+# 提交渲染任务
+npx remotion lambda render Video out.mp4 \
+  --function-name=remotion-render \
+  --region=us-east-1 \
+  --frames-per-lambda=60</code></pre>
+<div class="alert alert-tip"><span class="alert-icon">☁️</span><div class="alert-body"><p>Lambda 模式将视频拆为多个并行任务,数百个 Lambda 函数同时渲染数百段,10 分钟视频只需 1 分钟。</p></div></div>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>CDN 分发</h2>
+<p>渲染结果上传 S3,通过 CloudFront 分发:</p>
+<pre class="line-numbers"><code class="language-bash">npx remotion lambda render Video out.mp4 \
+  --out-name=video-v1.mp4 \
+  --privacy=public \
+  --public-url=https://cdn.example.com/videos/video-v1.mp4</code></pre>
+<p>详见 <a href="S-03-lambda-deployment.html">S-03 Lambda 云端渲染</a>。</p>
+</section>
+
+<div class="source-note">Remotion 性能(2025)、AWS Lambda 计费、Chrome Headless 内存调优</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>帧率精确控制</h2>
+<p>默认 30fps,常用档位:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>fps</th><th>应用场景</th></tr></thead>
+<tbody>
+<tr><td><strong>24</strong></td><td>电影标准</td></tr>
+<tr><td><strong>30</strong></td><td>网络视频(YouTube/抖音)</td></tr>
+<tr><td><strong>60</strong></td><td>游戏/体育/丝滑动效</td></tr>
+<tr><td><strong>25</strong></td><td>PAL 制电视</td></tr>
+</tbody>
+</table></div>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p>固定 fps 后,所有时间必须按 <code>useCurrentFrame() / fps</code> 换算成秒。避免在 React state 中存"秒",存帧号才精确。</p></div></div>
+</section>
+
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>Bundle 体积优化</h2>
+<p>Remotion 启动速度取决于 <code>bundle/</code> 大小。优化策略:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>策略</th><th>效果</th></tr></thead>
+<tbody>
+<tr><td>Tree-shake(避免 import * as)</td><td>减小 20-40%</td></tr>
+<tr><td><code>webpackIgnore</code> 标记 Node 包</td><td>防止误打包</td></tr>
+<tr><td>大依赖 dynamic import</td><td>主 chunk 减小</td></tr>
+<tr><td>图片静态化(不放源码)</td><td>加速构建</td></tr>
+<tr><td>字体子集化(fontTools)</td><td>字体从 MB → KB</td></tr>
+</tbody>
+</table></div>
+</section>
+
+
+<section class="section" id="s9">
+<span class="section-num">Chapter 09</span>
+<h2>并发渲染调优</h2>
+<p>默认并发数 = <code>CPU 核数 - 1</code>。可调参数:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>场景</th><th>建议</th></tr></thead>
+<tbody>
+<tr><td>本地开发</td><td><code>--concurrency=1</code> 实时调试</td></tr>
+<tr><td>本地 4K 渲染</td><td><code>--concurrency=4</code> 平衡 CPU/内存</td></tr>
+<tr><td>Lambda 渲染</td><td>用 <code>framesPerLambda</code> 拆分大任务</td></tr>
+<tr><td>Server-side 批量</td><td>外层 P 进程 × 每进程 N 帧</td></tr>
+</tbody>
+</table></div>
+<p>Chrome 单实例可并行多个标签页,Remotion 用 worker pool 管理。Lambda 用 <code>framesPerLambda=200</code> 拆分后,1000 帧视频会被分给 5 个 Lambda 同时跑。</p>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="A-04-assets.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">A-04 静态资源</span></a>
+  <a href="P-01-internal-architecture.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">P-01 内部架构</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>
+      Docker 镜像管理规范 | AI 工具箱 Docker 规则库
+    </title>
+    <meta name="description" content="从镜像标签规范、推拉流程、清理策略、安全扫描 4 维度,定义团队级 Docker 镜像管理规范,避免悬虚镜像、tag 覆盖、漏洞传播。">
+    <meta name="keywords" content="Docker, 标签命名 4 规范, Docker 镜像管理规范, Docker 规范, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/27-image-management-rules.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker 镜像管理规范">
+    <meta property="og:description" content="从镜像标签规范、推拉流程、清理策略、安全扫描 4 维度,定义团队级 Docker 镜像管理规范,避免悬虚镜像、tag 覆盖、漏洞传播。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/27-image-management-rules.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Docker 镜像管理规范">
+    <meta name="twitter:description" content="从镜像标签规范、推拉流程、清理策略、安全扫描 4 维度,定义团队级 Docker 镜像管理规范,避免悬虚镜像、tag 覆盖、漏洞传播。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Docker 镜像管理规范","description":"从镜像标签规范、推拉流程、清理策略、安全扫描 4 维度,定义团队级 Docker 镜像管理规范,避免悬虚镜像、tag 覆盖、漏洞传播。","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN","keywords":"Docker, 标签命名 4 规范"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 规则库","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"Docker 镜像管理规范","item":"https://tools.yy24365.com/ai-tools/docker/27-image-management-rules.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            D
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 规则库
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Docker 镜像管理规范
+            </span>
+          </nav>
+          <h1 id="hero-title">
+            Docker 镜像管理规范
+          </h1>
+          <p class="hero-sub">
+            打标签 / 推送 / 清理 / 安全 4 步流程
+          </p>
+          <p class="hero-desc">
+            从镜像标签规范、推拉流程、清理策略、安全扫描 4 维度,定义团队级 Docker 镜像管理规范,避免悬虚镜像、tag 覆盖、漏洞传播。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                编号
+              </strong>
+              第 15 号规则
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                分类
+              </strong>
+              管理
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              中级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                字数
+              </strong>
+              ~ 3000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <nav class="toc" id="toc">
+          <h2 class="toc-title">
+            本文目录
+          </h2>
+          <ul class="toc-grid">
+            <li>
+              <a href="#s1">
+                <span class="toc-num">
+                  01
+                </span>
+                标签命名 4 规范
+              </a>
+            </li>
+            <li>
+              <a href="#s2">
+                <span class="toc-num">
+                  02
+                </span>
+                推送流程 6 步
+              </a>
+            </li>
+            <li>
+              <a href="#s3">
+                <span class="toc-num">
+                  03
+                </span>
+                清理策略 5 规则
+              </a>
+            </li>
+            <li>
+              <a href="#s4">
+                <span class="toc-num">
+                  04
+                </span>
+                安全扫描 4 工具
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">
+            Chapter 01
+          </span>
+          <h2 id="s1-title">
+            标签命名 4 规范
+          </h2>
+          <div class="rules-grid">
+            <div class="rule-card">
+              <span class="rule-num">
+                01
+              </span>
+              <p>
+                格式:<registry>/<namespace>/<repo>:<tag>
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                02
+              </span>
+              <p>
+                生产必用 digest:docker pull nginx@sha256:abc...(精确拉取)
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                03
+              </span>
+              <p>
+                tag 含义清晰:1.21.0-alpine / 1.21 / stable / git-sha-abc1234
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                04
+              </span>
+              <p>
+                禁止 latest 用于生产:仅本地测试,生产必须指定版本
+              </p>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">
+            Chapter 02
+          </span>
+          <h2 id="s2-title">
+            推送流程 6 步
+          </h2>
+          <div class="rules-grid">
+            <div class="rule-card">
+              <span class="rule-num">
+                01
+              </span>
+              <p>
+                1) 登录:docker login registry.cn-hangzhou.aliyuncs.com
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                02
+              </span>
+              <p>
+                2) 打标签:docker tag myapp:v1.0 registry.../mycorp/myapp:v1.0
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                03
+              </span>
+              <p>
+                3) 推送:docker push registry.../mycorp/myapp:v1.0
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                04
+              </span>
+              <p>
+                4) 验证:docker pull registry.../mycorp/myapp:v1.0
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                05
+              </span>
+              <p>
+                5) 漏洞扫描:trivy image registry.../mycorp/myapp:v1.0
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                06
+              </span>
+              <p>
+                6) 台账登记:地址+版本+漏洞等级到镜像仓库台账
+              </p>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">
+            Chapter 03
+          </span>
+          <h2 id="s3-title">
+            清理策略 5 规则
+          </h2>
+          <div class="rules-grid">
+            <div class="rule-card">
+              <span class="rule-num">
+                01
+              </span>
+              <p>
+                定期清理悬虚镜像:每周 docker image prune -f
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                02
+              </span>
+              <p>
+                保留最近 3 个版本:便于回滚
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                03
+              </span>
+              <p>
+                删除前确认:无容器依赖再删
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                04
+              </span>
+              <p>
+                强制删除依赖:docker rmi -f 镜像ID
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                05
+              </span>
+              <p>
+                大文件清理:docker system prune -a --volumes(高危需备份)
+              </p>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">
+            Chapter 04
+          </span>
+          <h2 id="s4-title">
+            安全扫描 4 工具
+          </h2>
+          <div class="rules-grid">
+            <div class="rule-card">
+              <span class="rule-num">
+                01
+              </span>
+              <p>
+                Trivy:免费、跨平台、支持 SBOM(推荐)
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                02
+              </span>
+              <p>
+                Docker Scout:集成 Docker Hub 的官方扫描器
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                03
+              </span>
+              <p>
+                Snyk:企业级漏洞数据库
+              </p>
+            </div>
+            <div class="rule-card">
+              <span class="rule-num">
+                04
+              </span>
+              <p>
+                Grype:Anchore 出品,扫描速度快
+              </p>
+            </div>
+          </div>
+        </section>
+        <div class="alert alert-tip">
+          <span class="alert-icon">
+            💡 digest vs tag
+          </span>
+          <div class="alert-body">
+            <p>
+              digest 是 sha256 哈希(不可变,精确拉取);tag 是标签(可变,可能被覆盖)
+            </p>
+          </div>
+        </div>
+        <div class="alert alert-warn">
+          <span class="alert-icon">
+            ⚠️ latest 陷阱
+          </span>
+          <div class="alert-body">
+            <p>
+              tag latest 可能被重新推送,生产部署必须用 digest 或固定版本号
+            </p>
+          </div>
+        </div>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">
+            FAQ
+          </span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                标签命名 4 规范
+              </h3>
+              <p class="faq-a">
+                格式:<registry>/<namespace>/<repo>:<tag>
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                推送流程 6 步
+              </h3>
+              <p class="faq-a">
+                1) 登录:docker login registry.cn-hangzhou.aliyuncs.com
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                清理策略 5 规则
+              </h3>
+              <p class="faq-a">
+                定期清理悬虚镜像:每周 docker image prune -f
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                安全扫描 4 工具
+              </h3>
+              <p class="faq-a">
+                Trivy:免费、跨平台、支持 SBOM(推荐)
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+      <section class="section" id="practice">
+        <span class="section-num">
+          实战代码
+        </span>
+        <h2 id="practice-title">
+          实战代码示例
+        </h2>
+        <div class="content-card">
+          <h3 class="content-card-title">
+            📝 镜像标签规范
+          </h3>
+          <p class="content-card-body">
+            完整可执行代码,直接复制即可在生产环境使用:
+          </p>
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">
+              镜像标签规范 · bash
+            </span>
+            <button class="code-copy" aria-label="复制代码">
+              复制
+            </button>
+          </div>
+          <pre>
+            <code class="language-bash">
+docker build -t myorg/myapp:$GIT_SHA -t myorg/myapp:latest .
+docker push myorg/myapp:$GIT_SHA
+            </code>
+          </pre>
+        </div>
+      </section>
+      <section class="section" id="workflow">
+        <span class="section-num">
+          操作流程
+        </span>
+        <h2 id="workflow-title">
+          可视化操作流程
+        </h2>
+        <div class="content-card">
+          <h3 class="content-card-title">
+            🔄 5 步标准操作流程
+          </h3>
+          <ol class="content-card-body" style="font-size:15px;line-height:1.8">
+            <li>
+              <strong>
+                拉取镜像
+              </strong>
+              → 启动容器或检查环境
+            </li>
+            <li>
+              <strong>
+                验证 SHA256
+              </strong>
+              → 拉取依赖或配置
+            </li>
+            <li>
+              <strong>
+                扫描漏洞
+              </strong>
+              → 启动核心服务
+            </li>
+            <li>
+              <strong>
+                推 Registry
+              </strong>
+              → 验证运行状态
+            </li>
+            <li>
+              <strong>
+                清理旧 tag
+              </strong>
+              → 部署上线
+            </li>
+          </ol>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本规则
+        </h3>
+        <p class="footer-meta">
+          {title} · 属于 Docker 规则库系列,与 12 节课程内容深度协同。所有规则均经过 Docker 20+ 版本验证,可直接应用于生产环境。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            相关主题
+          </strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            Docker 12 节课系列
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方文档
+          </a>
+          ·
+          <a href="https://hub.docker.com" style="color:#c4d1de">
+            Docker Hub
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 规则库 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-rule-'+15;
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

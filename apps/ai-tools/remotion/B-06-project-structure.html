@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>B-06 Remotion 项目结构与配置 | monorepo 与团队协作</title>
+<meta name="description" content="Remotion 项目结构深度讲解:标准 monorepo 布局、TypeScript 路径别名、remotion.config.ts 全部配置项、环境变量管理、Git Hooks、ESLint 规范、多 Composition 组织模式,适合团队协作开发。">
+<meta name="keywords" content="Remotion 项目结构, monorepo, remotion.config, TypeScript 别名, 团队协作">
+<link rel="canonical" href="https://example.com/remotion/B-06-project-structure.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 项目结构与配置">
+<meta property="og:description" content="monorepo 布局、配置详解、团队协作最佳实践。">
+<meta property="og:url" content="https://example.com/remotion/B-06-project-structure.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"B-06 Remotion 项目结构与配置","description":"Remotion 项目结构、TypeScript 别名、remotion.config.ts 全部配置项、团队协作。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 项目结构"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html" class="active">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="S-01-code-walkthrough.html">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-basic">基础层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">B-06 项目结构与配置</span>
+    </nav>
+    <h1 id="hero-title">B-06 项目结构与配置 <span class="level-badge level-B">B 基础</span></h1>
+    <p class="hero-sub">monorepo 布局、TypeScript 别名、remotion.config.ts 全部配置项、团队协作最佳实践。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 11 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> B-01 ~ B-05</div>
+      <div class="hero-meta-item"><strong>类型</strong> 入门实战</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>标准 monorepo 布局</h2>
+<p>生产级 Remotion 项目通常用 monorepo 管理多视频:</p>
+<pre class="line-numbers"><code class="language-bash">my-video-suite/
+├── packages/
+│   ├── shared/             # 共享组件库
+│   │   ├── Logo.tsx
+│   │   └── theme.ts
+│   ├── video-tutorial/     # 教程视频
+│   │   ├── src/
+│   │   └── package.json
+│   └── video-ad/           # 广告视频
+│       ├── src/
+│       └── package.json
+├── tooling/
+│   ├── eslint-config/
+│   └── tsconfig/
+├── package.json            # workspace root
+└── pnpm-workspace.yaml</code></pre>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>TypeScript 路径别名</h2>
+<p>用 workspace 包引用避免相对路径混乱:</p>
+<pre class="line-numbers"><code class="language-ts">// packages/video-tutorial/tsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../shared/src/*"],
+      "@/*": ["./src/*"]
+    }
+  }
+}</code></pre>
+<p>组件内直接:</p>
+<pre class="line-numbers"><code class="language-tsx">import { Logo } from '@shared/Logo';</code></pre>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>remotion.config.ts 全部配置</h2>
+<pre class="line-numbers"><code class="language-ts">import { Config } from '@remotion/cli/config';
+import path from 'path';
+
+Config.setVideoImageFormat('jpeg');                 // 帧图格式
+Config.setConcurrency(4);                            // 并发
+Config.setEntryPoint('src/index.ts');                 // 入口
+Config.setCachingEnabled(true);                       // bundle 缓存
+Config.setPort(3000);                                 // Studio 端口
+Config.setWebpackOverride((c) =&gt; {
+  c.resolve.alias = {
+    ...c.resolve.alias,
+    '@': path.resolve(__dirname, 'src'),
+  };
+  return c;
+});
+
+Config.setFfmpegOverrideFunction(({ args }) =&gt; {
+  return [...args, '-c:v', 'libx264', '-preset', 'fast'];
+});</code></pre>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>环境变量管理</h2>
+<p>用 dotenv + 校验避免 CI 失败:</p>
+<pre class="line-numbers"><code class="language-bash"># .env.local
+REMOTION_AWS_REGION=us-east-1
+REMOTION_BUCKET=remotion-prod
+# 不要把 .env.local 入 git</code></pre>
+<p>运行时读取:</p>
+<pre class="line-numbers"><code class="language-tsx">const region = process.env.REMOTION_AWS_REGION;
+if (!region) throw new Error('Set REMOTION_AWS_REGION');</code></pre>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>ESLint 规范</h2>
+<p>基于 react + remotion 规则的最小配置:</p>
+<pre class="line-numbers"><code class="language-json">// .eslintrc.json
+{
+  "extends": ["@remotion/eslint-config"],
+  "rules": {
+    "react/prop-types": "off",
+    "@typescript-eslint/no-unused-vars": "error"
+  }
+}</code></pre>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>多 Composition 组织</h2>
+<p>大型项目把 Composition 分文件管理:</p>
+<pre class="line-numbers"><code class="language-tsx">// Root.tsx
+&lt;&gt;
+  &lt;Composition {...compositions.intro} /&gt;
+  &lt;Composition {...compositions.main} /&gt;
+  &lt;Composition {...compositions.outro} /&gt;
+&lt;/&gt;</code></pre>
+<p>每个 Composition 单独 schema + defaultProps 集中在 <code>compositions/</code> 目录,便于团队 review。</p>
+</section>
+
+<div class="source-note">Remotion monorepo 实践、Turborepo 文档、pnpm workspace</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>Studio 高级定制</h2>
+<p>Studio 不止是开发工具,还能通过 <code>saveBeforeRemux</code>、<code>getStaticFiles</code>、<code>getRenderProgress</code> 钩子深度定制:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">// remotion.config.ts
+Config.setVideoImageFormat('jpeg');
+Config.setOverwriteOutput(true);
+Config.setConcurrency(4);  // 4 并行渲染
+
+// 启用 Remotion Studio
+Config.setStudioEnabled(true);</code></pre></div>
+<p>Studio 内部支持 <strong>Watch 模式</strong>(保存源文件自动重载)与 <strong>Premounting</strong>(提前挂载,大幅减少切换卡顿)。</p>
+</section>
+
+
+<section class="section" id="s9">
+<span class="section-num">Chapter 09</span>
+<h2>Bun / Deno / 跨平台支持</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>运行时</th><th>支持</th><th>限制</th></tr></thead>
+<tbody>
+<tr><td>Node.js 20+</td><td>完整</td><td>—</td></tr>
+<tr><td>Bun 1.1+</td><td>完整</td><td>WebCodecs 部分 API 仍需 Node</td></tr>
+<tr><td>Deno 1.40+</td><td>基本</td><td>Studio 浏览器侧有兼容性</td></tr>
+<tr><td>Edge (Cloudflare)</td><td>仅 Studio/Player</td><td>无 SSR</td></tr>
+</tbody>
+</table></div>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash"># Bun 项目创建
+bun create video my-app --template next
+bun install
+bun x remotion studio</code></pre></div>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="B-05-rendering-basics.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">B-05 渲染基础</span></a>
+  <a href="A-01-data-driven.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">A-01 数据驱动视频</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 23 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

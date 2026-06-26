@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>A-01 Remotion 数据驱动视频 | Props 传递与动态内容</title>
+<meta name="description" content="Remotion 数据驱动视频完整指南:Props 类型定义、getInputProps 数据注入、calculateMetadata 动态时长、Zod schema 校验、动态 Composition 注册,数据可视化视频的进阶必读。">
+<meta name="keywords" content="Remotion Props, calculateMetadata, getInputProps, Zod, 数据驱动">
+<link rel="canonical" href="https://example.com/remotion/A-01-data-driven.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 数据驱动视频">
+<meta property="og:description" content="Props 传递、calculateMetadata、动态 Composition 进阶指南。">
+<meta property="og:url" content="https://example.com/remotion/A-01-data-driven.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"A-01 Remotion 数据驱动视频","description":"Props 传递、getInputProps、calculateMetadata 与 Zod 校验。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion Props"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html" class="active">进阶</a>
+      <a href="S-01-code-walkthrough.html">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-advanced">进阶层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">A-01 数据驱动视频</span>
+    </nav>
+    <h1 id="hero-title">A-01 数据驱动视频 <span class="level-badge level-A">A 进阶</span></h1>
+    <p class="hero-sub">Props 传递、getInputProps、calculateMetadata —— 用数据驱动视频内容。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 12 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> B-01 ~ B-05</div>
+      <div class="hero-meta-item"><strong>类型</strong> 进阶</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>为什么需要数据驱动</h2>
+<p>硬编码的视频只适合 demo。真实场景中,视频内容来自:</p>
+<ul>
+  <li><strong>数据库</strong>:用户列表、商品信息、订单数据</li>
+  <li><strong>API</strong>:实时股价、社交媒体、新闻</li>
+  <li><strong>CSV/Excel</strong>:报告、数据可视化</li>
+  <li><strong>用户输入</strong>:网页表单提交的内容</li>
+</ul>
+<p>Remotion 的 Props 机制让 React 组件接收外部数据,渲染时按数据生成画面。</p>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>基础 Props</h2>
+<p>在 Composition 中通过 <code>defaultProps</code> 传入:</p>
+<pre class="line-numbers"><code class="language-tsx">type MyProps = { title: string; subtitle: string };
+
+const MyVideo: React.FC&lt;MyProps&gt; = ({ title, subtitle }) =&gt; (
+  &lt;AbsoluteFill&gt;
+    &lt;h1&gt;{title}&lt;/h1&gt;
+    &lt;h2&gt;{subtitle}&lt;/h2&gt;
+  &lt;/AbsoluteFill&gt;
+);
+
+&lt;Composition
+  id="Video"
+  component={MyVideo}
+  durationInFrames={150}
+  fps={30}
+  width={1920}
+  height={1080}
+  defaultProps={{ title: 'Hello', subtitle: 'World' }}
+/&gt;</code></pre>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>getInputProps:CLI 注入数据</h2>
+<p>在组件外部(如 Root.tsx)用 <code>getInputProps()</code> 读取 CLI 传入的 JSON 数据:</p>
+<pre class="line-numbers"><code class="language-tsx">// Root.tsx
+import { Composition, getInputProps } from 'remotion';
+
+const inputProps = getInputProps();  // 读取 CLI --props 参数
+
+&lt;Composition
+  id="Video"
+  component={MyVideo}
+  defaultProps={inputProps}  // 注入到组件
+  // ...
+/&gt;</code></pre>
+<p>渲染时:</p>
+<pre class="line-numbers"><code class="language-bash">npx remotion render Video out.mp4 --props='{"title":"2026 年度报告","subtitle":"Q1 增长 200%"}'</code></pre>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>calculateMetadata:动态时长</h2>
+<p>视频时长通常依赖数据量。Remotion 提供 <code>calculateMetadata</code> 在 bundle 阶段异步计算:</p>
+<pre class="line-numbers"><code class="language-tsx">import { calculateMetadata, Composition } from 'remotion';
+
+const calculate: CalculateMetadataFunction&lt;MyProps&gt; = async ({ props }) =&gt; {
+  const data = await fetchData(props.dataUrl);  // 拉取数据
+  return {
+    durationInFrames: data.length * 30,        // 每条 30 帧
+    fps: 30,
+    width: 1920,
+    height: 1080,
+  };
+};
+
+&lt;Composition
+  id="Video"
+  component={MyVideo}
+  calculateMetadata={calculate}
+  defaultProps={{ dataUrl: 'https://api.example.com/items' }}
+/&gt;</code></pre>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>Zod schema 类型安全</h2>
+<p>从 Remotion 4.0 起,Props 校验交给 Zod:</p>
+<pre class="line-numbers"><code class="language-tsx">import { z } from 'zod';
+
+export const mySchema = z.object({
+  title: z.string().min(1).max(50),
+  subtitle: z.string().optional(),
+  tags: z.array(z.string()).max(10),
+  darkMode: z.boolean().default(false),
+});
+
+&lt;Composition
+  id="Video"
+  component={MyVideo}
+  schema={mySchema}              // 校验 defaultProps
+  defaultProps={{ title: 'Hello', tags: ['demo'], darkMode: true }}
+/&gt;</code></pre>
+<div class="alert alert-tip"><span class="alert-icon">🔒</span><div class="alert-body"><p>Zod 校验失败会阻止渲染,避免拼写错误等小问题在后期才暴露。</p></div></div>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>实战:CSV 驱动的产品介绍</h2>
+<p>用 PapaParse 读 CSV → Series 渲染每个产品:</p>
+<pre class="line-numbers"><code class="language-tsx">type Product = { name: string; price: number; image: string };
+const [products, setProducts] = useState&lt;Product[]&gt;([]);
+
+useEffect(() =&gt; {
+  Papa.parse('/products.csv', { header: true, complete: r =&gt; setProducts(r.data) });
+}, []);
+
+return (
+  &lt;Series&gt;
+    {products.map(p =&gt; (
+      &lt;Series.Sequence key={p.name} durationInFrames={90}&gt;
+        &lt;ProductCard product={p} /&gt;
+      &lt;/Series.Sequence&gt;
+    ))}
+  &lt;/Series&gt;
+);</code></pre>
+</section>
+
+<div class="source-note">Remotion Props API(2025)、Zod v3 文档、PapaParse CSV 库</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>数据获取 + useDelayRender</h2>
+<p>真实业务中 props 常需从 API 动态加载,使用 <code>useDelayRender</code> 阻塞渲染直到数据就绪:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { useState, useEffect } from 'react';
+import { useDelayRender } from 'remotion';
+
+export const DataDriven: React.FC = () =&gt; {
+  const [data, setData] = useState(null);
+  const { delayRender, continueRender } = useDelayRender();
+  const [h] = useState(() =&gt; delayRender());
+
+  useEffect(() =&gt; {
+    fetch('/api/data')
+      .then(r =&gt; r.json())
+      .then(d =&gt; { setData(d); continueRender(h); });
+  }, []);
+
+  if (!data) return null;
+  return &lt;MyVideo items={data} /&gt;;  // 把 API 数据当 props 传入
+};</code></pre></div>
+</section>
+
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>calculateMetadata 动态元数据</h2>
+<p>v2.0+ 引入,Composition 接受 <code>calculateMetadata</code> 函数,返回动态覆盖项(<code>durationInFrames</code> / <code>width</code> / <code>height</code> / <code>fps</code> / <code>props</code>):</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { CalculateMetadataFunction } from 'remotion';
+import { getMediaMetadata } from '@/lib/mediabunny-utils';
+
+const calculateMetadata: CalculateMetadataFunction&lt;Props&gt; = async ({
+  props, abortSignal,
+}) =&gt; {
+  const meta = await getMediaMetadata(props.videoSrc);
+  return {
+    durationInFrames: Math.ceil(meta.durationInSeconds * 30),
+    width: meta.dimensions?.width ?? 1920,
+    height: meta.dimensions?.height ?? 1080,
+    defaultOutName: `clip-${props.id}`,
+    props: { ...props, duration: meta.durationInSeconds },
+  };
+};
+
+&lt;Composition id="DynamicClip" component={Video} {...staticDefaults}
+  calculateMetadata={calculateMetadata} /&gt;</code></pre></div>
+<p>典型场景:剪辑跟源视频长度;封面跟原图尺寸;多个视频合成总时长等。</p>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="B-05-rendering-basics.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">B-05 渲染基础</span></a>
+  <a href="A-02-animation.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">A-02 Spring 弹簧动画</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

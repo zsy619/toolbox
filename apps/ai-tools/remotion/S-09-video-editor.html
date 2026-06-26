@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Remotion 场景:浏览器内视频编辑器构建 | Remotion 知识库</title>
+<meta name="description" content="使用 Remotion Player + React 状态管理 + IndexedDB 构建完整的浏览器端视频编辑器。涵盖时间轴、轨道管理、剪辑、特效、字幕与导出完整流程。">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Remotion 场景:浏览器内视频编辑器","description":"浏览器内视频编辑器完整架构设计。","inLanguage":"zh-CN"}</script>
+</head><body>
+<header class="site-header"><nav class="nav-wrap">
+<a href="index.html" class="brand"><span class="brand-mark">R</span><span>Remotion 知识库</span></a>
+<div class="nav-links"><a href="index.html">总目录</a><a href="S-08-cicd-pipeline.html">← CI/CD</a></div>
+</nav></header>
+<main class="container">
+<nav class="breadcrumb"><a href="index.html">首页</a> / <a href="index.html#scene">场景层</a> / 浏览器视频编辑器</nav>
+<h1>浏览器内视频编辑器</h1>
+<p class="hero-sub">用 Remotion Player + React + IndexedDB 构建 SaaS 视频编辑器</p>
+<div class="alert alert-info"><span class="alert-icon">📚</span><div class="alert-body"><p>来源:Remotion 官方文档 + 社区 SaaS 编辑器实践(2025-2026)。</p></div></div>
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>典型架构</h2>
+<div class="code-block"><div class="code-block-header">text</div><pre class="line-numbers"><code class="language-text">用户上传素材 → 客户端 IndexedDB 存储
+                 ↓
+           React 状态(Zustand/Recoil)管理时间轴
+                 ↓
+           <Player> 实时预览
+                 ↓
+           用户点击"导出" → 调 Lambda 渲染
+                 ↓
+           S3/CloudFront 分发 → 用户下载</code></pre></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>数据模型</h2>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">// 编辑器核心数据
+type Project = {
+  id: string;
+  tracks: Track[];
+  duration: number;  // 帧
+  composition: { width: number; height: number; fps: number };
+};
+type Track = {
+  id: string;
+  type: 'video' | 'audio' | 'text' | 'shape';
+  clips: Clip[];
+};
+type Clip = {
+  id: string;
+  trackId: string;
+  from: number;      // 起始帧
+  durationInFrames: number;
+  src?: string;      // 视频/图片 URL
+  text?: string;     // 文本
+  props?: Record&lt;string, any&gt;;
+};</code></pre></div>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>PlayerRef 控制时间轴</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { Player, PlayerRef } from '@remotion/player';
+
+const ref = useRef&lt;PlayerRef&gt;(null);
+
+// 点击时间轴某帧
+const seek = (frame: number) =&gt; ref.current?.seekTo(frame);
+
+// 实时同步到 Zustand store
+useEffect(() =&gt; {
+  ref.current?.addEventListener('frameupdate', e =&gt; {
+    setStore({ currentFrame: e.detail.frame });
+  });
+}, []);</code></pre></div>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>轨道渲染</h2>
+<p>把 Project 数据映射到 Composition 子树:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">const Editor: React.FC&lt;{project: Project}&gt; = ({ project }) =&gt; (
+  &lt;Player
+    component={VideoRenderer}
+    durationInFrames={project.duration}
+    compositionWidth={project.composition.width}
+    compositionHeight={project.composition.height}
+    fps={project.composition.fps}
+    ref={ref}
+  /&gt;
+);
+
+const VideoRenderer: React.FC = () =&gt; project.tracks.map(track =&gt; (
+  &lt;AbsoluteFill&gt;
+    {track.clips.map(clip =&gt; (
+      &lt;Sequence from={clip.from} durationInFrames={clip.durationInFrames}&gt;
+        {clip.type === 'video' &amp;&amp; &lt;OffthreadVideo src={clip.src} /&gt;}
+        {clip.type === 'text' &amp;&amp; &lt;TextOverlay text={clip.text} /&gt;}
+      &lt;/Sequence&gt;
+    ))}
+  &lt;/AbsoluteFill&gt;
+));</code></pre></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>导出到 Lambda</h2>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">// 点击"导出"按钮
+const exportVideo = async () =&gt; {
+  setStatus('rendering');
+  const { renderId, url } = await renderMediaOnLambda({
+    composition: 'Editor',
+    serveUrl: SERVE_URL,
+    functionName: 'editor-render',
+    region: 'us-east-1',
+    inputProps: { project, projectId },
+    webhook: { url: `${API}/webhook/${projectId}`,
+               secret: process.env.WEBHOOK_SECRET! },
+  });
+  setRenderId(renderId);
+};
+
+// 客户端轮询 OR WebSocket 接收完成
+useEffect(() =&gt; {
+  const ws = new WebSocket(`${WS}/render/${projectId}`);
+  ws.onmessage = e =&gt; {
+    const { status, url } = JSON.parse(e.data);
+    if (status === 'done') setStatus('done');
+  };
+  return () =&gt; ws.close();
+}, [projectId]);</code></pre></div>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>协作编辑(进阶)</h2>
+<p>多人同时编辑需要 CRDT(Y.js)同步时间轴数据:</p>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">import * as Y from 'yjs';
+import { WebsocketProvider } from 'y-websocket';
+
+const doc = new Y.Doc();
+const wsProvider = new WebsocketProvider(
+  'wss://yjs.yourdomain.com', projectId, doc
+);
+
+// project 用 Y.Map,clip 用 Y.Array
+const yTracks = doc.getArray&lt;Y.Map&lt;any&gt;&gt;('tracks');
+yTracks.observeDeep(() =&gt; setProject(yTracks.toJSON()));</code></pre></div>
+</section>
+
+<nav class="page-nav">
+<a href="S-08-cicd-pipeline.html" class="prev">← 上一页:CI/CD 流水线</a>
+<a href="index.html" class="next">回到总目录 →</a>
+</nav>
+</main>
+<footer class="site-footer"><p>© 2026 AI 工具箱 · Remotion 知识库 · 内容基于官方文档整理</p></footer>
+<script src="scripts.js"></script>
+</body></html>

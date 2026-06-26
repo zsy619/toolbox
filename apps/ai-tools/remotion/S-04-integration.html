@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>S-04 Remotion 集成方案 | Three.js/Lottie/Whisper/ffmpeg-wasm</title>
+<meta name="description" content="Remotion 与主流库集成实战:Three.js WebGL 3D 场景、Lottie Bodymovin 动画、Whisper 语音识别字幕、ffmpeg-wasm 浏览器端剪辑、Mapbox 地图动画。">
+<meta name="keywords" content="Remotion 集成, Three.js, Lottie, Whisper, ffmpeg-wasm">
+<link rel="canonical" href="https://example.com/remotion/S-04-integration.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 集成方案">
+<meta property="og:description" content="Three.js / Lottie / Whisper / ffmpeg-wasm 实战集成。">
+<meta property="og:url" content="https://example.com/remotion/S-04-integration.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"S-04 Remotion 集成方案","description":"Three.js / Lottie / Whisper / ffmpeg-wasm 实战集成指南。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 集成"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="S-01-code-walkthrough.html" class="active">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-scene">场景层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">S-04 集成方案</span>
+    </nav>
+    <h1 id="hero-title">S-04 集成方案 <span class="level-badge level-S">S 场景</span></h1>
+    <p class="hero-sub">Three.js / Lottie / Whisper / ffmpeg-wasm 实战集成。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 11 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> P-03 自定义组件</div>
+      <div class="hero-meta-item"><strong>类型</strong> 场景实战</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>Three.js 3D 集成</h2>
+<p>完整 3D 地球旋转动画:</p>
+<pre class="line-numbers"><code class="language-tsx">import { useEffect, useRef } from 'react';
+import { useCurrentFrame, AbsoluteFill } from 'remotion';
+import * as THREE from 'three';
+
+const Earth: React.FC = () =&gt; {
+  const ref = useRef&lt;HTMLDivElement&gt;(null);
+  const engine = useRef&lt;{ scene: any; camera: any; renderer: any; earth: any }&gt;({} as any);
+  const frame = useCurrentFrame();
+
+  useEffect(() =&gt; {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, 16 / 9, 0.1, 1000);
+    camera.position.z = 3;
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(1920, 1080);
+    ref.current!.appendChild(renderer.domElement);
+    const earth = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 64, 64),
+      new THREE.MeshPhongMaterial({ color: 0x2496ed })
+    );
+    scene.add(earth);
+    engine.current = { scene, camera, renderer, earth };
+    return () =&gt; renderer.dispose();
+  }, []);
+
+  useEffect(() =&gt; {
+    const { earth, scene, camera, renderer } = engine.current;
+    earth.rotation.y = frame * 0.02;
+    renderer.render(scene, camera);
+  }, [frame]);
+
+  return &lt;AbsoluteFill ref={ref} /&gt;;
+};</code></pre>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>Lottie 动画渲染</h2>
+<p>设计师在 After Effects 用 Bodymovin 导出 JSON,在 Remotion 中用 lottie-web 渲染:</p>
+<pre class="line-numbers"><code class="language-tsx">import { useEffect, useRef } from 'react';
+import { useCurrentFrame, staticFile } from 'remotion';
+import lottie from 'lottie-web';
+
+const LottieBox: React.FC = () =&gt; {
+  const ref = useRef&lt;HTMLDivElement&gt;(null);
+  const anim = useRef&lt;any&gt;();
+  const frame = useCurrentFrame();
+
+  useEffect(() =&gt; {
+    anim.current = lottie.loadAnimation({
+      container: ref.current!,
+      renderer: 'svg',
+      loop: false,
+      autoplay: false,
+      path: staticFile('logo.json'),
+    });
+    return () =&gt; anim.current?.destroy();
+  }, []);
+
+  useEffect(() =&gt; {
+    anim.current?.goToAndStop(frame, true);
+  }, [frame]);
+
+  return &lt;div ref={ref} style={{ width: 400, height: 400 }} /&gt;;
+};</code></pre>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>Whisper 字幕生成</h2>
+<p>OpenAI Whisper 离线 ASR 引擎,支持 99 种语言:</p>
+<pre class="line-numbers"><code class="language-bash">pip install openai-whisper
+whisper voiceover.mp3 --language Chinese --output_format srt</code></pre>
+<p>输出 SRT 字幕文件,在 Studio 中用 <code>getStaticFiles()</code> 读取:</p>
+<pre class="line-numbers"><code class="language-tsx">import { staticFile } from 'remotion';
+import { useEffect, useState } from 'react';
+
+const SrtParser = require('srt-parser-2');
+const [subs, setSubs] = useState([]);
+
+useEffect(() =&gt; {
+  fetch(staticFile('subs.srt')).then(r =&gt; r.text()).then(srt =&gt; {
+    setSubs(new SrtParser().fromSrt(srt));
+  });
+}, []);</code></pre>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>ffmpeg-wasm:浏览器内剪辑</h2>
+<p>用 wasm 版的 ffmpeg 在浏览器中处理视频,适合需要用户上传后立即预览:</p>
+<pre class="line-numbers"><code class="language-tsx">import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { useEffect, useRef } from 'react';
+
+const ffmpeg = useRef(new FFmpeg());
+
+useEffect(() =&gt; {
+  ffmpeg.current.load();
+}, []);
+
+const trim = async (file: File, start: number, end: number) =&gt; {
+  await ffmpeg.current.writeFile('in.mp4', await file.arrayBuffer());
+  await ffmpeg.current.exec(['-ss', String(start), '-to', String(end), '-i', 'in.mp4', 'out.mp4']);
+  const data = await ffmpeg.current.readFile('out.mp4');
+  return new Blob([data], { type: 'video/mp4' });
+};</code></pre>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>集成库选型指南</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>需求</th><th>推荐库</th><th>理由</th></tr></thead>
+<tbody>
+<tr><td>3D 模型 / 数据 3D 化</td><td>Three.js</td><td>WebGL 业界标准</td></tr>
+<tr><td>设计师 AE 交付</td><td>Lottie</td><td>Bodymovin 输出</td></tr>
+<tr><td>2D 数据图表</td><td>D3.js + SVG</td><td>声明式、可缩放</td></tr>
+<tr><td>语音转字幕</td><td>Whisper</td><td>离线、99 语言</td></tr>
+<tr><td>地图动画</td><td>Mapbox GL / Leaflet</td><td>动态轨迹展示</td></tr>
+<tr><td>AI 抠图</td><td>MediaPipe</td><td>浏览器端实时</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<div class="source-note">Three.js、Lottie Web、OpenAI Whisper、@ffmpeg/ffmpeg 官方文档</div>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>@remotion/transitions 场景转场</h2>
+<p>v4.0.53+ 引入 <code>&lt;TransitionSeries&gt;</code>,在两个场景间添加转场效果:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npx remotion add @remotion/transitions</code></pre></div>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { TransitionSeries, linearTiming } from '@remotion/transitions';
+import { fade } from '@remotion/transitions/fade';
+import { slide } from '@remotion/transitions/slide';
+
+&lt;TransitionSeries&gt;
+  &lt;TransitionSeries.Sequence durationInFrames={60}&gt;
+    &lt;SceneA /&gt;
+  &lt;/TransitionSeries.Sequence&gt;
+  &lt;TransitionSeries.Transition
+    timing={linearTiming({ durationInFrames: 30 })}
+    presentation={fade()}
+  /&gt;
+  &lt;TransitionSeries.Sequence durationInFrames={60}&gt;
+    &lt;SceneB /&gt;
+  &lt;/TransitionSeries.Sequence&gt;
+&lt;/TransitionSeries&gt;</code></pre></div>
+<p>内置 7 种转场:<code>fade</code> / <code>slide</code> / <code>wipe</code> / <code>flip</code> / <code>clockWipe</code> / <code>iris</code> / <code>zoomBlur</code>。</p>
+</section>
+
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>animation-utils + animated-emoji</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">// 粒子系统(2025+)
+import { ParticleSystem } from '@remotion/animation-utils';
+&lt;ParticleSystem
+  count={50}
+  speed={5}
+  color="hsl(200, 100%, 60%)"
+  gravity={0.3}
+/&gt;
+
+// 动画 Emoji(Twemoji Lottie)
+import { AnimatedEmoji } from '@remotion/animated-emoji';
+&lt;AnimatedEmoji emoji="🚀" size={200} /&gt;</code></pre></div>
+</section>
+
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>@remotion/transitions v2 完整指南</h2>
+<p>v4.0.59+ 提供 7 种内置转场,基于 TransitionSeries 模式:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { TransitionSeries, linearTiming, springTiming } from '@remotion/transitions';
+import { fade } from '@remotion/transitions/fade';
+import { slide } from '@remotion/transitions/slide';
+import { wipe } from '@remotion/transitions/wipe';
+import { flip } from '@remotion/transitions/flip';
+import { clockWipe } from '@remotion/transitions/clock-wipe';
+import { iris } from '@remotion/transitions/iris';
+import { zoomBlur } from '@remotion/transitions/zoom-blur';
+
+&lt;TransitionSeries&gt;
+  &lt;TransitionSeries.Sequence durationInFrames={60}&gt;
+    &lt;SceneA /&gt;
+  &lt;/TransitionSeries.Sequence&gt;
+  &lt;TransitionSeries.Transition
+    presentation={fade()} timing={linearTiming({ durationInFrames: 15 })} /&gt;
+  &lt;TransitionSeries.Sequence durationInFrames={60}&gt;
+    &lt;SceneB /&gt;
+  &lt;/TransitionSeries.Sequence&gt;
+&lt;/TransitionSeries&gt;</code></pre></div>
+</section>
+
+<section class="section" id="s9">
+<span class="section-num">Chapter 09</span>
+<h2>@remotion/light-leaks 光漏效果</h2>
+<p>v4.0.415+ 官方光漏叠加包,基于 WebGL,8 种预设:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { LightLeak } from '@remotion/light-leaks';
+
+&lt;AbsoluteFill&gt;
+  &lt;YourContent /&gt;
+  &lt;LightLeak
+    seed={42}                   // 随机种子
+    durationInFrames={60}       // 持续帧
+    hueShift={0}                // 色相偏移 (-180~180)
+    intensity={0.5}             // 强度 0~1
+  /&gt;
+&lt;/AbsoluteFill&gt;</code></pre></div>
+<p>前 1/2 帧渐入,后 1/2 帧渐出,适合场景切换的瞬间渲染。</p>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="S-03-lambda-deployment.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">S-03 Lambda 云端渲染</span></a>
+  <a href="S-05-troubleshooting.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">S-05 问题排查</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

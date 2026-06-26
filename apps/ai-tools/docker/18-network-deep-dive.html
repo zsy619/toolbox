@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>
+      Docker 网络深入:veth/iptables/overlay | Docker 实战教程
+    </title>
+    <meta name="description" content="详解 Linux 网络栈:veth pair/bridge/iptables/路由;Docker bridge 模式实现;overlay 网络 VXLAN 隧道;host/network 模式对比。">
+    <meta name="keywords" content="Docker, Docker 网络深入:veth/iptables/overlay, 容器化教程, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/18-network-deep-dive.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker 网络深入:veth/iptables/overlay">
+    <meta property="og:description" content="详解 Linux 网络栈:veth pair/bridge/iptables/路由;Docker bridge 模式实现;overlay 网络 VXLAN 隧道;host/network 模式对比。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/18-network-deep-dive.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Docker 网络深入:veth/iptables/overlay">
+    <meta name="twitter:description" content="详解 Linux 网络栈:veth pair/bridge/iptables/路由;Docker bridge 模式实现;overlay 网络 VXLAN 隧道;host/network 模式对比。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Docker 网络深入:veth/iptables/overlay","description":"详解 Linux 网络栈:veth pair/bridge/iptables/路由;Docker bridge 模式实现;overlay 网络 VXLAN 隧道;host/network 模式对比。","author":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 教程","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"Docker 网络深入:veth/iptables/overlay","item":"https://tools.yy24365.com/ai-tools/docker/18-network-deep-dive.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            D
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 教程
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Docker 网络深入:veth/iptables/overlay
+            </span>
+          </nav>
+          <h1 id="hero-title">
+            Docker 网络深入:veth/iptables/overlay
+          </h1>
+          <p class="hero-sub">
+            Linux 网络栈 + iptables + VXLAN 完整
+          </p>
+          <p class="hero-desc">
+            详解 Linux 网络栈:veth pair/bridge/iptables/路由;Docker bridge 模式实现;overlay 网络 VXLAN 隧道;host/network 模式对比。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                课程编号
+              </strong>
+              第 18 课
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                分类
+              </strong>
+              网络核心
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              高级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                字数
+              </strong>
+              ~ 4000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <nav class="toc" id="toc">
+          <h2 class="toc-title">
+            本文目录
+          </h2>
+          <ul class="toc-grid">
+            <li>
+              <a href="#s1">
+                <span class="toc-num">
+                  01
+                </span>
+                Linux 网络栈基础
+              </a>
+            </li>
+            <li>
+              <a href="#s2">
+                <span class="toc-num">
+                  02
+                </span>
+                bridge 模式实现原理
+              </a>
+            </li>
+            <li>
+              <a href="#s3">
+                <span class="toc-num">
+                  03
+                </span>
+                iptables 5 链 4 表
+              </a>
+            </li>
+            <li>
+              <a href="#s4">
+                <span class="toc-num">
+                  04
+                </span>
+                overlay 模式实现
+              </a>
+            </li>
+            <li>
+              <a href="#s5">
+                <span class="toc-num">
+                  05
+                </span>
+                5 种模式性能对比
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">
+            Chapter 01
+          </span>
+          <h2 id="s1-title">
+            Linux 网络栈基础
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  veth pair:成对虚拟网卡,容器与宿主机互通的网线
+                </li>
+                <li>
+                  Linux bridge:软件交换机,相当于 vSwitch
+                </li>
+                <li>
+                  iptables:L4 防火墙,NAT + filter 规则
+                </li>
+                <li>
+                  路由表:ip route 决定包转发路径
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">
+            Chapter 02
+          </span>
+          <h2 id="s2-title">
+            bridge 模式实现原理
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  docker0:宿主机虚拟网桥(172.17.0.0/16)
+                </li>
+                <li>
+                  vethXXX:容器端网卡(eth0@ifN) ↔ 宿主机端(XXXXXXXX@ifM)
+                </li>
+                <li>
+                  容器 IP:网桥 DHCP 自动分配
+                </li>
+                <li>
+                  DNS:容器内 /etc/resolv.conf 指向 dockerd
+                </li>
+                <li>
+                  iptables DNAT:宿主机端口 → 容器 IP:端口
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">
+            Chapter 03
+          </span>
+          <h2 id="s3-title">
+            iptables 5 链 4 表
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  PREROUTING / INPUT / FORWARD / OUTPUT / POSTROUTING
+                </li>
+                <li>
+                  filter:包过滤(ACCEPT/DROP/REJECT)
+                </li>
+                <li>
+                  nat:地址转换(SNAT/DNAT/MASQUERADE)
+                </li>
+                <li>
+                  mangle:包修改(TOS/TTL/MARK)
+                </li>
+                <li>
+                  raw:连接跟踪豁免(NOTRACK)
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">
+            Chapter 04
+          </span>
+          <h2 id="s4-title">
+            overlay 模式实现
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  VXLAN 隧道:UDP 4789 端口,跨主机封装 L2 帧
+                </li>
+                <li>
+                  Swarm 内置 K/V 存储:etcd 同步集群状态
+                </li>
+                <li>
+                  vxlan-id 24 位,理论 1600 万虚拟网络
+                </li>
+                <li>
+                  性能损失 10-15%(封装开销) vs macvlan 0 损失
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s5" aria-labelledby="s5-title">
+          <span class="section-num">
+            Chapter 05
+          </span>
+          <h2 id="s5-title">
+            5 种模式性能对比
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  bridge:性能中等,网络隔离,适合开发
+                </li>
+                <li>
+                  host:性能最高,网络零开销,端口冲突风险
+                </li>
+                <li>
+                  none:无网络,适合计算任务
+                </li>
+                <li>
+                  overlay:跨主机,适合 K8s/Swarm
+                </li>
+                <li>
+                  macvlan:物理网络层接入,适合需要外部 L2 访问
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <div class="alert alert-tip">
+          <span class="alert-icon">
+            💡 性能调优
+          </span>
+          <div class="alert-body">
+            <p>
+              桥接模式 MTU 1450(VXLAN 头部占 50 字节),避免分片
+            </p>
+          </div>
+        </div>
+        <div class="alert alert-info">
+          <span class="alert-icon">
+            🎯 排查工具
+          </span>
+          <div class="alert-body">
+            <p>
+              tcpdump + iptables -L -n -v + bridge link show 三件套
+            </p>
+          </div>
+        </div>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">
+            FAQ
+          </span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Linux 网络栈基础
+              </h3>
+              <p class="faq-a">
+                veth pair:成对虚拟网卡,容器与宿主机互通的网线
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                bridge 模式实现原理
+              </h3>
+              <p class="faq-a">
+                docker0:宿主机虚拟网桥(172.17.0.0/16)
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                iptables 5 链 4 表
+              </h3>
+              <p class="faq-a">
+                PREROUTING / INPUT / FORWARD / OUTPUT / POSTROUTING
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                overlay 模式实现
+              </h3>
+              <p class="faq-a">
+                VXLAN 隧道:UDP 4789 端口,跨主机封装 L2 帧
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                5 种模式性能对比
+              </h3>
+              <p class="faq-a">
+                bridge:性能中等,网络隔离,适合开发
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本课程
+        </h3>
+        <p class="footer-meta">
+          Docker 网络深入:veth/iptables/overlay · Docker 24 节系统化教程。所有代码均经过实测,可运行于 Docker 20+ / K8s 1.24+ 环境。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            完整 24 节课
+          </strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            回到索引
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 完整指南 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-lesson-18';
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

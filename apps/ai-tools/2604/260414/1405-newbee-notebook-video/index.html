@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Newbee Notebook 新蜂阅读器 - 对标NotebookLM的本地AI阅读工具</title>
+  <meta name="description" content="Newbee Notebook新蜂阅读器，对标NotebookLM，完全本地运行的AI文档阅读工具。支持PDF、Word、Excel、PPT、EPUB多格式，YouTube/B站视频总结，AI思维导图，数据不上云，隐私无忧。">
+  <meta name="keywords" content="NotebookLM, Newbee Notebook, AI阅读器, 本地AI, PDF解析, 文档总结, 视频总结, 思维导图, 隐私优先, 中文AI">
+  <meta name="author" content="diverHansun">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Newbee Notebook 新蜂阅读器 - 对标NotebookLM">
+  <meta property="og:description" content="完全本地运行的AI文档阅读工具，支持多格式文档和视频总结">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/cover.png">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Newbee Notebook 新蜂阅读器">
+  <meta name="twitter:description" content="对标NotebookLM，更棒的阅读体验和AI交互">
+  <meta name="twitter:image" content="assets/cover.png">
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://github.com/diverHansun/newbee-notebook">
+  
+  <!-- Schema.org 结构化数据 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Newbee Notebook",
+    "description": "对标NotebookLM的本地AI阅读工具，支持多格式文档解析和视频总结",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "CNY"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "diverHansun"
+    }
+  }
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  
+  <style>
+    /* 渐变背景 */
+    .gradient-bg {
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+    }
+    
+    /* 渐变文字 */
+    .gradient-text {
+      background: linear-gradient(135deg, #3B82F6, #10B981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    /* 卡片悬停效果 */
+    .card-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-hover:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* 功能卡片边框渐变 */
+    .feature-card {
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(16, 185, 129, 0.5));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+    
+    /* 导航卡片 */
+    .nav-card {
+      backdrop-filter: blur(10px);
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .nav-card:hover {
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+    
+    /* 脉冲动画 */
+    @keyframes pulse-glow {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+      }
+    }
+    .pulse-glow {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    
+    /* 打字机效果 */
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    .cursor-blink::after {
+      content: '|';
+      animation: blink 1s infinite;
+      color: #3B82F6;
+    }
+  </style>
+
+  <!-- Image Viewer Modal - Professional Style -->
+  <div id="imageViewer" class="image-viewer">
+      <div class="viewer-toolbar">
+          <div class="viewer-toolbar-left">
+              <button class="viewer-toolbar-btn" onclick="closeImageViewer()" title="关闭 (ESC)">
+                  <i class="fas fa-times"></i>
+              </button>
+              <div class="viewer-toolbar-divider"></div>
+              <button class="viewer-toolbar-btn" onclick="rotateImage(-90)" title="向左旋转">
+                  <i class="fas fa-undo"></i>
+              </button>
+              <button class="viewer-toolbar-btn" onclick="rotateImage(90)" title="向右旋转">
+                  <i class="fas fa-redo"></i>
+              </button>
+              <button class="viewer-toolbar-btn" onclick="flipHorizontal()" title="水平翻转">
+                  <i class="fas fa-arrows-alt-h"></i>
+              </button>
+              <button class="viewer-toolbar-btn" onclick="flipVertical()" title="垂直翻转">
+                  <i class="fas fa-arrows-alt-v"></i>
+              </button>
+          </div>
+          
+          <div class="viewer-toolbar-center">
+              <button class="viewer-toolbar-btn" onclick="zoomOut()" title="缩小 (-)">
+                  <i class="fas fa-search-minus"></i>
+              </button>
+              <div class="viewer-zoom-slider-container">
+                  <input type="range" id="zoomSlider" class="viewer-zoom-slider" min="10" max="500" value="100">
+                  <span id="zoomDisplay" class="viewer-zoom-display">100%</span>
+              </div>
+              <button class="viewer-toolbar-btn" onclick="zoomIn()" title="放大 (+)">
+                  <i class="fas fa-search-plus"></i>
+              </button>
+              <button class="viewer-toolbar-btn" onclick="fitToScreen()" title="适应屏幕 (0)">
+                  <i class="fas fa-expand-arrows-alt"></i>
+              </button>
+              <button class="viewer-toolbar-btn" onclick="toggleFullscreen()" title="全屏 (F)">
+                  <i class="fas fa-expand" id="fullscreenIcon"></i>
+              </button>
+          </div>
+          
+          <div class="viewer-toolbar-right">
+              <button class="viewer-toolbar-btn" onclick="toggleSlideShow()" title="幻灯片播放" id="slideShowBtn">
+                  <i class="fas fa-play"></i>
+              </button>
+              <div class="viewer-toolbar-divider"></div>
+              <button class="viewer-toolbar-btn" onclick="downloadImage()" title="下载图片">
+                  <i class="fas fa-download"></i>
+              </button>
+              <button class="viewer-toolbar-btn" onclick="openInNewTab()" title="新窗口打开">
+                  <i class="fas fa-external-link-alt"></i>
+              </button>
+          </div>
+      </div>
+      
+      <div class="viewer-main" id="viewerMain">
+          <div class="viewer-canvas" id="viewerCanvas">
+              <div class="viewer-image-container" id="imageContainer">
+                  <img id="viewerImage" class="viewer-image" src="" alt="">
+              </div>
+          </div>
+          
+          <button class="viewer-nav prev" id="prevBtn" onclick="prevImage()">
+              <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <button class="viewer-nav next" id="nextBtn" onclick="nextImage()">
+              <i class="fas fa-chevron-right"></i>
+          </button>
+          
+          <div class="viewer-bottom-bar">
+              <div class="viewer-info">
+                  <span id="imageTitle">图片</span>
+                  <span class="viewer-divider">|</span>
+                  <span id="imageCounter">1 / 1</span>
+                  <span class="viewer-divider">|</span>
+                  <span id="imageDimensions">-</span>
+              </div>
+          </div>
+      </div>
+      
+      <div class="viewer-thumbnail-strip" id="thumbnailStrip"></div>
+      
+      <div class="viewer-toast" id="viewerToast"></div>
+      
+      <div class="viewer-loading" id="viewerLoading">
+          <div class="viewer-loading-spinner"></div>
+          <span>加载中...</span>
+      </div>
+  </div>
+</head>
+
+<body class="gradient-bg text-white min-h-screen">
+
+  <!-- Hero Section -->
+  <section class="min-h-screen flex flex-col justify-center items-center text-center px-6 py-20 relative overflow-hidden">
+    <!-- 背景装饰 -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl"></div>
+    </div>
+    
+    <div class="relative z-10">
+      <span class="inline-block bg-gradient-to-r from-blue-600 to-emerald-600 text-white text-lg px-6 py-3 rounded-full mb-8 animate__animated animate__fadeIn pulse-glow">
+        🐝 对标 NotebookLM
+      </span>
+      
+      <h1 class="text-6xl md:text-8xl font-bold mb-6 animate__animated animate__fadeIn animate__delay-1s">
+        <span class="gradient-text">Newbee Notebook</span>
+      </h1>
+      
+      <p class="text-2xl md:text-3xl text-gray-300 mb-4 animate__animated animate__fadeIn animate__delay-2s">
+        新蜂阅读器
+      </p>
+      
+      <p class="text-xl md:text-2xl text-gray-400 mb-12 animate__animated animate__fadeIn animate__delay-3s">
+        更棒的阅读体验和 AI 交互
+      </p>
+      
+      <div class="flex flex-wrap justify-center gap-4 mb-12 animate__animated animate__fadeIn animate__delay-4s">
+        <a href="https://github.com/diverHansun/newbee-notebook" target="_blank" 
+           class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold transition-all hover:scale-105 inline-flex items-center gap-2 shadow-lg shadow-blue-600/30">
+          <i class="fab fa-github text-xl"></i>
+          <span>GitHub 开源</span>
+        </a>
+      </div>
+      
+      <p class="text-gray-500 text-sm animate__animated animate__fadeIn animate__delay-5s">
+        github.com/diverHansun/newbee-notebook
+      </p>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="py-20 px-6 bg-red-900/10">
+    <div class="max-w-5xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-6 animate__animated animate__fadeInUp">
+        😱 NotebookLM 的痛点
+      </h2>
+      <p class="text-xl text-gray-400 mb-12 animate__animated animate__fadeIn animate__delay-1s">
+        为什么我们需要更好的选择？
+      </p>
+      
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-red-900/20 border border-red-800/50 rounded-2xl p-8 text-left card-hover animate__animated animate__fadeIn animate__delay-2s">
+          <div class="text-3xl mb-4">☁️</div>
+          <div class="text-2xl font-bold text-white mb-2">数据上传云端</div>
+          <div class="text-gray-400">隐私无法保障，敏感文档不敢用</div>
+        </div>
+        
+        <div class="bg-red-900/20 border border-red-800/50 rounded-2xl p-8 text-left card-hover animate__animated animate__fadeIn animate__delay-2s">
+          <div class="text-3xl mb-4">🌐</div>
+          <div class="text-2xl font-bold text-white mb-2">中文支持一般</div>
+          <div class="text-gray-400">中文文档处理效果不理想</div>
+        </div>
+        
+        <div class="bg-red-900/20 border border-red-800/50 rounded-2xl p-8 text-left card-hover animate__animated animate__fadeIn animate__delay-3s">
+          <div class="text-3xl mb-4">📺</div>
+          <div class="text-2xl font-bold text-white mb-2">只支持 YouTube</div>
+          <div class="text-gray-400">无法处理 B站等国内视频</div>
+        </div>
+        
+        <div class="bg-red-900/20 border border-red-800/50 rounded-2xl p-8 text-left card-hover animate__animated animate__fadeIn animate__delay-3s">
+          <div class="text-3xl mb-4">🔒</div>
+          <div class="text-2xl font-bold text-white mb-2">无法自托管</div>
+          <div class="text-gray-400">企业内网环境无法使用</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Solution Section -->
+  <section class="py-20 px-6">
+    <div class="max-w-5xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-6 animate__animated animate__fadeInUp">
+        ✨ Newbee Notebook 来了！
+      </h2>
+      <p class="text-xl text-gray-400 mb-12 animate__animated animate__fadeIn animate__delay-1s">
+        自己手搓，对标 NotebookLM，更棒的阅读体验和 AI 交互
+      </p>
+      
+      <!-- 封面图片可点击 -->
+      <div class="mb-12 animate__animated animate__fadeIn animate__delay-2s cursor-pointer" onclick="openImageViewer(0)">
+        <img src="assets/cover.png" alt="Newbee Notebook 封面" 
+             class="w-full max-w-3xl mx-auto rounded-2xl shadow-2xl border border-gray-700 hover:border-blue-500 transition-all">
+        <p class="text-sm text-gray-500 mt-4">
+          <i class="fas fa-search-plus mr-2"></i>点击图片查看大图
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-20 px-6 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-emerald-900/20">
+    <div class="max-w-6xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-12 animate__animated animate__fadeInUp">
+        ⚡ 核心特性
+      </h2>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- 功能卡片 1 -->
+        <div class="feature-card bg-gray-800/60 rounded-2xl p-8 text-left card-hover animate__animated animate__fadeIn animate__delay-1s">
+          <div class="text-4xl mb-4">📄</div>
+          <div class="text-2xl font-bold text-white mb-2">多格式支持</div>
+          <div class="text-gray-400">PDF、Word、Excel、PPT、EPUB，应有尽有</div>
+        </div>
+        
+        <!-- 功能卡片 2 -->
+        <div class="feature-card bg-gray-800/60 rounded-2xl p-8 text-left card-hover animate__animated animate__fadeIn animate__delay-1s">
+          <div class="text-4xl mb-4">🔒</div>
+          <div class="text-2xl font-bold text-white mb-2">数据不上云</div>
+          <div class="text-gray-400">完全本地运行，你的隐私你做主</div>
+        </div>
+        
+        <!-- 功能卡片 3 -->
+        <div class="feature-card bg-gray-800/60 rounded-2xl p-8 text-left card-hover animate__animated animate__fadeIn animate__delay-2s">
+          <div class="text-4xl mb-4">🎬</div>
+          <div class="text-2xl font-bold text-white mb-2">视频总结</div>
+          <div class="text-gray-400">YouTube + B站，再长的视频都能快速消化</div>
+        </div>
+        
+        <!-- 功能卡片 4 -->
+        <div class="feature-card bg-gray-800/60 rounded-2xl p-8 text-left card-hover animate__animated animate__fadeIn animate__delay-2s">
+          <div class="text-4xl mb-4">🧠</div>
+          <div class="text-2xl font-bold text-white mb-2">AI 思维导图</div>
+          <div class="text-gray-400">自动绘制结构化图表，知识一目了然</div>
+        </div>
+        
+        <!-- 功能卡片 5 -->
+        <div class="feature-card bg-gray-800/60 rounded-2xl p-8 text-left card-hover animate__animated animate__fadeIn animate__delay-3s">
+          <div class="text-4xl mb-4">📝</div>
+          <div class="text-2xl font-bold text-white mb-2">Agent 笔记</div>
+          <div class="text-gray-400">边读边记，深度理解，高效学习</div>
+        </div>
+        
+        <!-- 功能卡片 6 -->
+        <div class="feature-card bg-gray-800/60 rounded-2xl p-8 text-left card-hover animate__animated animate__fadeIn animate__delay-3s">
+          <div class="text-4xl mb-4">🎯</div>
+          <div class="text-2xl font-bold text-white mb-2">高精度解析</div>
+          <div class="text-gray-400">PDF 大文档精准提取，再复杂的论文都能处理</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation Section -->
+  <section class="py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-4xl md:text-5xl font-bold mb-12 text-center animate__animated animate__fadeInUp">
+        📚 文档导航
+      </h2>
+      
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- 文章页面卡片 -->
+        <a href="article-page.html" class="nav-card rounded-2xl p-8 card-hover block animate__animated animate__fadeIn animate__delay-1s">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center mr-4">
+              <i class="fas fa-newspaper text-2xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold text-white">详细介绍</h3>
+              <p class="text-gray-400 text-sm">深入了解 Newbee Notebook</p>
+            </div>
+          </div>
+          <p class="text-gray-300 mb-4">
+            全面了解产品特性、核心优势和适用场景
+          </p>
+          <div class="flex items-center text-blue-400">
+            <span>阅读全文</span>
+            <i class="fas fa-arrow-right ml-2"></i>
+          </div>
+        </a>
+        
+        <!-- 落地页卡片 -->
+        <a href="landing-page.html" class="nav-card rounded-2xl p-8 card-hover block animate__animated animate__fadeIn animate__delay-2s">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center mr-4">
+              <i class="fas fa-rocket text-2xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold text-white">产品落地页</h3>
+              <p class="text-gray-400 text-sm">快速了解产品价值</p>
+            </div>
+          </div>
+          <p class="text-gray-300 mb-4">
+            简洁明了的价值主张和快速开始指南
+          </p>
+          <div class="flex items-center text-emerald-400">
+            <span>查看落地页</span>
+            <i class="fas fa-arrow-right ml-2"></i>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start Section -->
+  <section class="py-20 px-6 bg-gradient-to-br from-gray-900 to-gray-800">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-12 animate__animated animate__fadeInUp">
+        🚀 快速开始
+      </h2>
+      
+      <div class="bg-gray-900 rounded-2xl p-8 mb-8 text-left animate__animated animate__fadeIn animate__delay-1s">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center">
+            <i class="fab fa-github text-2xl text-gray-400 mr-3"></i>
+            <span class="text-gray-300 font-medium">克隆项目</span>
+          </div>
+          <button onclick="copyToClipboard()" class="text-blue-400 hover:text-blue-300 transition-all">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+        <code class="text-emerald-400 text-lg block select-all">git clone https://github.com/diverHansun/newbee-notebook</code>
+      </div>
+      
+      <a href="https://github.com/diverHansun/newbee-notebook" target="_blank" 
+         class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-semibold transition-all hover:scale-105 shadow-lg animate__animated animate__fadeIn animate__delay-2s">
+        <i class="fab fa-github text-xl"></i>
+        <span>Star on GitHub</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Target Audience Section -->
+  <section class="py-20 px-6">
+    <div class="max-w-5xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-12 animate__animated animate__fadeInUp">
+        🎯 适用人群
+      </h2>
+      
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-gradient-to-br from-blue-900/30 to-blue-800/10 rounded-2xl p-6 text-left card-hover animate__animated animate__fadeIn animate__delay-1s">
+          <div class="text-3xl mb-3">🔐</div>
+          <h3 class="text-xl font-bold text-white mb-2">隐私敏感用户</h3>
+          <p class="text-gray-400">需要处理敏感文档，不希望数据上传云端</p>
+        </div>
+        
+        <div class="bg-gradient-to-br from-emerald-900/30 to-emerald-800/10 rounded-2xl p-6 text-left card-hover animate__animated animate__fadeIn animate__delay-2s">
+          <div class="text-3xl mb-3">📚</div>
+          <h3 class="text-xl font-bold text-white mb-2">学术研究者</h3>
+          <p class="text-gray-400">需要阅读大量论文和PDF文档的学者学生</p>
+        </div>
+        
+        <div class="bg-gradient-to-br from-purple-900/30 to-purple-800/10 rounded-2xl p-6 text-left card-hover animate__animated animate__fadeIn animate__delay-3s">
+          <div class="text-3xl mb-3">🏢</div>
+          <h3 class="text-xl font-bold text-white mb-2">企业内网用户</h3>
+          <p class="text-gray-400">需要本地部署，无法使用云服务的团队</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 px-6 text-center border-t border-gray-800">
+    <div class="max-w-4xl mx-auto">
+      <div class="mb-6">
+        <a href="https://github.com/diverHansun/newbee-notebook" target="_blank" 
+           class="text-blue-400 hover:text-blue-300 text-lg hover:underline inline-flex items-center gap-2">
+          <i class="fab fa-github"></i>
+          <span>github.com/diverHansun/newbee-notebook</span>
+        </a>
+      </div>
+      
+      <p class="text-gray-500 mb-4">
+        Newbee Notebook - Make AI reading local and private
+      </p>
+      
+      <div class="flex justify-center gap-4 text-gray-600">
+        <span class="text-sm">完全开源</span>
+        <span>•</span>
+        <span class="text-sm">本地运行</span>
+        <span>•</span>
+        <span class="text-sm">隐私优先</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Image Viewer CSS -->
+  <style>
+    /* Image Viewer Modal - Professional Style */
+    .image-viewer {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 10000;
+        background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(20,20,30,0.98) 100%);
+        backdrop-filter: blur(20px);
+        overflow: hidden;
+    }
+
+    .image-viewer.active {
+        display: flex;
+        flex-direction: column;
+        animation: viewerFadeIn 0.3s ease;
+    }
+
+    @keyframes viewerFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .viewer-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        gap: 1rem;
+        flex-shrink: 0;
+    }
+
+    .viewer-toolbar-left,
+    .viewer-toolbar-center,
+    .viewer-toolbar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .viewer-toolbar-divider {
+        width: 1px;
+        height: 1.5rem;
+        background: rgba(255,255,255,0.2);
+        margin: 0 0.5rem;
+    }
+
+    .viewer-toolbar-btn {
+        width: 2.75rem;
+        height: 2.75rem;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.9rem;
+    }
+
+    .viewer-toolbar-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.25);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .viewer-toolbar-btn:active {
+        transform: translateY(0) scale(0.95);
+    }
+
+    .viewer-toolbar-btn.active {
+        background: linear-gradient(135deg, #3B82F6, #2563EB);
+        border-color: #3B82F6;
+        color: white;
+    }
+
+    .viewer-zoom-slider-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 0.75rem;
+        padding: 0.25rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .viewer-zoom-slider {
+        width: 120px;
+        height: 4px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        cursor: pointer;
+    }
+
+    .viewer-zoom-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        background: #3B82F6;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
+    }
+
+    .viewer-zoom-display {
+        font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.9);
+        min-width: 3.5rem;
+        text-align: center;
+    }
+
+    .viewer-main {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        min-height: 0;
+    }
+
+    .viewer-main:active {
+        cursor: grabbing;
+    }
+
+    .viewer-canvas {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: visible;
+    }
+
+    .viewer-image-container {
+        position: absolute;
+        transform-origin: center center;
+        user-select: none;
+        transition: transform 0.1s ease-out;
+    }
+
+    .viewer-image {
+        display: block;
+        max-width: 92vw;
+        max-height: 75vh;
+        object-fit: contain;
+        pointer-events: none;
+        user-select: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .viewer-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4rem;
+        height: 4rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: white;
+        font-size: 1.5rem;
+        z-index: 10;
+    }
+
+    .viewer-nav:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .viewer-nav.prev {
+        left: 1.5rem;
+    }
+
+    .viewer-nav.next {
+        right: 1.5rem;
+    }
+
+    .viewer-nav:disabled {
+        opacity: 0.2;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .viewer-bottom-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+        display: flex;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .viewer-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.85);
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        padding: 0.5rem 1.25rem;
+        border-radius: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .viewer-divider {
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .viewer-thumbnail-strip {
+        display: flex;
+        gap: 0.75rem;
+        padding: 1rem 1.5rem;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(10px);
+        overflow-x: auto;
+        max-height: 120px;
+        min-height: 100px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        flex-shrink: 0;
+    }
+
+    .viewer-thumbnail {
+        width: 80px;
+        height: 60px;
+        border-radius: 0.5rem;
+        object-fit: cover;
+        cursor: pointer;
+        opacity: 0.4;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid transparent;
+        flex-shrink: 0;
+    }
+
+    .viewer-thumbnail:hover {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+
+    .viewer-thumbnail.active {
+        opacity: 1;
+        border-color: #3B82F6;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .viewer-toast {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(10px);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+        pointer-events: none;
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 10002;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .viewer-toast.show {
+        opacity: 1;
+    }
+
+    .viewer-loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        gap: 1rem;
+        color: white;
+        font-size: 1rem;
+        z-index: 100;
+    }
+
+    .viewer-loading.active {
+        display: flex;
+    }
+
+    .viewer-loading-spinner {
+        width: 3rem;
+        height: 3rem;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        border-top-color: #3B82F6;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+  </style>
+
+  <!-- Image Viewer JavaScript -->
+  <script>
+    // 图片数组（延迟初始化，等待 DOM 完全就绪）
+    let images = [];
+
+    // 状态变量
+    let currentIndex = 0;
+    let scale = 1;
+    let rotation = 0;
+    let flipX = 1;
+    let flipY = 1;
+    let translateX = 0;
+    let translateY = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let initialScale = 1;
+    let slideShowInterval = null;
+    let slideShowPlaying = false;
+    let currentImageDimensions = { width: 0, height: 0 };
+
+    // 自动收集图片（优先收集 gallery-item 中的图片）
+    function collectImages() {
+        const images = [];
+        const seenSrc = new Set();
+        
+        // 只收集 gallery-item 中的图片（用于预览）
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            const img = item.querySelector('img');
+            if (img && img.src && !img.src.includes('data:')) {
+                if (!seenSrc.has(img.src)) {
+                    seenSrc.add(img.src);
+                    images.push({
+                        src: img.src,
+                        title: img.alt || '图片 ' + (images.length + 1),
+                        thumbnail: img.src
+                    });
+                }
+            }
+        });
+        
+        // 如果没有 gallery-item，则收集所有有意义的图片
+        if (images.length === 0) {
+            document.querySelectorAll('img').forEach(img => {
+                if (!seenSrc.has(img.src) && img.src && !img.src.includes('data:')) {
+                    // 排除 viewerImage（预览器的图片）
+                    if (img.id !== 'viewerImage') {
+                        seenSrc.add(img.src);
+                        images.push({
+                            src: img.src,
+                            title: img.alt || '图片 ' + (images.length + 1),
+                            thumbnail: img.src
+                        });
+                    }
+                }
+            });
+        }
+        
+        return images;
+    }
+
+    // 打开查看器
+    function openImageViewer(index) {
+        // 如果图片数组为空，先收集图片
+        if (images.length === 0) {
+            images = collectImages();
+        }
+        
+        if (images.length === 0) return;
+        
+        currentIndex = Math.max(0, Math.min(index, images.length - 1));
+        resetViewState();
+        loadImage(currentIndex);
+        buildThumbnailStrip();
+        updateUI();
+        
+        document.getElementById('imageViewer').classList.add('active');
+        document.body.style.overflow = 'hidden';
+        preloadAdjacentImages();
+    }
+
+    // 关闭查看器
+    function closeImageViewer() {
+        stopSlideShow();
+        document.getElementById('imageViewer').classList.remove('active');
+        document.body.style.overflow = '';
+        
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        }
+    }
+
+    // 重置视图
+    function resetViewState() {
+        scale = 1;
+        rotation = 0;
+        flipX = 1;
+        flipY = 1;
+        translateX = 0;
+        translateY = 0;
+        updateSliderValue();
+    }
+
+    // 加载图片
+    function loadImage(index) {
+        const loading = document.getElementById('viewerLoading');
+        const img = document.getElementById('viewerImage');
+        
+        if (loading) loading.classList.add('active');
+        
+        const tempImg = new Image();
+        tempImg.onload = () => {
+            img.src = images[index].src;
+            currentImageDimensions = {
+                width: tempImg.naturalWidth,
+                height: tempImg.naturalHeight
+            };
+            if (loading) loading.classList.remove('active');
+            updateImageInfo();
+            updateTransform();
+        };
+        tempImg.onerror = () => {
+            if (loading) loading.classList.remove('active');
+            showToast('图片加载失败');
+        };
+        tempImg.src = images[index].src;
+    }
+
+    // 上一张（循环）
+    function prevImage() {
+        if (images.length <= 1) return;
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        resetViewState();
+        loadImage(currentIndex);
+        updateUI();
+        preloadAdjacentImages();
+    }
+
+    // 下一张（循环）
+    function nextImage() {
+        if (images.length <= 1) return;
+        currentIndex = (currentIndex + 1) % images.length;
+        resetViewState();
+        loadImage(currentIndex);
+        updateUI();
+        preloadAdjacentImages();
+    }
+
+    // 缩放
+    function zoom(delta) {
+        const newScale = Math.max(0.1, Math.min(5, scale + delta));
+        if (newScale !== scale) {
+            scale = newScale;
+            updateTransform();
+            updateZoomDisplay();
+            updateSliderValue();
+        }
+    }
+
+    function zoomIn() { zoom(0.25); }
+    function zoomOut() { zoom(-0.25); }
+
+    function fitToScreen() {
+        resetViewState();
+        updateTransform();
+        updateZoomDisplay();
+        updateSliderValue();
+        showToast('已适应屏幕');
+    }
+
+    // 旋转
+    function rotateImage(deg) {
+        rotation = (rotation + deg) % 360;
+        updateTransform();
+        showToast('旋转 ' + rotation + '°');
+    }
+
+    // 翻转
+    function flipHorizontal() {
+        flipX *= -1;
+        updateTransform();
+        showToast(flipX === -1 ? '已水平翻转' : '已取消水平翻转');
+    }
+
+    function flipVertical() {
+        flipY *= -1;
+        updateTransform();
+        showToast(flipY === -1 ? '已垂直翻转' : '已取消垂直翻转');
+    }
+
+    // 全屏
+    function toggleFullscreen() {
+        const viewer = document.getElementById('imageViewer');
+        const icon = document.getElementById('fullscreenIcon');
+        
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+            if (icon) icon.className = 'fas fa-expand';
+            showToast('已退出全屏');
+        } else {
+            viewer.requestFullscreen();
+            if (icon) icon.className = 'fas fa-compress-alt';
+            showToast('已进入全屏');
+        }
+    }
+
+    // 幻灯片
+    function toggleSlideShow() {
+        if (slideShowPlaying) {
+            stopSlideShow();
+        } else {
+            startSlideShow();
+        }
+    }
+
+    function startSlideShow() {
+        if (images.length <= 1) {
+            showToast('只有一张图片，无法播放幻灯片');
+            return;
+        }
+        
+        slideShowPlaying = true;
+        updateSlideShowButton();
+        showToast('幻灯片播放中...');
+        
+        slideShowInterval = setInterval(() => {
+            nextImage();
+        }, 3000);
+    }
+
+    function stopSlideShow() {
+        slideShowPlaying = false;
+        updateSlideShowButton();
+        
+        if (slideShowInterval) {
+            clearInterval(slideShowInterval);
+            slideShowInterval = null;
+        }
+    }
+
+    // 下载
+    function downloadImage() {
+        const link = document.createElement('a');
+        link.href = images[currentIndex].src;
+        link.download = images[currentIndex].title || 'image';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('开始下载...');
+    }
+
+    // 新窗口打开
+    function openInNewTab() {
+        window.open(images[currentIndex].src, '_blank');
+    }
+
+    // Toast 提示
+    function showToast(text) {
+        const toast = document.getElementById('viewerToast');
+        if (!toast) return;
+        
+        toast.textContent = text;
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2000);
+    }
+
+    // 更新变换
+    function updateTransform() {
+        const container = document.getElementById('imageContainer');
+        if (container) {
+            container.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scaleX(${flipX}) scaleY(${flipY}) scale(${scale})`;
+        }
+    }
+
+    // 构建缩略图条
+    function buildThumbnailStrip() {
+        const strip = document.getElementById('thumbnailStrip');
+        if (!strip) return;
+        
+        strip.innerHTML = '';
+        
+        images.forEach((img, index) => {
+            const thumb = document.createElement('img');
+            thumb.className = 'viewer-thumbnail' + (index === currentIndex ? ' active' : '');
+            thumb.src = img.thumbnail;
+            thumb.alt = img.title;
+            thumb.onclick = () => {
+                currentIndex = index;
+                resetViewState();
+                loadImage(currentIndex);
+                updateUI();
+            };
+            strip.appendChild(thumb);
+        });
+    }
+
+    // 更新 UI 状态
+    function updateUI() {
+        // 更新缩略图激活状态
+        document.querySelectorAll('.viewer-thumbnail').forEach((thumb, index) => {
+            thumb.classList.toggle('active', index === currentIndex);
+        });
+        
+        // 更新图片信息
+        updateImageInfo();
+    }
+
+    // 更新图片信息
+    function updateImageInfo() {
+        const titleEl = document.getElementById('imageTitle');
+        const counterEl = document.getElementById('imageCounter');
+        const dimensionsEl = document.getElementById('imageDimensions');
+        
+        if (titleEl) titleEl.textContent = images[currentIndex]?.title || '图片';
+        if (counterEl) counterEl.textContent = (currentIndex + 1) + ' / ' + images.length;
+        if (dimensionsEl) dimensionsEl.textContent = currentImageDimensions.width + ' × ' + currentImageDimensions.height;
+    }
+
+    // 更新缩放显示
+    function updateZoomDisplay() {
+        const display = document.getElementById('zoomDisplay');
+        if (display) display.textContent = Math.round(scale * 100) + '%';
+    }
+
+    // 更新滑块值
+    function updateSliderValue() {
+        const slider = document.getElementById('zoomSlider');
+        if (slider) slider.value = scale * 100;
+    }
+
+    // 更新幻灯片按钮
+    function updateSlideShowButton() {
+        const btn = document.getElementById('slideShowBtn');
+        if (btn) {
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.className = slideShowPlaying ? 'fas fa-pause' : 'fas fa-play';
+            }
+        }
+    }
+
+    // 预加载相邻图片
+    function preloadAdjacentImages() {
+        const preloadIndices = [
+            (currentIndex - 1 + images.length) % images.length,
+            (currentIndex + 1) % images.length
+        ];
+        
+        preloadIndices.forEach(index => {
+            if (images[index]) {
+                const img = new Image();
+                img.src = images[index].src;
+            }
+        });
+    }
+
+    // 绑定事件（需要在 DOM 加载后调用）
+    function bindViewerEvents() {
+        const canvas = document.getElementById('viewerMain');
+        const zoomSlider = document.getElementById('zoomSlider');
+        
+        if (!canvas) return;
+
+        // 鼠标拖拽
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.button === 0) {
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                canvas.style.cursor = 'grabbing';
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                updateTransform();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            canvas.style.cursor = 'grab';
+        });
+
+        // 滚轮缩放
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            zoom(e.deltaY > 0 ? -0.15 : 0.15);
+        }, { passive: false });
+
+        // 双击适应屏幕
+        canvas.addEventListener('dblclick', (e) => {
+            if (scale !== 1) {
+                fitToScreen();
+            } else {
+                scale = 2;
+                updateTransform();
+                updateZoomDisplay();
+                updateSliderValue();
+            }
+        });
+
+        // 缩放滑块
+        if (zoomSlider) {
+            zoomSlider.addEventListener('input', (e) => {
+                scale = e.target.value / 100;
+                updateTransform();
+                updateZoomDisplay();
+            });
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('imageViewer').classList.contains('active')) return;
+            
+            switch(e.key) {
+                case 'Escape': closeImageViewer(); break;
+                case 'ArrowLeft': prevImage(); break;
+                case 'ArrowRight': nextImage(); break;
+                case '+': case '=': zoomIn(); break;
+                case '-': zoomOut(); break;
+                case '0': fitToScreen(); break;
+                case ' ': e.preventDefault(); toggleSlideShow(); break;
+                case 'f': case 'F': toggleFullscreen(); break;
+                case 'd': case 'D': downloadImage(); break;
+            }
+        });
+
+        // 触摸手势
+        let lastTouchDistance = 0;
+        let touchStartTime = 0;
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                startX = e.touches[0].clientX - translateX;
+                startY = e.touches[0].clientY - translateY;
+                touchStartTime = Date.now();
+            } else if (e.touches.length === 2) {
+                lastTouchDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                initialScale = scale;
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1) {
+                translateX = e.touches[0].clientX - startX;
+                translateY = e.touches[0].clientY - startY;
+                updateTransform();
+            } else if (e.touches.length === 2) {
+                e.preventDefault();
+                const currentDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                scale = Math.max(0.1, Math.min(5, initialScale * (currentDistance / lastTouchDistance)));
+                updateTransform();
+                updateZoomDisplay();
+                updateSliderValue();
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            if (e.touches.length === 0) {
+                const touchDuration = Date.now() - touchStartTime;
+                const diff = Math.abs(translateX) + Math.abs(translateY);
+                
+                if (diff > 50 && touchDuration < 300) {
+                    translateX > 0 ? prevImage() : nextImage();
+                }
+            }
+        });
+
+        // 点击背景关闭
+        canvas.addEventListener('click', (e) => {
+            if (e.target === canvas) {
+                closeImageViewer();
+            }
+        });
+
+        // 全屏变化
+        document.addEventListener('fullscreenchange', () => {
+            const icon = document.getElementById('fullscreenIcon');
+            if (icon) {
+                icon.className = document.fullscreenElement ? 'fas fa-compress-alt' : 'fas fa-expand';
+            }
+        });
+    }
+
+    // 复制到剪贴板
+    function copyToClipboard() {
+        const code = 'git clone https://github.com/diverHansun/newbee-notebook';
+        navigator.clipboard.writeText(code).then(() => {
+            showToast('命令已复制到剪贴板');
+        }).catch(() => {
+            showToast('复制失败');
+        });
+    }
+
+    // 页面加载完成后初始化（重要！）
+    document.addEventListener('DOMContentLoaded', () => {
+        // 延迟初始化图片查看器，确保 DOM 完全就绪
+        setTimeout(() => {
+            // 先收集图片
+            images = collectImages();
+            
+            if (images.length === 0) {
+                console.warn('没有找到图片');
+                return;
+            }
+            buildThumbnailStrip();
+            bindViewerEvents();
+        }, 100);
+    });
+
+    // 如果 DOM 已加载则立即初始化
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(() => {
+            // 先收集图片
+            images = collectImages();
+            
+            if (images.length > 0) {
+                buildThumbnailStrip();
+                bindViewerEvents();
+            }
+        }, 200);
+    }
+  </script>
+</body>
+</html>

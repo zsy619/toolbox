@@ -1,0 +1,2680 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Dockerfile 入门完全指南">
+    <meta name="format-detection" content="telephone=no">
+    <title>
+      Dockerfile 入门完全指南:15+ 指令、HelloWorld、Spring Boot 部署实战 | AI 工具箱
+    </title>
+    <meta name="description" content="Dockerfile 是构建 Docker 镜像的脚本文件。本文系统讲解 15+ 核心指令(FROM/LABEL/ENV/WORKDIR/RUN/CMD/ENTRYPOINT/ADD/COPY/ARG/ONBUILD/VOLUME 等)、scratch 镜像与 HelloWorld、CMD vs ENTRYPOINT 核心区别、构建新镜像的 5 种方式,以及 Spring Boot 项目完整部署实战。">
+    <meta name="keywords" content="Dockerfile, Docker 镜像构建, FROM 指令, RUN 指令, CMD 指令, ENTRYPOINT 指令, ADD 指令, COPY 指令, ARG 指令, ONBUILD 指令, VOLUME 指令, scratch 镜像, Spring Boot Docker 部署, docker build, docker commit, docker import, docker tag, 镜像分层">
+    <meta name="author" content="AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="language" content="zh-CN">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/05-docker-dockerfile-introduction.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://tools.yy24365.com/ai-tools/docker/05-docker-dockerfile-introduction.html">
+    <link rel="alternate" hreflang="x-default" href="https://tools.yy24365.com/ai-tools/docker/05-docker-dockerfile-introduction.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Dockerfile 入门完全指南:15+ 指令、HelloWorld、Spring Boot 部署实战">
+    <meta property="og:description" content="15+ 核心指令、CMD/ENTRYPOINT 区别、构建新镜像 5 种方式、Spring Boot 部署完整实战。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/05-docker-dockerfile-introduction.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dockerfile-intro-og.png">
+    <meta property="og:image:alt" content="Dockerfile 入门完全指南封面">
+    <meta property="article:published_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:modified_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:section" content="DevOps">
+    <meta property="article:tag" content="Dockerfile">
+    <meta property="article:tag" content="Spring Boot">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Dockerfile 入门完全指南">
+    <meta name="twitter:description" content="Dockerfile 15+ 指令详解 + Spring Boot 部署实战。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dockerfile-intro-og.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%232496ED' d='M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.083.185.185.185m-2.954-5.43h2.119a.186.186 0 00.186-.186V3.575a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m0 2.716h2.119a.187.187 0 00.186-.186V6.291a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.931 0h2.12a.186.186 0 00.184-.186V6.291a.185.185 0 00-.184-.185h-2.12a.185.185 0 00-.184.185v1.887c0 .102.082.185.184.186m-2.932 0h2.12a.185.185 0 00.184-.186V6.291a.185.185 0 00-.184-.185H5.166a.186.186 0 00-.185.185v1.887c0 .102.083.185.185.186m5.863 5.43h2.119a.186.186 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.082.185.185.185m-2.931 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.932 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.931 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m11.792 4.084h-2.119a.186.186 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.931 0h-2.119a.185.185 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.932 0h-2.118a.185.185 0 00-.184.185v1.886c0 .103.082.186.184.186h2.118a.186.186 0 00.185-.186v-1.886a.185.185 0 00-.185-.185m-2.931 0h-2.12a.185.185 0 00-.184.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.184-.186v-1.886a.185.185 0 00-.184-.185m-2.932 0H5.166a.186.186 0 00-.185.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.185-.186v-1.886a.186.186 0 00-.185-.185z'/%3E%3C/svg%3E">
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Dockerfile 入门完全指南",
+  "description": "系统讲解 Dockerfile 15+ 核心指令、scratch 镜像与 HelloWorld、CMD vs ENTRYPOINT、构建新镜像 5 种方式、Spring Boot 项目完整部署实战。",
+  "author": {"@type": "Organization", "name": "AI 工具箱"},
+  "publisher": {"@type": "Organization", "name": "AI 工具箱"},
+  "datePublished": "2026-06-03T00:00:00+08:00",
+  "dateModified": "2026-06-03T00:00:00+08:00",
+  "inLanguage": "zh-CN",
+  "mainEntityOfPage": "https://tools.yy24365.com/ai-tools/docker/05-docker-dockerfile-introduction.html",
+  "keywords": "Dockerfile, FROM, CMD, ENTRYPOINT, ADD, COPY, ARG, ONBUILD, VOLUME, Spring Boot Docker",
+  "about": {"@type": "SoftwareApplication", "name": "Dockerfile", "applicationCategory": "DeveloperApplication"},
+  "proficiencyLevel": "Beginner"
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "首页", "item": "https://tools.yy24365.com/"},
+    {"@type": "ListItem", "position": 2, "name": "AI 工具", "item": "https://tools.yy24365.com/ai-tools/"},
+    {"@type": "ListItem", "position": 3, "name": "Docker 学习", "item": "https://tools.yy24365.com/ai-tools/docker/"},
+    {"@type": "ListItem", "position": 4, "name": "Dockerfile 入门", "item": "https://tools.yy24365.com/ai-tools/docker/05-docker-dockerfile-introduction.html"}
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Dockerfile 是什么?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Dockerfile 是构建 Docker 镜像的脚本文件,由一系列指令构成。通过 docker build 命令构建镜像时,Dockerfile 中的指令由上到下依次执行,每条指令都会构建出一个镜像(就是镜像的分层)。因此指令越多,层次就越多,创建的镜像就越多,效率就越低。所以在定义 Dockerfile 时,能在一个指令完成的动作就不要分为两条。"}
+    },
+    {
+      "@type": "Question",
+      "name": "CMD 和 ENTRYPOINT 有什么区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "CMD 指定的是容器启动时<strong>默认</strong>的命令,如果 docker run 时指定了其他命令,Dockerfile 中的 CMD 指定的命令时不会执行;ENTRYPOINT 指定的是容器启动时<strong>一定会执行</strong>的命令,即使在 docker run 中指定了其他命令,ENTRYPOINT 也会执行(用 array 形式时,后面的内容会被作为 arg 拼接到 ENTRYPOINT 后面)。结论:无论 CMD 还是 ENTRYPOINT,使用 [\"EXECUTABLE\"] array 形式的通用性会更强。"}
+    },
+    {
+      "@type": "Question",
+      "name": "ADD 和 COPY 指令有什么区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "ADD 和 COPY 功能相似,主要区别:1) ADD 的 src 可以是<strong>URL</strong>(相当于 wget 下载),COPY 不行;2) ADD 的 src 如果是<strong>压缩包</strong>(如 .tar.gz),复制到容器后会<strong>自动解压</strong>,COPY 不会自动解压;3) COPY 行为更可控,生产环境推荐优先用 COPY,仅在需要下载远程资源或自动解压时才用 ADD。"}
+    },
+    {
+      "@type": "Question",
+      "name": "什么是 scratch 镜像?",
+      "acceptedAnswer": {"@type": "Answer", "text": "scratch 镜像是一个<strong>空镜像</strong>,是所有镜像的 Base Image。scratch 镜像只能在 Dockerfile 中被继承(FROM scratch),不能 pull 拉取,不能 run,没有 tag,并且它不会生成镜像中的文件系统层。scratch 是一个保留字,用户不能作为自己镜像的名称。常用于构建极小镜像(如 Go 编译后的二进制文件)。"}
+    },
+    {
+      "@type": "Question",
+      "name": "ARG 和 ENV 有什么区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "ARG 用于定义<strong>构建时</strong>变量,只在 docker build 阶段有效,容器运行时不可见;ENV 用于定义<strong>环境变量</strong>,容器运行时仍可通过 env 命令或代码中 process.env.X 访问。生产实践:ARG 用于构建参数(如 --build-arg VERSION=1.0),ENV 用于运行时配置(如 NODE_ENV=production)。"}
+    },
+    {
+      "@type": "Question",
+      "name": "构建新镜像的 5 种方式?",
+      "acceptedAnswer": {"@type": "Answer", "text": "1) docker build(基于 Dockerfile 构建,生产首选);2) docker commit(将容器修改保存为新镜像,适合调试);3) docker import(从 tar 包导入为镜像);4) docker compose(通过 compose.yml 批量构建);5) Docker Hub 中完成 Automated Builds(GitHub 集成自动构建)。注意 docker load<strong>并没有</strong>构建出新镜像,其与原镜像是同一个镜像。"}
+    },
+    {
+      "@type": "Question",
+      "name": "ONBUILD 指令有什么特殊用途?",
+      "acceptedAnswer": {"@type": "Answer", "text": "ONBUILD 指令只对<strong>当前镜像的子镜像</strong>进行构建时有效。典型应用场景:父镜像是一个基础镜像(如预装好 Python 的镜像),子镜像在 FROM 这个父镜像时,自动触发 ONBUILD 后面的指令(如自动 pip install requirements.txt),简化子镜像的 Dockerfile 编写。"}
+    }
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "将 Spring Boot 项目部署到 Docker",
+  "description": "完整 4 步将 Spring Boot 应用容器化",
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "准备 jar 包和目录", "text": "mvn package 打包,在宿主机创建 /root/hello-docker 目录,上传 jar 包"},
+    {"@type": "HowToStep", "position": 2, "name": "编写 Dockerfile", "text": "FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/openjdk:17\nMAINTAINER zhangsan zs@163.com\nLABEL version=\"1.0\" description=\"my own app\"\nCOPY hello-docker-0.0.1-SNAPSHOT.jar hd.jar\nENTRYPOINT [\"java\",\"-jar\",\"hd.jar\"]\nEXPOSE 9000"},
+    {"@type": "HowToStep", "position": 3, "name": "构建镜像", "text": "docker build -t hello-docker:1.0 ."},
+    {"@type": "HowToStep", "position": 4, "name": "运行容器", "text": "docker run --name myhd -dp 9000:8080 hello-docker:1.0,然后访问 http://IP:9000/hello 看到 Hello Docker!"}
+  ]
+}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress" role="progressbar" aria-label="阅读进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand" aria-label="AI 工具箱首页">
+          <span class="brand-mark">
+            AI
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main" role="main">
+      <section class="hero" aria-labelledby="article-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 学习
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Dockerfile 入门
+            </span>
+          </nav>
+          <h1 id="article-title">
+            Dockerfile 入门完全指南
+          </h1>
+          <p class="hero-sub">
+            15+ 核心指令详解、scratch 镜像与 HelloWorld 实战、CMD vs ENTRYPOINT 核心区别、构建新镜像的 5 种方式,以及 Spring Boot 项目完整部署到 Docker 的全流程。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              ★★☆ 入门
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                阅读时长
+              </strong>
+              约 25 分钟
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                核心指令
+              </strong>
+              FROM/RUN/CMD/ENTRYPOINT/ADD/COPY
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                最后更新
+              </strong>
+              2026-06-03
+            </div>
+          </div>
+          <div class="hero-tags" aria-label="标签">
+            <span class="tag">
+              Dockerfile
+            </span>
+            <span class="tag">
+              FROM
+            </span>
+            <span class="tag">
+              CMD
+            </span>
+            <span class="tag">
+              ENTRYPOINT
+            </span>
+            <span class="tag">
+              ADD
+            </span>
+            <span class="tag">
+              COPY
+            </span>
+            <span class="tag">
+              Spring Boot
+            </span>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <article>
+          <section class="section" aria-labelledby="intro">
+            <h2 id="intro">
+              为什么需要 Dockerfile
+            </h2>
+            <p>
+              <strong>
+                Dockerfile 是构建 Docker 镜像的脚本文件
+              </strong>
+              ,由一系列指令构成。通过
+              <code>
+docker build
+              </code>
+              命令构建镜像时,Dockerfile 中的指令由上到下依次执行,每条指令都会构建出一个镜像(就是
+              <strong>
+                镜像的分层
+              </strong>
+              )。因此指令越多,层次就越多,创建的镜像就越多,效率就越低。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                Dockerfile 三原则
+              </div>
+              <div class="concept-body">
+                <p>
+                  1)
+                  <strong>
+                    指令不区分大小写
+                  </strong>
+                  ,一般惯例写为全大写;
+                  <br>
+                  2)
+                  <strong>
+                    指令后至少会携带一个参数
+                  </strong>
+                  ;
+                  <br>
+                  3)
+                  <strong>
+                    注释以 # 开头
+                  </strong>
+                  。
+                  <br>
+                  所以在定义 Dockerfile 时,能在一个指令完成的动作就不要分为两条。
+                </p>
+              </div>
+            </div>
+          </section>
+          <nav class="toc" id="toc" aria-labelledby="toc-title">
+            <h2 class="toc-title" id="toc-title">
+              本文目录
+            </h2>
+            <ul class="toc-grid">
+              <li>
+                <a href="#s1">
+                  <span class="toc-num">
+                    1
+                  </span>
+                  15+ 核心指令速查
+                </a>
+              </li>
+              <li>
+                <a href="#s2">
+                  <span class="toc-num">
+                    2
+                  </span>
+                  scratch 镜像与 HelloWorld
+                </a>
+              </li>
+              <li>
+                <a href="#s3">
+                  <span class="toc-num">
+                    3
+                  </span>
+                  CMD vs ENTRYPOINT
+                </a>
+              </li>
+              <li>
+                <a href="#s4">
+                  <span class="toc-num">
+                    4
+                  </span>
+                  ADD vs COPY
+                </a>
+              </li>
+              <li>
+                <a href="#s5">
+                  <span class="toc-num">
+                    5
+                  </span>
+                  ARG 指令
+                </a>
+              </li>
+              <li>
+                <a href="#s6">
+                  <span class="toc-num">
+                    6
+                  </span>
+                  ONBUILD 指令
+                </a>
+              </li>
+              <li>
+                <a href="#s7">
+                  <span class="toc-num">
+                    7
+                  </span>
+                  构建新镜像 5 种方式
+                </a>
+              </li>
+              <li>
+                <a href="#s8">
+                  <span class="toc-num">
+                    8
+                  </span>
+                  Spring Boot 部署实战
+                </a>
+              </li>
+              <li>
+                <a href="#faq">
+                  <span class="toc-num">
+                    ?
+                  </span>
+                  常见问题
+                </a>
+              </li>
+              <li>
+                <a href="#refs">
+                  <span class="toc-num">
+                    i
+                  </span>
+                  参考资源
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- ============================================================
+     第一章 15+ 核心指令速查
+     ============================================================ -->
+          <section class="section" id="s1" aria-labelledby="s1-title">
+            <span class="section-num">
+              Chapter 01
+            </span>
+            <h2 id="s1-title">
+              15+ 核心指令速查
+            </h2>
+            <p>
+              下表汇总了 Dockerfile 中最常用的 15+ 指令,涵盖构建、运行、元数据等全场景。
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      指令
+                    </th>
+                    <th>
+                      语法
+                    </th>
+                    <th>
+                      作用
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <code>
+FROM
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+FROM <image>[:<tag>]
+                      </code>
+                    </td>
+                    <td>
+                      指定基础镜像,必须是第一条指令;省略 tag 默认为 latest
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+MAINTAINER
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+MAINTAINER <name>
+                      </code>
+                    </td>
+                    <td>
+                      维护者姓名和邮箱(官方
+                      <strong>
+                        不建议
+                      </strong>
+                      使用,推荐 LABEL)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+LABEL
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+LABEL <key>=<value> ...
+                      </code>
+                    </td>
+                    <td>
+                      键值对形式包含任意镜像元数据,代替 MAINTAINER
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+ENV
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+ENV <key>=<value> ...
+                      </code>
+                    </td>
+                    <td>
+                      指定环境变量,后续 RUN 可用,容器运行时也可见
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+WORKDIR
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+WORKDIR <path>
+                      </code>
+                    </td>
+                    <td>
+                      容器打开后默认进入的目录;可设置多个,后续相对路径会基于上次的 WORKDIR
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+RUN
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+RUN <command>
+                      </code>
+                      或
+                      <code>
+RUN ["EXECUTABLE","PARAM1",...]
+                      </code>
+                    </td>
+                    <td>
+                      在 docker build 过程中执行 shell 命令
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+CMD
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+CMD [...]
+                      </code>
+                      或
+                      <code>
+CMD command param1 ...
+                      </code>
+                    </td>
+                    <td>
+                      容器启动后立即执行的默认命令(
+                      <strong>
+                        可被 docker run 覆盖
+                      </strong>
+                      )
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+ENTRYPOINT
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+ENTRYPOINT [...]
+                      </code>
+                      或
+                      <code>
+ENTRYPOINT command ...
+                      </code>
+                    </td>
+                    <td>
+                      容器启动时
+                      <strong>
+                        一定执行
+                      </strong>
+                      的命令(类似 main 入口)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+EXPOSE
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+EXPOSE <port> [<port>...]
+                      </code>
+                    </td>
+                    <td>
+                      声明容器运行时监听的端口(需 -p 映射才对外)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+ARG
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+ARG <name>[=<default>]
+                      </code>
+                    </td>
+                    <td>
+                      定义
+                      <strong>
+                        构建时
+                      </strong>
+                      变量(
+                      <code>
+--build-arg
+                      </code>
+                      传入)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+ADD
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+ADD <src> <dest>
+                      </code>
+                    </td>
+                    <td>
+                      复制文件到容器;src 可为 URL,或 tar 包自动解压
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+COPY
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+COPY <src> <dest>
+                      </code>
+                    </td>
+                    <td>
+                      功能类似 ADD,但
+                      <strong>
+                        不能是 URL
+                      </strong>
+                      ,压缩包不自动解压
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+ONBUILD
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+ONBUILD [INSTRUCTION]
+                      </code>
+                    </td>
+                    <td>
+                      当前镜像的
+                      <strong>
+                        子镜像
+                      </strong>
+                      构建时执行的指令(钩子)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+VOLUME
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+VOLUME ["/dir1","/dir2"]
+                      </code>
+                    </td>
+                    <td>
+                      声明容器可挂载的数据卷挂载点
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+USER
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+USER <username|UID>
+                      </code>
+                    </td>
+                    <td>
+                      指定 RUN/CMD/ENTRYPOINT 的执行用户
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+HEALTHCHECK
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+HEALTHCHECK CMD ...
+                      </code>
+                    </td>
+                    <td>
+                      健康检查命令,常用于 docker compose depends_on
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    最少必须掌握的 5 个指令
+                  </strong>
+                  :FROM(基础)、RUN(构建时操作)、COPY(复制文件)、CMD/ENTRYPOINT(启动命令)、EXPOSE(端口声明)。这 5 个能覆盖 80% 的 Dockerfile 场景。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第二章 scratch 镜像与 HelloWorld
+     ============================================================ -->
+          <section class="section" id="s2" aria-labelledby="s2-title">
+            <span class="section-num">
+              Chapter 02
+            </span>
+            <h2 id="s2-title">
+              scratch 镜像与 HelloWorld 实战
+            </h2>
+            <h3>
+              2.1 scratch 镜像
+            </h3>
+            <p>
+              scratch 镜像是一个
+              <strong>
+                空镜像
+              </strong>
+              ,是所有镜像的 Base Image。
+            </p>
+            <ul>
+              <li>
+                scratch 镜像只能在 Dockerfile 中被继承(
+                <code>
+FROM scratch
+                </code>
+                ),
+                <strong>
+                  不能
+                </strong>
+                pull 拉取
+              </li>
+              <li>
+                <strong>
+                  不能
+                </strong>
+                run,没有 tag
+              </li>
+              <li>
+                不会生成镜像中的
+                <strong>
+                  文件系统层
+                </strong>
+              </li>
+              <li>
+                scratch 是一个保留字,用户
+                <strong>
+                  不能
+                </strong>
+                作为自己镜像的名称
+              </li>
+            </ul>
+            <p>
+              scratch 常用于构建
+              <strong>
+                极小镜像
+              </strong>
+              (如 Go 编译后的二进制文件)。
+            </p>
+            <h3>
+              2.2 实战:编译 C 语言 Hello World
+            </h3>
+            <p>
+              <strong>
+                1. 安装 C 编译器
+              </strong>
+              (如果宿主机没有 gcc):
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+yum install
+                  </span>
+                  <span class="tok-flag">
+-y
+                  </span>
+ gcc gcc-c++
+                  <span class="tok-cmd">
+yum install
+                  </span>
+                  <span class="tok-flag">
+-y
+                  </span>
+ glibc-static
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                2. 创建 hello.c
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  c
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+#include
+                  </span>
+ <stdio.h>
+                  <span class="tok-key">
+int
+                  </span>
+                  <span class="tok-cmd">
+main
+                  </span>
+() {
+                  <span class="tok-cmd">
+printf
+                  </span>
+(
+                  <span class="tok-str">
+"hello my docker world\n"
+                  </span>
+);
+                  <span class="tok-key">
+return
+                  </span>
+ 0;
+}
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                3. 编译测试
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+gcc
+                  </span>
+                  <span class="tok-flag">
+--static
+                  </span>
+                  <span class="tok-flag">
+-o
+                  </span>
+ hello hello.c
+                  <span class="tok-cmd">
+./hello
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                4. 创建 Dockerfile
+              </strong>
+              (文件名就叫 Dockerfile,不加后缀):
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ scratch
+                  <span class="tok-key">
+ADD
+                  </span>
+ hello /
+                  <span class="tok-key">
+CMD
+                  </span>
+ [
+                  <span class="tok-str">
+"/hello"
+                  </span>
+]
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                5. 构建并运行镜像
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 构建镜像
+                  </span>
+                  <span class="tok-cmd">
+docker build
+                  </span>
+                  <span class="tok-flag">
+-t
+                  </span>
+ hello-my-world .
+                  <span class="tok-com">
+# 运行镜像,会输出 "hello my docker world"
+                  </span>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+ hello-my-world
+                </code>
+              </pre>
+            </div>
+            <h3>
+              2.3 docker build 参数说明
+            </h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      参数
+                    </th>
+                    <th>
+                      说明
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <code>
+-t <name>[:<tag>]
+                      </code>
+                    </td>
+                    <td>
+                      指定要生成镜像的 repository 和 tag,省略 tag 默认为 latest
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+-f <path>
+                      </code>
+                    </td>
+                    <td>
+                      指定要使用的 Dockerfile 文件路径(文件名不是默认的 Dockerfile 时需要)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+最后的 .
+                      </code>
+                    </td>
+                    <td>
+                      宿主机 URL 路径,构建时从此路径中查找 Dockerfile
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+--no-cache
+                      </code>
+                    </td>
+                    <td>
+                      不使用 build cache,强制重新构建每一层
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+--build-arg name=value
+                      </code>
+                    </td>
+                    <td>
+                      为 ARG 指令传入构建时变量
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <h3>
+              2.4 镜像重打标签(docker tag)
+            </h3>
+            <p>
+              当进行过出新版本了,上个版本的镜像标签就不能再用了。
+              <code>
+docker tag
+              </code>
+              命令可以对镜像重打标签。重打标签实际是
+              <strong>
+                复制了一份镜像
+              </strong>
+              ,将新镜像指定新的 tag。新镜像的 ImageID 和 Digest 和原镜像的
+              <strong>
+                相同
+              </strong>
+              。
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker tag
+                  </span>
+ hello-my-world hello-my-world:1.0
+                </code>
+              </pre>
+            </div>
+          </section>
+          <!-- ============================================================
+     第三章 CMD vs ENTRYPOINT
+     ============================================================ -->
+          <section class="section" id="s3" aria-labelledby="s3-title">
+            <span class="section-num">
+              Chapter 03
+            </span>
+            <h2 id="s3-title">
+              CMD vs ENTRYPOINT
+            </h2>
+            <p>
+              这两个指令都是用于指定容器启动时要执行的命令,无论哪个指令,每个 Dockerfile 中
+              <strong>
+                只能有一个
+              </strong>
+              CMD/ENTRYPOINT 指令,
+              <strong>
+                多个指令只会执行最后一个
+              </strong>
+              。
+            </p>
+            <h3>
+              3.1 核心区别
+            </h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      维度
+                    </th>
+                    <th>
+                      CMD
+                    </th>
+                    <th>
+                      ENTRYPOINT
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        覆盖性
+                      </strong>
+                    </td>
+                    <td>
+                      可被
+                      <code>
+docker run
+                      </code>
+                      后面的命令
+                      <strong>
+                        覆盖
+                      </strong>
+                    </td>
+                    <td>
+                      不会被覆盖,只会被作为 arg 拼接(array 形式)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        使用场景
+                      </strong>
+                    </td>
+                    <td>
+                      容器启动时
+                      <strong>
+                        默认
+                      </strong>
+                      执行的命令
+                    </td>
+                    <td>
+                      容器启动时
+                      <strong>
+                        必须
+                      </strong>
+                      执行的命令(类似 main 入口)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        参数传递
+                      </strong>
+                    </td>
+                    <td>
+                      启动命令
+                      <code>
+docker run
+                      </code>
+                      中
+                      <strong>
+                        不能
+                      </strong>
+                      添加参数
+                    </td>
+                    <td>
+                      启动命令
+                      <code>
+docker run
+                      </code>
+                      中
+                      <strong>
+                        可以
+                      </strong>
+                      添加参数
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <h3>
+              3.2 CMD 例子
+            </h3>
+            <p>
+              创建
+              <code>
+Dockerfile2
+              </code>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ centos:7
+                  <span class="tok-key">
+CMD
+                  </span>
+ cal
+                </code>
+              </pre>
+            </div>
+            <p>
+              构建并运行:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker build
+                  </span>
+                  <span class="tok-flag">
+-f
+                  </span>
+ ./Dockerfile2
+                  <span class="tok-flag">
+-t
+                  </span>
+ mycal .
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ mycal
+                </code>
+              </pre>
+            </div>
+            <p>
+              运行就会显示当前月份的日历。
+            </p>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  此时若在
+                  <code>
+docker run
+                  </code>
+                  时指定要执行的命令(如
+                  <code>
+docker run -it mycal cal 2020
+                  </code>
+                  ),则 Dockerfile 中 CMD 指定的命令
+                  <strong>
+                    不执行了
+                  </strong>
+                  。也无法为 CMD 指定的命令设置选项。
+                </p>
+              </div>
+            </div>
+            <h3>
+              3.3 ENTRYPOINT 例子
+            </h3>
+            <p>
+              创建
+              <code>
+Dockerfile4
+              </code>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ centos:7
+                  <span class="tok-key">
+ENTRYPOINT
+                  </span>
+ cal
+                </code>
+              </pre>
+            </div>
+            <p>
+              如果
+              <code>
+docker run
+              </code>
+              时指定了执行命令(如
+              <code>
+cal 2020
+              </code>
+              ),ENTRYPOINT 指令
+              <strong>
+                依然会执行
+              </strong>
+              ,不会被覆盖。此时即使在
+              <code>
+docker run
+              </code>
+              中添加命令选项,也是
+              <strong>
+                无效的
+              </strong>
+              (因为 shell 形式不拼接 arg)。
+            </p>
+            <p>
+              如果 Dockerfile 内容改为 array 形式:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ centos:7
+                  <span class="tok-key">
+ENTRYPOINT
+                  </span>
+ [
+                  <span class="tok-str">
+"cal"
+                  </span>
+]
+                </code>
+              </pre>
+            </div>
+            <p>
+              那么在
+              <code>
+docker run
+              </code>
+              中添加命令选项
+              <code>
+cal 2020
+              </code>
+              是
+              <strong>
+                有效
+              </strong>
+              的——daemon 会先把
+              <code>
+cal
+              </code>
+              和
+              <code>
+2020
+              </code>
+              拼接成
+              <code>
+cal 2020
+              </code>
+              再运行。
+            </p>
+            <h3>
+              3.4 总结
+            </h3>
+            <div class="concept">
+              <div class="concept-title">
+                为什么 array 形式更通用
+              </div>
+              <div class="concept-body">
+                <p>
+                  docker daemon 对 ENTRYPOINT 指定的
+                  <code>
+command
+                  </code>
+                  和
+                  <code>
+["EXECUTABLE"]
+                  </code>
+                  处理方式不同:
+                  <br>
+                  1)
+                  <code>
+command
+                  </code>
+                  (shell 形式):daemon
+                  <strong>
+                    直接运行
+                  </strong>
+                  ,不会与
+                  <code>
+docker run
+                  </code>
+                  后的 arg 拼接;
+                  <br>
+                  2)
+                  <code>
+["EXECUTABLE"]
+                  </code>
+                  (array 形式):daemon
+                  <strong>
+                    会与
+                  </strong>
+                  <code>
+docker run
+                  </code>
+                  后的 arg 拼接,然后运行拼接后的结果。
+                  <br>
+                  <strong>
+                    结论
+                  </strong>
+                  :无论 CMD 还是 ENTRYPOINT,使用
+                  <code>
+["EXECUTABLE"]
+                  </code>
+                  array 形式的
+                  <strong>
+                    通用性会更强
+                  </strong>
+                  。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第四章 ADD vs COPY
+     ============================================================ -->
+          <section class="section" id="s4" aria-labelledby="s4-title">
+            <span class="section-num">
+              Chapter 04
+            </span>
+            <h2 id="s4-title">
+              ADD vs COPY
+            </h2>
+            <p>
+              创建一个 Dockerfile:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ centos:7
+                  <span class="tok-key">
+WORKDIR
+                  </span>
+ /opt
+                  <span class="tok-key">
+ADD
+                  </span>
+ zookeeper.tar.gz /opt/add
+                  <span class="tok-key">
+COPY
+                  </span>
+ zookeeper.tar.gz /opt/copy
+                  <span class="tok-key">
+CMD
+                  </span>
+ /bin/bash
+                </code>
+              </pre>
+            </div>
+            <p>
+              构建并运行镜像后会发现:
+            </p>
+            <ul>
+              <li>
+                <strong>
+                  ADD 指令添加的是解压后的目录
+                </strong>
+                (zookeeper 文件夹)
+              </li>
+              <li>
+                <strong>
+                  COPY 指令添加的是未解压的
+                </strong>
+                (zookeeper.tar.gz 压缩包)
+              </li>
+            </ul>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      特性
+                    </th>
+                    <th>
+                      ADD
+                    </th>
+                    <th>
+                      COPY
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      src 可以是 URL
+                    </td>
+                    <td>
+                      ✅ 相当于 wget 下载
+                    </td>
+                    <td>
+                      ❌ 必须是本地路径
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      src 是压缩包
+                    </td>
+                    <td>
+                      ✅
+                      <strong>
+                        自动解压
+                      </strong>
+                      到 dest
+                    </td>
+                    <td>
+                      ❌ 保持原压缩包
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      行为可控性
+                    </td>
+                    <td>
+                      有副作用(解压、下载)
+                    </td>
+                    <td>
+                      <strong>
+                        仅复制
+                      </strong>
+                      ,更可控
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      生产推荐
+                    </td>
+                    <td>
+                      需要下载/自动解压时使用
+                    </td>
+                    <td>
+                      <strong>
+                        默认推荐
+                      </strong>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  最佳实践:
+                  <strong>
+                    能用 COPY 就不用 ADD
+                  </strong>
+                  。只有当需要下载远程资源(如
+                  <code>
+ADD http://x.com/app.tar.gz /opt/
+                  </code>
+                  )或自动解压 tar 包时才用 ADD。其他场景一律 COPY,行为更可预测。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第五章 ARG 指令
+     ============================================================ -->
+          <section class="section" id="s5" aria-labelledby="s5-title">
+            <span class="section-num">
+              Chapter 05
+            </span>
+            <h2 id="s5-title">
+              ARG 指令(构建时变量)
+            </h2>
+            <p>
+              ARG 指令用于定义一个
+              <strong>
+                变量
+              </strong>
+              ,该变量会在
+              <strong>
+                镜像构建时
+              </strong>
+              使用,而
+              <strong>
+                不是容器启动时
+              </strong>
+              。
+            </p>
+            <h3>
+              5.1 示例 Dockerfile
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ centos:7
+                  <span class="tok-key">
+ARG
+                  </span>
+ name=TOM
+                  <span class="tok-key">
+RUN
+                  </span>
+ echo $name
+                </code>
+              </pre>
+            </div>
+            <h3>
+              5.2 使用 ARG 默认值构建
+            </h3>
+            <p>
+              构建时没给变量 name 赋予新值,所以 name 还是
+              <code>
+TOM
+              </code>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker build
+                  </span>
+                  <span class="tok-flag">
+-t
+                  </span>
+ myargs:1.0 .
+                </code>
+              </pre>
+            </div>
+            <h3>
+              5.3 使用 ARG 指定值构建
+            </h3>
+            <p>
+              构建时给变量 name 赋予新值,所以 name =
+              <code>
+jerry
+              </code>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker build
+                  </span>
+                  <span class="tok-flag">
+-t
+                  </span>
+ myargs:1.0
+                  <span class="tok-flag">
+--build-arg
+                  </span>
+ name=jerry .
+                </code>
+              </pre>
+            </div>
+            <h3>
+              5.4 ARG vs ENV
+            </h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      指令
+                    </th>
+                    <th>
+                      作用阶段
+                    </th>
+                    <th>
+                      是否在容器运行时可见
+                    </th>
+                    <th>
+                      典型用途
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <code>
+ARG
+                      </code>
+                    </td>
+                    <td>
+                      仅
+                      <strong>
+                        构建时
+                      </strong>
+                    </td>
+                    <td>
+                      ❌ 容器运行时不可见
+                    </td>
+                    <td>
+                      --build-arg VERSION=1.0
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+ENV
+                      </code>
+                    </td>
+                    <td>
+                      构建时 +
+                      <strong>
+                        运行时
+                      </strong>
+                    </td>
+                    <td>
+                      ✅ env 可见,代码 process.env 可读
+                    </td>
+                    <td>
+                      NODE_ENV=production
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- ============================================================
+     第六章 ONBUILD 指令
+     ============================================================ -->
+          <section class="section" id="s6" aria-labelledby="s6-title">
+            <span class="section-num">
+              Chapter 06
+            </span>
+            <h2 id="s6-title">
+              ONBUILD 指令(子镜像钩子)
+            </h2>
+            <p>
+              ONBUILD 指令只对
+              <strong>
+                当前镜像的子镜像
+              </strong>
+              进行构建时有效。
+            </p>
+            <h3>
+              6.1 父镜像 Dockerfile
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ centos:7
+                  <span class="tok-key">
+ENV
+                  </span>
+ WORKPATH /usr/local
+                  <span class="tok-key">
+WORKDIR
+                  </span>
+ $WORKPATH
+                  <span class="tok-key">
+ONBUILD
+                  </span>
+                  <span class="tok-key">
+RUN
+                  </span>
+ yum
+                  <span class="tok-flag">
+-y
+                  </span>
+ install wget
+                  <span class="tok-key">
+CMD
+                  </span>
+ /bin/bash
+                </code>
+              </pre>
+            </div>
+            <h3>
+              6.2 子镜像 Dockerfile
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ parent:1.0
+                </code>
+              </pre>
+            </div>
+            <h3>
+              6.3 效果
+            </h3>
+            <ul>
+              <li>
+                当前镜像及其子镜像的工作目录都是
+                <code>
+/usr/local
+                </code>
+              </li>
+              <li>
+                子镜像在进行
+                <code>
+docker build
+                </code>
+                时
+                <strong>
+                  会自动运行
+                </strong>
+                ONBUILD 后面的
+                <code>
+RUN yum -y install wget
+                </code>
+              </li>
+              <li>
+                构建并运行子镜像后,就可以使用
+                <code>
+wget
+                </code>
+                指令了
+              </li>
+            </ul>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  典型应用场景:父镜像是一个
+                  <strong>
+                    基础镜像
+                  </strong>
+                  (如预装好 Python 的镜像),子镜像在 FROM 这个父镜像时,自动触发 ONBUILD 后面的指令(如自动 pip install requirements.txt),
+                  <strong>
+                    简化子镜像的 Dockerfile 编写
+                  </strong>
+                  。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第七章 构建新镜像 5 种方式
+     ============================================================ -->
+          <section class="section" id="s7" aria-labelledby="s7-title">
+            <span class="section-num">
+              Chapter 07
+            </span>
+            <h2 id="s7-title">
+              构建新镜像的 5 种方式
+            </h2>
+            <ol>
+              <li>
+                <strong>
+                  docker build
+                </strong>
+                (基于 Dockerfile 构建,
+                <strong>
+                  生产首选
+                </strong>
+                )
+              </li>
+              <li>
+                <strong>
+                  docker commit
+                </strong>
+                (将容器修改保存为新镜像,适合调试)
+              </li>
+              <li>
+                <strong>
+                  docker import
+                </strong>
+                (从 tar 包导入为镜像)
+              </li>
+              <li>
+                <strong>
+                  docker compose
+                </strong>
+                (通过 compose.yml 批量构建)
+              </li>
+              <li>
+                <strong>
+                  Docker Hub 中完成 Automated Builds
+                </strong>
+                (GitHub 集成自动构建)
+              </li>
+            </ol>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  注意:
+                  <code>
+docker load
+                  </code>
+                  <strong>
+                    并没有
+                  </strong>
+                  构建出新镜像,其与原镜像是
+                  <strong>
+                    同一个镜像
+                  </strong>
+                  (只是从 tar 文件加载回本地)。
+                </p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      方式
+                    </th>
+                    <th>
+                      命令示例
+                    </th>
+                    <th>
+                      是否产生新 ImageID
+                    </th>
+                    <th>
+                      适用场景
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      build
+                    </td>
+                    <td>
+                      <code>
+docker build -t myapp:1.0 .
+                      </code>
+                    </td>
+                    <td>
+                      是(产生新 ID)
+                    </td>
+                    <td>
+                      生产首选,可复现
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      commit
+                    </td>
+                    <td>
+                      <code>
+docker commit mytom tomcat10:own
+                      </code>
+                    </td>
+                    <td>
+                      是(产生新 ID)
+                    </td>
+                    <td>
+                      调试、临时修改
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      import
+                    </td>
+                    <td>
+                      <code>
+docker import myimage.tar myimg:1.0
+                      </code>
+                    </td>
+                    <td>
+                      是(产生新 ID)
+                    </td>
+                    <td>
+                      从 tar 包恢复
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      compose
+                    </td>
+                    <td>
+                      <code>
+docker compose up --build
+                      </code>
+                    </td>
+                    <td>
+                      是(产生新 ID)
+                    </td>
+                    <td>
+                      多服务编排
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      load
+                    </td>
+                    <td>
+                      <code>
+docker load -i myimage.tar
+                      </code>
+                    </td>
+                    <td>
+                      <strong>
+                        否
+                      </strong>
+                      (ImageID 不变)
+                    </td>
+                    <td>
+                      镜像迁移
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- ============================================================
+     第八章 Spring Boot 部署实战
+     ============================================================ -->
+          <section class="section" id="s8" aria-labelledby="s8-title">
+            <span class="section-num">
+              Chapter 08
+            </span>
+            <h2 id="s8-title">
+              Spring Boot 项目部署到 Docker 实战
+            </h2>
+            <h3>
+              8.1 准备应用
+            </h3>
+            <p>
+              新建一个名称为
+              <code>
+hello-docker
+              </code>
+              的简单 SpringBoot 项目。
+            </p>
+            <p>
+              <strong>
+                POM 文件
+              </strong>
+              (Java 17 + Spring Boot Web):
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  xml
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+<?xml version=
+                  <span class="tok-str">
+"1.0"
+                  </span>
+ encoding=
+                  <span class="tok-str">
+"UTF-8"
+                  </span>
+?>
+<project xmlns=
+                  <span class="tok-str">
+"http://maven.apache.org/POM/4.0.0"
+                  </span>
+ ...>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>4.0.6</version>
+  </parent>
+  <groupId>com.ali</groupId>
+  <artifactId>hello-docker</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <properties>
+    <java.version>17</java.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+  </dependencies>
+</project>
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                application.yml
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  yaml
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+logging:
+                  </span>
+                  <span class="tok-key">
+pattern:
+                  </span>
+                  <span class="tok-key">
+console:
+                  </span>
+ level-%-5level - %msg%n
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                Controller
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  java
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+package
+                  </span>
+ com.ali.hellodocker.controller;
+                  <span class="tok-key">
+import
+                  </span>
+ org.springframework.web.bind.annotation.GetMapping;
+                  <span class="tok-key">
+import
+                  </span>
+ org.springframework.web.bind.annotation.RestController;
+                  <span class="tok-key">
+@RestController
+                  </span>
+                  <span class="tok-key">
+public class
+                  </span>
+                  <span class="tok-key">
+SomeController
+                  </span>
+ {
+                  <span class="tok-key">
+@GetMapping
+                  </span>
+(
+                  <span class="tok-str">
+"/hello"
+                  </span>
+)
+                  <span class="tok-key">
+public
+                  </span>
+ String
+                  <span class="tok-cmd">
+hello
+                  </span>
+() {
+        System.out.println(
+                  <span class="tok-str">
+"================hello========================"
+                  </span>
+);
+                  <span class="tok-key">
+return
+                  </span>
+                  <span class="tok-str">
+"Hello Docker!"
+                  </span>
+;
+    }
+}
+                </code>
+              </pre>
+            </div>
+            <p>
+              然后
+              <code>
+mvn package
+              </code>
+              打成 jar 包。
+            </p>
+            <h3>
+              8.2 准备发布
+            </h3>
+            <p>
+              在宿主机上创建一个专门的目录,用来存放 jar 包和 Dockerfile 等内容:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+mkdir
+                  </span>
+ /root/hello-docker
+                </code>
+              </pre>
+            </div>
+            <p>
+              然后将 jar 包上传到这个目录。
+            </p>
+            <h3>
+              8.3 创建 Dockerfile
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/openjdk:17
+                  <span class="tok-key">
+MAINTAINER
+                  </span>
+ zhangsan zs@163.com
+                  <span class="tok-key">
+LABEL
+                  </span>
+ version=
+                  <span class="tok-str">
+"1.0"
+                  </span>
+ description=
+                  <span class="tok-str">
+"my own app"
+                  </span>
+                  <span class="tok-key">
+COPY
+                  </span>
+ hello-docker-0.0.1-SNAPSHOT.jar hd.jar
+                  <span class="tok-key">
+ENTRYPOINT
+                  </span>
+ [
+                  <span class="tok-str">
+"java"
+                  </span>
+,
+                  <span class="tok-str">
+"-jar"
+                  </span>
+,
+                  <span class="tok-str">
+"hd.jar"
+                  </span>
+]
+                  <span class="tok-key">
+EXPOSE
+                  </span>
+ 9000
+                </code>
+              </pre>
+            </div>
+            <h3>
+              8.4 构建并运行
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker build
+                  </span>
+                  <span class="tok-flag">
+-t
+                  </span>
+ hello-docker:1.0 .
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myhd
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 9000:8080 hello-docker:1.0
+                </code>
+              </pre>
+            </div>
+            <p>
+              这时就可以通过
+              <code>
+http://IP:9000/hello
+              </code>
+              访问了,看到 "Hello Docker!"。
+            </p>
+            <h3>
+              8.5 查看日志
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker logs
+                  </span>
+                  <span class="tok-flag">
+-f
+                  </span>
+ myhd
+                </code>
+              </pre>
+            </div>
+            <p>
+              会看到 Spring Boot 启动日志,以及
+              <code>
+================hello========================
+              </code>
+              输出。
+            </p>
+          </section>
+          <!-- ============================================================
+     FAQ
+     ============================================================ -->
+          <section class="section" id="faq" aria-labelledby="faq-title">
+            <span class="section-num">
+              FAQ
+            </span>
+            <h2 id="faq-title">
+              常见问题
+            </h2>
+            <div class="faq">
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Dockerfile 是什么?
+                </h3>
+                <p class="faq-a">
+                  Dockerfile 是构建 Docker 镜像的脚本文件,由一系列指令构成。通过 docker build 命令构建镜像时,Dockerfile 中的指令由上到下依次执行,每条指令都会构建出一个镜像(就是镜像的分层)。因此指令越多,层次就越多,创建的镜像就越多,效率就越低。所以在定义 Dockerfile 时,能在一个指令完成的动作就不要分为两条。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  CMD 和 ENTRYPOINT 有什么区别?
+                </h3>
+                <p class="faq-a">
+                  CMD 指定的是容器启动时
+                  <strong>
+                    默认
+                  </strong>
+                  的命令,如果 docker run 时指定了其他命令,Dockerfile 中的 CMD 指定的命令时不会执行;ENTRYPOINT 指定的是容器启动时
+                  <strong>
+                    一定会执行
+                  </strong>
+                  的命令,即使在 docker run 中指定了其他命令,ENTRYPOINT 也会执行(用 array 形式时,后面的内容会被作为 arg 拼接到 ENTRYPOINT 后面)。结论:无论 CMD 还是 ENTRYPOINT,使用 ["EXECUTABLE"] array 形式的通用性会更强。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  ADD 和 COPY 指令有什么区别?
+                </h3>
+                <p class="faq-a">
+                  ADD 和 COPY 功能相似,主要区别:1) ADD 的 src 可以是 URL(相当于 wget 下载),COPY 不行;2) ADD 的 src 如果是压缩包(如 .tar.gz),复制到容器后会
+                  <strong>
+                    自动解压
+                  </strong>
+                  ,COPY 不会自动解压;3) COPY 行为更可控,生产环境推荐优先用 COPY,仅在需要下载远程资源或自动解压时才用 ADD。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  什么是 scratch 镜像?
+                </h3>
+                <p class="faq-a">
+                  scratch 镜像是一个空镜像,是所有镜像的 Base Image。scratch 镜像只能在 Dockerfile 中被继承(FROM scratch),不能 pull 拉取,不能 run,没有 tag,并且它不会生成镜像中的文件系统层。scratch 是一个保留字,用户不能作为自己镜像的名称。常用于构建极小镜像(如 Go 编译后的二进制文件)。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  ARG 和 ENV 有什么区别?
+                </h3>
+                <p class="faq-a">
+                  ARG 用于定义构建时变量,只在 docker build 阶段有效,容器运行时不可见;ENV 用于定义环境变量,容器运行时仍可通过 env 命令或代码中 process.env.X 访问。生产实践:ARG 用于构建参数(如 --build-arg VERSION=1.0),ENV 用于运行时配置(如 NODE_ENV=production)。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  构建新镜像的 5 种方式?
+                </h3>
+                <p class="faq-a">
+                  1) docker build(基于 Dockerfile 构建,生产首选);2) docker commit(将容器修改保存为新镜像,适合调试);3) docker import(从 tar 包导入为镜像);4) docker compose(通过 compose.yml 批量构建);5) Docker Hub 中完成 Automated Builds(GitHub 集成自动构建)。注意 docker load
+                  <strong>
+                    并没有
+                  </strong>
+                  构建出新镜像,其与原镜像是同一个镜像。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  ONBUILD 指令有什么特殊用途?
+                </h3>
+                <p class="faq-a">
+                  ONBUILD 指令只对当前镜像的子镜像进行构建时有效。典型应用场景:父镜像是一个基础镜像(如预装好 Python 的镜像),子镜像在 FROM 这个父镜像时,自动触发 ONBUILD 后面的指令(如自动 pip install requirements.txt),简化子镜像的 Dockerfile 编写。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     参考资源
+     ============================================================ -->
+          <section class="section" id="refs" aria-labelledby="refs-title">
+            <span class="section-num">
+              References
+            </span>
+            <h2 id="refs-title">
+              参考资源
+            </h2>
+            <ul>
+              <li>
+                <a href="https://docs.docker.com/engine/reference/builder/" rel="external noopener" target="_blank">
+                  Dockerfile 参考(官方)
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/develop/develop-images/dockerfile_best-practices/" rel="external noopener" target="_blank">
+                  Dockerfile 最佳实践
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/reference/run/#entrypoint-default-command-to-execute-at-runtime" rel="external noopener" target="_blank">
+                  ENTRYPOINT 详解
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/reference/builder/#cmd" rel="external noopener" target="_blank">
+                  CMD 详解
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/reference/builder/#add" rel="external noopener" target="_blank">
+                  ADD vs COPY 详解
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/reference/builder/#onbuild" rel="external noopener" target="_blank">
+                  ONBUILD 指令
+                </a>
+              </li>
+              <li>
+                <a href="https://spring.io/guides/gs/spring-boot-docker/" rel="external noopener" target="_blank">
+                  Spring Boot Docker 部署指南
+                </a>
+              </li>
+            </ul>
+          </section>
+        </article>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本文
+        </h3>
+        <p class="footer-meta">
+          本文系统讲解 Dockerfile 入门知识,涵盖 15+ 核心指令、scratch 镜像与 HelloWorld、CMD vs ENTRYPOINT 核心区别、ADD vs COPY、ARG/ONBUILD/VOLUME 进阶用法、构建新镜像的 5 种方式,以及 Spring Boot 项目完整部署到 Docker 的全流程。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            适用人群
+          </strong>
+          :Docker 初学者、后端开发、容器化技术入门者、Spring Boot 工程师
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · 内容遵循 CC BY 4.0 协议 · 文中命令与代码可自由使用
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function() {
+  const progress = document.getElementById('progress');
+  if (!progress) return;
+  const update = () => {
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const height = h.scrollHeight - h.clientHeight;
+    const pct = height > 0 ? (scrolled / height) * 100 : 0;
+    progress.style.width = pct + '%';
+    progress.setAttribute('aria-valuenow', Math.round(pct));
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+(function() {
+  const btn = document.getElementById('backTop');
+  if (!btn) return;
+  const toggle = () => {
+    if (window.scrollY > 400) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', toggle, { passive: true });
+  btn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  toggle();
+})();
+
+(function() {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const stored = localStorage.getItem('theme-dockerfile');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (stored === 'dark' || (!stored && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  btn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme-dockerfile', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme-dockerfile', 'dark');
+    }
+  });
+})();
+
+(function() {
+  document.querySelectorAll('.code-copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      if (!pre) return;
+      const text = pre.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        const old = btn.innerText;
+        btn.innerText = '已复制';
+        btn.classList.add('success');
+        setTimeout(() => { btn.innerText = old; btn.classList.remove('success'); }, 1500);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); btn.innerText = '已复制'; setTimeout(() => btn.innerText = '复制', 1500); } catch (err) { btn.innerText = '失败'; }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      }
+    });
+  });
+})();
+    </script>
+  </body>
+</html>

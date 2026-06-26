@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Remotion 场景:CI/CD 自动化流水线 | Remotion 知识库</title>
+<meta name="description" content="详解使用 GitHub Actions / GitLab CI / Jenkins 自动化构建、测试、部署 Remotion 项目。覆盖 SSH 部署、Docker 镜像、Lambda 部署、存储分发等完整工作流。">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Remotion 场景:CI/CD 自动化流水线","description":"GitHub Actions + Docker + Lambda 完整工作流。","inLanguage":"zh-CN"}</script>
+</head><body>
+<header class="site-header"><nav class="nav-wrap">
+<a href="index.html" class="brand"><span class="brand-mark">R</span><span>Remotion 知识库</span></a>
+<div class="nav-links"><a href="index.html">总目录</a><a href="S-07-captions-whisper.html">← 字幕</a></div>
+</nav></header>
+<main class="container">
+<nav class="breadcrumb"><a href="index.html">首页</a> / <a href="index.html#scene">场景层</a> / CI/CD 流水线</nav>
+<h1>CI/CD 自动化流水线</h1>
+<p class="hero-sub">GitHub Actions + Docker + Lambda 端到端自动化</p>
+<div class="alert alert-info"><span class="alert-icon">📚</span><div class="alert-body"><p>来源:GitHub Actions 官方文档 + Remotion 官方 Lambda 指南(2025-2026) + 社区实践。</p></div></div>
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>典型 CI/CD 流水线</h2>
+<div class="code-block"><div class="code-block-header">text</div><pre class="line-numbers"><code class="language-text">git push → GitHub Actions 触发
+  ├─ Checkout 代码
+  ├─ 装依赖 + 锁文件缓存
+  ├─ ESLint + TypeScript 类型检查
+  ├─ 单元测试 (vitest/jest)
+  ├─ Bundle 测试 (npx remotion compositions)
+  ├─ 部署到 S3 (serveUrl)
+  └─ 触发 Lambda 渲染 (webhook)</code></pre></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>完整 GitHub Actions 配置</h2>
+<div class="code-block"><div class="code-block-header">yaml</div><pre class="line-numbers"><code class="language-yaml">name: Remotion CI/CD
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint && pnpm typecheck
+      - run: pnpm test
+      - run: npx remotion compositions
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: npx remotion deploy --entry=src/index.ts
+        env:
+          REMOTION_AWS_REGION: ${{ secrets.AWS_REGION }}
+          REMOTION_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
+          REMOTION_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET }}</code></pre></div>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>Lambda 自动渲染触发</h2>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">// API 路由 - 用户提交数据时触发渲染
+import { renderMediaOnLambda } from '@remotion/lambda';
+
+app.post('/render', async (req, res) =&gt; {
+  const { id, data } = req.body;
+  const { url } = await renderMediaOnLambda({
+    composition: 'MyVideo',
+    serveUrl: process.env.SERVE_URL!,
+    functionName: 'remotion-render',
+    region: 'us-east-1',
+    inputProps: data,
+    webhook: { url: `${process.env.API}/webhook/${id}`, secret: 'my-secret' },
+  });
+  await db.update(id, { status: 'rendering', renderId: url });
+  res.json({ ok: true });
+});</code></pre></div>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>Webhook + 钉钉/飞书通知</h2>
+<p>渲染完成后通过 Webhook 通知业务系统 + 群机器人:</p>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">app.post('/webhook/:id', async (req, res) =&gt; {
+  const { type, renders } = req.body;
+  await db.update(req.params.id, { status: type });
+  await fetch(process.env.DINGTING_WEBHOOK!, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      msgtype: 'markdown',
+      markdown: { title: '视频渲染', text: `任务 ${req.params.id} ${type} → ${renders[0].output}` },
+    }),
+  });
+  res.json({ ok: true });
+});</code></pre></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>Docker 化部署</h2>
+<div class="code-block"><div class="code-block-header">dockerfile</div><pre class="line-numbers"><code class="language-dockerfile">FROM node:20-alpine
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+RUN corepack enable && pnpm i --prod --frozen-lockfile
+COPY . .
+RUN apk add --no-cache chromium ffmpeg
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+EXPOSE 3000
+CMD ["npx", "remotion", "studio", "--host", "0.0.0.0"]</code></pre></div>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>GitLab CI 完整示例</h2>
+<div class="code-block"><div class="code-block-header">yaml</div><pre class="line-numbers"><code class="language-yaml">stages: [test, build, deploy]
+test:
+  image: node:20
+  script: pnpm i && pnpm lint && pnpm test
+build:
+  image: node:20
+  script: npx remotion deploy
+  artifacts: { paths: [bundle/] }
+deploy:
+  stage: deploy
+  script: npx remotion lambda render ...
+  only: [main]</code></pre></div>
+</section>
+
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>Docker 部署完整指南</h2>
+<div class="code-block"><div class="code-block-header">dockerfile</div><pre class="line-numbers"><code class="language-dockerfile">FROM node:22-bookworm-slim
+
+# Chrome 共享库依赖
+RUN apt-get update && apt-get install -y \
+  libnss3 libdbus-1-3 libatk1.0-0 libgbm-dev \
+  libasound2 libxrandr2 libxkbcommon-dev libxfixes3 \
+  libxcomposite1 libxdamage1 libatk-bridge2.0-0 libcups2 \
+  fontconfig \
+  && rm -rf /var/lib/apt/lists/*
+
+# 复制项目
+COPY package.json pnpm-lock.yaml* tsconfig.json* ./
+COPY src ./src
+COPY public ./public
+
+# 装依赖
+RUN corepack enable && pnpm i
+
+# 装 Chrome Headless Shell
+RUN npx remotion browser ensure
+
+# 业务脚本
+COPY render.mjs render.mjs
+CMD ["node", "render.mjs"]</code></pre></div>
+<div class="code-block"><div class="code-block-header">js</div><pre class="line-numbers"><code class="language-js">// render.mjs - 多进程 + CPU 控制
+await renderMedia({
+  composition, serveUrl, outputLocation: 'out/video.mp4',
+  chromiumOptions: { enableMultiProcessOnLinux: true },
+  concurrency: 8,
+});</code></pre></div>
+<p>关键配置:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>配置</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>enableMultiProcessOnLinux</code></td><td>4.0.137+ 默认开启,Linux 多进程渲染</td></tr>
+<tr><td><code>--cpus=8 --cpuset-cpus=0-7</code></td><td>限制容器使用 8 核</td></tr>
+<tr><td><code>--user 1000:1000</code></td><td>非 root 用户,文件属主正确</td></tr>
+<tr><td><code>fonts-noto-color-emoji</code></td><td>Docker 镜像内支持 emoji</td></tr>
+<tr><td>挂载输出目录</td><td><code>-v $(pwd)/output:/app/output</code></td></tr>
+</tbody>
+</table></div>
+</section>
+
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>Express Render Server 完整搭建</h2>
+<p>官方 <code>render-server</code> 模板提供开箱即用的 Express 渲染 API:</p>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">// server.ts
+import express from 'express';
+import { bundle } from '@remotion/bundler';
+import { renderMedia, selectComposition } from '@remotion/renderer';
+
+const app = express();
+app.use(express.json());
+
+app.post('/render', async (req, res) =&gt; {
+  const { compId, inputProps } = req.body;
+  const bundleLocation = await bundle({ entryPoint: './src/index.ts' });
+  const comp = await selectComposition({ serveUrl: bundleLocation, id: compId, inputProps });
+  const output = `out/${compId}-${Date.now()}.mp4`;
+  await renderMedia({ composition: comp, serveUrl: bundleLocation, codec: 'h264', outputLocation: output, inputProps });
+  res.json({ url: `/${output}` });
+});
+
+app.listen(3001, () =&gt; console.log('Render API on :3001'));</code></pre></div>
+</section>
+
+<nav class="page-nav">
+<a href="S-07-captions-whisper.html" class="prev">← 上一页:字幕与 Whisper</a>
+<a href="index.html" class="next">回到总目录 →</a>
+</nav>
+</main>
+<footer class="site-footer"><p>© 2026 AI 工具箱 · Remotion 知识库 · 内容基于官方文档整理</p></footer>
+<script src="scripts.js"></script>
+</body></html>

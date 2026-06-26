@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub 在线源码分析工具面板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+        }
+
+        .header {
+            padding: 14px 20px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .header input {
+            flex: 1 1 250px;
+            padding: 8px 12px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .header input:focus {
+            border-color: #58a6ff;
+        }
+
+        .header button {
+            padding: 8px 18px;
+            background: #238636;
+            border: 1px solid #2ea043;
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .header button:hover {
+            background: #2ea043;
+        }
+
+        .tabs {
+            display: flex;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            flex-shrink: 0;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #30363d #0d1117;
+        }
+
+        .tab {
+            padding: 10px 18px;
+            font-size: 13px;
+            color: #8b949e;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.2s, border-color 0.2s, background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tab:hover {
+            color: #c9d1d9;
+            background: #1c2128;
+        }
+
+        .tab.active {
+            color: #58a6ff;
+            border-bottom-color: #58a6ff;
+        }
+
+        .tab .external-link {
+            font-size: 12px;
+            color: #8b949e;
+            text-decoration: none;
+            opacity: 0.7;
+            margin-left: 2px;
+            transition: color 0.2s, opacity 0.2s;
+        }
+
+        .tab .external-link:hover {
+            color: #58a6ff;
+            opacity: 1;
+        }
+
+        .iframe-container {
+            flex: 1;
+            position: relative;
+            background: #0d1117;
+            overflow: hidden;
+        }
+
+        .iframe-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .iframe-wrapper.active {
+            display: block;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+            display: block;
+        }
+
+        .placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #8b949e;
+            font-size: 16px;
+            flex-direction: column;
+            gap: 12px;
+            background: #0d1117;
+        }
+
+        .placeholder .icon {
+            font-size: 40px;
+        }
+
+        .placeholder small {
+            font-size: 13px;
+            color: #6e7681;
+        }
+
+        @media (max-width: 650px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .tab {
+                padding: 10px 14px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <input type="text" id="repoUrl" placeholder="输入 GitHub 仓库地址，如 https://github.com/facebook/react" value="https://github.com/facebook/react">
+        <button id="analyzeBtn">🔍 开始分析</button>
+    </div>
+    <div class="tabs" id="tabBar"></div>
+    <div class="iframe-container" id="iframeContainer"></div>
+    <script>
+        (function () {
+            // ---------- 工具定义 ----------
+            // 根据提供的在线源码分析工具，构造直接呈现分析结果的 URL
+            const tools = [
+                // -------- AI 智能解读 --------
+                {
+                    name: '🤖 ExplainGitHub',
+                    category: 'AI',
+                    icon: '🧠',
+                    // 尝试构造带参数的链接，部分工具可能不支持，会回退到主页
+                    urlBuilder: ({ owner, repo }) => `https://explaingithub.com/analyze?repo=${owner}/${repo}`
+                },
+                {
+                    name: '📘 DeepWiki',
+                    category: 'AI',
+                    icon: '📖',
+                    // DeepWiki 通常支持直接路径: deepwiki.com/owner/repo
+                    urlBuilder: ({ owner, repo }) => `https://deepwiki.com/${owner}/${repo}`
+                },
+                {
+                    name: '✍️ Zread.AI',
+                    category: 'AI',
+                    icon: '📝',
+                    urlBuilder: ({ owner, repo }) => `https://zread.ai/analyze?url=https://github.com/${owner}/${repo}`
+                },
+                // -------- 架构可视化 --------
+                {
+                    name: '🗺️ GitDiagram',
+                    category: 'Viz',
+                    icon: '📊',
+                    urlBuilder: ({ owner, repo }) => `https://gitdiagram.com/${owner}/${repo}`
+                },
+                {
+                    name: '🧩 Eraser.io',
+                    category: 'Viz',
+                    icon: '🖼️',
+                    urlBuilder: ({ owner, repo }) => `https://www.eraser.io/git-diagrammer?repo=${owner}/${repo}`
+                },
+                // -------- 在线树状检索 --------
+                {
+                    name: '💻 GitHub1s',
+                    category: 'Code',
+                    icon: '📁',
+                    urlBuilder: ({ owner, repo }) => `https://github1s.com/${owner}/${repo}`
+                },
+                {
+                    name: '🌳 Git Tree',
+                    category: 'Code',
+                    icon: '🌲',
+                    urlBuilder: ({ owner, repo }) => `https://git-tree.vercel.app/${owner}/${repo}`
+                }
+            ];
+
+            // 当前状态
+            let currentOwner = 'facebook';
+            let currentRepo = 'react';
+            let activeTabIndex = 0;
+            let iframesInitialized = new Array(tools.length).fill(false);
+
+            // DOM
+            const repoUrlInput = document.getElementById('repoUrl');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const tabBar = document.getElementById('tabBar');
+            const iframeContainer = document.getElementById('iframeContainer');
+
+            // 解析 GitHub URL
+            function parseGitHubUrl(url) {
+                url = url.trim();
+                if (!url) return null;
+                try {
+                    if (url.startsWith('git@')) {
+                        const match = url.match(/git@github\.com:([^/]+)\/([^/]+?)(?:\.git)?$/);
+                        if (match) return { owner: match[1], repo: match[2] };
+                    }
+                    const httpMatch = url.match(/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:\/.*)?$/);
+                    if (httpMatch) return { owner: httpMatch[1], repo: httpMatch[2].replace(/\.git$/, '') };
+                    const simpleMatch = url.match(/^([^/]+)\/([^/]+)$/);
+                    if (simpleMatch) return { owner: simpleMatch[1], repo: simpleMatch[2].replace(/\.git$/, '') };
+                } catch (e) {
+                    return null;
+                }
+                return null;
+            }
+
+            // 构建 UI 结构
+            function buildUI() {
+                tabBar.innerHTML = '';
+                iframeContainer.innerHTML = '';
+
+                tools.forEach((tool, index) => {
+                    // 标签页
+                    const tab = document.createElement('div');
+                    tab.className = `tab${index === activeTabIndex ? ' active' : ''}`;
+                    tab.innerHTML = `${tool.icon} ${tool.name} <a class="external-link" href="#" title="在新窗口打开" data-index="${index}">↗</a>`;
+                    tab.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('external-link')) {
+                            e.stopPropagation();
+                            const url = tool.urlBuilder({ owner: currentOwner, repo: currentRepo });
+                            window.open(url, '_blank');
+                            return;
+                        }
+                        switchTab(index);
+                    });
+                    tabBar.appendChild(tab);
+
+                    // iframe 容器
+                    const wrapper = document.createElement('div');
+                    wrapper.className = `iframe-wrapper${index === activeTabIndex ? ' active' : ''}`;
+                    const iframe = document.createElement('iframe');
+                    iframe.id = `iframe-${index}`;
+                    iframe.allow = "fullscreen";
+                    iframe.title = tool.name;
+
+                    // 激活的标签立即加载，非激活显示占位
+                    if (index === activeTabIndex) {
+                        iframe.src = tool.urlBuilder({ owner: currentOwner, repo: currentRepo });
+                        iframesInitialized[index] = true;
+                    } else {
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'placeholder';
+                        placeholder.innerHTML = `<span class="icon">${tool.icon}</span><span>${tool.name}</span><small>点击标签加载分析</small>`;
+                        wrapper.appendChild(placeholder);
+                    }
+                    wrapper.appendChild(iframe);
+                    iframeContainer.appendChild(wrapper);
+                });
+            }
+
+            // 切换标签
+            function switchTab(index) {
+                if (index === activeTabIndex) return;
+                const tabs = document.querySelectorAll('.tab');
+                tabs.forEach(t => t.classList.remove('active'));
+                tabs[index].classList.add('active');
+
+                const wrappers = document.querySelectorAll('.iframe-wrapper');
+                wrappers.forEach((w, i) => w.classList.toggle('active', i === index));
+
+                const wrapper = wrappers[index];
+                const iframe = wrapper.querySelector('iframe');
+                // 如果未初始化，则加载并移除占位
+                if (!iframesInitialized[index] && currentOwner && currentRepo) {
+                    iframe.src = tools[index].urlBuilder({ owner: currentOwner, repo: currentRepo });
+                    iframesInitialized[index] = true;
+                    const placeholder = wrapper.querySelector('.placeholder');
+                    if (placeholder) placeholder.remove();
+                }
+                activeTabIndex = index;
+            }
+
+            // 分析按钮：重新设置所有标签指向新仓库
+            function analyze() {
+                const input = repoUrlInput.value;
+                const parsed = parseGitHubUrl(input);
+                if (!parsed) {
+                    alert('无法解析仓库地址，请输入类似 https://github.com/owner/repo 或 owner/repo');
+                    return;
+                }
+                currentOwner = parsed.owner;
+                currentRepo = parsed.repo;
+
+                // 重置所有 iframe 状态
+                iframesInitialized.fill(false);
+                const wrappers = document.querySelectorAll('.iframe-wrapper');
+                wrappers.forEach((wrapper, index) => {
+                    const iframe = wrapper.querySelector('iframe');
+                    // 清空 iframe 并移除旧占位
+                    iframe.src = '';
+                    const oldPlaceholder = wrapper.querySelector('.placeholder');
+                    if (oldPlaceholder) oldPlaceholder.remove();
+
+                    if (index === activeTabIndex) {
+                        // 激活标签直接加载新仓库分析页
+                        iframe.src = tools[index].urlBuilder({ owner: currentOwner, repo: currentRepo });
+                        iframesInitialized[index] = true;
+                    } else {
+                        // 非激活标签显示占位提示
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'placeholder';
+                        placeholder.innerHTML = `<span class="icon">${tools[index].icon}</span><span>${tools[index].name}</span><small>点击标签加载 ${currentOwner}/${currentRepo} 分析</small>`;
+                        wrapper.appendChild(placeholder);
+                    }
+                });
+            }
+
+            // 事件绑定
+            analyzeBtn.addEventListener('click', analyze);
+            repoUrlInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') analyze();
+            });
+
+            // 初始化
+            buildUI();
+            analyze(); // 加载默认仓库
+        })();
+    </script>
+</body>
+
+</html>

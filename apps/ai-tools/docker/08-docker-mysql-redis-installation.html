@@ -1,0 +1,2483 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="MySQL 与 Redis Docker 安装完全指南">
+    <meta name="format-detection" content="telephone=no">
+    <title>
+      Docker 安装 MySQL 与 Redis 完全指南:单机、主从复制、Sentinel、Cluster 全覆盖 | AI 工具箱
+    </title>
+    <meta name="description" content="MySQL 与 Redis 是最常用的两大数据库/缓存中间件。本文系统讲解 Docker 部署 MySQL 单机/主从复制、Redis 单机/一主两从/Sentinel 高可用/Cluster 分布式集群,所有命令可直接复用。">
+    <meta name="keywords" content="Docker MySQL, Docker Redis, MySQL 主从复制, Redis Sentinel, Redis Cluster, Redis 主从, 读写分离, 数据卷, docker pull, replication, 高可用, 分布式, 中间件, DevOps">
+    <meta name="author" content="AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="language" content="zh-CN">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/08-docker-mysql-redis-installation.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://tools.yy24365.com/ai-tools/docker/08-docker-mysql-redis-installation.html">
+    <link rel="alternate" hreflang="x-default" href="https://tools.yy24365.com/ai-tools/docker/08-docker-mysql-redis-installation.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker 安装 MySQL 与 Redis 完全指南">
+    <meta property="og:description" content="单机、主从复制、Sentinel、Cluster 完整实战,所有命令可直接复用。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/08-docker-mysql-redis-installation.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/docker-mysql-redis-og.png">
+    <meta property="og:image:alt" content="Docker MySQL Redis 集群架构图">
+    <meta property="article:published_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:modified_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:section" content="DevOps">
+    <meta property="article:tag" content="MySQL">
+    <meta property="article:tag" content="Redis">
+    <meta property="article:tag" content="数据库">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Docker 安装 MySQL 与 Redis 完全指南">
+    <meta name="twitter:description" content="单机、主从复制、Sentinel、Cluster 完整实战。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/docker-mysql-redis-og.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%232496ED' d='M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.083.185.185.185m-2.954-5.43h2.119a.186.186 0 00.186-.186V3.575a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m0 2.716h2.119a.187.187 0 00.186-.186V6.291a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.931 0h2.12a.186.186 0 00.184-.186V6.291a.185.185 0 00-.184-.185h-2.12a.185.185 0 00-.184.185v1.887c0 .102.082.185.184.186m-2.932 0h2.12a.185.185 0 00.184-.186V6.291a.185.185 0 00-.184-.185H5.166a.186.186 0 00-.185.185v1.887c0 .102.083.185.185.186m5.863 5.43h2.119a.186.186 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.082.185.185.185m-2.931 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.932 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.931 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m11.792 4.084h-2.119a.186.186 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.931 0h-2.119a.185.185 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.932 0h-2.118a.185.185 0 00-.184.185v1.886c0 .103.082.186.184.186h2.118a.186.186 0 00.185-.186v-1.886a.185.185 0 00-.185-.185m-2.931 0h-2.12a.185.185 0 00-.184.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.184-.186v-1.886a.185.185 0 00-.184-.185m-2.932 0H5.166a.186.186 0 00-.185.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.185-.186v-1.886a.186.186 0 00-.185-.185z'/%3E%3C/svg%3E">
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Docker 安装 MySQL 与 Redis 完全指南",
+  "description": "系统讲解 MySQL 单机/主从复制、Redis 单机/一主两从/Sentinel 高可用/Cluster 分布式集群的 Docker 部署。",
+  "author": {"@type": "Organization", "name": "AI 工具箱"},
+  "publisher": {"@type": "Organization", "name": "AI 工具箱"},
+  "datePublished": "2026-06-03T00:00:00+08:00",
+  "dateModified": "2026-06-03T00:00:00+08:00",
+  "inLanguage": "zh-CN",
+  "mainEntityOfPage": "https://tools.yy24365.com/ai-tools/docker/08-docker-mysql-redis-installation.html",
+  "keywords": "Docker MySQL, Docker Redis, MySQL 主从, Redis Sentinel, Redis Cluster",
+  "about": [
+    {"@type": "SoftwareApplication", "name": "MySQL", "applicationCategory": "DatabaseApplication"},
+    {"@type": "SoftwareApplication", "name": "Redis", "applicationCategory": "DatabaseApplication"}
+  ],
+  "proficiencyLevel": "Intermediate"
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "首页", "item": "https://tools.yy24365.com/"},
+    {"@type": "ListItem", "position": 2, "name": "AI 工具", "item": "https://tools.yy24365.com/ai-tools/"},
+    {"@type": "ListItem", "position": 3, "name": "Docker 学习", "item": "https://tools.yy24365.com/ai-tools/docker/"},
+    {"@type": "ListItem", "position": 4, "name": "MySQL/Redis 指南", "item": "https://tools.yy24365.com/ai-tools/docker/08-docker-mysql-redis-installation.html"}
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "MySQL 5.7 vs 8.0 在 Docker 中有什么区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "MySQL 5.7:稳定,生态成熟,默认字符集 latin1(中文需手动改 utf8),密码策略简单;MySQL 8.0:性能更好,默认字符集 utf8mb4(完整 Unicode 支持),密码策略更严格(caching_sha2_password),窗口函数、CTE、JSON 增强。新项目推荐 8.0,旧系统兼容 5.7。"}
+    },
+    {
+      "@type": "Question",
+      "name": "MySQL 容器为什么必须挂载数据卷?",
+      "acceptedAnswer": {"@type": "Answer", "text": "容器默认使用联合文件系统,数据存储在容器可写层,容器删除时数据全部丢失。生产环境必须挂载 3 个数据卷:1) 数据目录 /var/lib/mysql;2) 日志目录 /var/log/mysql;3) 配置目录 /etc/mysql/conf.d。这样容器重建时数据可恢复,符合生产数据持久化要求。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Redis 主从复制、Sentinel、Cluster 有什么区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "主从复制:读写分离,master 写、slave 读,但 master 故障需手动切换;Sentinel:在主从基础上加 3 个哨兵节点,自动监控并选举新 master,实现高可用(HA);Cluster:真正的分布式,数据分片(16384 槽)分布在多个 master,水平扩展能力强,适合海量数据。三者层级递进:主从→Sentinel→Cluster。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Redis 配置中的 daemonize no 是什么意思?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Redis 默认 daemonize yes(后台守护进程),但 Docker 容器本身就是后台运行的,Redis 不能再 daemonize,否则进程会立刻 fork 退出,导致容器停止。所以 Docker 部署 Redis 必须设置 daemonize no。同理 MySQL 也不能用 mysqld_safe 守护。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Sentinel 至少需要几个节点?",
+      "acceptedAnswer": {"@type": "Answer", "text": "至少 3 个。Sentinel 集群通过 Raft 多数派决策,3 节点可容忍 1 节点故障,5 节点可容忍 2 节点故障。生产环境强烈建议奇数节点(1/3/5/7),避免偶数造成脑裂。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Redis Cluster 至少需要几个节点?",
+      "acceptedAnswer": {"@type": "Answer", "text": "至少 6 个(3 master + 3 slave)。Redis Cluster 通过虚拟槽分区(0-16383)分配数据,每个 master 负责一部分槽。当某个 master 故障时,其 slave 自动提升为新 master,继续提供服务。生产推荐 6 节点起步,数据量大时横向扩展。"}
+    },
+    {
+      "@type": "Question",
+      "name": "为什么 Redis Cluster 启动要加 --network host?",
+      "acceptedAnswer": {"@type": "Answer", "text": "因为 Cluster 节点之间需要通过 IP+端口互相通信(bus port 端口号+10000),使用 bridge 网络时容器 IP 难被其他容器/主机直接访问。使用 --network host 让容器共享宿主机网络命名空间,容器端口直接绑定宿主机端口,简化集群节点互联。新版 Docker 19.03+ 推荐使用自定义 macvlan 网络代替 host 模式。"}
+    }
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "搭建 MySQL 主从复制集群",
+  "description": "使用 Docker 部署 1 主 1 从 MySQL 复制集群",
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "启动 master 容器", "text": "docker run --name mysql_master -e MYSQL_ROOT_PASSWORD=111 -v /root/mysql_master/conf:/etc/mysql/conf.d -dp 3316:3306 mysql:5.7"},
+    {"@type": "HowToStep", "position": 2, "name": "配置 master my.cnf", "text": "在 master conf 目录新建 my.cnf,设置 server_id=01, 开启 binlog"},
+    {"@type": "HowToStep", "position": 3, "name": "重启 master", "text": "docker restart mysql_master"},
+    {"@type": "HowToStep", "position": 4, "name": "创建同步用户", "text": "create user 'slave'@'%' identified by '123456';grant replication slave,replication client on *.* to 'slave'@'%'"},
+    {"@type": "HowToStep", "position": 5, "name": "启动 slave 容器", "text": "docker run --name mysql_slave -e MYSQL_ROOT_PASSWORD=111 -v /root/mysql_slave/conf:/etc/mysql/conf.d -dp 3326:3306 mysql:5.7,设置 server_id=02"},
+    {"@type": "HowToStep", "position": 6, "name": "配置主从", "text": "在 slave 中执行 change master to master_host, master_user, master_password, master_log_file, master_log_pos 等"},
+    {"@type": "HowToStep", "position": 7, "name": "启动复制", "text": "在 slave 中执行 start slave;验证主从复制成功"}
+  ]
+}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress" role="progressbar" aria-label="阅读进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand" aria-label="AI 工具箱首页">
+          <span class="brand-mark">
+            AI
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main" role="main">
+      <section class="hero" aria-labelledby="article-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 学习
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              MySQL/Redis 指南
+            </span>
+          </nav>
+          <h1 id="article-title">
+            Docker 安装 MySQL 与 Redis 完全指南
+          </h1>
+          <p class="hero-sub">
+            从单机版到主从复制、Sentinel 高可用、Cluster 分布式集群,系统讲解两大核心中间件的 Docker 部署方案。所有命令均经过生产环境验证,可直接复用。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              ★★★ 中级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                阅读时长
+              </strong>
+              约 30 分钟
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                中间件
+              </strong>
+              MySQL 5.7 + Redis 7.0
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                最后更新
+              </strong>
+              2026-06-03
+            </div>
+          </div>
+          <div class="hero-tags" aria-label="标签">
+            <span class="tag">
+              MySQL
+            </span>
+            <span class="tag">
+              Redis
+            </span>
+            <span class="tag">
+              主从复制
+            </span>
+            <span class="tag">
+              Sentinel
+            </span>
+            <span class="tag">
+              Cluster
+            </span>
+            <span class="tag">
+              数据卷
+            </span>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <article>
+          <section class="section" aria-labelledby="intro">
+            <h2 id="intro">
+              概述
+            </h2>
+            <p>
+              MySQL 和 Redis 是后端架构中
+              <strong>
+                最核心的两大中间件
+              </strong>
+              :MySQL 负责持久化存储,Redis 负责高性能缓存。本文以生产环境视角,从
+              <strong>
+                单机版 → 主从复制 → Sentinel 高可用 → Cluster 分布式
+              </strong>
+              逐层深入,所有命令均提供完整示例。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                数据持久化的重要性
+              </div>
+              <div class="concept-body">
+                <p>
+                  Docker 容器默认使用联合文件系统,数据存储在容器可写层。
+                  <strong>
+                    容器删除时,数据全部丢失
+                  </strong>
+                  。生产环境必须挂载数据卷(volume),将 MySQL 的数据/日志/配置、Redis 的数据和配置持久化到宿主机。
+                </p>
+              </div>
+            </div>
+          </section>
+          <nav class="toc" id="toc" aria-labelledby="toc-title">
+            <h2 class="toc-title" id="toc-title">
+              本文目录
+            </h2>
+            <ul class="toc-grid">
+              <li>
+                <a href="#s1">
+                  <span class="toc-num">
+                    1
+                  </span>
+                  MySQL 单机版
+                </a>
+              </li>
+              <li>
+                <a href="#s2">
+                  <span class="toc-num">
+                    2
+                  </span>
+                  MySQL 生产安装
+                </a>
+              </li>
+              <li>
+                <a href="#s3">
+                  <span class="toc-num">
+                    3
+                  </span>
+                  MySQL 主从复制
+                </a>
+              </li>
+              <li>
+                <a href="#s4">
+                  <span class="toc-num">
+                    4
+                  </span>
+                  Redis 单机版
+                </a>
+              </li>
+              <li>
+                <a href="#s5">
+                  <span class="toc-num">
+                    5
+                  </span>
+                  Redis 一主两从
+                </a>
+              </li>
+              <li>
+                <a href="#s6">
+                  <span class="toc-num">
+                    6
+                  </span>
+                  Redis Sentinel
+                </a>
+              </li>
+              <li>
+                <a href="#s7">
+                  <span class="toc-num">
+                    7
+                  </span>
+                  Redis Cluster
+                </a>
+              </li>
+              <li>
+                <a href="#faq">
+                  <span class="toc-num">
+                    ?
+                  </span>
+                  常见问题
+                </a>
+              </li>
+              <li>
+                <a href="#refs">
+                  <span class="toc-num">
+                    i
+                  </span>
+                  参考资源
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- ============================================================
+     第一章 MySQL 单机版
+     ============================================================ -->
+          <section class="section" id="s1" aria-labelledby="s1-title">
+            <span class="section-num">
+              Chapter 01
+            </span>
+            <h2 id="s1-title">
+              MySQL 单机版(基础安装)
+            </h2>
+            <h3>
+              1.1 拉取镜像
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker pull
+                  </span>
+ mysql:5.7
+                </code>
+              </pre>
+            </div>
+            <h3>
+              1.2 启动容器
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ mysql
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 3306:3306
+                  <span class="tok-flag">
+-e
+                  </span>
+ MYSQL_ROOT_PASSWORD=111 mysql:5.7
+                </code>
+              </pre>
+            </div>
+            <p>
+              <code>
+MYSQL_ROOT_PASSWORD=111
+              </code>
+              指定 root 密码为 111。
+            </p>
+            <h3>
+              1.3 进入并连接 MySQL
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 交互进入容器
+                  </span>
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ mysql /bin/bash
+                  <span class="tok-com">
+# 容器内连接 MySQL
+                  </span>
+                  <span class="tok-cmd">
+mysql
+                  </span>
+                  <span class="tok-flag">
+-uroot
+                  </span>
+                  <span class="tok-flag">
+-p
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    基础安装存在两个问题
+                  </strong>
+                  :1)
+                  <strong>
+                    字符编码问题
+                  </strong>
+                  ——使用 Navicat 插入中文记录会报错(默认 latin1);2)
+                  <strong>
+                    数据安全问题
+                  </strong>
+                  ——容器删除则数据全部丢失(
+                  <code>
+/var/lib/mysql
+                  </code>
+                  随容器消失)。生产环境必须改进。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第二章 MySQL 生产安装
+     ============================================================ -->
+          <section class="section" id="s2" aria-labelledby="s2-title">
+            <span class="section-num">
+              Chapter 02
+            </span>
+            <h2 id="s2-title">
+              MySQL 生产安装(数据卷持久化)
+            </h2>
+            <p>
+              为了保证数据安全,生产环境启动时使用
+              <strong>
+                数据卷
+              </strong>
+              持久化数据。同时配置 UTF8 字符集解决中文乱码。
+            </p>
+            <h3>
+              2.1 启动容器(挂载 3 个数据卷)
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ mysql \
+                  <span class="tok-flag">
+-e
+                  </span>
+ MYSQL_ROOT_PASSWORD=111 \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/mysql/log:/var/log/mysql \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/mysql/data:/var/lib/mysql \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/mysql/conf:/etc/mysql/conf.d \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 3306:3306 mysql:5.7
+                </code>
+              </pre>
+            </div>
+            <h3>
+              2.2 创建 my.cnf(指定字符集)
+            </h3>
+            <p>
+              在宿主机
+              <code>
+/root/mysql/conf
+              </code>
+              中新建
+              <code>
+my.cnf
+              </code>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  ini
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+[client]
+                  </span>
+                  <span class="tok-key">
+default_character_set
+                  </span>
+=utf8
+                  <span class="tok-key">
+[mysql]
+                  </span>
+                  <span class="tok-key">
+default_character_set
+                  </span>
+=utf8
+                  <span class="tok-key">
+[mysqld]
+                  </span>
+                  <span class="tok-key">
+character_set_server
+                  </span>
+=utf8
+                </code>
+              </pre>
+            </div>
+            <h3>
+              2.3 重启并验证
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 配置修改后必须重启
+                  </span>
+                  <span class="tok-cmd">
+docker restart
+                  </span>
+ mysql
+                  <span class="tok-com">
+# 进入容器验证
+                  </span>
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ mysql /bin/bash
+                  <span class="tok-cmd">
+mysql
+                  </span>
+                  <span class="tok-flag">
+-uroot
+                  </span>
+                  <span class="tok-flag">
+-p
+                  </span>
+                  <span class="tok-com">
+-- 查看字符集
+                  </span>
+                  <span class="tok-cmd">
+show variables like
+                  </span>
+                  <span class="tok-str">
+'character_set_%'
+                  </span>
+;
+                </code>
+              </pre>
+            </div>
+            <h3>
+              2.4 数据卷说明
+            </h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      宿主机路径
+                    </th>
+                    <th>
+                      容器内路径
+                    </th>
+                    <th>
+                      作用
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <code>
+/root/mysql/log
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+/var/log/mysql
+                      </code>
+                    </td>
+                    <td>
+                      MySQL 错误日志
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+/root/mysql/data
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+/var/lib/mysql
+                      </code>
+                    </td>
+                    <td>
+                      数据库与表的数据文件(核心)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+/root/mysql/conf
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+/etc/mysql/conf.d
+                      </code>
+                    </td>
+                    <td>
+                      自定义 my.cnf 配置
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- ============================================================
+     第三章 MySQL 主从复制
+     ============================================================ -->
+          <section class="section" id="s3" aria-labelledby="s3-title">
+            <span class="section-num">
+              Chapter 03
+            </span>
+            <h2 id="s3-title">
+              MySQL 主从复制集群(读写分离)
+            </h2>
+            <p>
+              主从复制是 MySQL
+              <strong>
+                读写分离、高可用、容灾
+              </strong>
+              的基础:master 处理写操作,slave 同步数据并提供读操作。
+            </p>
+            <h3>
+              3.1 Master 安装与配置
+            </h3>
+            <p>
+              <strong>
+                启动 master 容器
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ mysql_master \
+                  <span class="tok-flag">
+-e
+                  </span>
+ MYSQL_ROOT_PASSWORD=111 \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/mysql_master/log:/var/log/mysql \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/mysql_master/data:/var/lib/mysql \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/mysql_master/conf:/etc/mysql/conf.d \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 3316:3306 mysql:5.7
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                master my.cnf
+              </strong>
+              (在
+              <code>
+/root/mysql_master/conf
+              </code>
+              下创建):
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  ini
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+[client]
+                  </span>
+                  <span class="tok-key">
+default_character_set
+                  </span>
+=utf8
+                  <span class="tok-key">
+[mysql]
+                  </span>
+                  <span class="tok-key">
+default_character_set
+                  </span>
+=utf8
+                  <span class="tok-key">
+[mysqld]
+                  </span>
+                  <span class="tok-key">
+character_set_server
+                  </span>
+=utf8
+                  <span class="tok-key">
+server_id
+                  </span>
+=01
+                  <span class="tok-key">
+binlog-ignore-db
+                  </span>
+=mysql
+                  <span class="tok-key">
+log-bin
+                  </span>
+=master-log-bin
+                  <span class="tok-key">
+binlog_cache_size
+                  </span>
+=1M
+                  <span class="tok-key">
+binlog_format
+                  </span>
+=mixed
+                  <span class="tok-key">
+expire_logs_days
+                  </span>
+=7
+                  <span class="tok-key">
+slave_skip_errors
+                  </span>
+=1062
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                重启 master
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker restart
+                  </span>
+ mysql_master
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                创建同步用户并授权
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  sql
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ mysql_master /bin/bash
+                  <span class="tok-cmd">
+mysql
+                  </span>
+                  <span class="tok-flag">
+-uroot
+                  </span>
+                  <span class="tok-flag">
+-p
+                  </span>
+                  <span class="tok-com">
+-- 'slave'@'%' 用户名 slave,% 代表任意 IP 都能连接
+                  </span>
+                  <span class="tok-key">
+create user
+                  </span>
+                  <span class="tok-str">
+'slave'
+                  </span>
+@
+                  <span class="tok-str">
+'%'
+                  </span>
+                  <span class="tok-key">
+identified by
+                  </span>
+                  <span class="tok-str">
+'123456'
+                  </span>
+;
+                  <span class="tok-com">
+-- 赋主从同步权限
+                  </span>
+                  <span class="tok-key">
+grant
+                  </span>
+ replication slave, replication client
+                  <span class="tok-key">
+on
+                  </span>
+ *.*
+                  <span class="tok-key">
+to
+                  </span>
+                  <span class="tok-str">
+'slave'
+                  </span>
+@
+                  <span class="tok-str">
+'%'
+                  </span>
+;
+                </code>
+              </pre>
+            </div>
+            <h3>
+              3.2 Slave 安装与配置
+            </h3>
+            <p>
+              <strong>
+                启动 slave 容器
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ mysql_slave \
+                  <span class="tok-flag">
+-e
+                  </span>
+ MYSQL_ROOT_PASSWORD=111 \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/mysql_slave/log:/var/log/mysql \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/mysql_slave/data:/var/lib/mysql \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/mysql_slave/conf:/etc/mysql/conf.d \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 3326:3306 mysql:5.7
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                slave my.cnf
+              </strong>
+              (注意
+              <code>
+server_id=02
+              </code>
+              必须与 master 不同):
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  ini
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+[client]
+                  </span>
+                  <span class="tok-key">
+default_character_set
+                  </span>
+=utf8
+                  <span class="tok-key">
+[mysql]
+                  </span>
+                  <span class="tok-key">
+default_character_set
+                  </span>
+=utf8
+                  <span class="tok-key">
+[mysqld]
+                  </span>
+                  <span class="tok-key">
+character_set_server
+                  </span>
+=utf8
+                  <span class="tok-key">
+server_id
+                  </span>
+=02
+                  <span class="tok-key">
+binlog-ignore-db
+                  </span>
+=mysql
+                  <span class="tok-key">
+log-bin
+                  </span>
+=slave-log-bin
+                  <span class="tok-key">
+binlog_cache_size
+                  </span>
+=1M
+                  <span class="tok-key">
+binlog_format
+                  </span>
+=mixed
+                  <span class="tok-key">
+expire_logs_days
+                  </span>
+=7
+                  <span class="tok-key">
+slave_skip_errors
+                  </span>
+=1062
+                  <span class="tok-key">
+relay_log
+                  </span>
+=relay-log-bin
+                  <span class="tok-key">
+log_slave_updates
+                  </span>
+=1
+                  <span class="tok-key">
+read_only
+                  </span>
+=1
+                </code>
+              </pre>
+            </div>
+            <h3>
+              3.3 配置主从复制
+            </h3>
+            <p>
+              <strong>
+                步骤 1
+              </strong>
+              :查看 master 状态
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  sql
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+show master status
+                  </span>
+;
+                </code>
+              </pre>
+            </div>
+            <p>
+              记下
+              <code>
+File
+              </code>
+              (如
+              <code>
+master-log-bin.000002
+              </code>
+              )和
+              <code>
+Position
+              </code>
+              (如
+              <code>
+154
+              </code>
+              )的值。
+            </p>
+            <p>
+              <strong>
+                步骤 2
+              </strong>
+              :在 slave 中执行
+              <code>
+change master to
+              </code>
+              指定 master
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  sql
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+change master to
+                  </span>
+
+  master_host=
+                  <span class="tok-str">
+'192.168.220.128'
+                  </span>
+,
+  master_user=
+                  <span class="tok-str">
+'slave'
+                  </span>
+,
+  master_password=
+                  <span class="tok-str">
+'123456'
+                  </span>
+,
+  master_port=
+                  <span class="tok-num">
+3316
+                  </span>
+,
+  master_log_file=
+                  <span class="tok-str">
+'master-log-bin.000002'
+                  </span>
+,
+  master_log_pos=
+                  <span class="tok-num">
+154
+                  </span>
+,
+  master_connect_retry=
+                  <span class="tok-num">
+30
+                  </span>
+,
+  master_retry_count=
+                  <span class="tok-num">
+3
+                  </span>
+;
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                步骤 3
+              </strong>
+              :启动 slave 数据同步
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  sql
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+start slave
+                  </span>
+;
+                </code>
+              </pre>
+            </div>
+            <p>
+              主从复制配置完成!master 中执行写操作,slave 即可同步读取。
+            </p>
+          </section>
+          <!-- ============================================================
+     第四章 Redis 单机版
+     ============================================================ -->
+          <section class="section" id="s4" aria-labelledby="s4-title">
+            <span class="section-num">
+              Chapter 04
+            </span>
+            <h2 id="s4-title">
+              Redis 单机版
+            </h2>
+            <h3>
+              4.1 拉取镜像
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker pull
+                  </span>
+ redis:7.0
+                </code>
+              </pre>
+            </div>
+            <h3>
+              4.2 准备 redis.conf
+            </h3>
+            <p>
+              复制一份
+              <code>
+redis.conf
+              </code>
+              到
+              <code>
+/root/redis
+              </code>
+              ,并修改以下
+              <strong>
+                四项关键配置
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  conf
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 解除 IP 绑定
+                  </span>
+                  <span class="tok-com">
+# bind 127.0.0.1 -::1
+                  </span>
+                  <span class="tok-com">
+# 关闭保护模式,否则只能本机访问
+                  </span>
+                  <span class="tok-key">
+protected-mode
+                  </span>
+ no
+                  <span class="tok-com">
+# 关闭守护模式(Docker 本身已后台运行,Redis 再 daemonize 会立刻 fork 退出)
+                  </span>
+                  <span class="tok-key">
+daemonize
+                  </span>
+ no
+                  <span class="tok-com">
+# 指定 RDB/AOF 持久化目录
+                  </span>
+                  <span class="tok-key">
+dir
+                  </span>
+ /data
+                </code>
+              </pre>
+            </div>
+            <h3>
+              4.3 启动容器
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myredis \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/redis.conf:/etc/redis/redis.conf \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/data:/data \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 6379:6379 \
+  redis:7.0 \
+  redis-server /etc/redis/redis.conf
+                </code>
+              </pre>
+            </div>
+            <p>
+              挂载两个数据卷:配置文件 + 数据目录。命令加载挂载点目录的 redis.conf。
+            </p>
+            <h3>
+              4.4 连接 Redis
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ myredis /bin/bash
+                  <span class="tok-cmd">
+redis-cli
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  Docker 容器本身就是后台运行的进程,Redis 如果再 daemonize(后台守护),会立即 fork 退出,导致容器停止。所以
+                  <strong>
+                    Docker 部署 Redis 必须 daemonize no
+                  </strong>
+                  。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第五章 Redis 一主两从
+     ============================================================ -->
+          <section class="section" id="s5" aria-labelledby="s5-title">
+            <span class="section-num">
+              Chapter 05
+            </span>
+            <h2 id="s5-title">
+              Redis 一主两从集群
+            </h2>
+            <p>
+              在 Redis 单机版基础上搭建
+              <strong>
+                一主两从
+              </strong>
+              集群:master 端口 6381,slave 端口 6382、6383。
+            </p>
+            <h3>
+              5.1 准备 3 份 redis.conf
+            </h3>
+            <p>
+              复制
+              <code>
+redis.conf
+              </code>
+              为
+              <code>
+redis1.conf
+              </code>
+              、
+              <code>
+redis2.conf
+              </code>
+              、
+              <code>
+redis3.conf
+              </code>
+              ,在文件末尾添加:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  conf
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# redis1.conf (master)
+                  </span>
+                  <span class="tok-key">
+slave-announce-ip
+                  </span>
+ 192.168.220.128
+                  <span class="tok-key">
+slave-announce-port
+                  </span>
+ 6381
+                  <span class="tok-com">
+# redis2.conf (slave)
+                  </span>
+                  <span class="tok-key">
+slave-announce-ip
+                  </span>
+ 192.168.220.128
+                  <span class="tok-key">
+slave-announce-port
+                  </span>
+ 6382
+                  <span class="tok-com">
+# redis3.conf (slave)
+                  </span>
+                  <span class="tok-key">
+slave-announce-ip
+                  </span>
+ 192.168.220.128
+                  <span class="tok-key">
+slave-announce-port
+                  </span>
+ 6383
+                </code>
+              </pre>
+            </div>
+            <h3>
+              5.2 启动 master
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myredis-1 \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/redis1.conf:/etc/redis/redis.conf \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/data/6381:/data \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 6381:6379 \
+  redis:7.0 \
+  redis-server /etc/redis/redis.conf
+                </code>
+              </pre>
+            </div>
+            <h3>
+              5.3 启动 2 个 slave
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myredis-2 \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/redis2.conf:/etc/redis/redis.conf \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/data/6382:/data \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 6382:6379 \
+  redis:7.0 \
+  redis-server /etc/redis/redis.conf
+                  <span class="tok-flag">
+--slaveof
+                  </span>
+ 192.168.220.128 6381
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myredis-3 \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/redis3.conf:/etc/redis/redis.conf \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/data/6383:/data \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 6383:6379 \
+  redis:7.0 \
+  redis-server /etc/redis/redis.conf
+                  <span class="tok-flag">
+--slaveof
+                  </span>
+ 192.168.220.128 6381
+                </code>
+              </pre>
+            </div>
+            <h3>
+              5.4 查看主从关系
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ myredis-1 redis-cli info replication
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ myredis-2 redis-cli info replication
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ myredis-3 redis-cli info replication
+                </code>
+              </pre>
+            </div>
+            <p>
+              主从集群搭建完成,但 master 故障时
+              <strong>
+                需要手动切换
+              </strong>
+              ——这正是 Sentinel 解决的问题。
+            </p>
+          </section>
+          <!-- ============================================================
+     第六章 Redis Sentinel
+     ============================================================ -->
+          <section class="section" id="s6" aria-labelledby="s6-title">
+            <span class="section-num">
+              Chapter 06
+            </span>
+            <h2 id="s6-title">
+              Redis Sentinel 高可用集群
+            </h2>
+            <p>
+              Sentinel(哨兵)在主从基础上加 3 个哨兵节点,
+              <strong>
+                自动监控
+              </strong>
+              master 状态并在故障时
+              <strong>
+                自动选举新 master
+              </strong>
+              ,实现高可用。
+            </p>
+            <h3>
+              6.1 准备 3 份 sentinel.conf
+            </h3>
+            <p>
+              复制
+              <code>
+sentinel.conf
+              </code>
+              为
+              <code>
+sentinel1.conf
+              </code>
+              、
+              <code>
+sentinel2.conf
+              </code>
+              、
+              <code>
+sentinel3.conf
+              </code>
+              ,每份修改
+              <strong>
+                两处
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  conf
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# sentinel1.conf
+                  </span>
+                  <span class="tok-com">
+# 指定要监视的 master 及 <quorum>
+                  </span>
+                  <span class="tok-key">
+sentinel monitor
+                  </span>
+ mymaster 192.168.220.128 6381 2
+                  <span class="tok-com">
+# 指定对外 ip 和端口号
+                  </span>
+                  <span class="tok-key">
+sentinel announce-ip
+                  </span>
+ 192.168.220.128
+                  <span class="tok-key">
+sentinel announce-port
+                  </span>
+ 26381
+                  <span class="tok-com">
+# sentinel2.conf(只改端口 26382)
+                  </span>
+                  <span class="tok-com">
+# sentinel3.conf(只改端口 26383)
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              6.2 启动 3 个 Sentinel
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ mysentinel-1 \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/sentinel1.conf:/etc/redis/sentinel.conf \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 26381:26379 \
+  redis:7.0 \
+  redis-sentinel /etc/redis/sentinel.conf
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ mysentinel-2 \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/sentinel2.conf:/etc/redis/sentinel.conf \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 26382:26379 \
+  redis:7.0 \
+  redis-sentinel /etc/redis/sentinel.conf
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ mysentinel-3 \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/sentinel3.conf:/etc/redis/sentinel.conf \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 26383:26379 \
+  redis:7.0 \
+  redis-sentinel /etc/redis/sentinel.conf
+                </code>
+              </pre>
+            </div>
+            <h3>
+              6.3 验证 Sentinel
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ mysentinel-1 redis-cli
+                  <span class="tok-flag">
+-h
+                  </span>
+ 192.168.220.128
+                  <span class="tok-flag">
+-p
+                  </span>
+ 26381 info sentinel
+                </code>
+              </pre>
+            </div>
+            <p>
+              高可用集群搭建成功。当 master 故障,Sentinel 通过 Raft 算法
+              <strong>
+                自动选举
+              </strong>
+              新 master(从 2 个 slave 中选),应用端无需修改。
+            </p>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  Sentinel 至少 3 个节点。quorum 设为 2,意味着至少 2 个 Sentinel 同意才认为 master 真正故障,避免误判导致不必要的切换。生产推荐 3 节点起步。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第七章 Redis Cluster
+     ============================================================ -->
+          <section class="section" id="s7" aria-labelledby="s7-title">
+            <span class="section-num">
+              Chapter 07
+            </span>
+            <h2 id="s7-title">
+              Redis Cluster 分布式系统
+            </h2>
+            <p>
+              Redis Cluster 是真正的
+              <strong>
+                分布式系统
+              </strong>
+              ,数据通过
+              <strong>
+                虚拟槽分区算法
+              </strong>
+              (16384 个槽)分布在多个 master 节点,实现
+              <strong>
+                水平扩展
+              </strong>
+              。每个 master 配备一个 slave,master 故障时自动故障转移。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                主从 vs Sentinel vs Cluster
+              </div>
+              <div class="concept-body">
+                <p>
+                  1)
+                  <strong>
+                    主从
+                  </strong>
+                  :读写分离,master 故障需手动切换;
+                  <br>
+                  2)
+                  <strong>
+                    Sentinel
+                  </strong>
+                  :在主从基础上加 3 个哨兵,自动监控并选举新 master,实现 HA;
+                  <br>
+                  3)
+                  <strong>
+                    Cluster
+                  </strong>
+                  :真正的分布式,数据分片(16384 槽)分布在多个 master,水平扩展能力强,适合海量数据。
+                  <br>
+                  三者层级递进:主从 → Sentinel → Cluster。
+                </p>
+              </div>
+            </div>
+            <h3>
+              7.1 准备 6 份 redis.conf
+            </h3>
+            <p>
+              创建
+              <code>
+/root/cluster
+              </code>
+              目录,复制 6 份
+              <code>
+redis.conf
+              </code>
+              (内容完全相同),打开两个 cluster 配置:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  conf
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 开启 cluster 功能
+                  </span>
+                  <span class="tok-key">
+cluster-enabled
+                  </span>
+ yes
+                  <span class="tok-com">
+# 指定需要的配置文件名称
+                  </span>
+                  <span class="tok-key">
+cluster-config-file
+                  </span>
+ nodes-6379.conf
+                </code>
+              </pre>
+            </div>
+            <h3>
+              7.2 启动 6 个节点
+            </h3>
+            <p>
+              使用
+              <code>
+--network host
+              </code>
+              让容器共享宿主机网络,简化集群节点互联。
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myredis-1
+                  <span class="tok-flag">
+--network
+                  </span>
+ host \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/cluster/redis1.conf:/etc/redis/redis.conf \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/cluster/data/6381:/data \
+                  <span class="tok-flag">
+-d
+                  </span>
+ redis:7.0 redis-server /etc/redis/redis.conf
+                  <span class="tok-flag">
+--port
+                  </span>
+ 6381
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myredis-2
+                  <span class="tok-flag">
+--network
+                  </span>
+ host \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/cluster/redis2.conf:/etc/redis/redis.conf \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/cluster/data/6382:/data \
+                  <span class="tok-flag">
+-d
+                  </span>
+ redis:7.0 redis-server /etc/redis/redis.conf
+                  <span class="tok-flag">
+--port
+                  </span>
+ 6382
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myredis-3
+                  <span class="tok-flag">
+--network
+                  </span>
+ host \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/cluster/redis3.conf:/etc/redis/redis.conf \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/cluster/data/6383:/data \
+                  <span class="tok-flag">
+-d
+                  </span>
+ redis:7.0 redis-server /etc/redis/redis.conf
+                  <span class="tok-flag">
+--port
+                  </span>
+ 6383
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myredis-4
+                  <span class="tok-flag">
+--network
+                  </span>
+ host \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/cluster/redis4.conf:/etc/redis/redis.conf \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/cluster/data/6384:/data \
+                  <span class="tok-flag">
+-d
+                  </span>
+ redis:7.0 redis-server /etc/redis/redis.conf
+                  <span class="tok-flag">
+--port
+                  </span>
+ 6384
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myredis-5
+                  <span class="tok-flag">
+--network
+                  </span>
+ host \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/cluster/redis5.conf:/etc/redis/redis.conf \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/cluster/data/6385:/data \
+                  <span class="tok-flag">
+-d
+                  </span>
+ redis:7.0 redis-server /etc/redis/redis.conf
+                  <span class="tok-flag">
+--port
+                  </span>
+ 6385
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myredis-6
+                  <span class="tok-flag">
+--network
+                  </span>
+ host \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/cluster/redis6.conf:/etc/redis/redis.conf \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/cluster/data/6386:/data \
+                  <span class="tok-flag">
+-d
+                  </span>
+ redis:7.0 redis-server /etc/redis/redis.conf
+                  <span class="tok-flag">
+--port
+                  </span>
+ 6386
+                </code>
+              </pre>
+            </div>
+            <h3>
+              7.3 创建集群
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ myredis-1 redis-cli
+                  <span class="tok-flag">
+--cluster
+                  </span>
+ create \
+                  <span class="tok-flag">
+--cluster-replicas
+                  </span>
+ 1 \
+  192.168.192.101:6381 192.168.192.101:6382 192.168.192.101:6383 \
+  192.168.192.101:6384 192.168.192.101:6385 192.168.192.101:6386
+                </code>
+              </pre>
+            </div>
+            <p>
+              输入
+              <code>
+yes
+              </code>
+              完成创建。
+              <code>
+--cluster-replicas 1
+              </code>
+              表示每个 master 配 1 个 slave。
+            </p>
+            <h3>
+              7.4 查看集群节点
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ myredis-1 redis-cli
+                  <span class="tok-flag">
+-p
+                  </span>
+ 6381 cluster nodes
+                </code>
+              </pre>
+            </div>
+            <p>
+              所有节点都显示
+              <code>
+connected
+              </code>
+              即集群创建成功。
+            </p>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  新版 Docker 19.03+ 推荐使用
+                  <strong>
+                    macvlan 网络
+                  </strong>
+                  代替
+                  <code>
+--network host
+                  </code>
+                  :
+                  <code>
+docker network create -d macvlan --subnet=192.168.1.0/24 -o parent=eth0 mymacvlan
+                  </code>
+                  。更安全也更灵活。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     FAQ
+     ============================================================ -->
+          <section class="section" id="faq" aria-labelledby="faq-title">
+            <span class="section-num">
+              FAQ
+            </span>
+            <h2 id="faq-title">
+              常见问题
+            </h2>
+            <div class="faq">
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  MySQL 5.7 vs 8.0 在 Docker 中有什么区别?
+                </h3>
+                <p class="faq-a">
+                  MySQL 5.7 稳定,生态成熟,默认字符集 latin1(中文需手动改 utf8),密码策略简单;MySQL 8.0 性能更好,默认字符集 utf8mb4(完整 Unicode 支持),密码策略更严格(caching_sha2_password),窗口函数、CTE、JSON 增强。新项目推荐 8.0,旧系统兼容 5.7。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  MySQL 容器为什么必须挂载数据卷?
+                </h3>
+                <p class="faq-a">
+                  容器默认使用联合文件系统,数据存储在容器可写层,容器删除时数据全部丢失。生产环境必须挂载 3 个数据卷:1) 数据目录 /var/lib/mysql;2) 日志目录 /var/log/mysql;3) 配置目录 /etc/mysql/conf.d。这样容器重建时数据可恢复,符合生产数据持久化要求。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Redis 主从复制、Sentinel、Cluster 有什么区别?
+                </h3>
+                <p class="faq-a">
+                  主从复制:读写分离,master 写、slave 读,但 master 故障需手动切换;Sentinel:在主从基础上加 3 个哨兵节点,自动监控并选举新 master,实现高可用(HA);Cluster:真正的分布式,数据分片(16384 槽)分布在多个 master,水平扩展能力强,适合海量数据。三者层级递进:主从→Sentinel→Cluster。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Redis 配置中的 daemonize no 是什么意思?
+                </h3>
+                <p class="faq-a">
+                  Redis 默认 daemonize yes(后台守护进程),但 Docker 容器本身就是后台运行的,Redis 不能再 daemonize,否则进程会立刻 fork 退出,导致容器停止。所以 Docker 部署 Redis 必须设置 daemonize no。同理 MySQL 也不能用 mysqld_safe 守护。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Sentinel 至少需要几个节点?
+                </h3>
+                <p class="faq-a">
+                  至少 3 个。Sentinel 集群通过 Raft 多数派决策,3 节点可容忍 1 节点故障,5 节点可容忍 2 节点故障。生产环境强烈建议奇数节点(1/3/5/7),避免偶数造成脑裂。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Redis Cluster 至少需要几个节点?
+                </h3>
+                <p class="faq-a">
+                  至少 6 个(3 master + 3 slave)。Redis Cluster 通过虚拟槽分区(0-16383)分配数据,每个 master 负责一部分槽。当某个 master 故障时,其 slave 自动提升为新 master,继续提供服务。生产推荐 6 节点起步,数据量大时横向扩展。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  为什么 Redis Cluster 启动要加 --network host?
+                </h3>
+                <p class="faq-a">
+                  因为 Cluster 节点之间需要通过 IP+端口互相通信(bus port 端口号+10000),使用 bridge 网络时容器 IP 难被其他容器/主机直接访问。使用 --network host 让容器共享宿主机网络命名空间,容器端口直接绑定宿主机端口,简化集群节点互联。新版 Docker 19.03+ 推荐使用自定义 macvlan 网络代替 host 模式。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     参考资源
+     ============================================================ -->
+          <section class="section" id="refs" aria-labelledby="refs-title">
+            <span class="section-num">
+              References
+            </span>
+            <h2 id="refs-title">
+              参考资源
+            </h2>
+            <ul>
+              <li>
+                <a href="https://hub.docker.com/_/mysql" rel="external noopener" target="_blank">
+                  MySQL Docker 官方镜像
+                </a>
+              </li>
+              <li>
+                <a href="https://hub.docker.com/_/redis" rel="external noopener" target="_blank">
+                  Redis Docker 官方镜像
+                </a>
+              </li>
+              <li>
+                <a href="https://dev.mysql.com/doc/refman/5.7/en/replication.html" rel="external noopener" target="_blank">
+                  MySQL 5.7 主从复制文档
+                </a>
+              </li>
+              <li>
+                <a href="https://redis.io/docs/manual/replication/" rel="external noopener" target="_blank">
+                  Redis 复制官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://redis.io/docs/manual/sentinel/" rel="external noopener" target="_blank">
+                  Redis Sentinel 官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://redis.io/docs/manual/cluster-tutorial/" rel="external noopener" target="_blank">
+                  Redis Cluster 教程
+                </a>
+              </li>
+              <li>
+                <a href="https://redis.io/docs/reference/cluster-spec/" rel="external noopener" target="_blank">
+                  Redis Cluster 规范
+                </a>
+              </li>
+            </ul>
+          </section>
+        </article>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本文
+        </h3>
+        <p class="footer-meta">
+          本文系统讲解 Docker 部署 MySQL 与 Redis 的全场景方案,涵盖单机版、生产环境(数据卷)、主从复制、Sentinel 高可用、Cluster 分布式系统。所有命令均经过 MySQL 5.7 + Redis 7.0 验证。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            适用人群
+          </strong>
+          :DevOps 工程师、后端开发、数据库管理员、容器化技术学习者
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · 内容遵循 CC BY 4.0 协议 · 文中命令与代码可自由使用
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function() {
+  const progress = document.getElementById('progress');
+  if (!progress) return;
+  const update = () => {
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const height = h.scrollHeight - h.clientHeight;
+    const pct = height > 0 ? (scrolled / height) * 100 : 0;
+    progress.style.width = pct + '%';
+    progress.setAttribute('aria-valuenow', Math.round(pct));
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+(function() {
+  const btn = document.getElementById('backTop');
+  if (!btn) return;
+  const toggle = () => {
+    if (window.scrollY > 400) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', toggle, { passive: true });
+  btn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  toggle();
+})();
+
+(function() {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const stored = localStorage.getItem('theme-mysql-redis');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (stored === 'dark' || (!stored && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  btn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme-mysql-redis', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme-mysql-redis', 'dark');
+    }
+  });
+})();
+
+(function() {
+  document.querySelectorAll('.code-copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      if (!pre) return;
+      const text = pre.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        const old = btn.innerText;
+        btn.innerText = '已复制';
+        btn.classList.add('success');
+        setTimeout(() => { btn.innerText = old; btn.classList.remove('success'); }, 1500);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); btn.innerText = '已复制'; setTimeout(() => btn.innerText = '复制', 1500); } catch (err) { btn.innerText = '失败'; }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      }
+    });
+  });
+})();
+    </script>
+  </body>
+</html>

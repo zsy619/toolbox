@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Remotion 基础:CLI 完整命令 + 高级渲染组件 | Remotion 知识库</title>
+<meta name="description" content="Remotion 4.x CLI 完整命令参考(benchmark/skills/gpu/ffmpeg/ffprobe/browser/compositions/still/bundle)+ 新组件 <HtmlInCanvas>/<CanvasImage>/<IFrame>/<AnimatedImage> + @remotion/rounded-text-box 完整指南。">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Remotion CLI 完整命令 + 高级渲染组件","description":"CLI 完整参考 + 高级渲染组件。","inLanguage":"zh-CN"}</script>
+</head><body>
+<header class="site-header"><nav class="nav-wrap">
+<a href="index.html" class="brand"><span class="brand-mark">R</span><span>Remotion 知识库</span></a>
+<div class="nav-links"><a href="index.html">总目录</a><a href="B-10-media-utils-zod.html">← 媒体工具</a></div>
+</nav></header>
+<main class="container">
+<nav class="breadcrumb"><a href="index.html">首页</a> / <a href="index.html#basic">基础层</a> / CLI + 高级组件</nav>
+<h1>CLI 完整命令 + 高级渲染组件</h1>
+<p class="hero-sub">10 大 CLI 子命令 + 4 个新组件 + rounded-text-box</p>
+<div class="alert alert-info"><span class="alert-icon">📚</span><div class="alert-body"><p>来源:Remotion 4.0.468+ 官方 CLI 参考 + HtmlInCanvas(4.0.455)+ rounded-text-box(4.0.360) 发布说明。</p></div></div>
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>CLI 14 大子命令完整表</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>命令</th><th>作用</th><th>典型用法</th></tr></thead>
+<tbody>
+<tr><td><code>studio</code></td><td>启动 Studio 预览</td><td><code>npx remotion studio</code></td></tr>
+<tr><td><code>render</code></td><td>渲染视频/音频</td><td><code>npx remotion render MyComp out.mp4</code></td></tr>
+<tr><td><code>still</code></td><td>渲染单张图</td><td><code>npx remotion still MyComp out.png --frame=30</code></td></tr>
+<tr><td><code>compositions</code></td><td>列出所有 Composition</td><td><code>npx remotion compositions</code></td></tr>
+<tr><td><code>bundle</code></td><td>打包成单文件夹(用于 Lambda)</td><td><code>npx remotion bundle src/index.ts build/</code></td></tr>
+<tr><td><code>browser</code></td><td>下载/升级 Chrome</td><td><code>npx remotion browser ensure</code></td></tr>
+<tr><td><code>lambda</code></td><td>Lambda 云渲染管理</td><td><code>npx remotion lambda deploy</code></td></tr>
+<tr><td><code>cloudrun</code></td><td>GCP Cloud Run 管理</td><td><code>npx remotion cloudrun deploy</code></td></tr>
+<tr><td><code>benchmark</code></td><td>基准测试渲染时间</td><td><code>npx remotion benchmark MyComp</code></td></tr>
+<tr><td><code>skills</code></td><td>安装/更新 Claude Code skills</td><td><code>npx remotion skills add</code></td></tr>
+<tr><td><code>versions</code></td><td>列出并校验所有包版本</td><td><code>npx remotion versions</code></td></tr>
+<tr><td><code>upgrade</code></td><td>升级到指定版本</td><td><code>npx remotion upgrade 4.0.468</code></td></tr>
+<tr><td><code>add</code></td><td>添加 @remotion/* 子包</td><td><code>npx remotion add @remotion/three</code></td></tr>
+<tr><td><code>gpu</code></td><td>打印 Chrome GPU 信息</td><td><code>npx remotion gpu</code></td></tr>
+<tr><td><code>ffmpeg / ffprobe</code></td><td>执行 FFmpeg 工具</td><td><code>npx remotion ffmpeg -i in.mp4 out.webm</code></td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>benchmark 性能基准</h2>
+<p>v4.0.5+ 测单 Composition 渲染时间,优化前后对比:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash"># 完整基准(单次)
+npx remotion benchmark MyComp out.mp4
+
+# 多次平均(--runs 关闭 trial 提示)
+npx remotion benchmark MyComp out.mp4 --runs=5
+
+# 测不同参数组合
+npx remotion benchmark MyComp out.mp4 --concurrency=1
+npx remotion benchmark MyComp out.mp4 --concurrency=4
+npx remotion benchmark MyComp out.mp4 --concurrency=8</code></pre></div>
+<p>输出 FPS / 总耗时 / 单帧平均,助你选最佳并发。</p>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>skills:Claude Code 集成</h2>
+<p>2026.01 官方为 Claude Code 推出 Agent Skill,把"如何用 Remotion"的最佳实践打包注入 IDE:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash"># 安装官方 skill
+npx remotion skills add
+
+# 列出已装 skill
+npx remotion skills ls
+
+# 更新到最新版
+npx remotion skills update</code></pre></div>
+<p>装上后,Claude Code 在写 Remotion 视频时会自动应用 28 条官方规则。</p>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>browser 浏览器管理</h2>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash"># 检测/下载
+npx remotion browser ensure
+
+# 打印已装版本
+npx remotion browser exec echo "version printed"
+
+# 用指定 Chrome 路径覆盖
+remotion.config.ts:
+Config.setBrowserExecutable('/usr/bin/chromium')</code></pre></div>
+<p>用 Chrome Headless Shell 替代旧版 headless(4.0.378+),节省 ~50MB。</p>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2><HtmlInCanvas> 新组件(4.0.455+)</h2>
+<p>用 HTML2Canvas 风格的方案,把 DOM 内容直接绘入 canvas,比 `<OffthreadVideo>` 路径更轻量:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { HtmlInCanvas, AbsoluteFill } from 'remotion';
+
+&lt;AbsoluteFill&gt;
+  &lt;HtmlInCanvas&gt;
+    &lt;div style={{ color: 'white' }}&gt;
+      可任意写 React,会被画到 canvas
+    &lt;/div&gt;
+  &lt;/HtmlInCanvas&gt;
+&lt;/AbsoluteFill&gt;</code></pre></div>
+<p>适合:复杂 CSS 动画(伪元素、阴影)、Canvas 不便实现的 UI。</p>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2><CanvasImage> 图像特效</h2>
+<p>把图片绘到 canvas,可施加任意像素级效果:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { CanvasImage } from 'remotion';
+
+&lt;CanvasImage
+  src={staticFile('photo.jpg')}
+  onMount={(canvas) =&gt; {
+    const ctx = canvas.getContext('2d')!;
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    // 应用灰度滤镜
+    for (let i = 0; i &lt; data.data.length; i += 4) {
+      const avg = (data.data[i] + data.data[i+1] + data.data[i+2]) / 3;
+      data.data[i] = data.data[i+1] = data.data[i+2] = avg;
+    }
+    ctx.putImageData(data, 0, 0);
+  }}
+/&gt;</code></pre></div>
+<p>使用场景:滤镜、边缘检测、马赛克、合成图。</p>
+</section>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2><IFrame> 嵌入外部内容</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { IFrame } from 'remotion';
+
+// iframe 等加载完成才开始渲染
+&lt;IFrame
+  src="https://example.com/widget"
+  width={1920}
+  height={1080}
+  style={{ border: 'none' }}
+  onLoad={() =&gt; console.log('iframe ready')}
+/&gt;</code></pre></div>
+<p>使用场景:嵌入第三方小部件(Charts.js 完整版、Mapbox 地图、CodeSandbox 演示)。</p>
+</section>
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2><AnimatedImage> 动图组件</h2>
+<p>统一支持 GIF / AVIF / Animated WebP:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { AnimatedImage } from 'remotion';
+
+&lt;AnimatedImage
+  src={staticFile('reaction.gif')}
+  width={300}
+  height={300}
+  style={{ borderRadius: 8 }}
+/&gt;</code></pre></div>
+<p>内部用 OffthreadVideo 路径,SSR 时将 GIF 抽帧并复用现有渲染管线,效率高于 `<img>`。</p>
+</section>
+
+<section class="section" id="s9">
+<span class="section-num">Chapter 09</span>
+<h2>cancelRender / continueRender 错误处理</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { cancelRender, continueRender, delayRender } from 'remotion';
+
+const handle = delayRender();
+try {
+  const data = await fetchData();
+  if (!data) {
+    cancelRender(new Error('No data'));  // 立即终止
+  }
+  continueRender(handle);                 // 显式放行
+} catch (e) {
+  cancelRender(e);
+}</code></pre></div>
+<p>对比 <code>useDelayRender</code> hook:hook 模式声明式,这两个函数命令式,适合在异步函数或事件回调中。</p>
+</section>
+
+<section class="section" id="s10">
+<span class="section-num">Chapter 10</span>
+<h2>@remotion/rounded-text-box 完整指南</h2>
+<p>v4.0.360+ 官方 TikTok 风格多行圆角文本框:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { createRoundedTextBox } from '@remotion/rounded-text-box';
+
+const path = createRoundedTextBox({
+  text: 'Hello\nWorld',
+  fontSize: 80,
+  fontFamily: 'Inter',
+  fontWeight: 600,
+  padding: 24,
+  borderRadius: 18,
+  width: 1000,
+  // backgroundColor: '#000',  // SVG path,可自填
+});
+
+return &lt;svg viewBox="..."&gt;&lt;path d={path} fill="#000" /&gt;&lt;/svg&gt;;</code></pre></div>
+<p>典型用法:用 SVG `<text>` 渲染相同文本 + 同字库,使 path 与文字完美贴合。</p>
+</section>
+
+<section class="section" id="s11">
+<span class="section-num">Chapter 11</span>
+<h2>ffmpeg / ffprobe CLI 直通</h2>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash"># 自动用项目内的 FFmpeg(避免 PATH 冲突)
+npx remotion ffmpeg -i in.mp4 -c:v libvpx-vp9 out.webm
+
+# ffprobe 查看元数据
+npx remotion ffprobe -v quiet -print_format json -show_streams in.mp4
+
+# 等价:ffmpeg -h
+npx remotion ffmpeg -h</code></pre></div>
+<p>Remotion 自带 ffmpeg 静态二进制,无需单独装。</p>
+</section>
+
+<nav class="page-nav">
+<a href="B-10-media-utils-zod.html" class="prev">← 上一页:媒体工具 & Zod</a>
+<a href="index.html" class="next">回到总目录 →</a>
+</nav>
+</main>
+<footer class="site-footer"><p>© 2026 AI 工具箱 · Remotion 知识库 · 内容基于官方文档整理</p></footer>
+<script src="scripts.js"></script>
+</body></html>

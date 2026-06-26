@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- SEO Meta Tags -->
+    <title>Graphify 知识图谱工具 - 零配置、全模态、本地跑、71.5倍Token节省</title>
+    <meta name="description" content="Graphify 是 Karpathy 知识库的完全体，48小时极速交付。本地 AST 解析节省 71.5 倍 Token，支持代码/PDF/图片/截图全模态图谱化，零配置开箱即用。">
+    <meta name="keywords" content="Graphify, 知识图谱, Karpathy, AI工具, 开源, AST解析, 本地部署, 全模态, token节省">
+    <meta name="author" content="AI工具评测">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/safishamsi/graphify">
+    <meta property="og:title" content="Graphify 知识图谱工具 - 零配置、全模态、71.5倍Token节省">
+    <meta property="og:description" content="Karpathy 没做完，开源社区 48 小时搞定！完全体知识库，token 省 71.5 倍。">
+    <meta property="og:image" content="assets/cover.png">
+    <meta property="og:locale" content="zh_CN">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://github.com/safishamsi/graphify">
+    <meta name="twitter:title" content="Graphify 知识图谱工具 - 零配置、全模态、71.5倍Token节省">
+    <meta name="twitter:description" content="Karpathy 没做完，开源社区 48 小时搞定！完全体知识库，token 省 71.5 倍。">
+    <meta name="twitter:image" content="assets/cover.png">
+    
+    <!-- WeChat Share -->
+    <meta property="wechat-share:title" content="Graphify 知识图谱工具">
+    <meta property="wechat-share:description" content="Karpathy 没做完，开源社区 48 小时搞定！token 省 71.5 倍！">
+    <meta property="wechat-share:image" content="assets/cover.png">
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Graphify 知识图谱工具",
+        "description": "零配置、全模态、本地跑、特能省 token 的知识图谱工具",
+        "author": {
+            "@type": "Person",
+            "name": "Safi Shamsi"
+        },
+        "datePublished": "2025-07-07",
+        "image": "assets/cover.png"
+    }
+    </script>
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://github.com/safishamsi/graphify">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/cover.png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Custom Styles -->
+    <style>
+        /* Hero Background Gradient - Green/Cyan Theme */
+        .hero-gradient {
+            background: linear-gradient(135deg, #059669 0%, #0891b2 100%);
+        }
+        
+        /* Feature Card Hover Effect */
+        .feature-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Navigation Card Style */
+        .nav-card {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-card:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Code Highlight */
+        .code-highlight {
+            background: linear-gradient(90deg, #059669 0%, #0891b2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Stats Counter Animation */
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stat-item {
+            animation: countUp 0.8s ease-out forwards;
+        }
+        
+        /* Button Gradient */
+        .btn-gradient {
+            background: linear-gradient(135deg, #059669 0%, #0891b2 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.4);
+        }
+        
+        /* Image Gallery */
+        .gallery-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Responsive Typography */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+        }
+        
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #059669 0%, #0891b2 100%);
+            border-radius: 4px;
+        }
+        
+        /* Story Timeline */
+        .timeline-item {
+            position: relative;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #059669, #0891b2);
+            z-index: 0;
+        }
+        
+        .timeline-dot {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, #059669, #0891b2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            z-index: 1;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md shadow-sm z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <img src="assets/cover.png" alt="Logo" class="h-10 w-10 rounded-lg shadow-md" onclick="openImageViewer(0)">
+                    <span class="font-bold text-xl text-gray-900">Graphify</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#story" class="text-gray-600 hover:text-gray-900 transition-colors">背景故事</a>
+                    <a href="#features" class="text-gray-600 hover:text-gray-900 transition-colors">核心特性</a>
+                    <a href="#resources" class="text-gray-600 hover:text-gray-900 transition-colors">资源文档</a>
+                    <a href="#gallery" class="text-gray-600 hover:text-gray-900 transition-colors">素材展示</a>
+                    <a href="https://github.com/safishamsi/graphify" target="_blank" class="btn-gradient text-white px-5 py-2 rounded-lg font-medium hover:shadow-lg">
+                        <i class="fab fa-github mr-2"></i>GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <header class="hero-gradient relative overflow-hidden pt-24 pb-20 lg:pt-32 lg:pb-28">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-20 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-10 right-20 w-48 h-48 bg-white rounded-full blur-3xl"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center">
+                <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium mb-6 animate__animated animate__fadeInDown">
+                    <i class="fas fa-rocket mr-2"></i>
+                    Karpathy 知识库的完全体
+                </div>
+                
+                <h1 class="hero-title text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 animate__animated animate__fadeInUp">
+                    Graphify
+                    <span class="block text-3xl md:text-4xl lg:text-5xl mt-2 opacity-90">知识图谱工具</span>
+                </h1>
+                
+                <p class="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-10 animate__animated animate__fadeInUp animate__delay-200">
+                    Karpathy 没做完，开源社区 <span class="font-bold text-yellow-300">48 小时</span> 搞定！<br>
+                    完全体知识库，Token 节省 <span class="font-bold text-yellow-300">71.5 倍</span>
+                </p>
+                
+                <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 animate__animated animate__fadeInUp animate__delay-300">
+                    <a href="https://github.com/safishamsi/graphify" target="_blank" class="bg-white text-emerald-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl">
+                        <i class="fab fa-github mr-2"></i>查看 GitHub 仓库
+                    </a>
+                    <a href="#story" class="bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/30 transition-all border-2 border-white/50">
+                        <i class="fas fa-play mr-2"></i>了解背景故事
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-0 left-0 right-0">
+            <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#f9fafb"/>
+            </svg>
+        </div>
+    </header>
+    
+    <!-- Stats Section -->
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="stat-item text-center" style="animation-delay: 0.1s;">
+                    <div class="text-4xl md:text-5xl font-bold code-highlight mb-2">71.5x</div>
+                    <div class="text-gray-600">Token 节省</div>
+                </div>
+                <div class="stat-item text-center" style="animation-delay: 0.2s;">
+                    <div class="text-4xl md:text-5xl font-bold code-highlight mb-2">48h</div>
+                    <div class="text-gray-600">极速交付</div>
+                </div>
+                <div class="stat-item text-center" style="animation-delay: 0.3s;">
+                    <div class="text-4xl md:text-5xl font-bold code-highlight mb-2">2k+</div>
+                    <div class="text-gray-600">GitHub Star</div>
+                </div>
+                <div class="stat-item text-center" style="animation-delay: 0.4s;">
+                    <div class="text-4xl md:text-5xl font-bold code-highlight mb-2">0</div>
+                    <div class="text-gray-600">配置依赖</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Story Section -->
+    <section id="story" class="py-20 bg-white">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-history text-emerald-600 mr-3"></i>
+                    背景故事
+                </h2>
+                <p class="text-xl text-gray-600">
+                    从 Karpathy 的分享到开源社区的完美交付
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                <div class="timeline-item bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-8 text-white text-center relative z-10 shadow-lg">
+                    <div class="timeline-dot mx-auto mb-6 text-sm">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Karpathy 分享</h3>
+                    <p class="text-white/90">分享个人知识库方案</p>
+                    <div class="mt-4 text-sm text-white/70">Step 1</div>
+                </div>
+                
+                <div class="timeline-item bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-8 text-white text-center relative z-10 shadow-lg">
+                    <div class="timeline-dot mx-auto mb-6 text-sm">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">48 小时</h3>
+                    <p class="text-white/90">开源社区接力开发</p>
+                    <div class="mt-4 text-sm text-white/70">Step 2</div>
+                </div>
+                
+                <div class="timeline-item bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-8 text-white text-center relative z-10 shadow-lg">
+                    <div class="timeline-dot mx-auto mb-6 text-sm">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Graphify 诞生</h3>
+                    <p class="text-white/90">完全体知识库交付</p>
+                    <div class="mt-4 text-sm text-white/70">Step 3</div>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <div class="inline-block bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-8 border border-emerald-200">
+                    <p class="text-lg text-gray-700 italic">
+                        "Karpathy 没做完的，开源社区 48 小时搞定！"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Core Features Section -->
+    <section id="features" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-star text-emerald-600 mr-3"></i>
+                    核心亮点
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    三大核心优势，重新定义知识图谱工具
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="feature-card bg-white rounded-2xl p-8 shadow-lg">
+                    <div class="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-coins text-3xl text-emerald-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">71.5 倍 Token 节省</h3>
+                    <p class="text-gray-600 mb-4">本地 AST 解析，无需将全部内容发送给 LLM，大幅降低 Token 消耗</p>
+                    <div class="text-sm text-emerald-600 font-medium">
+                        <i class="fas fa-check-circle mr-1"></i>成本降低 98%+
+                    </div>
+                </div>
+                
+                <div class="feature-card bg-white rounded-2xl p-8 shadow-lg">
+                    <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-shapes text-3xl text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">全模态图谱化</h3>
+                    <p class="text-gray-600 mb-4">支持代码、PDF、图片、截图等多种文件类型的智能图谱化处理</p>
+                    <div class="text-sm text-blue-600 font-medium">
+                        <i class="fas fa-check-circle mr-1"></i>多格式支持
+                    </div>
+                </div>
+                
+                <div class="feature-card bg-white rounded-2xl p-8 shadow-lg">
+                    <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-magic text-3xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">零配置开箱即用</h3>
+                    <p class="text-gray-600 mb-4">无需向量数据库，无需嵌入计算，一行命令即可运行</p>
+                    <div class="text-sm text-purple-600 font-medium">
+                        <i class="fas fa-check-circle mr-1"></i>无需额外依赖
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Capabilities Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-layer-group text-emerald-600 mr-3"></i>
+                    全模态能力
+                </h2>
+                <p class="text-xl text-gray-600">
+                    四大文件类型，统统搞定
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 text-white text-center shadow-lg">
+                    <i class="fas fa-code text-5xl mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">代码解析</h3>
+                    <p class="text-sm text-white/90">智能分析代码结构和依赖关系</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl p-8 text-white text-center shadow-lg">
+                    <i class="fas fa-file-pdf text-5xl mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">PDF 分析</h3>
+                    <p class="text-sm text-white/90">提取文档中的关键信息和结构</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-8 text-white text-center shadow-lg">
+                    <i class="fas fa-image text-5xl mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">图片理解</h3>
+                    <p class="text-sm text-white/90">识别图片中的图表和文字</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-8 text-white text-center shadow-lg">
+                    <i class="fas fa-camera text-5xl mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">截图识别</h3>
+                    <p class="text-sm text-white/90">从截图中提取结构化信息</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Technical Principle Section -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-cogs text-emerald-600 mr-3"></i>
+                    技术原理
+                </h2>
+                <p class="text-xl text-gray-600">
+                    两阶段流程，兼顾效率与智能
+                </p>
+            </div>
+            
+            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-3xl p-8 md:p-12">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div class="text-center flex-1">
+                        <div class="w-24 h-24 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <i class="fas fa-code-branch text-4xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">阶段一</h3>
+                        <p class="text-lg text-emerald-600 font-medium mb-2">AST 本地提取</p>
+                        <p class="text-gray-600">使用本地抽象语法树解析，提取结构化信息</p>
+                    </div>
+                    
+                    <div class="hidden md:block text-emerald-400 text-5xl">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                    <div class="md:hidden text-emerald-400 text-5xl rotate-90">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    
+                    <div class="text-center flex-1">
+                        <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <i class="fas fa-brain text-4xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">阶段二</h3>
+                        <p class="text-lg text-blue-600 font-medium mb-2">LLM 语义抽取</p>
+                        <p class="text-gray-600">仅将结构化片段发送给 LLM 进行语义理解和图谱构建</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center">
+                <div class="inline-block bg-white rounded-xl p-6 shadow-md border border-gray-200">
+                    <p class="text-gray-700 font-medium">
+                        <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                        仅发送结构化片段，大幅减少 Token 消耗
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Resources Section -->
+    <section id="resources" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-folder-open text-emerald-600 mr-3"></i>
+                    项目资源
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    完整的项目文档和视频素材
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <a href="README.md" class="nav-card bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-book text-3xl"></i>
+                        <span class="ml-4 text-xl font-bold">README</span>
+                    </div>
+                    <p class="text-white/90">项目完整说明文档</p>
+                    <div class="mt-4 text-sm text-white/70">
+                        <i class="fas fa-file-alt mr-2"></i>Markdown 格式
+                    </div>
+                </a>
+                
+                <a href="video-script.md" class="nav-card bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-6 text-white shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-film text-3xl"></i>
+                        <span class="ml-4 text-xl font-bold">视频脚本</span>
+                    </div>
+                    <p class="text-white/90">42秒竖屏视频完整脚本</p>
+                    <div class="mt-4 text-sm text-white/70">
+                        <i class="fas fa-clock mr-2"></i>8个场景分镜
+                    </div>
+                </a>
+                
+                <a href="copy.md" class="nav-card bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-pen text-3xl"></i>
+                        <span class="ml-4 text-xl font-bold">营销文案</span>
+                    </div>
+                    <p class="text-white/90">推广营销使用文案</p>
+                    <div class="mt-4 text-sm text-white/70">
+                        <i class="fas fa-bullhorn mr-2"></i>多平台适配
+                    </div>
+                </a>
+                
+                <a href="wechat-copy.md" class="nav-card bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl p-6 text-white shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fab fa-weixin text-3xl"></i>
+                        <span class="ml-4 text-xl font-bold">公众号文案</span>
+                    </div>
+                    <p class="text-white/90">微信公众号专用版本</p>
+                    <div class="mt-4 text-sm text-white/70">
+                        <i class="fas fa-mobile-alt mr-2"></i>移动端优化
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Image Gallery Section -->
+    <section id="gallery" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-images text-emerald-600 mr-3"></i>
+                    素材展示
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    点击图片可查看大图，支持缩放、旋转、幻灯片播放
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="gallery-item bg-white rounded-2xl overflow-hidden shadow-lg" onclick="openImageViewer(1)">
+                    <div class="relative aspect-video">
+                        <img src="assets/cover.png" alt="项目封面图" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div class="absolute bottom-4 left-4 text-white">
+                            <h3 class="text-xl font-bold">项目封面</h3>
+                            <p class="text-sm opacity-90">知识图谱可视化风格</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="gallery-item bg-white rounded-2xl overflow-hidden shadow-lg" onclick="openImageViewer(2)">
+                        <div class="relative">
+                            <img src="assets/illustrations/scene-story.png" alt="背景故事插图" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 text-white">
+                                <h3 class="text-lg font-bold">背景故事</h3>
+                                <p class="text-sm opacity-90">Karpathy 到 Graphify 的进化</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="gallery-item bg-white rounded-2xl overflow-hidden shadow-lg" onclick="openImageViewer(3)">
+                        <div class="relative">
+                            <img src="assets/illustrations/scene-capabilities.png" alt="能力展示插图" class="w-full h-48 object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 text-white">
+                                <h3 class="text-lg font-bold">能力展示</h3>
+                                <p class="text-sm opacity-90">多文件类型图谱化处理</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <div class="inline-flex items-center px-6 py-3 bg-emerald-100 rounded-full text-emerald-700">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <span>提示：点击图片打开专业查看器，支持键盘快捷键操作</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Video Info Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-video text-emerald-600 mr-3"></i>
+                    视频信息
+                </h2>
+            </div>
+            
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-8 md:p-12">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold code-highlight mb-2">~42秒</div>
+                        <div class="text-gray-600">视频时长</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold code-highlight mb-2">1080×1920</div>
+                        <div class="text-gray-600">分辨率</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-bold code-highlight mb-2">60fps</div>
+                        <div class="text-gray-600">帧率</div>
+                    </div>
+                </div>
+                
+                <div class="mt-10 border-t border-emerald-200 pt-8">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">
+                        <i class="fas fa-layer-group text-emerald-600 mr-2"></i>
+                        8 帧场景结构
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="text-emerald-600 font-bold mb-1">帧 1-3s</div>
+                            <div class="text-gray-800 font-medium">封面展示</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="text-emerald-600 font-bold mb-1">帧 3-7s</div>
+                            <div class="text-gray-800 font-medium">背景故事</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="text-emerald-600 font-bold mb-1">帧 7-14s</div>
+                            <div class="text-gray-800 font-medium">核心亮点</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="text-emerald-600 font-bold mb-1">帧 14-20s</div>
+                            <div class="text-gray-800 font-medium">能力展示</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="text-emerald-600 font-bold mb-1">帧 20-26s</div>
+                            <div class="text-gray-800 font-medium">技术原理</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="text-emerald-600 font-bold mb-1">帧 26-30s</div>
+                            <div class="text-gray-800 font-medium">开源地址</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="text-emerald-600 font-bold mb-1">帧 30-35s</div>
+                            <div class="text-gray-800 font-medium">总结回顾</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm">
+                            <div class="text-emerald-600 font-bold mb-1">帧 35-42s</div>
+                            <div class="text-gray-800 font-medium">CTA引导</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Target Audience Section -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-users text-emerald-600 mr-3"></i>
+                    适用人群
+                </h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-2xl p-8 shadow-lg text-center">
+                    <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-code text-4xl text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">开发者</h3>
+                    <p class="text-gray-600">需要快速构建项目知识图谱的程序员</p>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-8 shadow-lg text-center">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-graduation-cap text-4xl text-green-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">研究者</h3>
+                    <p class="text-gray-600">研究知识图谱和 RAG 系统的学者</p>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-8 shadow-lg text-center">
+                    <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-rocket text-4xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">效率派</h3>
+                    <p class="text-gray-600">追求低成本、高效率知识管理的用户</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="py-20 hero-gradient">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+                一行命令，知识图谱随手可得
+            </h2>
+            <p class="text-xl text-white/90 mb-10">
+                立即访问 GitHub 仓库，探索 Graphify 的无限可能
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <a href="https://github.com/safishamsi/graphify" target="_blank" class="bg-white text-emerald-600 px-10 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all shadow-lg">
+                    <i class="fab fa-github mr-2"></i>Star on GitHub
+                </a>
+                <div class="flex items-center space-x-2 text-white/90">
+                    <span>#AI</span>
+                    <span>#Graphify</span>
+                    <span>#知识图谱</span>
+                    <span>#开源</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="assets/cover.png" alt="Logo" class="h-10 w-10 rounded-lg">
+                        <span class="font-bold text-xl">Graphify</span>
+                    </div>
+                    <p class="text-gray-400">
+                        零配置、全模态、本地跑、特能省 token 的知识图谱工具
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-lg mb-4">相关链接</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>
+                            <a href="https://github.com/safishamsi/graphify" target="_blank" class="hover:text-white transition-colors">
+                                <i class="fab fa-github mr-2"></i>GitHub 仓库
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/karpathy" target="_blank" class="hover:text-white transition-colors">
+                                <i class="fas fa-user mr-2"></i>Karpathy
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-lg mb-4">项目资源</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="README.md" class="hover:text-white transition-colors">📄 README 文档</a></li>
+                        <li><a href="video-script.md" class="hover:text-white transition-colors">🎬 视频脚本</a></li>
+                        <li><a href="copy.md" class="hover:text-white transition-colors">✍️ 营销文案</a></li>
+                        <li><a href="wechat-copy.md" class="hover:text-white transition-colors">📱 公众号文案</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-500">
+                <p>© 2025 Graphify Video Project. Generated by OpenClaw Video Creator Skill.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Image Viewer Modal - Professional Style -->
+    <div id="imageViewer" class="image-viewer">
+        <div class="viewer-toolbar">
+            <div class="viewer-toolbar-left">
+                <button class="viewer-toolbar-btn" onclick="closeImageViewer()" title="关闭 (ESC)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="viewer-toolbar-divider"></div>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(-90)" title="向左旋转">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(90)" title="向右旋转">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="flipHorizontal()" title="水平翻转">
+                    <i class="fas fa-arrows-alt-h"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="flipVertical()" title="垂直翻转">
+                    <i class="fas fa-arrows-alt-v"></i>
+                </button>
+            </div>
+            
+            <div class="viewer-toolbar-center">
+                <button class="viewer-toolbar-btn" onclick="zoomOut()" title="缩小 (-)">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <div class="viewer-zoom-slider-container">
+                    <input type="range" id="zoomSlider" class="viewer-zoom-slider" min="10" max="500" value="100">
+                    <span id="zoomDisplay" class="viewer-zoom-display">100%</span>
+                </div>
+                <button class="viewer-toolbar-btn" onclick="zoomIn()" title="放大 (+)">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="fitToScreen()" title="适应屏幕 (0)">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="toggleFullscreen()" title="全屏 (F)">
+                    <i class="fas fa-expand" id="fullscreenIcon"></i>
+                </button>
+            </div>
+            
+            <div class="viewer-toolbar-right">
+                <button class="viewer-toolbar-btn" onclick="toggleSlideShow()" title="幻灯片播放" id="slideShowBtn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <div class="viewer-toolbar-divider"></div>
+                <button class="viewer-toolbar-btn" onclick="downloadImage()" title="下载图片">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="openInNewTab()" title="新窗口打开">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="viewer-main" id="viewerMain">
+            <div class="viewer-canvas" id="viewerCanvas">
+                <div class="viewer-image-container" id="imageContainer">
+                    <img id="viewerImage" class="viewer-image" src="" alt="">
+                </div>
+            </div>
+            
+            <button class="viewer-nav prev" id="prevBtn" onclick="prevImage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <button class="viewer-nav next" id="nextBtn" onclick="nextImage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <div class="viewer-bottom-bar">
+                <div class="viewer-info">
+                    <span id="imageTitle">图片</span>
+                    <span class="viewer-divider">|</span>
+                    <span id="imageCounter">1 / 1</span>
+                    <span class="viewer-divider">|</span>
+                    <span id="imageDimensions">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="viewer-thumbnail-strip" id="thumbnailStrip"></div>
+        
+        <div class="viewer-toast" id="viewerToast"></div>
+        
+        <div class="viewer-loading" id="viewerLoading">
+            <div class="viewer-loading-spinner"></div>
+            <span>加载中...</span>
+        </div>
+    </div>
+    
+    <!-- Image Viewer Styles -->
+    <style>
+        /* Image Viewer Modal - Professional Style */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+            background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(20,20,30,0.98) 100%);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+        
+        .image-viewer.active {
+            display: flex;
+            flex-direction: column;
+            animation: viewerFadeIn 0.3s ease;
+        }
+        
+        @keyframes viewerFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .viewer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .viewer-toolbar-left,
+        .viewer-toolbar-center,
+        .viewer-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .viewer-toolbar-divider {
+            width: 1px;
+            height: 1.5rem;
+            background: rgba(255,255,255,0.2);
+            margin: 0 0.5rem;
+        }
+        
+        .viewer-toolbar-btn {
+            width: 2.75rem;
+            height: 2.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9rem;
+        }
+        
+        .viewer-toolbar-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .viewer-toolbar-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+        
+        .viewer-toolbar-btn.active {
+            background: linear-gradient(135deg, #059669, #0891b2);
+            border-color: #059669;
+            color: white;
+        }
+        
+        .viewer-zoom-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 0.25rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .viewer-zoom-slider {
+            width: 120px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        
+        .viewer-zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #059669, #0891b2);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.5);
+        }
+        
+        .viewer-zoom-display {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            min-width: 3.5rem;
+            text-align: center;
+        }
+        
+        .viewer-main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            min-height: 0;
+        }
+        
+        .viewer-main:active {
+            cursor: grabbing;
+        }
+        
+        .viewer-canvas {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+        }
+        
+        .viewer-image-container {
+            position: absolute;
+            transform-origin: center center;
+            user-select: none;
+            transition: transform 0.1s ease-out;
+        }
+        
+        .viewer-image {
+            display: block;
+            max-width: 92vw;
+            max-height: 75vh;
+            object-fit: contain;
+            pointer-events: none;
+            user-select: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .viewer-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4rem;
+            height: 4rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 1.5rem;
+            z-index: 10;
+        }
+        
+        .viewer-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .viewer-nav.prev {
+            left: 1.5rem;
+        }
+        
+        .viewer-nav.next {
+            right: 1.5rem;
+        }
+        
+        .viewer-nav:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .viewer-bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .viewer-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.85);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1.25rem;
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .viewer-divider {
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .viewer-thumbnail-strip {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            overflow-x: auto;
+            max-height: 120px;
+            min-height: 100px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
+        }
+        
+        .viewer-thumbnail {
+            width: 80px;
+            height: 60px;
+            border-radius: 0.5rem;
+            object-fit: cover;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            flex-shrink: 0;
+        }
+        
+        .viewer-thumbnail:hover {
+            opacity: 0.7;
+            transform: scale(1.05);
+        }
+        
+        .viewer-thumbnail.active {
+            opacity: 1;
+            border-color: #059669;
+            box-shadow: 0 0 20px rgba(5, 150, 105, 0.4);
+        }
+        
+        .viewer-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 10002;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .viewer-toast.show {
+            opacity: 1;
+        }
+        
+        .viewer-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            gap: 1rem;
+            color: white;
+            font-size: 1rem;
+            z-index: 100;
+        }
+        
+        .viewer-loading.active {
+            display: flex;
+        }
+        
+        .viewer-loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #059669;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    
+    <!-- Image Viewer JavaScript -->
+    <script>
+        // 图片数组（延迟初始化，等待 DOM 完全就绪）
+        let images = [];
+        
+        // 状态变量
+        let currentIndex = 0;
+        let scale = 1;
+        let rotation = 0;
+        let flipX = 1;
+        let flipY = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let initialScale = 1;
+        let slideShowInterval = null;
+        let slideShowPlaying = false;
+        let currentImageDimensions = { width: 0, height: 0 };
+        
+        // 自动收集图片（优先收集 gallery-item 中的图片）
+        function collectImages() {
+            const images = [];
+            const seenSrc = new Set();
+            
+            // 收集所有有意义的图片
+            document.querySelectorAll('img').forEach(img => {
+                if (!seenSrc.has(img.src) && img.src && !img.src.includes('data:')) {
+                    // 排除 viewerImage（预览器的图片）
+                    if (img.id !== 'viewerImage') {
+                        seenSrc.add(img.src);
+                        images.push({
+                            src: img.src,
+                            title: img.alt || '图片 ' + (images.length + 1),
+                            thumbnail: img.src
+                        });
+                    }
+                }
+            });
+            
+            return images;
+        }
+        
+        // 打开查看器
+        function openImageViewer(index) {
+            // 如果图片数组为空，先收集图片
+            if (images.length === 0) {
+                images = collectImages();
+            }
+            
+            if (images.length === 0) return;
+            
+            currentIndex = Math.max(0, Math.min(index, images.length - 1));
+            resetViewState();
+            loadImage(currentIndex);
+            buildThumbnailStrip();
+            updateUI();
+            
+            document.getElementById('imageViewer').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            preloadAdjacentImages();
+        }
+        
+        // 关闭查看器
+        function closeImageViewer() {
+            stopSlideShow();
+            document.getElementById('imageViewer').classList.remove('active');
+            document.body.style.overflow = '';
+            
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        }
+        
+        // 重置视图
+        function resetViewState() {
+            scale = 1;
+            rotation = 0;
+            flipX = 1;
+            flipY = 1;
+            translateX = 0;
+            translateY = 0;
+            updateSliderValue();
+        }
+        
+        // 加载图片
+        function loadImage(index) {
+            const loading = document.getElementById('viewerLoading');
+            const img = document.getElementById('viewerImage');
+            
+            if (loading) loading.classList.add('active');
+            
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                img.src = images[index].src;
+                currentImageDimensions = {
+                    width: tempImg.naturalWidth,
+                    height: tempImg.naturalHeight
+                };
+                if (loading) loading.classList.remove('active');
+                updateImageInfo();
+                updateTransform();
+            };
+            tempImg.onerror = () => {
+                if (loading) loading.classList.remove('active');
+                showToast('图片加载失败');
+            };
+            tempImg.src = images[index].src;
+        }
+        
+        // 上一张（循环）
+        function prevImage() {
+            if (images.length <= 1) return;
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            resetViewState();
+            loadImage(currentIndex);
+            updateUI();
+            preloadAdjacentImages();
+        }
+        
+        // 下一张（循环）
+        function nextImage() {
+            if (images.length <= 1) return;
+            currentIndex = (currentIndex + 1) % images.length;
+            resetViewState();
+            loadImage(currentIndex);
+            updateUI();
+            preloadAdjacentImages();
+        }
+        
+        // 缩放
+        function zoom(delta) {
+            const newScale = Math.max(0.1, Math.min(5, scale + delta));
+            if (newScale !== scale) {
+                scale = newScale;
+                updateTransform();
+                updateZoomDisplay();
+                updateSliderValue();
+            }
+        }
+        
+        function zoomIn() { zoom(0.25); }
+        function zoomOut() { zoom(-0.25); }
+        
+        function fitToScreen() {
+            resetViewState();
+            updateTransform();
+            updateZoomDisplay();
+            updateSliderValue();
+            showToast('已适应屏幕');
+        }
+        
+        // 旋转
+        function rotateImage(deg) {
+            rotation = (rotation + deg) % 360;
+            updateTransform();
+            showToast('旋转 ' + rotation + '°');
+        }
+        
+        // 翻转
+        function flipHorizontal() {
+            flipX *= -1;
+            updateTransform();
+            showToast(flipX === -1 ? '已水平翻转' : '已取消水平翻转');
+        }
+        
+        function flipVertical() {
+            flipY *= -1;
+            updateTransform();
+            showToast(flipY === -1 ? '已垂直翻转' : '已取消垂直翻转');
+        }
+        
+        // 全屏
+        function toggleFullscreen() {
+            const viewer = document.getElementById('imageViewer');
+            const icon = document.getElementById('fullscreenIcon');
+            
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+                if (icon) icon.className = 'fas fa-expand';
+                showToast('已退出全屏');
+            } else {
+                viewer.requestFullscreen();
+                if (icon) icon.className = 'fas fa-compress-alt';
+                showToast('已进入全屏');
+            }
+        }
+        
+        // 幻灯片
+        function toggleSlideShow() {
+            if (slideShowPlaying) {
+                stopSlideShow();
+            } else {
+                startSlideShow();
+            }
+        }
+        
+        function startSlideShow() {
+            if (images.length <= 1) {
+                showToast('只有一张图片，无法播放幻灯片');
+                return;
+            }
+            
+            slideShowPlaying = true;
+            updateSlideShowButton();
+            showToast('幻灯片播放中...');
+            
+            slideShowInterval = setInterval(() => {
+                nextImage();
+            }, 3000);
+        }
+        
+        function stopSlideShow() {
+            slideShowPlaying = false;
+            updateSlideShowButton();
+            
+            if (slideShowInterval) {
+                clearInterval(slideShowInterval);
+                slideShowInterval = null;
+            }
+        }
+        
+        // 下载
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.href = images[currentIndex].src;
+            link.download = images[currentIndex].title || 'image';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('开始下载...');
+        }
+        
+        // 新窗口打开
+        function openInNewTab() {
+            window.open(images[currentIndex].src, '_blank');
+        }
+        
+        // Toast 提示
+        function showToast(text) {
+            const toast = document.getElementById('viewerToast');
+            if (!toast) return;
+            
+            toast.textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+        
+        // 更新变换
+        function updateTransform() {
+            const container = document.getElementById('imageContainer');
+            if (container) {
+                container.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scaleX(${flipX}) scaleY(${flipY}) scale(${scale})`;
+            }
+        }
+        
+        // 构建缩略图条
+        function buildThumbnailStrip() {
+            const strip = document.getElementById('thumbnailStrip');
+            if (!strip) return;
+            
+            strip.innerHTML = '';
+            
+            images.forEach((img, index) => {
+                const thumb = document.createElement('img');
+                thumb.className = 'viewer-thumbnail' + (index === currentIndex ? ' active' : '');
+                thumb.src = img.thumbnail;
+                thumb.alt = img.title;
+                thumb.onclick = () => {
+                    currentIndex = index;
+                    resetViewState();
+                    loadImage(currentIndex);
+                    updateUI();
+                };
+                strip.appendChild(thumb);
+            });
+        }
+        
+        // 更新 UI 状态
+        function updateUI() {
+            // 更新缩略图激活状态
+            document.querySelectorAll('.viewer-thumbnail').forEach((thumb, index) => {
+                thumb.classList.toggle('active', index === currentIndex);
+            });
+            
+            // 更新图片信息
+            updateImageInfo();
+        }
+        
+        // 更新图片信息
+        function updateImageInfo() {
+            const titleEl = document.getElementById('imageTitle');
+            const counterEl = document.getElementById('imageCounter');
+            const dimensionsEl = document.getElementById('imageDimensions');
+            
+            if (titleEl) titleEl.textContent = images[currentIndex]?.title || '图片';
+            if (counterEl) counterEl.textContent = (currentIndex + 1) + ' / ' + images.length;
+            if (dimensionsEl) dimensionsEl.textContent = currentImageDimensions.width + ' × ' + currentImageDimensions.height;
+        }
+        
+        // 更新缩放显示
+        function updateZoomDisplay() {
+            const display = document.getElementById('zoomDisplay');
+            if (display) display.textContent = Math.round(scale * 100) + '%';
+        }
+        
+        // 更新滑块值
+        function updateSliderValue() {
+            const slider = document.getElementById('zoomSlider');
+            if (slider) slider.value = scale * 100;
+        }
+        
+        // 更新幻灯片按钮
+        function updateSlideShowButton() {
+            const btn = document.getElementById('slideShowBtn');
+            if (btn) {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = slideShowPlaying ? 'fas fa-pause' : 'fas fa-play';
+                }
+            }
+        }
+        
+        // 预加载相邻图片
+        function preloadAdjacentImages() {
+            const preloadIndices = [
+                (currentIndex - 1 + images.length) % images.length,
+                (currentIndex + 1) % images.length
+            ];
+            
+            preloadIndices.forEach(index => {
+                if (images[index]) {
+                    const img = new Image();
+                    img.src = images[index].src;
+                }
+            });
+        }
+        
+        // 绑定事件（需要在 DOM 加载后调用）
+        function bindViewerEvents() {
+            const canvas = document.getElementById('viewerMain');
+            const zoomSlider = document.getElementById('zoomSlider');
+            
+            if (!canvas) return;
+        
+            // 鼠标拖拽
+            canvas.addEventListener('mousedown', (e) => {
+                if (e.button === 0) {
+                    isDragging = true;
+                    startX = e.clientX - translateX;
+                    startY = e.clientY - translateY;
+                    canvas.style.cursor = 'grabbing';
+                }
+            });
+        
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    translateX = e.clientX - startX;
+                    translateY = e.clientY - startY;
+                    updateTransform();
+                }
+            });
+        
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                canvas.style.cursor = 'grab';
+            });
+        
+            // 滚轮缩放
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                zoom(e.deltaY > 0 ? -0.15 : 0.15);
+            }, { passive: false });
+        
+            // 双击适应屏幕
+            canvas.addEventListener('dblclick', (e) => {
+                if (scale !== 1) {
+                    fitToScreen();
+                } else {
+                    scale = 2;
+                    updateTransform();
+                    updateZoomDisplay();
+                    updateSliderValue();
+                }
+            });
+        
+            // 缩放滑块
+            if (zoomSlider) {
+                zoomSlider.addEventListener('input', (e) => {
+                    scale = e.target.value / 100;
+                    updateTransform();
+                    updateZoomDisplay();
+                });
+            }
+        
+            // 键盘快捷键
+            document.addEventListener('keydown', (e) => {
+                if (!document.getElementById('imageViewer').classList.contains('active')) return;
+                
+                switch(e.key) {
+                    case 'Escape': closeImageViewer(); break;
+                    case 'ArrowLeft': prevImage(); break;
+                    case 'ArrowRight': nextImage(); break;
+                    case '+': case '=': zoomIn(); break;
+                    case '-': zoomOut(); break;
+                    case '0': fitToScreen(); break;
+                    case ' ': e.preventDefault(); toggleSlideShow(); break;
+                    case 'f': case 'F': toggleFullscreen(); break;
+                    case 'd': case 'D': downloadImage(); break;
+                }
+            });
+        
+            // 触摸手势
+            let lastTouchDistance = 0;
+            let touchStartTime = 0;
+        
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    startX = e.touches[0].clientX - translateX;
+                    startY = e.touches[0].clientY - translateY;
+                    touchStartTime = Date.now();
+                } else if (e.touches.length === 2) {
+                    lastTouchDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    initialScale = scale;
+                }
+            }, { passive: true });
+        
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1) {
+                    translateX = e.touches[0].clientX - startX;
+                    translateY = e.touches[0].clientY - startY;
+                    updateTransform();
+                } else if (e.touches.length === 2) {
+                    e.preventDefault();
+                    const currentDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    scale = Math.max(0.1, Math.min(5, initialScale * (currentDistance / lastTouchDistance)));
+                    updateTransform();
+                    updateZoomDisplay();
+                    updateSliderValue();
+                }
+            }, { passive: false });
+        
+            canvas.addEventListener('touchend', (e) => {
+                if (e.touches.length === 0) {
+                    const touchDuration = Date.now() - touchStartTime;
+                    const diff = Math.abs(translateX) + Math.abs(translateY);
+                    
+                    if (diff > 50 && touchDuration < 300) {
+                        translateX > 0 ? prevImage() : nextImage();
+                    }
+                }
+            });
+        
+            // 点击背景关闭
+            canvas.addEventListener('click', (e) => {
+                if (e.target === canvas) {
+                    closeImageViewer();
+                }
+            });
+        
+            // 全屏变化
+            document.addEventListener('fullscreenchange', () => {
+                const icon = document.getElementById('fullscreenIcon');
+                if (icon) {
+                    icon.className = document.fullscreenElement ? 'fas fa-compress-alt' : 'fas fa-expand';
+                }
+            });
+        }
+        
+        // 页面加载完成后初始化（重要！）
+        document.addEventListener('DOMContentLoaded', () => {
+            // 延迟初始化图片查看器，确保 DOM 完全就绪
+            setTimeout(() => {
+                // 先收集图片
+                images = collectImages();
+                
+                if (images.length === 0) {
+                    console.warn('没有找到图片');
+                    return;
+                }
+                buildThumbnailStrip();
+                bindViewerEvents();
+            }, 100);
+        });
+        
+        // 如果 DOM 已加载则立即初始化
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(() => {
+                // 先收集图片
+                images = collectImages();
+                
+                if (images.length > 0) {
+                    buildThumbnailStrip();
+                    bindViewerEvents();
+                }
+            }, 200);
+        }
+    </script>
+</body>
+</html>
+                    case '

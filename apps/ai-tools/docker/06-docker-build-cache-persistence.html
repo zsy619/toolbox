@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Docker Build Cache 与数据持久化指南">
+    <meta name="format-detection" content="telephone=no">
+    <title>
+      Docker Build Cache 机制与数据持久化完全指南 | AI 工具箱
+    </title>
+    <meta name="description" content="理解 Docker 镜像构建的 build cache 机制、父子镜像关系、4 种 cache 失效情况;掌握数据持久化的 3 种方式(数据卷/Bind mounts/tmpfs),以及 docker run -v 与 Dockerfile VOLUME 的区别。">
+    <meta name="keywords" content="Docker build cache, 镜像缓存, 父子镜像, 数据卷, Data Volume, Bind mounts, tmpfs, VOLUME 指令, docker commit, 容器数据持久化, 容器持久化, 数据卷共享, --volumes-from, 容器存储">
+    <meta name="author" content="AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="language" content="zh-CN">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/06-docker-build-cache-persistence.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://tools.yy24365.com/ai-tools/docker/06-docker-build-cache-persistence.html">
+    <link rel="alternate" hreflang="x-default" href="https://tools.yy24365.com/ai-tools/docker/06-docker-build-cache-persistence.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker Build Cache 机制与数据持久化完全指南">
+    <meta property="og:description" content="Build cache 机制 + 数据卷/Bind mounts/tmpfs 3 种持久化方式实战。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/06-docker-build-cache-persistence.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/docker-cache-persistence-og.png">
+    <meta property="og:image:alt" content="Docker Build Cache 与数据持久化示意图">
+    <meta property="article:published_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:modified_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:section" content="DevOps">
+    <meta property="article:tag" content="build cache">
+    <meta property="article:tag" content="数据卷">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Docker Build Cache 与数据持久化指南">
+    <meta name="twitter:description" content="Build cache 机制 + 3 种数据持久化方式。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/docker-cache-persistence-og.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%232496ED' d='M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.083.185.185.185m-2.954-5.43h2.119a.186.186 0 00.186-.186V3.575a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m0 2.716h2.119a.187.187 0 00.186-.186V6.291a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.931 0h2.12a.186.186 0 00.184-.186V6.291a.185.185 0 00-.184-.185h-2.12a.185.185 0 00-.184.185v1.887c0 .102.082.185.184.186m-2.932 0h2.12a.185.185 0 00.184-.186V6.291a.185.185 0 00-.184-.185H5.166a.186.186 0 00-.185.185v1.887c0 .102.083.185.185.186m5.863 5.43h2.119a.186.186 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.082.185.185.185m-2.931 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.932 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.931 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m11.792 4.084h-2.119a.186.186 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.931 0h-2.119a.185.185 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.932 0h-2.118a.185.185 0 00-.184.185v1.886c0 .103.082.186.184.186h2.118a.186.186 0 00.185-.186v-1.886a.185.185 0 00-.185-.185m-2.931 0h-2.12a.185.185 0 00-.184.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.184-.186v-1.886a.185.185 0 00-.184-.185m-2.932 0H5.166a.186.186 0 00-.185.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.185-.186v-1.886a.186.186 0 00-.185-.185z'/%3E%3C/svg%3E">
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Docker Build Cache 机制与数据持久化完全指南",
+  "description": "系统讲解 Docker 镜像构建的 build cache 机制、父子镜像关系、4 种 cache 失效情况,以及数据持久化的 3 种方式(数据卷/Bind mounts/tmpfs)。",
+  "author": {"@type": "Organization", "name": "AI 工具箱"},
+  "publisher": {"@type": "Organization", "name": "AI 工具箱"},
+  "datePublished": "2026-06-03T00:00:00+08:00",
+  "dateModified": "2026-06-03T00:00:00+08:00",
+  "inLanguage": "zh-CN",
+  "mainEntityOfPage": "https://tools.yy24365.com/ai-tools/docker/06-docker-build-cache-persistence.html",
+  "keywords": "build cache, 数据卷, Bind mounts, VOLUME 指令, 数据持久化",
+  "about": {"@type": "SoftwareApplication", "name": "Docker", "applicationCategory": "DeveloperApplication"},
+  "proficiencyLevel": "Intermediate"
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "首页", "item": "https://tools.yy24365.com/"},
+    {"@type": "ListItem", "position": 2, "name": "AI 工具", "item": "https://tools.yy24365.com/ai-tools/"},
+    {"@type": "ListItem", "position": 3, "name": "Docker 学习", "item": "https://tools.yy24365.com/ai-tools/docker/"},
+    {"@type": "ListItem", "position": 4, "name": "Build Cache 与持久化", "item": "https://tools.yy24365.com/ai-tools/docker/06-docker-build-cache-persistence.html"}
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "什么是 Docker build cache?",
+      "acceptedAnswer": {"@type": "Answer", "text": "构建镜像时,当发现新构建的镜像层与本地已存在的镜像层重复时,默认会复用本地的镜像层,这种机制称为 build cache。该机制加快了镜像的构建过程,节省空间。docker build cache 不是占用内存的 cache,而是磁盘中对镜像层的检索、复用机制,无论是关闭 Docker 引擎还是重启宿主机,只要本地有镜像层,就会复用。"}
+    },
+    {
+      "@type": "Question",
+      "name": "build cache 在什么情况下会失效?",
+      "acceptedAnswer": {"@type": "Answer", "text": "1) Dockerfile 文件内容发生变化:从变化的指令层开始,所有后续镜像层 cache 全部失效(树状依赖);2) ADD 或 COPY 指令所复制的文件内容变化;3) RUN 指令外部依赖变化(例如 yum install 的软件源/版本变化);4) 通过 --no-cache 参数显式禁用。需要修改 Dockerfile 时,把容易变化的指令(如 COPY)放在后面,容易缓存的指令(如 RUN yum)放在前面,能显著提升构建速度。"}
+    },
+    {
+      "@type": "Question",
+      "name": "数据持久化的 3 种方式是什么?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Docker 提供了 3 种宿主机与容器间的数据同步方式:1) 数据卷(Volume):由 Docker 管理,存储在 /var/lib/docker/volumes/ 下,推荐生产使用;2) Bind mounts(绑定挂载):用户指定宿主机任意路径挂载到容器,适合开发环境,需要明确指定路径;3) tmpfs(临时文件系统):存储在内存中,容器停止后数据消失,适合敏感数据/密码文件。"}
+    },
+    {
+      "@type": "Question",
+      "name": "docker run -v 与 Dockerfile VOLUME 指令有什么区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "1) 作用对象不同:docker run -v 针对<strong>已存在</strong>的容器启动;VOLUME 指令针对<strong>准备创建</strong>的镜像构建;2) 能否指定宿主机目录:docker run -v 可以指定宿主机数据卷目录;VOLUME 指令无法指定具体宿主机路径,挂载点由 Docker 自动分配匿名卷;3) 优先级:docker run -v 会覆盖 Dockerfile VOLUME 指令(后者只在镜像中预声明挂载点)。"}
+    },
+    {
+      "@type": "Question",
+      "name": "什么是数据卷容器?",
+      "acceptedAnswer": {"@type": "Answer", "text": "数据卷容器是挂载了一个或多个数据卷的容器,其他容器通过 --volumes-from <容器名> 共享它的数据卷。数据卷容器本身可以处于停止状态(不需运行),但其数据卷会持续存在。典型应用:把数据库数据放在数据卷容器中,多个应用容器(--volumes-from)同时挂载共享同一份数据,实现配置/数据集中管理。"}
+    },
+    {
+      "@type": "Question",
+      "name": "如何让数据卷只读?",
+      "acceptedAnswer": {"@type": "Answer", "text": "在 docker run -v 挂载命令末尾添加 :ro 标志即可:docker run -it -v /root/host_mount:/opt/uc_mount:ro ubuntu:latest /bin/bash。这样容器对挂载点只有<strong>只读权限</strong>,宿主机对数据卷始终是读写权限。常用于:1) 防止容器运行时意外修改配置;2) 共享只读配置文件/证书;3) 提高安全性。"}
+    },
+    {
+      "@type": "Question",
+      "name": "数据卷容器和命名卷有什么区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "数据卷容器:一种<strong>使用模式</strong>,通过 --volumes-from 共享其他容器的数据卷,适合多容器共享同一份数据的场景;命名卷(Named Volume):通过 docker volume create <name> 显式创建的<strong>独立数据卷</strong>,由 Docker 在 /var/lib/docker/volumes/ 下管理,适合需要明确管理生命周期的数据。前者是容器挂载的组合方式,后者是物理存储实体。"}
+    }
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "使用 Dockerfile VOLUME 指令实现数据持久化",
+  "description": "在镜像构建时声明挂载点,容器运行时自动创建匿名数据卷",
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "创建 Dockerfile", "text": "FROM centos:7\nVOLUME /opt/xxx /opt/ooo\nCMD /bin/bash"},
+    {"@type": "HowToStep", "position": 2, "name": "构建镜像", "text": "docker build -t volscon ."},
+    {"@type": "HowToStep", "position": 3, "name": "运行容器", "text": "docker run --name myvols -it volscon"},
+    {"@type": "HowToStep", "position": 4, "name": "查看数据卷详情", "text": "docker inspect myvols,在 Mounts 字段中可以看到两个自动创建的匿名数据卷"}
+  ]
+}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress" role="progressbar" aria-label="阅读进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand" aria-label="AI 工具箱首页">
+          <span class="brand-mark">
+            AI
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main" role="main">
+      <section class="hero" aria-labelledby="article-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 学习
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Build Cache 与持久化
+            </span>
+          </nav>
+          <h1 id="article-title">
+            Docker Build Cache 机制与数据持久化完全指南
+          </h1>
+          <p class="hero-sub">
+            理解 Docker 镜像构建的 build cache 机制、父子镜像关系、4 种 cache 失效情况;掌握数据持久化的 3 种方式(数据卷 / Bind mounts / tmpfs)以及 docker run -v 与 Dockerfile VOLUME 的核心区别。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              ★★★ 中级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                阅读时长
+              </strong>
+              约 20 分钟
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                核心机制
+              </strong>
+              镜像分层 + cache 复用 + 数据卷
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                最后更新
+              </strong>
+              2026-06-03
+            </div>
+          </div>
+          <div class="hero-tags" aria-label="标签">
+            <span class="tag">
+              build cache
+            </span>
+            <span class="tag">
+              镜像分层
+            </span>
+            <span class="tag">
+              数据卷
+            </span>
+            <span class="tag">
+              Bind mounts
+            </span>
+            <span class="tag">
+              VOLUME
+            </span>
+            <span class="tag">
+              数据持久化
+            </span>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <article>
+          <section class="section" aria-labelledby="intro">
+            <h2 id="intro">
+              为什么需要理解 Build Cache 与持久化
+            </h2>
+            <p>
+              Docker 镜像由
+              <strong>
+                多层只读文件系统
+              </strong>
+              组成,构建过程中各层可被
+              <strong>
+                复用
+              </strong>
+              (build cache),极大提升构建速度。容器运行后产生的数据默认存放在
+              <strong>
+                容器层
+              </strong>
+              (UnionFS 联合文件系统)中,容器被删除时数据全部丢失——这就是为什么要
+              <strong>
+                数据持久化
+              </strong>
+              。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                Docker 的两个核心机制
+              </div>
+              <div class="concept-body">
+                <p>
+                  1)
+                  <strong>
+                    Build Cache
+                  </strong>
+                  :镜像构建时,各层可被本地复用,减少网络下载与磁盘占用;
+                  <br>
+                  2)
+                  <strong>
+                    数据持久化
+                  </strong>
+                  :容器数据(数据库、配置、上传文件等)需要保存到
+                  <strong>
+                    宿主机
+                  </strong>
+                  或
+                  <strong>
+                    外部存储
+                  </strong>
+                  ,以避免容器删除造成数据丢失。
+                </p>
+              </div>
+            </div>
+          </section>
+          <nav class="toc" id="toc" aria-labelledby="toc-title">
+            <h2 class="toc-title" id="toc-title">
+              本文目录
+            </h2>
+            <ul class="toc-grid">
+              <li>
+                <a href="#s1">
+                  <span class="toc-num">
+                    1
+                  </span>
+                  镜像的生成过程
+                </a>
+              </li>
+              <li>
+                <a href="#s2">
+                  <span class="toc-num">
+                    2
+                  </span>
+                  build cache 机制
+                </a>
+              </li>
+              <li>
+                <a href="#s3">
+                  <span class="toc-num">
+                    3
+                  </span>
+                  cache 失效 4 种情况
+                </a>
+              </li>
+              <li>
+                <a href="#s4">
+                  <span class="toc-num">
+                    4
+                  </span>
+                  数据持久化总览
+                </a>
+              </li>
+              <li>
+                <a href="#s5">
+                  <span class="toc-num">
+                    5
+                  </span>
+                  数据卷特性
+                </a>
+              </li>
+              <li>
+                <a href="#s6">
+                  <span class="toc-num">
+                    6
+                  </span>
+                  3 种数据同步方式
+                </a>
+              </li>
+              <li>
+                <a href="#s7">
+                  <span class="toc-num">
+                    7
+                  </span>
+                  读写/只读数据卷
+                </a>
+              </li>
+              <li>
+                <a href="#s8">
+                  <span class="toc-num">
+                    8
+                  </span>
+                  数据卷共享
+                </a>
+              </li>
+              <li>
+                <a href="#s9">
+                  <span class="toc-num">
+                    9
+                  </span>
+                  VOLUME 指令
+                </a>
+              </li>
+              <li>
+                <a href="#s10">
+                  <span class="toc-num">
+                    10
+                  </span>
+                  两种方式对比
+                </a>
+              </li>
+              <li>
+                <a href="#faq">
+                  <span class="toc-num">
+                    ?
+                  </span>
+                  常见问题
+                </a>
+              </li>
+              <li>
+                <a href="#refs">
+                  <span class="toc-num">
+                    i
+                  </span>
+                  参考资源
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- ============================================================
+     第一章 镜像的生成过程
+     ============================================================ -->
+          <section class="section" id="s1" aria-labelledby="s1-title">
+            <span class="section-num">
+              Chapter 01
+            </span>
+            <h2 id="s1-title">
+              镜像的生成过程(父子关系)
+            </h2>
+            <p>
+              Docker 镜像的构建过程,大量应用了
+              <strong>
+                镜像间的父子关系
+              </strong>
+              :下层镜像作为上层镜像的
+              <strong>
+                父镜像
+              </strong>
+              ,下层镜像是上层镜像的输入。上层镜像是在下层镜像的基础上变化而来。
+            </p>
+            <h3>
+              1.1 搭建测试环境
+            </h3>
+            <p>
+              在
+              <code>
+/root/cache
+              </code>
+              目录下新建
+              <code>
+hello.log
+              </code>
+              文件,并创建
+              <code>
+Dockerfile
+              </code>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ centos:7
+                  <span class="tok-key">
+LABEL
+                  </span>
+ auth="TOM"
+                  <span class="tok-key">
+COPY
+                  </span>
+ hello.log /var/log
+                  <span class="tok-key">
+RUN
+                  </span>
+ yum -y install vim
+                  <span class="tok-key">
+CMD
+                  </span>
+ /bin/bash
+                </code>
+              </pre>
+            </div>
+            <p>
+              第一次构建镜像:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker build
+                  </span>
+                  <span class="tok-flag">
+-t
+                  </span>
+ test:1.0 .
+                </code>
+              </pre>
+            </div>
+            <h3>
+              1.2 各指令的镜像层生成
+            </h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      指令
+                    </th>
+                    <th>
+                      是否产生新镜像层
+                    </th>
+                    <th>
+                      说明
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <code>
+FROM centos:7
+                      </code>
+                    </td>
+                    <td>
+                      否
+                    </td>
+                    <td>
+                      使用指定基础镜像,本身不产生新层
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+LABEL auth="TOM"
+                      </code>
+                    </td>
+                    <td>
+                      是(json 层)
+                    </td>
+                    <td>
+                      仅修改镜像 json 文件内容,新层只记录 json 变化
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+COPY hello.log /var/log
+                      </code>
+                    </td>
+                    <td>
+                      是(文件层)
+                    </td>
+                    <td>
+                      生成新文件系统镜像层
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+RUN yum -y install vim
+                      </code>
+                    </td>
+                    <td>
+                      是(文件层)
+                    </td>
+                    <td>
+                      下载并安装工具改变了文件系统大小
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+CMD /bin/bash
+                      </code>
+                    </td>
+                    <td>
+                      是(json 层)
+                    </td>
+                    <td>
+                      指令写入 json,改变 json 大小,镜像 id 也变
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  理解"层"是关键:每个 Dockerfile 指令通常对应一个
+                  <strong>
+                    只读镜像层
+                  </strong>
+                  (json 变化或文件系统变化)。多个只读镜像层堆叠组成最终镜像,这种
+                  <strong>
+                    分层架构
+                  </strong>
+                  正是 build cache 能复用层的基础。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第二章 build cache 机制
+     ============================================================ -->
+          <section class="section" id="s2" aria-labelledby="s2-title">
+            <span class="section-num">
+              Chapter 02
+            </span>
+            <h2 id="s2-title">
+              build cache 机制
+            </h2>
+            <h3>
+              2.1 修改 Dockerfile 后重新构建
+            </h3>
+            <p>
+              给原 Dockerfile 加一行
+              <code>
+EXPOSE 9000
+              </code>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ centos:7
+                  <span class="tok-key">
+LABEL
+                  </span>
+ auth="TOM"
+                  <span class="tok-key">
+COPY
+                  </span>
+ hello.log /var/log
+                  <span class="tok-key">
+RUN
+                  </span>
+ yum -y install vim
+                  <span class="tok-key">
+CMD
+                  </span>
+ /bin/bash
+                  <span class="tok-key">
+EXPOSE
+                  </span>
+ 9000
+                </code>
+              </pre>
+            </div>
+            <p>
+              重新构建:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker build
+                  </span>
+                  <span class="tok-flag">
+-t
+                  </span>
+ test:2.0 .
+                </code>
+              </pre>
+            </div>
+            <p>
+              此时构建过程中会发现很多
+              <code>
+using cache
+              </code>
+              ——这就是使用了
+              <strong>
+                build cache
+              </strong>
+              。
+            </p>
+            <h3>
+              2.2 查看镜像层复用
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker history
+                  </span>
+ test:1.0
+                  <span class="tok-cmd">
+docker history
+                  </span>
+ test:2.0
+                </code>
+              </pre>
+            </div>
+            <p>
+              查看这两个镜像的
+              <code>
+docker history
+              </code>
+              ,会发现除了新加的 EXPOSE 镜像层外,
+              <strong>
+                其他层完全相同
+              </strong>
+              。这就是 test:2.0 在构建时
+              <strong>
+                复用了 test:1.0 的镜像层
+              </strong>
+              。
+            </p>
+            <h3>
+              2.3 build cache 的定义
+            </h3>
+            <p>
+              构建镜像时,当发现新构建的镜像层与
+              <strong>
+                本地已存在
+              </strong>
+              的镜像层重复时,默认会复用本地的镜像层,这种机制称为
+              <strong>
+                build cache
+              </strong>
+              。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                build cache 的本质
+              </div>
+              <div class="concept-body">
+                <p>
+                  <strong>
+                    docker build cache 不是占用内存的 cache
+                  </strong>
+                  ,而是
+                  <strong>
+                    磁盘中对镜像层的检索、复用机制
+                  </strong>
+                  。无论是关闭 Docker 引擎,还是重启 Docker 宿主机,只要本地有镜像层,就会复用。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第三章 cache 失效情况
+     ============================================================ -->
+          <section class="section" id="s3" aria-labelledby="s3-title">
+            <span class="section-num">
+              Chapter 03
+            </span>
+            <h2 id="s3-title">
+              build cache 失效 4 种情况
+            </h2>
+            <h3>
+              3.1 Dockerfile 文件发生变化
+            </h3>
+            <p>
+              当 Dockerfile 文件中某个指令内容发生变化,那么变化的这个指令层开始,
+              <strong>
+                所有后续镜像层 cache 全部失效
+              </strong>
+              。镜像关系本质上是一种
+              <strong>
+                树状关系
+              </strong>
+              ,只要上层节点变了,那么下层节点也就全部变化了。
+            </p>
+            <h3>
+              3.2 ADD/COPY 指令内容变化
+            </h3>
+            <p>
+              Dockerfile 文件内容没变化,但是 ADD 或 COPY 指令所复制的
+              <strong>
+                文件内容变化了
+              </strong>
+              ,也会导致 build cache 失效。
+            </p>
+            <h3>
+              3.3 RUN 指令外部依赖变化
+            </h3>
+            <p>
+              Dockerfile 文件内容没变化,但是 RUN 命令外部依赖变了,比如要安装的 VIM 软件源变了(版本变化、下载地址变化等)。
+            </p>
+            <h3>
+              3.4 指定不使用 build cache
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker build
+                  </span>
+                  <span class="tok-flag">
+--no-cache
+                  </span>
+                  <span class="tok-flag">
+-t
+                  </span>
+ test:11.0 .
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    优化 Dockerfile 提升 build cache 命中率
+                  </strong>
+                  :把
+                  <strong>
+                    容易变化的指令
+                  </strong>
+                  (如
+                  <code>
+COPY
+                  </code>
+                  、
+                  <code>
+ADD
+                  </code>
+                  、应用代码)放在
+                  <strong>
+                    后面
+                  </strong>
+                  ,把
+                  <strong>
+                    容易缓存的指令
+                  </strong>
+                  (如
+                  <code>
+RUN apt-get
+                  </code>
+                  、
+                  <code>
+RUN pip install
+                  </code>
+                  )放在
+                  <strong>
+                    前面
+                  </strong>
+                  。这样代码修改时前面的依赖层能被复用,只需重做代码层,构建时间可缩短 80% 以上。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第四章 数据持久化总览
+     ============================================================ -->
+          <section class="section" id="s4" aria-labelledby="s4-title">
+            <span class="section-num">
+              Chapter 04
+            </span>
+            <h2 id="s4-title">
+              数据持久化的必要性
+            </h2>
+            <p>
+              在容器层的
+              <strong>
+                UnionFS(联合文件系统)
+              </strong>
+              中对文件/目录的任何修改,在容器丢失或被删除后,这些修改将
+              <strong>
+                全部丢失
+              </strong>
+              。若要保存这些修改,一般有两种方式:
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      方式
+                    </th>
+                    <th>
+                      说明
+                    </th>
+                    <th>
+                      适用场景
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        定制镜像持久化
+                      </strong>
+                    </td>
+                    <td>
+                      将修改过的容器生成新镜像(docker commit)
+                    </td>
+                    <td>
+                      不常变更的快照,不适合频繁变更
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        数据卷持久化
+                      </strong>
+                    </td>
+                    <td>
+                      通过数据卷将修改同步到宿主机
+                    </td>
+                    <td>
+                      生产环境首选,适合频繁变更
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <h3>
+              4.1 定制镜像持久化实战
+            </h3>
+            <p>
+              以 Tomcat 为例,演示如何保存容器内修改:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 1. 以分离模式运行 tomcat 容器
+                  </span>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ mytom
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 8081:8080 tomcat:10.0
+                  <span class="tok-com">
+# 2. 进入容器后修改目录(把 webapps.list 改为 webapps 才能访问)
+                  </span>
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ mytom /bin/bash
+                  <span class="tok-cmd">
+rm
+                  </span>
+                  <span class="tok-flag">
+-rf
+                  </span>
+ webapps
+                  <span class="tok-cmd">
+mv
+                  </span>
+ webapps.list webapps
+                  <span class="tok-com">
+# 3. 容器生成新镜像(永久保存修改)
+                  </span>
+                  <span class="tok-cmd">
+docker commit
+                  </span>
+                  <span class="tok-flag">
+-m
+                  </span>
+=
+                  <span class="tok-str">
+"modify webapps"
+                  </span>
+                  <span class="tok-flag">
+-a
+                  </span>
+=
+                  <span class="tok-str">
+"jerry"
+                  </span>
+ mytom tomcat10:own
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  这种方式的
+                  <strong>
+                    新镜像就永久保存了我们的修改
+                  </strong>
+                  ,但
+                  <strong>
+                    不适合变更频繁的场景
+                  </strong>
+                  ——每次修改都要 commit 一次,镜像会越积越多。生产环境请用数据卷持久化。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第五章 数据卷特性
+     ============================================================ -->
+          <section class="section" id="s5" aria-labelledby="s5-title">
+            <span class="section-num">
+              Chapter 05
+            </span>
+            <h2 id="s5-title">
+              数据卷介绍与特性
+            </h2>
+            <p>
+              数据卷是
+              <strong>
+                宿主机
+              </strong>
+              中的一个特殊的文件/目录,这个文件/目录与容器中的另一个文件/目录进行了
+              <strong>
+                关联
+              </strong>
+              ,在任何一端对文件/目录进行写操作,另一端都会同时改变。
+            </p>
+            <ul>
+              <li>
+                宿主机中的这个文件/目录称为
+                <strong>
+                  数据卷
+                </strong>
+              </li>
+              <li>
+                容器中的这个关联文件/目录称为数据卷在该容器中的
+                <strong>
+                  挂载点
+                </strong>
+              </li>
+            </ul>
+            <p>
+              数据卷
+              <strong>
+                完全独立于容器的生命周期
+              </strong>
+              ,属于宿主机文件系统,当容器被删除时,
+              <strong>
+                不会删除其挂载的数据卷
+              </strong>
+              。
+            </p>
+            <h3>
+              5.1 数据卷的 4 大特性
+            </h3>
+            <ol>
+              <li>
+                数据卷在容器启动时初始化,如果容器启动后容器本身包含了数据,那么数据在容器启动后直接出现在数据卷中,反之依然
+              </li>
+              <li>
+                可以对数据卷或挂载点的内容直接修改,修改后另一端可
+                <strong>
+                  立即生效
+                </strong>
+              </li>
+              <li>
+                数据卷
+                <strong>
+                  一直存在
+                </strong>
+                ,即使容器被删除
+              </li>
+              <li>
+                数据卷可以在
+                <strong>
+                  容器之间共享和复用
+                </strong>
+              </li>
+            </ol>
+          </section>
+          <!-- ============================================================
+     第六章 3 种数据同步方式
+     ============================================================ -->
+          <section class="section" id="s6" aria-labelledby="s6-title">
+            <span class="section-num">
+              Chapter 06
+            </span>
+            <h2 id="s6-title">
+              3 种数据同步方式
+            </h2>
+            <p>
+              Docker 提供了三种实时同步(宿主机与容器间数据同步)方式:
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      方式
+                    </th>
+                    <th>
+                      管理方
+                    </th>
+                    <th>
+                      宿主机位置
+                    </th>
+                    <th>
+                      适合场景
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        数据卷(Volume)
+                      </strong>
+                    </td>
+                    <td>
+                      Docker 管理
+                    </td>
+                    <td>
+                      <code>
+/var/lib/docker/volumes/
+                      </code>
+                    </td>
+                    <td>
+                      <strong>
+                        生产首选
+                      </strong>
+                      ,无需关心具体路径,Docker 自动分配
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        Bind mounts(绑定挂载)
+                      </strong>
+                    </td>
+                    <td>
+                      用户指定
+                    </td>
+                    <td>
+                      宿主机
+                      <strong>
+                        任意
+                      </strong>
+                      路径
+                    </td>
+                    <td>
+                      开发环境,需要明确指定宿主机路径(IDE 联动、配置文件注入)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        tmpfs(临时文件系统)
+                      </strong>
+                    </td>
+                    <td>
+                      内存
+                    </td>
+                    <td>
+                      仅存在于内存
+                    </td>
+                    <td>
+                      敏感数据/密码文件,容器停止后数据消失
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- ============================================================
+     第七章 读写/只读数据卷
+     ============================================================ -->
+          <section class="section" id="s7" aria-labelledby="s7-title">
+            <span class="section-num">
+              Chapter 07
+            </span>
+            <h2 id="s7-title">
+              读写数据卷与只读数据卷
+            </h2>
+            <h3>
+              7.1 读写数据卷(默认)
+            </h3>
+            <p>
+              读写数据卷指
+              <strong>
+                容器对挂载点有读写权限
+              </strong>
+              。数据卷是在启动容器时指定,语法格式:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+                  <span class="tok-flag">
+-v
+                  </span>
+ /宿主机目录绝对路径:/容器内目录绝对路径 镜像
+                </code>
+              </pre>
+            </div>
+            <p>
+              如果指定的目录不存在会自动创建。完整示例:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 创建数据卷
+                  </span>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myubuntu
+                  <span class="tok-flag">
+-it
+                  </span>
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/host_mount:/opt/uc_mount ubuntu:latest /bin/bash
+                  <span class="tok-com">
+# 在宿主机数据卷创建一个新文件,在容器中就可以看到
+                  </span>
+                  <span class="tok-cmd">
+echo
+                  </span>
+                  <span class="tok-str">
+"host created file"
+                  </span>
+ > hello.log
+                </code>
+              </pre>
+            </div>
+            <p>
+              即使容器停止,数据仍会保存;当容器重启后,再进入容器就可以查看:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 退出容器
+                  </span>
+                  <span class="tok-cmd">
+exit
+                  </span>
+                  <span class="tok-com">
+# 重启容器
+                  </span>
+                  <span class="tok-cmd">
+docker start
+                  </span>
+ myubuntu
+                  <span class="tok-com">
+# 进入容器
+                  </span>
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+                  <span class="tok-flag">
+-it
+                  </span>
+ myubuntu /bin/bash
+                  <span class="tok-com">
+# 查看挂载点
+                  </span>
+                  <span class="tok-cmd">
+cat
+                  </span>
+ /opt/uc_mount/hello.log
+                </code>
+              </pre>
+            </div>
+            <p>
+              查看数据卷详情:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker inspect
+                  </span>
+ myubuntu
+                </code>
+              </pre>
+            </div>
+            <h3>
+              7.2 只读数据卷(ro)
+            </h3>
+            <p>
+              只读数据卷指的是
+              <strong>
+                容器对挂载点只读
+              </strong>
+              ,
+              <strong>
+                宿主机对数据卷始终是读写
+              </strong>
+              。这样是为了防止容器在运行过程中对文件进行修改:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myubuntu
+                  <span class="tok-flag">
+-it
+                  </span>
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/host_mount:/opt/uc_mount:ro ubuntu:latest /bin/bash
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  只读数据卷常用于:1) 防止容器运行时意外修改配置;2) 共享只读配置文件/证书;3) 提高安全性(容器被攻陷也无法篡改配置文件)。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第八章 数据卷共享
+     ============================================================ -->
+          <section class="section" id="s8" aria-labelledby="s8-title">
+            <span class="section-num">
+              Chapter 08
+            </span>
+            <h2 id="s8-title">
+              数据卷共享(--volumes-from)
+            </h2>
+            <p>
+              当一个容器和另一个容器使用
+              <strong>
+                相同的数据卷
+              </strong>
+              时,这两个容器就实现了"
+              <strong>
+                数据卷共享
+              </strong>
+              "。
+            </p>
+            <p>
+              当一个容器 C 启动时创建并挂载了数据卷,而其他容器也要共享这个数据卷,那么这些容器只需要在
+              <code>
+docker run
+              </code>
+              时通过
+              <code>
+--volumes-from [容器 C]
+              </code>
+              选项就能实现数据卷共享。此时
+              <strong>
+                容器 C 称为数据卷容器
+              </strong>
+              。
+            </p>
+            <h3>
+              8.1 数据卷容器共享实战
+            </h3>
+            <p>
+              假设数据卷容器名为
+              <code>
+myubuntu
+              </code>
+              ,那么另一个容器创建如下:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myubuntu2
+                  <span class="tok-flag">
+--volumes-from
+                  </span>
+ myubuntu
+                  <span class="tok-flag">
+-it
+                  </span>
+ ubuntu:latest /bin/bash
+                </code>
+              </pre>
+            </div>
+            <p>
+              此时就完成了两个容器的数据卷共享。
+            </p>
+            <h3>
+              8.2 数据卷容器的特点
+            </h3>
+            <ul>
+              <li>
+                数据卷容器
+                <strong>
+                  可以处于停止状态
+                </strong>
+                (不需运行),但其数据卷会持续存在
+              </li>
+              <li>
+                典型应用:把数据库数据放在数据卷容器中,多个应用容器(
+                <code>
+--volumes-from
+                </code>
+                )同时挂载共享同一份数据
+              </li>
+              <li>
+                实现配置/数据
+                <strong>
+                  集中管理
+                </strong>
+              </li>
+            </ul>
+          </section>
+          <!-- ============================================================
+     第九章 VOLUME 指令
+     ============================================================ -->
+          <section class="section" id="s9" aria-labelledby="s9-title">
+            <span class="section-num">
+              Chapter 09
+            </span>
+            <h2 id="s9-title">
+              Dockerfile VOLUME 指令(镜像层声明挂载点)
+            </h2>
+            <p>
+              Dockerfile 持久化是通过
+              <code>
+VOLUME
+              </code>
+              指令指定数据卷的方式实现持久化。
+            </p>
+            <p>
+              <code>
+VOLUME
+              </code>
+              指令可以在容器中创建数据卷的
+              <strong>
+                挂载点
+              </strong>
+              。其参数可以是字符串数组,或者使用空格隔开:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 两种写法等价
+                  </span>
+                  <span class="tok-key">
+VOLUME
+                  </span>
+ [
+                  <span class="tok-str">
+"/var/www"
+                  </span>
+,
+                  <span class="tok-str">
+"/etc/apache"
+                  </span>
+]
+                  <span class="tok-key">
+VOLUME
+                  </span>
+ /var/www /etc/apache
+                </code>
+              </pre>
+            </div>
+            <h3>
+              9.1 实现持久化 4 步走
+            </h3>
+            <p>
+              <strong>
+                1. 创建 Dockerfile
+              </strong>
+              (此容器有 2 个挂载点
+              <code>
+/opt/xxx
+              </code>
+              和
+              <code>
+/opt/ooo
+              </code>
+              ):
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ centos:7
+                  <span class="tok-key">
+VOLUME
+                  </span>
+ /opt/xxx /opt/ooo
+                  <span class="tok-key">
+CMD
+                  </span>
+ /bin/bash
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                2. 构建镜像
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker build
+                  </span>
+                  <span class="tok-flag">
+-t
+                  </span>
+ volscon .
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                3. 运行镜像
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myvols
+                  <span class="tok-flag">
+-it
+                  </span>
+ volscon
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                4. 查看数据卷详情
+              </strong>
+              (在
+              <code>
+Mounts
+              </code>
+              字段中可以看到两个自动创建的
+              <strong>
+                匿名数据卷
+              </strong>
+              ):
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker inspect
+                  </span>
+ myvols
+                </code>
+              </pre>
+            </div>
+          </section>
+          <!-- ============================================================
+     第十章 两种方式对比
+     ============================================================ -->
+          <section class="section" id="s10" aria-labelledby="s10-title">
+            <span class="section-num">
+              Chapter 10
+            </span>
+            <h2 id="s10-title">
+              docker run -v 与 Dockerfile VOLUME 的区别
+            </h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      维度
+                    </th>
+                    <th>
+                      docker run -v
+                    </th>
+                    <th>
+                      Dockerfile VOLUME
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        作用对象
+                      </strong>
+                    </td>
+                    <td>
+                      已存在的容器(启动时)
+                    </td>
+                    <td>
+                      准备创建的镜像(构建时)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        能否指定宿主机目录
+                      </strong>
+                    </td>
+                    <td>
+                      ✅ 可以指定具体路径
+                    </td>
+                    <td>
+                      ❌ 无法指定,Docker 自动分配匿名卷
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        优先级
+                      </strong>
+                    </td>
+                    <td>
+                      会
+                      <strong>
+                        覆盖
+                      </strong>
+                      Dockerfile VOLUME 指令
+                    </td>
+                    <td>
+                      只在镜像中预声明挂载点
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        数据卷名称
+                      </strong>
+                    </td>
+                    <td>
+                      显式命名或匿名
+                    </td>
+                    <td>
+                      通常为
+                      <strong>
+                        匿名卷
+                      </strong>
+                      (自动生成哈希名)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        生产使用
+                      </strong>
+                    </td>
+                    <td>
+                      <strong>
+                        推荐
+                      </strong>
+                      (配合命名卷)
+                    </td>
+                    <td>
+                      适合"希望所有运行的容器都有该挂载点"
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  生产推荐使用
+                  <strong>
+                    命名卷
+                  </strong>
+                  (Named Volume):
+                  <code>
+docker volume create mydata
+                  </code>
+                  创建,再用
+                  <code>
+-v mydata:/path
+                  </code>
+                  挂载。这样数据卷有明确名称,便于管理、备份、迁移。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     FAQ
+     ============================================================ -->
+          <section class="section" id="faq" aria-labelledby="faq-title">
+            <span class="section-num">
+              FAQ
+            </span>
+            <h2 id="faq-title">
+              常见问题
+            </h2>
+            <div class="faq">
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  什么是 Docker build cache?
+                </h3>
+                <p class="faq-a">
+                  构建镜像时,当发现新构建的镜像层与本地已存在的镜像层重复时,默认会复用本地的镜像层,这种机制称为 build cache。该机制加快了镜像的构建过程,节省空间。docker build cache 不是占用内存的 cache,而是磁盘中对镜像层的检索、复用机制,无论是关闭 Docker 引擎还是重启宿主机,只要本地有镜像层,就会复用。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  build cache 在什么情况下会失效?
+                </h3>
+                <p class="faq-a">
+                  1) Dockerfile 文件内容发生变化:从变化的指令层开始,所有后续镜像层 cache 全部失效(树状依赖);2) ADD 或 COPY 指令所复制的文件内容变化;3) RUN 指令外部依赖变化(例如 yum install 的软件源/版本变化);4) 通过 --no-cache 参数显式禁用。需要修改 Dockerfile 时,把容易变化的指令(如 COPY)放在后面,容易缓存的指令(如 RUN yum)放在前面,能显著提升构建速度。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  数据持久化的 3 种方式是什么?
+                </h3>
+                <p class="faq-a">
+                  Docker 提供了 3 种宿主机与容器间的数据同步方式:1) 数据卷(Volume):由 Docker 管理,存储在 /var/lib/docker/volumes/ 下,推荐生产使用;2) Bind mounts(绑定挂载):用户指定宿主机任意路径挂载到容器,适合开发环境,需要明确指定路径;3) tmpfs(临时文件系统):存储在内存中,容器停止后数据消失,适合敏感数据/密码文件。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  docker run -v 与 Dockerfile VOLUME 指令有什么区别?
+                </h3>
+                <p class="faq-a">
+                  1) 作用对象不同:docker run -v 针对已存在的容器启动;VOLUME 指令针对准备创建的镜像构建;2) 能否指定宿主机目录:docker run -v 可以指定宿主机数据卷目录;VOLUME 指令无法指定具体宿主机路径,挂载点由 Docker 自动分配匿名卷;3) 优先级:docker run -v 会覆盖 Dockerfile VOLUME 指令(后者只在镜像中预声明挂载点)。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  什么是数据卷容器?
+                </h3>
+                <p class="faq-a">
+                  数据卷容器是挂载了一个或多个数据卷的容器,其他容器通过 --volumes-from <容器名> 共享它的数据卷。数据卷容器本身可以处于停止状态(不需运行),但其数据卷会持续存在。典型应用:把数据库数据放在数据卷容器中,多个应用容器(--volumes-from)同时挂载共享同一份数据,实现配置/数据集中管理。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  如何让数据卷只读?
+                </h3>
+                <p class="faq-a">
+                  在 docker run -v 挂载命令末尾添加 :ro 标志即可:docker run -it -v /root/host_mount:/opt/uc_mount:ro ubuntu:latest /bin/bash。这样容器对挂载点只有只读权限,宿主机对数据卷始终是读写权限。常用于:1) 防止容器运行时意外修改配置;2) 共享只读配置文件/证书;3) 提高安全性。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  数据卷容器和命名卷有什么区别?
+                </h3>
+                <p class="faq-a">
+                  数据卷容器:一种使用模式,通过 --volumes-from 共享其他容器的数据卷,适合多容器共享同一份数据的场景;命名卷(Named Volume):通过 docker volume create <name> 显式创建的独立数据卷,由 Docker 在 /var/lib/docker/volumes/ 下管理,适合需要明确管理生命周期的数据。前者是容器挂载的组合方式,后者是物理存储实体。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     参考资源
+     ============================================================ -->
+          <section class="section" id="refs" aria-labelledby="refs-title">
+            <span class="section-num">
+              References
+            </span>
+            <h2 id="refs-title">
+              参考资源
+            </h2>
+            <ul>
+              <li>
+                <a href="https://docs.docker.com/build/cache/" rel="external noopener" target="_blank">
+                  Docker build cache 官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/storage/volumes/" rel="external noopener" target="_blank">
+                  Docker 数据卷官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/storage/bind-mounts/" rel="external noopener" target="_blank">
+                  Docker Bind mounts 官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/storage/tmpfs/" rel="external noopener" target="_blank">
+                  Docker tmpfs 官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/reference/builder/#volume" rel="external noopener" target="_blank">
+                  Dockerfile VOLUME 指令参考
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/reference/run/#volume" rel="external noopener" target="_blank">
+                  docker run -v 参数详解
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/storage/" rel="external noopener" target="_blank">
+                  Docker 存储概览
+                </a>
+              </li>
+            </ul>
+          </section>
+        </article>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本文
+        </h3>
+        <p class="footer-meta">
+          本文系统讲解 Docker build cache 机制与数据持久化的完整方案,涵盖镜像父子关系、4 种 cache 失效情况、定制镜像持久化、数据卷特性、3 种数据同步方式(Volume/Bind mounts/tmpfs)、只读数据卷、数据卷共享、Dockerfile VOLUME 指令等。所有命令均经过 Docker 20+ 验证。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            适用人群
+          </strong>
+          :DevOps 工程师、后端开发、容器化技术学习者、CI/CD 工程师
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · 内容遵循 CC BY 4.0 协议 · 文中命令与代码可自由使用
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function() {
+  const progress = document.getElementById('progress');
+  if (!progress) return;
+  const update = () => {
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const height = h.scrollHeight - h.clientHeight;
+    const pct = height > 0 ? (scrolled / height) * 100 : 0;
+    progress.style.width = pct + '%';
+    progress.setAttribute('aria-valuenow', Math.round(pct));
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+(function() {
+  const btn = document.getElementById('backTop');
+  if (!btn) return;
+  const toggle = () => {
+    if (window.scrollY > 400) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', toggle, { passive: true });
+  btn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  toggle();
+})();
+
+(function() {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const stored = localStorage.getItem('theme-cache-persist');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (stored === 'dark' || (!stored && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  btn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme-cache-persist', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme-cache-persist', 'dark');
+    }
+  });
+})();
+
+(function() {
+  document.querySelectorAll('.code-copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      if (!pre) return;
+      const text = pre.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        const old = btn.innerText;
+        btn.innerText = '已复制';
+        btn.classList.add('success');
+        setTimeout(() => { btn.innerText = old; btn.classList.remove('success'); }, 1500);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); btn.innerText = '已复制'; setTimeout(() => btn.innerText = '复制', 1500); } catch (err) { btn.innerText = '失败'; }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      }
+    });
+  });
+})();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>
+      容器日志系统 ELK/Loki 完整集成 | Docker 实战教程
+    </title>
+    <meta name="description" content="详解 Docker 日志驱动(fluentd/gelf/awslogs)+ ELK/Loki 完整日志聚合方案;JSON 结构化日志;日志轮转;日志保留策略。">
+    <meta name="keywords" content="Docker, 容器日志系统 ELK/Loki 完整集成, 容器化教程, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/17-logging-elk-integration.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="容器日志系统 ELK/Loki 完整集成">
+    <meta property="og:description" content="详解 Docker 日志驱动(fluentd/gelf/awslogs)+ ELK/Loki 完整日志聚合方案;JSON 结构化日志;日志轮转;日志保留策略。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/17-logging-elk-integration.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="容器日志系统 ELK/Loki 完整集成">
+    <meta name="twitter:description" content="详解 Docker 日志驱动(fluentd/gelf/awslogs)+ ELK/Loki 完整日志聚合方案;JSON 结构化日志;日志轮转;日志保留策略。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"容器日志系统 ELK/Loki 完整集成","description":"详解 Docker 日志驱动(fluentd/gelf/awslogs)+ ELK/Loki 完整日志聚合方案;JSON 结构化日志;日志轮转;日志保留策略。","author":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 教程","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"容器日志系统 ELK/Loki 完整集成","item":"https://tools.yy24365.com/ai-tools/docker/17-logging-elk-integration.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            D
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 教程
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              容器日志系统 ELK/Loki 完整集成
+            </span>
+          </nav>
+          <h1 id="hero-title">
+            容器日志系统 ELK/Loki 完整集成
+          </h1>
+          <p class="hero-sub">
+            Fluentd/Promtail + ES/Loki + Grafana
+          </p>
+          <p class="hero-desc">
+            详解 Docker 日志驱动(fluentd/gelf/awslogs)+ ELK/Loki 完整日志聚合方案;JSON 结构化日志;日志轮转;日志保留策略。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                课程编号
+              </strong>
+              第 17 课
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                分类
+              </strong>
+              可观测性
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              中级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                字数
+              </strong>
+              ~ 4000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <nav class="toc" id="toc">
+          <h2 class="toc-title">
+            本文目录
+          </h2>
+          <ul class="toc-grid">
+            <li>
+              <a href="#s1">
+                <span class="toc-num">
+                  01
+                </span>
+                5 种 Docker 日志驱动
+              </a>
+            </li>
+            <li>
+              <a href="#s2">
+                <span class="toc-num">
+                  02
+                </span>
+                Fluentd + Elasticsearch 完整链路
+              </a>
+            </li>
+            <li>
+              <a href="#s3">
+                <span class="toc-num">
+                  03
+                </span>
+                Loki + Promtail 轻量级方案
+              </a>
+            </li>
+            <li>
+              <a href="#s4">
+                <span class="toc-num">
+                  04
+                </span>
+                JSON 结构化日志
+              </a>
+            </li>
+            <li>
+              <a href="#s5">
+                <span class="toc-num">
+                  05
+                </span>
+                日志轮转与保留
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">
+            Chapter 01
+          </span>
+          <h2 id="s1-title">
+            5 种 Docker 日志驱动
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  json-file:默认,每容器 1 个 JSON 文件,需 logrotate
+                </li>
+                <li>
+                  journald:systemd 集成,query-by-attribute
+                </li>
+                <li>
+                  syslog:写入远端 syslog 服务
+                </li>
+                <li>
+                  fluentd/gelf:直推日志聚合系统,无本地存储
+                </li>
+                <li>
+                  awslogs/azurelogs:云厂商日志服务集成
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">
+            Chapter 02
+          </span>
+          <h2 id="s2-title">
+            Fluentd + Elasticsearch 完整链路
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  fluent/fluent-bit:Sidecar 模式收集容器 stdout
+                </li>
+                <li>
+                  DaemonSet 部署:每节点 1 个 fluent-bit
+                </li>
+                <li>
+                  input:docker.sock 监听所有容器日志
+                </li>
+                <li>
+                  filter:解析 JSON / 附加 Kubernetes labels
+                </li>
+                <li>
+                  output:elasticsearch 索引按日期 daily
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">
+            Chapter 03
+          </span>
+          <h2 id="s3-title">
+            Loki + Promtail 轻量级方案
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  Grafana Loki:类似 Prometheus 但针对日志
+                </li>
+                <li>
+                  Promtail:DaemonSet 部署,采集 + 标签 + push
+                </li>
+                <li>
+                  LogQL:类 PromQL 的日志查询语言
+                </li>
+                <li>
+                  Grafana 一体化:同一面板看 Metrics + Logs + Traces
+                </li>
+                <li>
+                  存储成本低:不建索引,只压缩原始日志
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">
+            Chapter 04
+          </span>
+          <h2 id="s4-title">
+            JSON 结构化日志
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  Java:logback-spring.xml + logstash-logback-encoder
+                </li>
+                <li>
+                  Python:python-json-logger 输出 JSON
+                </li>
+                <li>
+                  Node.js:winston + format: winston.format.json()
+                </li>
+                <li>
+                  Go:log/slog 内置 JSON formatter(Go 1.21+)
+                </li>
+                <li>
+                  字段标准化:timestamp / level / message / traceId / spanId
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s5" aria-labelledby="s5-title">
+          <span class="section-num">
+            Chapter 05
+          </span>
+          <h2 id="s5-title">
+            日志轮转与保留
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  json-file:max-size=10m + max-file=3(单文件 10MB × 3 轮转)
+                </li>
+                <li>
+                  ES ILM:热(SSD)→ 温(HDD)→ 冷(对象存储)→ 删除
+                </li>
+                <li>
+                  Loki retention 7d 数据 + 30d 压缩存储
+                </li>
+                <li>
+                  Fluentd buffer:file buffer 防进程崩溃数据丢失
+                </li>
+                <li>
+                  生产建议:默认 7 天 + 1 年归档 OSS/S3
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <div class="alert alert-tip">
+          <span class="alert-icon">
+            💡 选型建议
+          </span>
+          <div class="alert-body">
+            <p>
+              中小项目 Loki+Grafana,大企业 ELK,云原生 EFK 完整生态
+            </p>
+          </div>
+        </div>
+        <div class="alert alert-info">
+          <span class="alert-icon">
+            🎯 结构化优势
+          </span>
+          <div class="alert-body">
+            <p>
+              JSON 日志可直接 PromQL 聚合,避免 grep 痛苦
+            </p>
+          </div>
+        </div>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">
+            FAQ
+          </span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                5 种 Docker 日志驱动
+              </h3>
+              <p class="faq-a">
+                json-file:默认,每容器 1 个 JSON 文件,需 logrotate
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Fluentd + Elasticsearch 完整链路
+              </h3>
+              <p class="faq-a">
+                fluent/fluent-bit:Sidecar 模式收集容器 stdout
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Loki + Promtail 轻量级方案
+              </h3>
+              <p class="faq-a">
+                Grafana Loki:类似 Prometheus 但针对日志
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                JSON 结构化日志
+              </h3>
+              <p class="faq-a">
+                Java:logback-spring.xml + logstash-logback-encoder
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                日志轮转与保留
+              </h3>
+              <p class="faq-a">
+                json-file:max-size=10m + max-file=3(单文件 10MB × 3 轮转)
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本课程
+        </h3>
+        <p class="footer-meta">
+          容器日志系统 ELK/Loki 完整集成 · Docker 24 节系统化教程。所有代码均经过实测,可运行于 Docker 20+ / K8s 1.24+ 环境。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            完整 24 节课
+          </strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            回到索引
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 完整指南 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-lesson-17';
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

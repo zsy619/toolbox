@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>S-01 Remotion 代码讲解视频 | 画面+配音+字幕端到端</title>
+<meta name="description" content="Remotion 端到端实战案例:用 Whisper 语音识别生成时间轴、Edge TTS 合成配音、Remotion 渲染带代码高亮+逐句字幕的技术讲解视频,完整工程结构与代码。">
+<meta name="keywords" content="Remotion 代码讲解, Whisper, Edge TTS, 字幕, 配音">
+<link rel="canonical" href="https://example.com/remotion/S-01-code-walkthrough.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码讲解视频端到端">
+<meta property="og:description" content="Whisper 字幕 + Edge TTS 配音 + Remotion 渲染。">
+<meta property="og:url" content="https://example.com/remotion/S-01-code-walkthrough.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"S-01 代码讲解视频","description":"Whisper + Edge TTS + Remotion 端到端代码讲解视频制作。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 实战"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="S-01-code-walkthrough.html" class="active">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-scene">场景层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">S-01 代码讲解视频</span>
+    </nav>
+    <h1 id="hero-title">S-01 代码讲解视频 <span class="level-badge level-S">S 场景</span></h1>
+    <p class="hero-sub">画面 + 配音 + 字幕的端到端案例:Whisper + Edge TTS + Remotion。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 14 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> 全部基础 + 进阶章节</div>
+      <div class="hero-meta-item"><strong>类型</strong> 场景实战</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>目标与流程</h2>
+<p>我们要做一个 3 分钟的代码讲解视频,完整流程:</p>
+<ol>
+  <li>写好代码讲解文稿(纯文本)</li>
+  <li>用 Edge TTS 合成中文配音 MP3</li>
+  <li>用 Whisper 对配音做时间戳对齐</li>
+  <li>写 Remotion 组件:代码块滚动 + 字幕 + 配音</li>
+  <li>渲染输出 MP4</li>
+</ol>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>Step 1:合成配音</h2>
+<p>用 Microsoft Edge 免费 TTS 合成中文语音:</p>
+<pre class="line-numbers"><code class="language-bash">npm i -g edge-tts
+edge-tts --voice zh-CN-XiaoxiaoNeural \
+  --text "今天我们讲 React Hooks" \
+  --write-media voiceover.mp3</code></pre>
+<p>也可以用 Python:</p>
+<pre class="line-numbers"><code class="language-python">import edge_tts, asyncio
+
+async def synth():
+    comm = edge_tts.Communicate(
+        script_text, voice="zh-CN-XiaoxiaoNeural"
+    )
+    await comm.save("voiceover.mp3")
+
+asyncio.run(synth())</code></pre>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>Step 2:字幕时间戳</h2>
+<p>用 Whisper 对 MP3 做 ASR 得到逐句时间戳:</p>
+<pre class="line-numbers"><code class="language-bash">pip install openai-whisper
+whisper voiceover.mp3 --language Chinese \
+  --output_format json --output_dir ./</code></pre>
+<p>输出 <code>voiceover.json</code> 包含 <code>segments[].start / end / text</code>。</p>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>Step 3:Remotion 组件</h2>
+<p>把 JSON 注入 Composition 作为 Props:</p>
+<pre class="line-numbers"><code class="language-tsx">import { AbsoluteFill, Audio, Sequence, useCurrentFrame } from 'remotion';
+import { staticFile } from 'remotion';
+
+type Sub = { start: number; end: number; text: string };
+
+const CodeVideo: React.FC&lt;{ subs: Sub[]; code: string }&gt; = ({ subs, code }) =&gt; (
+  &lt;AbsoluteFill style={{ background: '#0a1a2a' }}&gt;
+    &lt;Audio src={staticFile('voiceover.mp3')} /&gt;
+    &lt;CodeBlock code={code} /&gt;
+    {subs.map((s, i) =&gt; (
+      &lt;Sequence key={i} from={Math.floor(s.start * 30)} durationInFrames={Math.ceil((s.end - s.start) * 30)}&gt;
+        &lt;Subtitle text={s.text} /&gt;
+      &lt;/Sequence&gt;
+    ))}
+  &lt;/AbsoluteFill&gt;
+);</code></pre>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>Step 4:滚动代码高亮</h2>
+<p>代码块跟随讲解滚动 + 当前行高亮:</p>
+<pre class="line-numbers"><code class="language-tsx">const CodeBlock: React.FC&lt;{ code: string }&gt; = ({ code }) =&gt; {
+  const frame = useCurrentFrame();
+  const lineHeight = 32;
+  const visibleLines = 12;
+  const targetLine = Math.floor(frame / 30);  // 每秒滚动一行
+  const offsetY = -targetLine * lineHeight;
+
+  return (
+    &lt;pre style={{
+      position: 'absolute', top: 200, left: 200, right: 200,
+      fontFamily: 'monospace', color: '#e6edf3',
+      transform: `translateY(${offsetY}px)`,
+      transition: 'transform 0.3s',
+    }}&gt;
+      {code.split('\n').map((line, i) =&gt; (
+        &lt;div key={i} style={{
+          background: i === targetLine ? 'rgba(36,150,237,.2)' : 'transparent',
+          height: lineHeight,
+        }}&gt;{line}&lt;/div&gt;
+      ))}
+    &lt;/pre&gt;
+  );
+};</code></pre>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>Step 5:渲染与发布</h2>
+<p>把代码拆分到 JSON Props,渲染:</p>
+<pre class="line-numbers"><code class="language-bash">npx remotion render CodeVideo out/tutorial.mp4 \
+  --props='{"subs":[...],"code":"..."}' \
+  --concurrency=4</code></pre>
+<p>输出 1080p MP4,上传到 Bilibili/YouTube/抖音即可。</p>
+<div class="alert alert-tip"><span class="alert-icon">🎓</span><div class="alert-body"><p>完整工程可参考 <a href="https://github.com/remotion-dev">remotion-dev/examples</a>,包含 <code>tts-walkthrough</code> 示例。</p></div></div>
+</section>
+
+<div class="source-note">OpenAI Whisper、Microsoft Edge TTS、Remotion OffthreadVideo</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>配音与 TTS</h2>
+<p>Remotion 不直接提供 TTS,但可与第三方服务集成:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>服务</th><th>特性</th></tr></thead>
+<tbody>
+<tr><td><strong>OpenAI TTS</strong></td><td>6 种声音,中英日韩,API 计费</td></tr>
+<tr><td><strong>ElevenLabs</strong></td><td>超拟人,支持声音克隆</td></tr>
+<tr><td><strong>Azure Speech</strong></td><td>SSML 精细控制</td></tr>
+<tr><td><strong>Edge TTS</strong></td><td>微软在线,免费但有频率限制</td></tr>
+</tbody>
+</table></div>
+<div class="alert alert-tip"><span class="alert-icon">💡</span><div class="alert-body"><p>生成 mp3 → 放入 <code>public/</code> → <code>staticFile()</code> 加载 → <code>&lt;Audio /&gt;</code> 播放。整条流水线可全自动。</p></div></div>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="P-04-secure-rendering.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">P-04 安全渲染</span></a>
+  <a href="S-02-data-storytelling.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">S-02 数据故事化</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

@@ -1,0 +1,1220 @@
+/* =================================================================
+ * design-tokens-applied.css · DESIGN.md Token 落地层
+ * 适用: apps/reading/index.html(也兼容其他阅读页)
+ * 版本: v1.0.0 · 2026-06-22
+ *
+ * 目标:
+ *   · 把 index.html 的核心组件类迁移到 DESIGN.md token 系统
+ *   · 不修改 index.html 的 12,619 行内联代码
+ *   · 通过 CSS 变量映射 + !important 覆盖实现 token 化
+ *   · 修复 1128 个硬编码 hex 中的核心样式(按钮/卡片/Hero 等)
+ *
+ * 来源: ./DESIGN.md(Google Design Tokens Spec)
+ *      ./assets/styles/design-tokens.css(底层 token 定义)
+ *
+ * 引入方式(在 <head> 中,放在 ui-ux-max.css 之后):
+ *   <link href="assets/styles/design-tokens-applied.css" rel="stylesheet">
+ *
+ * 设计原则(DESIGN.md 第 526-541 行 "Do's and Don'ts"):
+ *   · 暖米色画布 #faf9f5 作为主背景
+ *   · 珊瑚 #cc785c 专门用于主 CTA 和全宽 callout
+ *   · 衬线 Display(Copernicus/Cormorant) 400 字重 + 负字距
+ *   · 8/12/16px 圆角分级
+ *   · 96px section 节奏
+ * ================================================================= */
+
+/* ============================================
+   1. 变量别名映射(让 index.html 的旧变量名继续工作)
+   ============================================ */
+:root {
+    /* 把 index.html 的 --brand-* 映射到 DESIGN.md token */
+    --brand-primary: var(--token-coral);
+    --brand-primary-active: var(--token-coral-active);
+    --brand-primary-disabled: var(--token-coral-disabled);
+
+    /* 旧 ink/body/canvas 变量映射 */
+    --ink: var(--token-ink);
+    --body: var(--token-body);
+    --body-strong: var(--token-body-strong);
+    --muted: var(--token-muted);
+    --muted-soft: var(--token-muted-soft);
+    --canvas: var(--token-canvas);
+    --surface-soft: var(--token-surface-soft);
+    --surface-card: var(--token-surface-card);
+    --surface-cream-strong: var(--token-surface-cream-strong);
+    --surface-dark: var(--token-surface-dark);
+    --surface-dark-elevated: var(--token-surface-dark-elevated);
+    --surface-dark-soft: var(--token-surface-dark-soft);
+    --on-primary: var(--token-on-primary);
+    --on-dark: var(--token-on-dark);
+    --on-dark-soft: var(--token-on-dark-soft);
+    --hairline: var(--token-hairline);
+    --hairline-soft: var(--token-hairline-soft);
+
+    /* 字体映射 */
+    --font-display: var(--token-font-display);
+    --font-sans: var(--token-font-sans);
+    --font-mono: var(--token-font-mono);
+}
+
+/* ============================================
+   2. 按钮系统(DESIGN.md 第 461-474 行)
+   ============================================ */
+
+/* .btn-primary · .nav-link-cta · .featured-card-cta
+   已经有 !important,必须用 !important 覆盖 */
+.btn-primary,
+.nav-link-cta,
+.featured-card-cta {
+    background-color: var(--token-coral) !important;
+    color: var(--token-on-primary) !important;
+    border: 1px solid var(--token-coral) !important;
+    border-radius: var(--token-rounded-md) !important;
+    padding: 12px 20px !important;
+    height: 40px !important;
+    font-family: var(--token-font-sans) !important;
+    font-size: var(--token-button-size) !important;
+    font-weight: var(--token-weight-medium) !important;
+    line-height: 1 !important;
+    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover,
+.nav-link-cta:hover,
+.featured-card-cta:hover {
+    background-color: var(--token-coral-active) !important;
+    border-color: var(--token-coral-active) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(204, 120, 92, 0.30);
+}
+
+.btn-primary:active,
+.nav-link-cta:active,
+.featured-card-cta:active {
+    background-color: var(--token-coral-active) !important;
+    transform: scale(0.98) !important;
+}
+
+.btn-primary:focus-visible,
+.nav-link-cta:focus-visible,
+.featured-card-cta:focus-visible {
+    outline: 3px solid var(--token-coral) !important;
+    outline-offset: 3px !important;
+}
+
+/* 次按钮 · 描边按钮(常见于过滤/取消) */
+.btn-secondary,
+.btn-outline {
+    background-color: var(--token-canvas) !important;
+    color: var(--token-ink) !important;
+    border: 1px solid var(--token-hairline) !important;
+    border-radius: var(--token-rounded-md) !important;
+    padding: 12px 20px !important;
+    height: 40px !important;
+    font-family: var(--token-font-sans) !important;
+    font-size: var(--token-button-size) !important;
+    font-weight: var(--token-weight-medium) !important;
+    line-height: 1 !important;
+    transition: border-color 0.2s ease, background-color 0.2s ease !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-secondary:hover,
+.btn-outline:hover {
+    border-color: var(--token-ink) !important;
+    background-color: var(--token-surface-soft) !important;
+}
+
+/* 文字按钮 / 链接 */
+.btn-text,
+.text-link,
+a.text-link {
+    background: transparent !important;
+    color: var(--token-coral) !important;
+    border: none !important;
+    padding: 0 !important;
+    height: auto !important;
+    font-family: var(--token-font-sans) !important;
+    font-size: var(--token-body-sm-size) !important;
+    font-weight: var(--token-weight-medium) !important;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: color 0.2s ease !important;
+}
+
+.btn-text:hover,
+.text-link:hover {
+    color: var(--token-coral-active) !important;
+    text-decoration: underline !important;
+}
+
+/* 圆形图标按钮 */
+.btn-icon,
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: var(--token-canvas) !important;
+    color: var(--token-ink) !important;
+    border: 1px solid var(--token-hairline) !important;
+    border-radius: var(--token-rounded-full) !important;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-icon:hover,
+.icon-btn:hover {
+    border-color: var(--token-ink) !important;
+    background-color: var(--token-surface-soft) !important;
+}
+
+/* ============================================
+   3. 卡片系统(DESIGN.md 第 475-495 行)
+   ============================================ */
+
+/* .book-card · .featured-card · .mood-card 统一 */
+.book-card,
+.featured-card,
+.mood-card {
+    background-color: var(--token-canvas) !important;
+    border: 1px solid var(--token-hairline) !important;
+    border-radius: var(--token-rounded-lg) !important;
+    overflow: hidden !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s ease,
+                border-color 0.2s ease !important;
+    display: block;
+    text-decoration: none !important;
+    color: inherit;
+}
+
+/* 悬停效果(只动 transform / box-shadow / border,不动 background) */
+.book-card:hover,
+.featured-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(20, 20, 19, 0.08);
+    border-color: var(--token-coral) !important;
+}
+
+.mood-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(20, 20, 19, 0.06);
+    border-color: var(--token-coral) !important;
+}
+
+/* .featured-card 特殊增强:渐变背景(DESIGN.md 第 213-218 行) */
+.featured-card {
+    background: linear-gradient(135deg, var(--token-canvas) 0%, var(--token-surface-soft) 100%) !important;
+    border: 1px solid var(--token-hairline) !important;
+    border-radius: 14px !important;
+}
+
+.featured-card-content {
+    padding: var(--token-spacing-lg);
+}
+
+.featured-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--token-rounded-md);
+    background: var(--token-surface-soft);
+    color: var(--token-coral);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: var(--token-spacing-md);
+}
+
+.featured-card-title {
+    font-family: var(--token-font-display);
+    font-size: var(--token-display-sm-size);
+    font-weight: var(--token-display-sm-weight);
+    letter-spacing: var(--token-display-sm-ls);
+    line-height: var(--token-display-sm-lh);
+    color: var(--token-ink);
+    margin: 0 0 var(--token-spacing-xs);
+}
+
+.featured-card-author {
+    font-family: var(--token-font-sans);
+    font-size: var(--token-caption-size);
+    color: var(--token-muted);
+    font-weight: var(--token-weight-medium);
+    margin: 0 0 var(--token-spacing-sm);
+}
+
+.featured-card-desc {
+    font-family: var(--token-font-sans);
+    font-size: var(--token-body-sm-size);
+    line-height: var(--token-body-lh);
+    color: var(--token-body);
+    margin: 0 0 var(--token-spacing-md);
+}
+
+/* 徽章(.featured-badge · .badge · .tag · .chip) */
+.featured-badge,
+.badge,
+.tag,
+.chip {
+    display: inline-flex !important;
+    align-items: center !important;
+    background-color: var(--token-surface-card) !important;
+    color: var(--token-ink) !important;
+    font-family: var(--token-font-sans) !important;
+    font-size: var(--token-caption-size) !important;
+    font-weight: var(--token-weight-medium) !important;
+    line-height: var(--token-caption-lh) !important;
+    padding: 4px 12px !important;
+    border-radius: var(--token-rounded-pill) !important;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.badge-coral,
+.tag-coral {
+    background-color: var(--token-coral) !important;
+    color: var(--token-on-primary) !important;
+    font-size: var(--token-caption-uppercase-size) !important;
+    letter-spacing: var(--token-uppercase-ls) !important;
+    text-transform: uppercase;
+}
+
+.badge-amber,
+.tag-amber {
+    background-color: var(--token-accent-amber) !important;
+    color: var(--token-on-primary) !important;
+    font-size: var(--token-caption-uppercase-size) !important;
+    letter-spacing: var(--token-uppercase-ls) !important;
+    text-transform: uppercase;
+}
+
+.badge-teal,
+.tag-teal {
+    background-color: var(--token-accent-teal) !important;
+    color: var(--token-on-primary) !important;
+    font-size: var(--token-caption-uppercase-size) !important;
+    letter-spacing: var(--token-uppercase-ls) !important;
+    text-transform: uppercase;
+}
+
+/* ============================================
+   4. Hero 区(DESIGN.md 第 477-479 行)
+   ============================================ */
+.hero-section {
+    padding: 64px 0 !important;
+    background-color: var(--token-canvas) !important;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-title {
+    font-family: var(--token-font-display) !important;
+    font-size: clamp(2rem, 5vw, 3.5rem) !important;
+    font-weight: var(--token-weight-regular) !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.02em !important;
+    color: var(--token-ink) !important;
+    margin: 0 0 1rem;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--token-coral) 0%, var(--token-coral-active) 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+/* ============================================
+   5. Section Header(分节标题)
+   ============================================ */
+.section-header {
+    margin-bottom: var(--token-spacing-xl);
+    text-align: left;
+}
+
+.section-title {
+    font-family: var(--token-font-display) !important;
+    font-size: clamp(1.5rem, 3vw, 2.25rem) !important;
+    font-weight: var(--token-weight-regular) !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.02em !important;
+    color: var(--token-ink) !important;
+    margin: 0 0 var(--token-spacing-sm);
+}
+
+.section-subtitle {
+    font-family: var(--token-font-sans) !important;
+    font-size: var(--token-body-md-size) !important;
+    color: var(--token-body) !important;
+    line-height: var(--token-body-lh) !important;
+    margin: 0;
+}
+
+/* ============================================
+   6. 统计卡片(.stat-card · .counter · .metric)
+   ============================================ */
+.stat-card,
+.counter,
+.metric {
+    background-color: var(--token-canvas) !important;
+    border: 1px solid var(--token-hairline) !important;
+    border-radius: var(--token-rounded-lg) !important;
+    padding: var(--token-spacing-lg) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+    text-align: center;
+}
+
+.stat-card:hover,
+.counter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(20, 20, 19, 0.06);
+    border-color: var(--token-coral) !important;
+}
+
+.stat-value,
+.counter-value {
+    font-family: var(--token-font-display) !important;
+    font-size: clamp(1.75rem, 4vw, 2.5rem) !important;
+    font-weight: var(--token-weight-regular) !important;
+    letter-spacing: -0.02em !important;
+    color: var(--token-coral) !important;
+    line-height: 1.1 !important;
+    margin: 0 0 var(--token-spacing-xs);
+}
+
+.stat-label,
+.counter-label {
+    font-family: var(--token-font-sans) !important;
+    font-size: var(--token-caption-size) !important;
+    font-weight: var(--token-weight-medium) !important;
+    color: var(--token-muted) !important;
+    text-transform: uppercase;
+    letter-spacing: var(--token-uppercase-ls);
+}
+
+/* ============================================
+   7. 标签页 / 分类(Category Tab · DESIGN.md 第 513 行)
+   ============================================ */
+.tab,
+.category-tab,
+.filter-tab {
+    background-color: transparent !important;
+    color: var(--token-muted) !important;
+    font-family: var(--token-font-sans) !important;
+    font-size: var(--token-nav-size) !important;
+    font-weight: var(--token-weight-medium) !important;
+    padding: 8px 14px !important;
+    border-radius: var(--token-rounded-md) !important;
+    border: none !important;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    text-decoration: none !important;
+    display: inline-flex;
+    align-items: center;
+}
+
+.tab:hover,
+.category-tab:hover,
+.filter-tab:hover {
+    color: var(--token-ink) !important;
+    background-color: var(--token-surface-soft) !important;
+}
+
+.tab.active,
+.category-tab.active,
+.filter-tab.active {
+    background-color: var(--token-surface-card) !important;
+    color: var(--token-ink) !important;
+}
+
+/* ============================================
+   8. 导航栏(DESIGN.md 第 459 行)
+   ============================================ */
+.nav-glass,
+.nav-sticky,
+.site-header,
+.top-nav,
+header nav {
+    background-color: rgba(250, 249, 245, 0.85) !important;
+    backdrop-filter: saturate(180%) blur(20px) !important;
+    -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
+    border-bottom: 1px solid var(--token-hairline) !important;
+    color: var(--token-ink);
+    font-family: var(--token-font-sans);
+}
+
+/* nav-link(标准 14px / 500) */
+.nav-link,
+.nav-link-pill,
+header nav a {
+    color: var(--token-ink) !important;
+    font-family: var(--token-font-sans) !important;
+    font-size: var(--token-nav-size) !important;
+    font-weight: var(--token-weight-medium) !important;
+    text-decoration: none !important;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    border-radius: var(--token-rounded-md);
+    padding: 6px 12px;
+}
+
+.nav-link:hover,
+header nav a:hover {
+    background-color: var(--token-surface-soft) !important;
+    color: var(--token-coral) !important;
+}
+
+.nav-link.active,
+header nav a.active {
+    color: var(--token-coral) !important;
+    background-color: var(--token-surface-card) !important;
+}
+
+/* ============================================
+   9. 表单输入(DESIGN.md 第 499-502 行)
+   ============================================ */
+input[type="text"],
+input[type="email"],
+input[type="search"],
+input[type="url"],
+input[type="password"],
+input[type="number"],
+.search-input,
+.search-bar input {
+    background-color: var(--token-canvas) !important;
+    color: var(--token-ink) !important;
+    font-family: var(--token-font-sans) !important;
+    font-size: var(--token-body-md-size) !important;
+    line-height: var(--token-body-lh) !important;
+    border: 1px solid var(--token-hairline) !important;
+    border-radius: var(--token-rounded-md) !important;
+    padding: 10px 14px !important;
+    height: 40px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="search"]:focus,
+input[type="url"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+.search-input:focus {
+    border-color: var(--token-coral) !important;
+    box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15) !important;
+}
+
+input::placeholder,
+.search-input::placeholder {
+    color: var(--token-muted);
+}
+
+/* ============================================
+   10. 链接与文字
+   ============================================ */
+a {
+    color: var(--token-coral);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--token-coral-active);
+    text-decoration: underline;
+}
+
+/* 全局基线对齐 DESIGN.md 暖米色画布 */
+html, body {
+    background-color: var(--token-canvas) !important;
+    color: var(--token-ink) !important;
+    font-family: var(--token-font-sans) !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.65;
+}
+
+/* 标题统一用衬线 Display */
+h1, h2, h3, h4, h5, h6,
+.book-title {
+    font-family: var(--token-font-display) !important;
+    font-weight: var(--token-weight-regular) !important;
+    color: var(--token-ink) !important;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+}
+
+/* ============================================
+   11. 滚动条(DESIGN.md 暖色风格)
+   ============================================ */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--token-canvas) !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--token-surface-cream-strong) !important;
+    border-radius: var(--token-rounded-pill);
+    transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--token-muted-soft) !important;
+}
+
+/* ============================================
+   12. 全宽 Coral Callout(DESIGN.md 第 493 行)
+   ============================================ */
+.callout-coral,
+.cta-coral {
+    background: linear-gradient(135deg, var(--token-coral) 0%, var(--token-coral-active) 100%);
+    color: var(--token-on-primary);
+    border-radius: var(--token-rounded-lg);
+    padding: 64px;
+    text-align: center;
+    font-family: var(--token-font-sans);
+}
+
+.callout-coral h2,
+.callout-coral h3,
+.cta-coral h2 {
+    color: var(--token-on-primary) !important;
+    font-family: var(--token-font-display) !important;
+    font-size: clamp(1.5rem, 3vw, 2rem) !important;
+    margin: 0 0 var(--token-spacing-md);
+}
+
+.callout-coral p,
+.cta-coral p {
+    color: var(--token-on-primary) !important;
+    margin: 0 0 var(--token-spacing-lg);
+}
+
+.callout-coral .btn,
+.cta-coral .btn {
+    background: var(--token-canvas);
+    color: var(--token-ink) !important;
+    border: 1px solid var(--token-canvas);
+}
+
+.callout-coral .btn:hover,
+.cta-coral .btn:hover {
+    background: var(--token-surface-soft);
+    color: var(--token-coral) !important;
+    border-color: var(--token-surface-soft);
+}
+
+/* ============================================
+   13. 暗色产品卡(DESIGN.md 第 483-485 行)
+   ============================================ */
+.dark-card,
+.code-card,
+.terminal {
+    background-color: var(--token-surface-dark);
+    color: var(--token-on-dark);
+    border-radius: var(--token-rounded-lg);
+    padding: var(--token-spacing-xl);
+    font-family: var(--token-font-mono);
+    font-size: var(--token-code-size);
+    line-height: var(--token-code-lh);
+}
+
+.dark-card pre,
+.code-card pre,
+.terminal pre {
+    background-color: var(--token-surface-dark-soft);
+    color: var(--token-on-dark);
+    padding: var(--token-spacing-md);
+    border-radius: var(--token-rounded-md);
+    overflow-x: auto;
+    margin: 0;
+}
+
+/* ============================================
+   14. 响应式(DESIGN.md 第 546-552 行)
+   ============================================ */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 32px 0 !important;
+    }
+
+    .hero-title {
+        font-size: clamp(1.5rem, 8vw, 2rem) !important;
+    }
+
+    .featured-card-content {
+        padding: var(--token-spacing-md) !important;
+    }
+
+    .featured-card-title {
+        font-size: var(--token-title-md-size) !important;
+    }
+
+    .stat-card,
+    .counter {
+        padding: var(--token-spacing-md) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-primary,
+    .nav-link-cta,
+    .featured-card-cta {
+        padding: 10px 16px !important;
+        height: 36px !important;
+        font-size: 13px !important;
+    }
+}
+
+@media (min-width: 1440px) {
+    .hero-section {
+        padding: 96px 0 !important;
+    }
+}
+
+/* ============================================
+   15. 暗色模式(DESIGN.md 文档允许每个表面模式单独定义)
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+    html, body {
+        background-color: #1a1816 !important;
+        color: #faf9f5 !important;
+    }
+
+    .book-card,
+    .featured-card,
+    .mood-card,
+    .stat-card,
+    .counter {
+        background-color: #252320 !important;
+        border-color: #2d2c28 !important;
+    }
+
+    h1, h2, h3, h4, h5, h6,
+    .book-title,
+    .featured-card-title,
+    .section-title,
+    .hero-title {
+        color: #faf9f5 !important;
+    }
+
+    p, .stat-label {
+        color: #d0cdc6 !important;
+    }
+}
+
+/* ============================================
+   16. 焦点态(可访问性 · DESIGN.md 强调 WCAG)
+   ============================================ */
+*:focus-visible {
+    outline: 3px solid var(--token-coral);
+    outline-offset: 2px;
+    border-radius: var(--token-rounded-md);
+}
+
+/* 跳过导航 */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: var(--token-spacing-md);
+    z-index: 9999;
+    background: var(--token-coral);
+    color: var(--token-on-primary);
+    padding: 10px 20px;
+    border-radius: var(--token-rounded-md);
+    text-decoration: none;
+    font-weight: var(--token-weight-medium);
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+    top: var(--token-spacing-md);
+    color: var(--token-on-primary);
+}
+
+/* ============================================
+   17. 打印样式
+   ============================================ */
+@media print {
+    .book-card,
+    .featured-card,
+    .mood-card {
+        box-shadow: none !important;
+        border: 1px solid var(--token-hairline) !important;
+    }
+
+    .nav-glass,
+    .nav-sticky,
+    .top-nav,
+    header nav {
+        background: transparent !important;
+        backdrop-filter: none !important;
+    }
+}
+
+/* =================================================================
+ * 结束 · design-tokens-applied.css v1.0.0
+ * 影响范围: index.html 立即获得完整 DESIGN.md token 化
+ * ================================================================= */
+
+/* =================================================================
+ * 18. 编辑精选 · 必读经典 · Google Design 杂志级样式
+ * 适配: index.html #featured section (v2.0.0 · 2026-06-22)
+ *
+ * 设计目标:
+ *   · 8 张卡片采用"数字水印 + 图标徽章 + 衬线书名 + 斜体金句"四层结构
+ *   · Section Header 引入编号+英文 eyebrow,营造杂志专栏感
+ *   · 重新启用 badge/desc(此前被 display:none 隐藏)
+ *   · Hover 状态:边框转珊瑚 + 大水印数字浮现 + 阴影抬升
+ * ================================================================= */
+
+/* ============================================
+   18.1 Section Header · 三层结构
+   ============================================ */
+.featured-section-header {
+    text-align: left;
+    margin-bottom: var(--token-spacing-xl);
+    padding-bottom: var(--token-spacing-md);
+    border-bottom: 1px solid var(--token-hairline);
+    position: relative;
+}
+
+/* 数字 + 英文 eyebrow 标签 */
+.section-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: var(--token-spacing-md);
+    font-family: var(--token-font-sans);
+}
+
+.eyebrow-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 10px;
+    background-color: var(--token-coral);
+    color: var(--token-on-primary);
+    border-radius: var(--token-rounded-sm);
+    font-family: var(--token-font-mono);
+    font-size: 13px;
+    font-weight: var(--token-weight-medium);
+    letter-spacing: 0.05em;
+}
+
+.eyebrow-en {
+    font-family: var(--token-font-sans);
+    font-size: 11px;
+    font-weight: var(--token-weight-medium);
+    color: var(--token-muted);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+/* Section Title 重新应用衬线 Display + 渐变 */
+.featured-section-header .section-title {
+    font-family: var(--token-font-display) !important;
+    font-size: clamp(1.875rem, 4vw, 2.75rem) !important;
+    font-weight: var(--token-weight-regular) !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.02em !important;
+    margin: 0 0 var(--token-spacing-sm);
+}
+
+.featured-section-header .section-subtitle {
+    font-family: var(--token-font-sans) !important;
+    font-size: var(--token-body-md-size) !important;
+    line-height: 1.6 !important;
+    color: var(--token-body) !important;
+    max-width: 60ch;
+    margin: 0;
+}
+
+/* ============================================
+   18.2 Featured Scroll · 列表节奏
+   ============================================ */
+.featured-scroll {
+    display: flex !important;
+    flex-direction: column;
+    gap: var(--token-spacing-md);
+    padding: 0;
+}
+
+/* ============================================
+   18.3 Featured Card · Google Editorial 风格
+   ============================================ */
+.featured-card {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--token-canvas) 0%, var(--token-surface-soft) 100%) !important;
+    border: 1px solid var(--token-hairline) !important;
+    border-radius: var(--token-rounded-lg) !important;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.4s ease,
+                border-color 0.3s ease !important;
+    display: block;
+    text-decoration: none !important;
+    color: inherit;
+    padding: 0;
+}
+
+/* 大号水印数字(显示在卡片右下角) */
+.featured-card-num {
+    position: absolute;
+    right: var(--token-spacing-lg);
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--token-font-display) !important;
+    font-size: clamp(80px, 10vw, 140px) !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    color: var(--token-coral) !important;
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: -0.05em;
+    user-select: none;
+}
+
+/* 悬停时:水印浮现 + 卡片抬升 + 边框转珊瑚 */
+.featured-card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 16px 40px rgba(20, 20, 19, 0.10) !important;
+    border-color: var(--token-coral) !important;
+}
+
+.featured-card:hover .featured-card-num {
+    opacity: 0.14;
+    transform: translateY(-50%) translateX(-4px);
+}
+
+/* 焦点态(可访问性) */
+.featured-card:focus-visible {
+    outline: 3px solid var(--token-coral) !important;
+    outline-offset: 3px !important;
+}
+
+/* ============================================
+   18.4 Featured Card Content · 三列网格
+   ============================================ */
+.featured-card-content {
+    position: relative;
+    z-index: 1;
+    display: grid !important;
+    grid-template-columns: 56px 1fr auto;
+    grid-template-areas:
+        "icon text  cta"
+        "icon text  cta";
+    align-items: center;
+    column-gap: var(--token-spacing-lg);
+    row-gap: 0;
+    padding: var(--token-spacing-lg) var(--token-spacing-xl) !important;
+    background: transparent !important;
+}
+
+/* 卡片左侧的发光底层效果(原有结构) */
+.featured-card-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(800px circle at 0% 0%, rgba(204, 120, 92, 0.04), transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ============================================
+   18.5 Featured Card Icon · 图标徽章
+   ============================================ */
+.featured-card-icon {
+    grid-area: icon !important;
+    font-size: 32px !important;
+    line-height: 1;
+    width: 56px !important;
+    height: 56px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: var(--token-surface-card) !important;
+    border-radius: var(--token-rounded-md) !important;
+    flex-shrink: 0;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease;
+}
+
+.featured-card:hover .featured-card-icon {
+    transform: scale(1.08) rotate(-4deg);
+    background-color: var(--token-coral);
+}
+
+/* ============================================
+   18.6 Featured Card Text · 文本容器
+   ============================================ */
+.featured-card-text {
+    grid-area: text;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* 编辑精选徽章(重新启用) */
+.featured-badge {
+    display: inline-flex !important;
+    align-items: center;
+    align-self: flex-start;
+    background-color: var(--token-surface-card) !important;
+    color: var(--token-body-strong) !important;
+    font-family: var(--token-font-sans) !important;
+    font-size: 11px !important;
+    font-weight: var(--token-weight-medium) !important;
+    line-height: 1 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase;
+    padding: 5px 10px !important;
+    border-radius: var(--token-rounded-sm) !important;
+    margin-bottom: 4px;
+    width: fit-content;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.featured-card:hover .featured-badge {
+    background-color: var(--token-coral) !important;
+    color: var(--token-on-primary) !important;
+}
+
+/* 书名 · 衬线 Display */
+.featured-card-title {
+    grid-area: title !important;
+    font-family: var(--token-font-display) !important;
+    font-size: clamp(1.125rem, 1.5vw, 1.375rem) !important;
+    font-weight: var(--token-weight-regular) !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.01em !important;
+    color: var(--token-ink) !important;
+    margin: 0 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.3s ease;
+}
+
+.featured-card:hover .featured-card-title {
+    color: var(--token-coral);
+}
+
+/* 作者 + 出版年 */
+.featured-card-author {
+    grid-area: text !important;
+    font-family: var(--token-font-sans) !important;
+    font-size: 12px !important;
+    font-weight: var(--token-weight-medium) !important;
+    color: var(--token-muted) !important;
+    margin: 0 !important;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 必读理由 · 斜体引文 */
+.featured-card-desc {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical;
+    font-family: var(--token-font-sans) !important;
+    font-style: italic !important;
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+    color: var(--token-body) !important;
+    margin: 6px 0 0 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 64ch;
+}
+
+/* ============================================
+   18.7 Featured Card CTA · 珊瑚色按钮
+   ============================================ */
+.featured-card-cta {
+    grid-area: cta !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--token-font-sans) !important;
+    font-size: 13px !important;
+    font-weight: var(--token-weight-medium) !important;
+    color: var(--token-on-primary) !important;
+    background-color: var(--token-coral) !important;
+    border: 1px solid var(--token-coral) !important;
+    border-radius: var(--token-rounded-md) !important;
+    padding: 10px 18px !important;
+    text-decoration: none !important;
+    white-space: nowrap;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(204, 120, 92, 0.20);
+}
+
+.featured-card-cta i {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.featured-card-cta:hover {
+    background-color: var(--token-coral-active) !important;
+    border-color: var(--token-coral-active) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(204, 120, 92, 0.30);
+}
+
+.featured-card-cta:hover i {
+    transform: translateX(3px);
+}
+
+/* ============================================
+   18.8 响应式 · 移动端单列压缩
+   ============================================ */
+@media (max-width: 768px) {
+    .featured-section-header {
+        margin-bottom: var(--token-spacing-lg);
+    }
+
+    .featured-card-content {
+        grid-template-columns: 48px 1fr !important;
+        grid-template-areas:
+            "icon text"
+            "cta  cta" !important;
+        column-gap: var(--token-spacing-md);
+        row-gap: var(--token-spacing-md);
+        padding: var(--token-spacing-md) var(--token-spacing-lg) !important;
+    }
+
+    .featured-card-icon {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 24px !important;
+    }
+
+    .featured-card-cta {
+        grid-column: 1 / -1 !important;
+        justify-content: center !important;
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+    }
+
+    .featured-card-title {
+        font-size: 1.05rem !important;
+        white-space: normal !important;
+    }
+
+    .featured-card-desc {
+        font-size: 12px !important;
+        -webkit-line-clamp: 2 !important;
+    }
+
+    /* 移动端隐藏大水印,改用 badge 编号 */
+    .featured-card-num {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .featured-card-content {
+        padding: var(--token-spacing-md) !important;
+    }
+
+    .featured-card-icon {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 20px !important;
+    }
+
+    .featured-card-title {
+        font-size: 1rem !important;
+    }
+}
+
+@media (min-width: 1440px) {
+    .featured-card-content {
+        padding: var(--token-spacing-xl) calc(var(--token-spacing-xl) * 1.5) !important;
+    }
+
+    .featured-card-desc {
+        font-size: 14px !important;
+        -webkit-line-clamp: 3 !important;
+    }
+}
+
+/* ============================================
+   18.9 暗色模式适配
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+    .featured-card {
+        background: linear-gradient(135deg, #252320 0%, #1f1e1b 100%) !important;
+        border-color: #2d2c28 !important;
+    }
+
+    .featured-card-num {
+        color: #e8a55a !important;
+    }
+
+    .featured-card-title {
+        color: #faf9f5 !important;
+    }
+
+    .featured-card-author {
+        color: #a09d96 !important;
+    }
+
+    .featured-card-desc {
+        color: #d0cdc6 !important;
+    }
+
+    .featured-card-icon {
+        background-color: #2d2c28 !important;
+    }
+
+    .featured-badge {
+        background-color: #2d2c28 !important;
+        color: #d0cdc6 !important;
+    }
+
+    .featured-section-header {
+        border-bottom-color: #2d2c28 !important;
+    }
+}
+
+/* ============================================
+   18.10 打印样式
+   ============================================ */
+@media print {
+    .featured-card {
+        box-shadow: none !important;
+        border: 1px solid var(--token-hairline) !important;
+        break-inside: avoid;
+    }
+
+    .featured-card-num {
+        display: none;
+    }
+}
+
+/* =================================================================
+ * 结束 · 编辑精选 v2.0.0
+ * ================================================================= */

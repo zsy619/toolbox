@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Remotion 场景:最佳实践 & FAQ 全收录 | Remotion 知识库</title>
+<meta name="description" content="Remotion 4.x 完整最佳实践 + 28 条规则 + 20+ FAQ + License + Docker 镜像选择 + enableMultiProcessOnLinux 性能优化 + Light Leaks 完整 8 种叠加等。">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Remotion 最佳实践 & FAQ 全收录","description":"28 条规则 + 20+ FAQ 全收录。","inLanguage":"zh-CN"}</script>
+</head><body>
+<header class="site-header"><nav class="nav-wrap">
+<a href="index.html" class="brand"><span class="brand-mark">R</span><span>Remotion 知识库</span></a>
+<div class="nav-links"><a href="index.html">总目录</a><a href="S-09-video-editor.html">← 视频编辑器</a></div>
+</nav></header>
+<main class="container">
+<nav class="breadcrumb"><a href="index.html">首页</a> / <a href="index.html#scene">场景层</a> / 最佳实践 & FAQ</nav>
+<h1>最佳实践 & FAQ 全收录</h1>
+<p class="hero-sub">28 条规则 + 20+ FAQ + License + Docker 镜像全选</p>
+<div class="alert alert-info"><span class="alert-icon">📚</span><div class="alert-body"><p>来源:Remotion 官方 best-practices 仓库(28 条)+ 官方 FAQ + community/discord 实战汇总。</p></div></div>
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>28 条官方规则分类</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>分类</th><th>规则</th></tr></thead>
+<tbody>
+<tr><td>基础概念(4)</td><td>3D 内容(Three.js)、基础动画、资源导入、组合定义</td></tr>
+<tr><td>媒体处理(4)</td><td>音频(裁剪/速度/音调)、视频(裁剪/循环)、GIFs、透明视频</td></tr>
+<tr><td>动画过渡(5)</td><td>TransitionSeries、缓动/弹簧、文本动画、裁剪、序列化</td></tr>
+<tr><td>高级功能(4)</td><td>calculateMetadata、Zod 参数化、DOM 测量、文本测量</td></tr>
+<tr><td>可视化(4)</td><td>图表、Mapbox、Lottie 动画、Img 组件</td></tr>
+<tr><td>实用工具(4)</td><td>TailwindCSS、Google Fonts、字幕处理、Light Leaks</td></tr>
+<tr><td>媒体解析(7)</td><td>can-decode、getVideoDuration、getVideoDimensions、getAudioDuration、extractFrames、transcribe/import SRT/displayCaptions</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>FAQ 20+ 常见问题</h2>
+<div class="faq">
+  <div class="faq-item"><h3 class="faq-q">Q:Remotion 能用 Tailwind v4 吗?</h3><p class="faq-a">可以,装 <code>@remotion/tailwind-v4</code>(v4+ 推荐)。旧版用 <code>@remotion/tailwind</code>(v3 PostCSS)。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:为什么 Lambda 渲染比本地慢?</h3><p class="faq-a">Lambda 用临时无头实例,冷启动约 5-15s。bundle 复用 + 多 Lambda 并行可显著加速。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:Bundle 太大怎么办?</h3><p class="faq-a">1) tree-shake;2) webpackIgnore 标记 Node-only 包;3) 大依赖动态 import;4) 字体子集化;5) 大图不放源码。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:为什么 Player 控件没显示?</h3><p class="faq-a">默认 <code>controls={false}</code>,手动设 <code>controls</code> 或 <code>showPlaybackRateControl</code>。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:声音出不来?</h3><p class="faq-a">1) <code>&lt;Html5Audio muted /&gt;</code> 默认静音;2) 视频含多音轨用 <code>soundtrackAudio</code>;3) 用 <code>getAudioData</code> 调试。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:How to support iOS Safari?</h3><p class="faq-a">1) 用 <code>OffthreadVideo</code> 替代 <code>Html5Video</code>;2) 视频用 h264 + AAC;3) Player 关闭 autoplay。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:Remotion 是开源的吗?</h3><p class="faq-a">remotion 主包 MIT 许可,@remotion/lambda 等少数商业包需付费订阅(详见 license.md)。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:How to 加速打包?</h3><p class="faq-a">用 Rspack 替代 Webpack:<code>--experimental-rspack</code> 或在 config 中设置,加速 3-5x。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:AWS Lambda 限制?</h3><p class="faq-a">最大 10GB 内存、15min 超时、6TB 临时磁盘。Remotion 默认开 <code>--memory=2048</code>。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:Chinese text 乱码?</h3><p class="faq-a">装 <code>fonts-noto-color-emoji</code> + 中文字体(如 Source Han Sans),Docker 镜像中包含 <code>apt-get install fonts-noto-cjk</code>。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:Studio 中断网怎么办?</h3><p class="faq-a">Studio 客户端是纯静态 + Webpack HMR,断网会失去 HMR;重启后 <code>--webpack-poll=2000</code> 适配远程磁盘。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:How to 防字体闪屏?</h3><p class="faq-a"><code>loadFont().waitUntilDone()</code> 阻塞渲染;或 <code>document.fonts.ready</code>。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:如何用 Remotion 做字幕?</h3><p class="faq-a">v4.0.327+ 用 <code>@remotion/captions</code> 的 <code>createTikTokStyleCaptions</code>;旧方案用 <code>parseSrt()</code> + 自渲染。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:Linux 单进程慢?</h3><p class="faq-a">v4.0.137+ 默认 <code>enableMultiProcessOnLinux: true</code>;旧版需手动开启。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:How to 上千条视频批渲染?</h3><p class="faq-a">Lambda 批处理:先用 <code>renderMediaOnLambda</code> 渲染一条,后续用 <code>framesPerLambda=200</code> 拆任务并行。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:HLS 流支持?</h3><p class="faq-a"><code>&lt;Video&gt;</code> (@remotion/media) 完整支持;.m3u8 直接放 src;Chrome 142+ 可 SSR 部分 HLS。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:How to 优化 bundle?</h3><p class="faq-a">用 <code>webpack-bundle-analyzer</code> 找出大模块,通常 Three.js/Lottie 体积最大。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:Studio 不能打开?</h3><p class="faq-a">1) 关代理;2) 关防火墙;3) <code>--no-open</code> + 手动打开 <code>http://localhost:3000</code>。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:Remotion 跑在 Edge?</h3><p class="faq-a">Player 可在 Edge 运行;SSR/Studio 不行(需要 Puppeteer + 大量 Node API)。</p></div>
+  <div class="faq-item"><h3 class="faq-q">Q:How to 用 GPU?</h3><p class="faq-a">需要手动配置 Chrome 启动参数 <code>--use-gl=egl</code>;Lambda/GCP Cloud Run 不直接支持。</p></div>
+</div>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>License & 订阅</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>组件</th><th>许可</th></tr></thead>
+<tbody>
+<tr><td>remotion</td><td>MIT(完全免费)</td></tr>
+<tr><td>@remotion/cli / bundler / renderer / player / gif / web-renderer</td><td>MIT</td></tr>
+<tr><td>@remotion/lambda</td><td>商业(免费 tier:1000 渲染/月)</td></tr>
+<tr><td>@remotion/cloudrun</td><td>商业</td></tr>
+<tr><td>@remotion/vercel</td><td>商业</td></tr>
+<tr><td>@remotion/* 全部子包</td><td>MIT</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>Docker 镜像 3 选</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>镜像</th><th>大小</th><th>特点</th></tr></thead>
+<tbody>
+<tr><td><code>node:22-bookworm-slim</code> + 自装</td><td>~800MB</td><td>推荐,自定义灵活</td></tr>
+<tr><td><code>linuxserver/remotion</code></td><td>~600MB</td><td>社区维护,完整预设</td></tr>
+<tr><td><code>jrottenberg/ffmpeg</code> + Node</td><td>~1.2GB</td><td>含 FFmpeg,转码强</td></tr>
+<tr><td><code>mcr.microsoft.com/playwright</code></td><td>~900MB</td><td>含 Playwright Chrome</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>性能关键:enableMultiProcessOnLinux</h2>
+<p>v4.0.137+ 默认开启 Linux 多进程 Chrome,旧版需手动:</p>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">await renderMedia({
+  composition, serveUrl, outputLocation,
+  chromiumOptions: { enableMultiProcessOnLinux: true },
+  concurrency: '100%',  // 用满所有核
+});</code></pre></div>
+<p>提速效果:同机器从 4 分钟降到 1 分钟(30s 视频 1080p)。</p>
+</section>
+
+<nav class="page-nav">
+<a href="S-09-video-editor.html" class="prev">← 上一页:浏览器视频编辑器</a>
+<a href="index.html" class="next">回到总目录 →</a>
+</nav>
+</main>
+<footer class="site-footer"><p>© 2026 AI 工具箱 · Remotion 知识库 · 内容基于官方文档整理</p></footer>
+<script src="scripts.js"></script>
+</body></html>

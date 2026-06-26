@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>P-03 Remotion 自定义组件 | Three.js/Lottie/SVG/Canvas</title>
+<meta name="description" content="Remotion 与第三方库桥接高级模式:Three.js WebGL 集成、Lottie 动画渲染、SVG 动态生成、Canvas 2D 离屏绘制、Imperative API 与声明式 React 调和技巧。">
+<meta name="keywords" content="Remotion Three.js, Lottie, Canvas, SVG, 桥接">
+<link rel="canonical" href="https://example.com/remotion/P-03-custom-components.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 自定义组件扩展">
+<meta property="og:description" content="Three.js / Lottie / SVG / Canvas 与 Remotion 桥接。">
+<meta property="og:url" content="https://example.com/remotion/P-03-custom-components.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"P-03 Remotion 自定义组件","description":"Three.js、Lottie、SVG、Canvas 与 Remotion 桥接的高级模式。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 扩展"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="P-01-internal-architecture.html" class="active">高级</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-pro">高级层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">P-03 自定义组件</span>
+    </nav>
+    <h1 id="hero-title">P-03 自定义组件 <span class="level-badge level-P">P 高级</span></h1>
+    <p class="hero-sub">Three.js / Lottie / SVG / Canvas 与 Remotion 桥接的高级模式。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 12 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> A-04 静态资源</div>
+      <div class="hero-meta-item"><strong>类型</strong> 高级</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>Remotion 桥接模式</h2>
+<p>第三方库大多有<strong>命令式 API</strong>(new Renderer, 然后调用方法),Remotion 是<strong>声明式 React</strong>。桥接的关键模式:</p>
+<ol>
+  <li><strong>useEffect 初始化</strong>:首次渲染时创建对象</li>
+  <li><strong>useRef 保存实例</strong>:跨帧保持同一对象</li>
+  <li><strong>useCurrentFrame 驱动</strong>:每帧更新对象状态</li>
+  <li><strong>useEffect 清理</strong>:组件卸载时释放资源</li>
+</ol>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>Three.js:3D 场景</h2>
+<p>完整 Three.js 组件模式:</p>
+<pre class="line-numbers"><code class="language-tsx">import { useRef, useEffect } from 'react';
+import { useCurrentFrame, AbsoluteFill } from 'remotion';
+import * as THREE from 'three';
+
+const Scene3D: React.FC = () =&gt; {
+  const mountRef = useRef&lt;HTMLDivElement&gt;(null);
+  const stateRef = useRef&lt;{ scene?: any; camera?: any; renderer?: any }&gt;({});
+  const frame = useCurrentFrame();
+
+  useEffect(() =&gt; {
+    const w = 1920, h = 1080;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(w, h);
+    mountRef.current!.appendChild(renderer.domElement);
+    stateRef.current = { scene, camera, renderer };
+    return () =&gt; renderer.dispose();
+  }, []);
+
+  useEffect(() =&gt; {
+    const { scene, camera, renderer } = stateRef.current;
+    if (!scene) return;
+    scene.rotation.y = frame * 0.01;
+    renderer.render(scene, camera);
+  }, [frame]);
+
+  return &lt;AbsoluteFill ref={mountRef} /&gt;;
+};</code></pre>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p>Three.js 渲染需要 Puppeteer 启用 WebGL,Remotion 默认配置已包含。需 <code>--gl=angle-egl</code>(Linux) 或 macOS/Windows 原生 WebGL。</p></div></div>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>Lottie:Bodymovin 动画</h2>
+<p>用 lottie-web 渲染 After Effects 导出的 JSON 动画:</p>
+<pre class="line-numbers"><code class="language-tsx">import { useEffect, useRef } from 'react';
+import lottie from 'lottie-web';
+import { useCurrentFrame, staticFile } from 'remotion';
+
+const LottieAnim: React.FC = () =&gt; {
+  const ref = useRef&lt;HTMLDivElement&gt;(null);
+  const animRef = useRef&lt;any&gt;();
+  const frame = useCurrentFrame();
+
+  useEffect(() =&gt; {
+    animRef.current = lottie.loadAnimation({
+      container: ref.current!,
+      renderer: 'svg',
+      loop: false,
+      autoplay: false,
+      path: staticFile('anim.json'),
+    });
+    return () =&gt; animRef.current?.destroy();
+  }, []);
+
+  useEffect(() =&gt; {
+    if (animRef.current) animRef.current.goToAndStop(frame, true);
+  }, [frame]);
+
+  return &lt;div ref={ref} style={{ width: '100%', height: '100%' }} /&gt;;
+};</code></pre>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>SVG 动态生成</h2>
+<p>用 React JSX 直接写 SVG,Remotion 会自动序列化:</p>
+<pre class="line-numbers"><code class="language-tsx">const ProgressRing: React.FC&lt;{ progress: number }&gt; = ({ progress }) =&gt; {
+  const r = 80;
+  const c = 2 * Math.PI * r;
+  return (
+    &lt;svg width="200" height="200"&gt;
+      &lt;circle cx="100" cy="100" r={r} stroke="#eef3f9" strokeWidth="10" fill="none" /&gt;
+      &lt;circle cx="100" cy="100" r={r}
+        stroke="#2496ED" strokeWidth="10" fill="none"
+        strokeDasharray={c} strokeDashoffset={c * (1 - progress)}
+        transform="rotate(-90 100 100)" /&gt;
+    &lt;/svg&gt;
+  );
+};</code></pre>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>Canvas 2D 离屏绘制</h2>
+<p>用 canvas + useEffect 逐帧绘制:</p>
+<pre class="line-numbers"><code class="language-tsx">const CanvasAnim: React.FC = () =&gt; {
+  const ref = useRef&lt;HTMLCanvasElement&gt;(null);
+  const frame = useCurrentFrame();
+
+  useEffect(() =&gt; {
+    const ctx = ref.current!.getContext('2d')!;
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, 1920, 1080);
+    ctx.fillStyle = '#2496ED';
+    ctx.beginPath();
+    ctx.arc(960, 540, 100 + frame * 5, 0, Math.PI * 2);
+    ctx.fill();
+  }, [frame]);
+
+  return &lt;canvas ref={ref} width={1920} height={1080} /&gt;;
+};</code></pre>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>桥接库选型</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>库</th><th>场景</th><th>复杂度</th></tr></thead>
+<tbody>
+<tr><td>Three.js</td><td>3D / 数据可视化</td><td>高</td></tr>
+<tr><td>Lottie</td><td>设计师交付的动画</td><td>中</td></tr>
+<tr><td>SVG</td><td>简单图形 / 图标</td><td>低</td></tr>
+<tr><td>Canvas 2D</td><td>逐帧绘制 / 粒子</td><td>中</td></tr>
+<tr><td>D3.js</td><td>动态数据图表</td><td>中</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<div class="source-note">Three.js 文档、Lottie Bodymovin 规范、Canvas 2D API</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>Lottie + SVG 集成</h2>
+<p>接入 After Effects 导出的 Lottie 动画:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npx remotion add @remotion/lottie</code></pre></div>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { Lottie } from '@remotion/lottie';
+import animation from './animation.json';
+
+&lt;Lottie
+  animationData={animation}
+  style={{ width: 800, height: 800 }}
+/&gt;</code></pre></div>
+<p>SVG 路径操作(描边动画、路径变形)用 <code>@remotion/paths</code>:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npx remotion add @remotion/paths</code></pre></div>
+</section>
+
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>@remotion/skia + @remotion/shapes</h2>
+<p>Skia 是 Google 2D 矢量图形库,@remotion/skia 把它集成到 React:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { Canvas, Rect, Path, Skia } from '@remotion/skia';
+import { Circle, Triangle, Rect as R } from '@remotion/shapes';
+
+&lt;Canvas width={1920} height={1080}&gt;
+  &lt;R width={200} height={200} fill="cyan" /&gt;
+  &lt;Circle radius={100} fill="red" /&gt;
+&lt;/Canvas&gt;</code></pre></div>
+<p>vs SVG:Skia 性能更好(GPU 加速),SVG 兼容性更广;vs Canvas 2D:Skia 提供声明式 API,Canvas 2D 命令式。</p>
+</section>
+
+
+<section class="section" id="s9">
+<span class="section-num">Chapter 09</span>
+<h2>@remotion/rive + zod-types + layout-utils</h2>
+<p>三个高阶包:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npx remotion add @remotion/rive @remotion/zod-types @remotion/layout-utils</code></pre></div>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">// Rive 矢量动画(state machine 状态机)
+import { Rive } from '@remotion/rive';
+&lt;Rive src={riveFile} stateMachine="default" input={true} /&gt;
+
+// Zod 表单类型 + 颜色/日期选择器
+import { zColor, z } from '@remotion/zod-types';
+const Schema = z.object({ bg: zColor(), name: z.string() });
+&lt;Composition schema={Schema} calculateMetadata={...} /&gt;
+
+// 布局工具:fitText / measureText / 9-slice
+import { fitText } from '@remotion/layout-utils';
+const { fontSize } = fitText({ text, width, height, fontFamily: 'Inter' });</code></pre></div>
+</section>
+
+
+<section class="section" id="s10">
+<span class="section-num">Chapter 10</span>
+<h2>@remotion/paths SVG 路径工具</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>函数</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>getPointOnPath(progress, path)</code></td><td>沿路径上某点坐标</td></tr>
+<tr><td><code>getLength(path)</code></td><td>路径总长度</td></tr>
+<tr><td><code>evolvePath(progress, path)</code></td><td>SVG 路径动画展开</td></tr>
+<tr><td><code>interpolatePath(progress, a, b)</code></td><td>两条路径插值(Morph)</td></tr>
+<tr><td><code>translatePath(path, x, y)</code></td><td>平移</td></tr>
+<tr><td><code>reversePath(path)</code></td><td>反向</td></tr>
+</tbody>
+</table></div>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">// 让小球沿贝塞尔曲线动
+const p = getPointOnPath(progress, 'M 0 0 C 100 200 300 200 400 0');
+&lt;Circle cx={p.x} cy={p.y} r={20} fill="red" /&gt;
+
+// 笔画绘制动画
+const { strokeDasharray, strokeDashoffset } = evolvePath(progress, path);
+&lt;path d={path} strokeDasharray={strokeDasharray} strokeDashoffset={strokeDashoffset} /&gt;</code></pre></div>
+</section>
+
+<section class="section" id="s11">
+<span class="section-num">Chapter 11</span>
+<h2>@remotion/shapes 几何形状</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { Rect, Circle, Triangle, Polygon, Star, Heart, Pie, Ellipse } from '@remotion/shapes';
+// 自动生成 SVG Path,接受 fill / stroke / 尺寸
+
+&lt;Rect width={200} height={100} fill="cyan" /&gt;
+&lt;Circle radius={50} fill="red" /&gt;
+&lt;Star points={5} innerRadius={30} outerRadius={100} fill="gold" /&gt;</code></pre></div>
+<p>比手写 SVG Path 省 90% 代码。</p>
+</section>
+
+<section class="section" id="s12">
+<span class="section-num">Chapter 12</span>
+<h2>@remotion/layout-utils 排版工具</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { fitText, measureText, fillTextBox, fitTextOnNLines } from '@remotion/layout-utils';
+
+// 字体大小自适应宽度
+const { fontSize } = fitText({
+  text, withinWidth: 600, fontFamily: 'Inter', fontWeight: 'bold',
+});
+
+// 测量文字
+const { width, height } = measureText({ text, fontSize: 40, fontFamily: 'Inter' });
+
+// 多行排版
+const lines = fillTextBox({ text, maxLines: 3, fontSize, withinWidth });</code></pre></div>
+<p>配合 <code>useMeasureText</code>(必须用 <code>@remotion/google-fonts</code> 的 <code>loadFont().waitUntilDone()</code>)。</p>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="P-02-render-pipeline.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">P-02 渲染管线</span></a>
+  <a href="P-04-secure-rendering.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">P-04 安全渲染</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

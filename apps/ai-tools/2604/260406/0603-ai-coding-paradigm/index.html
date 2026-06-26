@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI编程的三次范式跃迁 | 从Vibe Coding到Harness Engineer</title>
+    <meta name="description" content="从Vibe Coding到Spec Coding到Harness Engineer，AI编程正在经历三次重大范式跃迁。深入解析三种编程范式的底层逻辑与实践路径。">
+    <meta name="keywords" content="Vibe Coding, Spec Coding, Harness Engineer, AI编程, AI Agent, 编程范式, ChatGPT, Copilot, 技术革命">
+    <meta name="author" content="AI技术">
+    
+    <link rel="canonical" href="./index.html">
+    
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="AI编程的三次范式跃迁">
+    <meta property="og:description" content="从Vibe Coding到Harness Engineer，三次范式跃迁的底层逻辑">
+    <meta property="og:locale" content="zh_CN">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI编程的三次范式跃迁">
+    <meta name="twitter:description" content="Vibe Coding → Spec Coding → Harness Engineer">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563EB',
+                        secondary: '#1D4ED8',
+                        accent: '#3B82F6',
+                        purple: '#7C3AED',
+                        green: '#10B981',
+                        dark: '#0F172A'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #60A5FA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gradient-text-purple {
+            background: linear-gradient(135deg, #7C3AED 0%, #A855F7 50%, #C084FC 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gradient-text-green {
+            background: linear-gradient(135deg, #10B981 0%, #34D399 50%, #6EE7B7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-base {
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card-base:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
+            border-color: rgba(37, 99, 235, 0.3);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #2563EB, rgba(37, 99, 235, 0.3));
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            background: #2563EB;
+            border-radius: 50%;
+        }
+
+        .paradigm-card {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.05));
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .paradigm-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(37, 99, 235, 0.4);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.2);
+        }
+
+        .paradigm-card.vibe {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(234, 88, 12, 0.05));
+            border-color: rgba(249, 115, 22, 0.2);
+        }
+
+        .paradigm-card.vibe:hover {
+            border-color: rgba(249, 115, 22, 0.4);
+            box-shadow: 0 8px 24px rgba(249, 115, 22, 0.2);
+        }
+
+        .paradigm-card.spec {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.05));
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        .paradigm-card.spec:hover {
+            border-color: rgba(37, 99, 235, 0.4);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.2);
+        }
+
+        .paradigm-card.harness {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(168, 85, 247, 0.05));
+            border-color: rgba(124, 58, 237, 0.2);
+        }
+
+        .paradigm-card.harness:hover {
+            border-color: rgba(124, 58, 237, 0.4);
+            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.2);
+        }
+
+        .year-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .tag-orange {
+            background-color: rgba(249, 115, 22, 0.2);
+            color: #FB923C;
+        }
+
+        .tag-blue {
+            background-color: rgba(37, 99, 235, 0.2);
+            color: #60A5FA;
+        }
+
+        .tag-purple {
+            background-color: rgba(124, 58, 237, 0.2);
+            color: #A855F7;
+        }
+
+        .tag-green {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #34D399;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th {
+            background-color: rgba(37, 99, 235, 0.2);
+            color: #60A5FA;
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #CBD5E1;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, #2563EB, #1D4ED8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            z-index: 100;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-2px);
+        }
+
+        .toc-card {
+            position: sticky;
+            top: 5rem;
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.25rem;
+        }
+
+        .toc-link {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #94A3B8;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .toc-link:hover {
+            background-color: rgba(37, 99, 235, 0.2);
+            color: #60A5FA;
+        }
+
+        .toc-link.active {
+            background-color: rgba(37, 99, 235, 0.3);
+            color: #60A5FA;
+        }
+
+        @media (max-width: 1024px) {
+            .toc-card {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem !important;
+            }
+            
+            .section-title {
+                font-size: 1.5rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav-fixed">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-purple flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <span class="font-bold text-lg">AI编程范式</span>
+                </div>
+                
+                <div class="hidden md:flex items-center gap-6 text-sm">
+                    <a href="#overview" class="text-gray-400 hover:text-white transition-colors">概述</a>
+                    <a href="#paradigms" class="text-gray-400 hover:text-white transition-colors">三次跃迁</a>
+                    <a href="#spec" class="text-gray-400 hover:text-white transition-colors">Spec Coding</a>
+                    <a href="#harness" class="text-gray-400 hover:text-white transition-colors">Harness</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-24 pb-12 px-4" style="background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-500/30 rounded-full px-4 py-1.5 mb-4">
+                <i class="fas fa-bolt text-blue-400 text-xs"></i>
+                <span class="text-xs font-medium">技术深度解析</span>
+            </div>
+            
+            <h1 class="hero-title text-3xl sm:text-4xl lg:text-5xl font-black mb-4">
+                <span class="gradient-text">AI编程的三次范式跃迁</span>
+            </h1>
+            
+            <p class="text-base sm:text-lg text-gray-400 mb-6 max-w-2xl mx-auto">
+                从 Vibe Coding 到 Spec Coding 到 Harness Engineer<br>
+                <span class="text-white font-semibold">不是工具升级，而是人机协作关系的根本重构</span>
+            </p>
+            
+            <div class="flex flex-wrap justify-center gap-3 text-sm">
+                <span class="bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                    <i class="fas fa-code text-orange-400 mr-1"></i>Vibe Coding
+                </span>
+                <span class="bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                    <i class="fas fa-file-alt text-blue-400 mr-1"></i>Spec Coding
+                </span>
+                <span class="bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                    <i class="fas fa-cogs text-purple-400 mr-1"></i>Harness Engineer
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            <!-- Table of Contents -->
+            <aside class="lg:col-span-1">
+                <div class="toc-card">
+                    <h3 class="text-sm font-bold mb-3 flex items-center gap-2">
+                        <i class="fas fa-list text-blue-400"></i>
+                        目录导航
+                    </h3>
+                    <nav class="space-y-1">
+                        <a href="#overview" class="toc-link active">
+                            <i class="fas fa-chart-line mr-2"></i>全景对比
+                        </a>
+                        <a href="#vibe" class="toc-link">
+                            <i class="fas fa-pen mr-2"></i>Vibe Coding
+                        </a>
+                        <a href="#spec" class="toc-link">
+                            <i class="fas fa-file-alt mr-2"></i>Spec Coding
+                        </a>
+                        <a href="#harness" class="toc-link">
+                            <i class="fas fa-cogs mr-2"></i>Harness
+                        </a>
+                        <a href="#timeline" class="toc-link">
+                            <i class="fas fa-clock mr-2"></i>时间轴
+                        </a>
+                    </nav>
+                </div>
+            </aside>
+            
+            <!-- Article Content -->
+            <article class="lg:col-span-3">
+                
+                <!-- Overview Section -->
+                <section id="overview" class="mb-12 scroll-mt-16">
+                    <div class="card-base mb-8">
+                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                            <i class="fas fa-chart-line text-blue-400"></i>
+                            三次跃迁的底层逻辑
+                        </h2>
+                        
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>维度</th>
+                                        <th class="tag-orange text-center">Vibe Coding<br><span class="text-xs font-normal">2024</span></th>
+                                        <th class="tag-blue text-center">Spec Coding<br><span class="text-xs font-normal">2025</span></th>
+                                        <th class="tag-purple text-center">Harness Engineer<br><span class="text-xs font-normal">2026</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="font-semibold">核心变化</td>
+                                        <td>用嘴写代码</td>
+                                        <td>先写规格再实现</td>
+                                        <td>管理Agent运行</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold">人类角色</td>
+                                        <td>需求描述者</td>
+                                        <td>规格制定者</td>
+                                        <td>系统架构师</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold">解决问题</td>
+                                        <td>零门槛编程</td>
+                                        <td>歧义与不确定性</td>
+                                        <td>Agent可靠性</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold">核心挑战</td>
+                                        <td>技术债累积</td>
+                                        <td>运行时故障</td>
+                                        <td>多Agent协作</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Vibe Coding Section -->
+                <section id="vibe" class="mb-12 scroll-mt-16">
+                    <div class="paradigm-card vibe mb-6">
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="year-badge bg-orange-500/20 text-orange-400">2024</span>
+                            <h2 class="text-2xl font-bold">Vibe Coding</h2>
+                        </div>
+                        <p class="text-gray-300 mb-4">
+                            Andrej Karpathy 提出的概念，自然语言描述需求，AI生成代码
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag tag-orange">零门槛</span>
+                            <span class="tag tag-orange">30分钟</span>
+                            <span class="tag tag-orange">Web应用</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="card-base">
+                            <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-green-400">
+                                <i class="fas fa-check-circle"></i>
+                                核心优势
+                            </h3>
+                            <ul class="space-y-2 text-gray-300 text-sm">
+                                <li>• 零门槛，不需要编程基础</li>
+                                <li>• 快速生成代码原型</li>
+                                <li>• 适合 POC 快速验证</li>
+                                <li>• Hackathon 和 Demo 利器</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card-base">
+                            <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-red-400">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                致命缺陷
+                            </h3>
+                            <ul class="space-y-2 text-gray-300 text-sm">
+                                <li>• <strong>歧义问题</strong>：AI替人做沉默决策</li>
+                                <li>• <strong>范围蔓延</strong>：需求边界模糊</li>
+                                <li>• <strong>幻觉</strong>：代码可能看似正确</li>
+                                <li>• <strong>不可审查</strong>：难以人工验证</li>
+                                <li>• <strong>不可复现</strong>：相同需求结果不同</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card-base mt-6">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-orange-400">
+                            <i class="fas fa-lightbulb"></i>
+                            核心洞察
+                        </h3>
+                        <p class="text-gray-300 text-lg italic">
+                            "看起来能用"和"真正能用"之间隔着一道深渊
+                        </p>
+                        <p class="text-gray-400 text-sm mt-3">
+                            Vibe Coding 是 AI 编程的"素描"，不是"施工图"。它的最佳场景是快速验证想法可行性，一次性脚本，个人项目。
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Spec Coding Section -->
+                <section id="spec" class="mb-12 scroll-mt-16">
+                    <div class="paradigm-card spec mb-6">
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="year-badge bg-blue-500/20 text-blue-400">2025</span>
+                            <h2 class="text-2xl font-bold">Spec Coding</h2>
+                        </div>
+                        <p class="text-gray-300 mb-4">
+                            行业集体转向：在写代码之前，先把"做什么"定义清楚
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag tag-blue">Spec Kit</span>
+                            <span class="tag tag-blue">Symphony</span>
+                            <span class="tag tag-blue">Plan Mode</span>
+                        </div>
+                    </div>
+                    
+                    <!-- SDD Flow -->
+                    <div class="card-base mb-6">
+                        <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                            <i class="fas fa-stream text-blue-400"></i>
+                            Spec Driven Development 流程
+                        </h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-blue-500/10 rounded-lg p-4 text-center border border-blue-500/20">
+                                <div class="text-3xl font-black text-blue-400 mb-2">1</div>
+                                <p class="font-semibold">Spec</p>
+                                <p class="text-xs text-gray-400">定义做什么</p>
+                            </div>
+                            <div class="bg-purple-500/10 rounded-lg p-4 text-center border border-purple-500/20">
+                                <div class="text-3xl font-black text-purple-400 mb-2">2</div>
+                                <p class="font-semibold">Plan</p>
+                                <p class="text-xs text-gray-400">规划怎么做</p>
+                            </div>
+                            <div class="bg-green-500/10 rounded-lg p-4 text-center border border-green-500/20">
+                                <div class="text-3xl font-black text-green-400 mb-2">3</div>
+                                <p class="font-semibold">Tasks</p>
+                                <p class="text-xs text-gray-400">拆解任务</p>
+                            </div>
+                            <div class="bg-orange-500/10 rounded-lg p-4 text-center border border-orange-500/20">
+                                <div class="text-3xl font-black text-orange-400 mb-2">4</div>
+                                <p class="font-semibold">Implement</p>
+                                <p class="text-xs text-gray-400">逐个实现</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="card-base">
+                            <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-green-400">
+                                <i class="fas fa-check-circle"></i>
+                                解决了什么问题
+                            </h3>
+                            <ul class="space-y-2 text-gray-300 text-sm">
+                                <li>• <strong>歧义问题</strong>：Agent 不需要再猜</li>
+                                <li>• <strong>可审查性</strong>：团队可在实现前对齐预期</li>
+                                <li>• <strong>可复现性</strong>：相同 Spec 产出一致结果</li>
+                                <li>• <strong>质量底线</strong>：验收标准就是测试用例</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card-base">
+                            <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-yellow-400">
+                                <i class="fas fa-exclamation-circle"></i>
+                                没解决什么
+                            </h3>
+                            <ul class="space-y-2 text-gray-300 text-sm">
+                                <li>• Agent 运行时的故障恢复</li>
+                                <li>• 多 Agent 协作的编排与状态管理</li>
+                                <li>• 上下文窗口的动态管理</li>
+                                <li>• 安全防护与人工审批流程</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Maturity Levels -->
+                    <div class="card-base mt-6">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-layer-group text-blue-400"></i>
+                            Spec Coding 的三个成熟度层级
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="bg-white/5 rounded-lg p-4 border-l-4 border-blue-500">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="tag tag-blue">L1</span>
+                                    <span class="font-bold">Spec-First</span>
+                                </div>
+                                <p class="text-gray-400 text-sm">在编码前编写功能规格说明</p>
+                            </div>
+                            <div class="bg-white/5 rounded-lg p-4 border-l-4 border-purple-500">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="tag tag-purple">L2</span>
+                                    <span class="font-bold">Spec-Anchored</span>
+                                </div>
+                                <p class="text-gray-400 text-sm">规格作为验证和决策的核心依据</p>
+                            </div>
+                            <div class="bg-white/5 rounded-lg p-4 border-l-4 border-green-500">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="tag tag-green">L3</span>
+                                    <span class="font-bold">Spec-as-Source</span>
+                                </div>
+                                <p class="text-gray-400 text-sm">规格本身成为源代码的一部分</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Harness Section -->
+                <section id="harness" class="mb-12 scroll-mt-16">
+                    <div class="paradigm-card harness mb-6">
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="year-badge bg-purple-500/20 text-purple-400">2026</span>
+                            <h2 class="text-2xl font-bold">Harness Engineer</h2>
+                        </div>
+                        <p class="text-gray-300 mb-4">
+                            Harness 不是 Agent，是管理 Agent 如何运行的软件系统
+                        </p>
+                        <div class="bg-purple-500/10 rounded-lg p-4 border border-purple-500/20">
+                            <p class="text-sm text-gray-300">
+                                <strong class="text-purple-400">计算机类比：</strong>
+                                CPU = LLM，RAM = 上下文窗口，操作系统 = Harness，应用程序 = Agent
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Six Components -->
+                    <div class="card-base mb-6">
+                        <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                            <i class="fas fa-cubes text-purple-400"></i>
+                            Harness 的六大核心组件
+                        </h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-white/5 rounded-lg p-4">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <i class="fas fa-plug text-purple-400"></i>
+                                    <span class="font-semibold">工具集成层</span>
+                                </div>
+                                <p class="text-xs text-gray-400">设备驱动程序 - Agent 调用外部工具的接口</p>
+                            </div>
+                            <div class="bg-white/5 rounded-lg p-4">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <i class="fas fa-memory text-blue-400"></i>
+                                    <span class="font-semibold">内存与状态管理</span>
+                                </div>
+                                <p class="text-xs text-gray-400">内存管理 + 文件系统 - 持久化与临时状态</p>
+                            </div>
+                            <div class="bg-white/5 rounded-lg p-4">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <i class="fas fa-brain text-green-400"></i>
+                                    <span class="font-semibold">上下文工程</span>
+                                </div>
+                                <p class="text-xs text-gray-400">进程调度器 - 管理上下文窗口的动态分配</p>
+                            </div>
+                            <div class="bg-white/5 rounded-lg p-4">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <i class="fas fa-project-diagram text-orange-400"></i>
+                                    <span class="font-semibold">规划与分解</span>
+                                </div>
+                                <p class="text-xs text-gray-400">任务调度器 - 复杂任务的分层规划</p>
+                            </div>
+                            <div class="bg-white/5 rounded-lg p-4">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <i class="fas fa-shield-alt text-red-400"></i>
+                                    <span class="font-semibold">验证与防护</span>
+                                </div>
+                                <p class="text-xs text-gray-400">防火墙 + 权限系统 - 安全防护与审批流程</p>
+                            </div>
+                            <div class="bg-white/5 rounded-lg p-4">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <i class="fas fa-puzzle-piece text-yellow-400"></i>
+                                    <span class="font-semibold">模块化与扩展</span>
+                                </div>
+                                <p class="text-xs text-gray-400">内核模块 - 可扩展的功能组件</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Engineer Skills -->
+                    <div class="card-base">
+                        <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                            <i class="fas fa-user-graduate text-purple-400"></i>
+                            Harness Engineer 的五大核心技能
+                        </h3>
+                        <div class="grid md:grid-cols-5 gap-4">
+                            <div class="text-center">
+                                <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-brain text-purple-400"></i>
+                                </div>
+                                <p class="font-semibold text-sm">上下文工程</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-balance-scale text-blue-400"></i>
+                                </div>
+                                <p class="font-semibold text-sm">约束设计</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-sitemap text-green-400"></i>
+                                </div>
+                                <p class="font-semibold text-sm">工具编排</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-clipboard-check text-orange-400"></i>
+                                </div>
+                                <p class="font-semibold text-sm">规格治理</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-check-double text-red-400"></i>
+                                </div>
+                                <p class="font-semibold text-sm">质量闭环</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Timeline Section -->
+                <section id="timeline" class="mb-12 scroll-mt-16">
+                    <div class="card-base mb-6">
+                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                            <i class="fas fa-clock text-blue-400"></i>
+                            视频场景时间轴
+                        </h2>
+                        <div class="text-sm text-gray-400 mb-6">
+                            总时长：120秒 | 帧率：60fps | 总帧数：7200帧
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item pb-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-blue-400">场景 1: 封面</span>
+                            <span class="text-gray-500 text-xs">0s - 5s (帧 0-300)</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">AI编程的三次范式跃迁，从 Vibe Coding 到 Harness Engineer</p>
+                    </div>
+                    
+                    <div class="timeline-item pb-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-blue-400">场景 2: 全景</span>
+                            <span class="text-gray-500 text-xs">5s - 12s (帧 300-720)</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">三次跃迁的底层逻辑对比表格</p>
+                    </div>
+                    
+                    <div class="timeline-item pb-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-orange-400">场景 3-5: Vibe Coding</span>
+                            <span class="text-gray-500 text-xs">12s - 42s</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">什么是 Vibe Coding、致命缺陷、正确定位</p>
+                    </div>
+                    
+                    <div class="timeline-item pb-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-purple-400">场景 6-8: Spec Coding</span>
+                            <span class="text-gray-500 text-xs">42s - 80s</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">行业集体转向、SDD 核心流程、三个成熟度层级</p>
+                    </div>
+                    
+                    <div class="timeline-item pb-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-purple-400">场景 9-11: Harness</span>
+                            <span class="text-gray-500 text-xs">80s - 115s</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">Harness 是什么、六大核心组件、新工种 Harness Engineer</p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-green-400">场景 12: 结尾</span>
+                            <span class="text-gray-500 text-xs">115s - 120s</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">三次跃迁揭示的方向：人类角色从"编写代码"上移到"编写约束"</p>
+                    </div>
+                </section>
+
+                <!-- Conclusion -->
+                <section class="mb-12">
+                    <div class="bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 rounded-2xl p-8 border border-blue-500/30 text-center">
+                        <h3 class="text-2xl font-bold mb-4 gradient-text">核心结论</h3>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-4">
+                            从 Vibe Coding 到 Spec Coding 到 Harness Engineer
+                        </p>
+                        <p class="text-white text-xl font-semibold">
+                            本质上都是在提升人类表达意图的精确程度
+                        </p>
+                        <p class="text-gray-400 mt-4">
+                            系统的质量上限，永远取决于人类表达意图的精确程度
+                        </p>
+                    </div>
+                </section>
+
+            </article>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 px-4 border-t border-white/10 text-center">
+        <div class="flex items-center justify-center gap-3 mb-4">
+            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-purple flex items-center justify-center">
+                <i class="fas fa-robot text-white text-sm"></i>
+            </div>
+            <span class="font-bold text-lg">AI编程范式</span>
+        </div>
+        <p class="text-gray-500 text-sm mb-2">从 Vibe Coding 到 Harness Engineer</p>
+        <div class="flex justify-center gap-4 text-xs text-gray-500">
+            <span>Vibe Coding</span>
+            <span>•</span>
+            <span>Spec Coding</span>
+            <span>•</span>
+            <span>Harness Engineer</span>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Back to Top
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('backToTop');
+            if (window.scrollY > 300) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        });
+
+        // TOC Active State
+        const sections = document.querySelectorAll('section[id]');
+        const tocLinks = document.querySelectorAll('.toc-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

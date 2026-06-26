@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hermes Agent vs OpenClaw：自主 AI 智能体框架深度对比</title>
+    <meta name="description" content="深入对比两大热门 AI Agent 框架：OpenClaw 如瑞士军刀般功能全面，Hermes Agent 则如会思考进化的资深专家。从核心理念、记忆系统、代码质量、部署易用性等维度全面解析，助你找到最适合的 AI 编程伙伴。">
+    <meta name="keywords" content="Hermes Agent, OpenClaw, AI Agent, 自主智能体, AI编程, Nous Research, 框架对比, 人工智能, Multi-Agent">
+    <meta name="author" content="AI科技观察">
+    <!-- Open Graph -->
+    <meta property="og:title" content="Hermes Agent vs OpenClaw：自主 AI 智能体框架深度对比">
+    <meta property="og:description" content="OpenClaw 像瑞士军刀，Hermes Agent 像资深专家。两大 AI Agent 框架深度对比，帮你找到最适合的选择！">
+    <meta property="og:image" content="assets/cover.png">
+    <meta property="og:type" content="website">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Hermes Agent vs OpenClaw：自主 AI 智能体框架深度对比">
+    <meta name="twitter:description" content="OpenClaw 像瑞士军刀，Hermes Agent 像资深专家。两大 AI Agent 框架深度对比，帮你找到最适合的选择！">
+    <meta name="twitter:image" content="assets/cover.png">
+    <!-- Schema.org 结构化数据 -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Hermes Agent vs OpenClaw：自主 AI 智能体框架深度对比",
+        "description": "深入对比两大热门 AI Agent 框架：OpenClaw 如瑞士军刀般功能全面，Hermes Agent 则如会思考进化的资深专家",
+        "image": "assets/cover.png",
+        "author": {
+            "@type": "Organization",
+            "name": "AI科技观察"
+        }
+    }
+    </script>
+    <!-- 国内 CDN CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-border {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));
+            backdrop-filter: blur(10px);
+        }
+
+        .card-hover {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(37, 99, 235, 0.3);
+        }
+
+        .gallery-item {
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Image Viewer Modal - Professional Style */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 30, 0.98) 100%);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+
+        .image-viewer.active {
+            display: flex;
+            flex-direction: column;
+            animation: viewerFadeIn 0.3s ease;
+        }
+
+        @keyframes viewerFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .viewer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .viewer-toolbar-left,
+        .viewer-toolbar-center,
+        .viewer-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .viewer-toolbar-divider {
+            width: 1px;
+            height: 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 0.5rem;
+        }
+
+        .viewer-toolbar-btn {
+            width: 2.75rem;
+            height: 2.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9rem;
+        }
+
+        .viewer-toolbar-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .viewer-toolbar-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        .viewer-toolbar-btn.active {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            border-color: #3B82F6;
+            color: white;
+        }
+
+        .viewer-zoom-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 0.25rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-zoom-slider {
+            width: 120px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        .viewer-zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #3B82F6;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
+        }
+
+        .viewer-zoom-display {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            min-width: 3.5rem;
+            text-align: center;
+        }
+
+        .viewer-main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            min-height: 0;
+        }
+
+        .viewer-main:active {
+            cursor: grabbing;
+        }
+
+        .viewer-canvas {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+        }
+
+        .viewer-image-container {
+            position: absolute;
+            transform-origin: center center;
+            user-select: none;
+            transition: transform 0.1s ease-out;
+        }
+
+        .viewer-image {
+            display: block;
+            max-width: 92vw;
+            max-height: 75vh;
+            object-fit: contain;
+            pointer-events: none;
+            user-select: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .viewer-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4rem;
+            height: 4rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 1.5rem;
+            z-index: 10;
+        }
+
+        .viewer-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .viewer-nav.prev {
+            left: 1.5rem;
+        }
+
+        .viewer-nav.next {
+            right: 1.5rem;
+        }
+
+        .viewer-nav:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .viewer-bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .viewer-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.85);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1.25rem;
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-divider {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .viewer-thumbnail-strip {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            overflow-x: auto;
+            max-height: 120px;
+            min-height: 100px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
+        }
+
+        .viewer-thumbnail {
+            width: 80px;
+            height: 60px;
+            border-radius: 0.5rem;
+            object-fit: cover;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            flex-shrink: 0;
+        }
+
+        .viewer-thumbnail:hover {
+            opacity: 0.7;
+            transform: scale(1.05);
+        }
+
+        .viewer-thumbnail.active {
+            opacity: 1;
+            border-color: #3B82F6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .viewer-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 10002;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-toast.show {
+            opacity: 1;
+        }
+
+        .viewer-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            gap: 1rem;
+            color: white;
+            font-size: 1rem;
+            z-index: 100;
+        }
+
+        .viewer-loading.active {
+            display: flex;
+        }
+
+        .viewer-loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #3B82F6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 gradient-border border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-balance-scale text-2xl text-blue-500"></i>
+                <span class="text-xl font-bold gradient-text">AI Agent 对比</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <a href="#overview" class="text-gray-400 hover:text-white transition-colors">框架对比</a>
+                <a href="#features" class="text-gray-400 hover:text-white transition-colors">核心特性</a>
+                <a href="#gallery" class="text-gray-400 hover:text-white transition-colors">资源展示</a>
+                <a href="#documents" class="text-gray-400 hover:text-white transition-colors">文档资料</a>
+            </div>
+        </div>
+    </nav>
+    <!-- Hero Section -->
+    <section class="min-h-screen flex flex-col justify-center items-center text-center px-6 py-20 pt-24">
+        <div class="animate__animated animate__fadeIn">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 gradient-text">
+                Hermes Agent vs OpenClaw
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-400 mb-8 animate__animated animate__fadeIn animate__delay-1s">
+                自主 AI 智能体框架深度对比
+            </p>
+            <p class="text-lg text-gray-500 mb-12 max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-2s">
+                OpenClaw 像瑞士军刀，Hermes Agent 像资深专家。谁更适合你？
+            </p>
+        </div>
+        <div class="flex gap-4 flex-wrap justify-center animate__animated animate__fadeIn animate__delay-3s">
+            <a href="#overview" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold transition-all hover:scale-105">
+                <i class="fas fa-balance-scale mr-2"></i>开始对比
+            </a>
+            <a href="#quick-start" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-xl font-semibold transition-all hover:scale-105">
+                <i class="fas fa-rocket mr-2"></i>快速了解
+            </a>
+        </div>
+    </section>
+    <!-- Overview Section -->
+    <section id="overview" class="py-20 px-6 bg-gray-800">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-16">
+                <i class="fas fa-balance-scale text-blue-500 mr-4"></i>
+                框架对比总览
+            </h2>
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Hermes Agent -->
+                <div class="card-hover bg-gradient-to-br from-blue-900/50 to-blue-900/20 rounded-2xl p-8 border border-blue-500/50">
+                    <div class="flex items-center mb-6">
+                        <span class="text-5xl mr-4">🤖</span>
+                        <div>
+                            <h3 class="text-2xl font-bold text-blue-400">Hermes Agent</h3>
+                            <p class="text-gray-400">资深专家型</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-6">
+                        像一位会"思考进化"的资深专家。完全用 Python 编写，设计精巧，注重长期记忆和任务质量。
+                    </p>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-brain text-blue-400"></i>
+                            <span class="text-gray-300">自我进化、长期记忆</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-code text-blue-400"></i>
+                            <span class="text-gray-300">Python（便于理解和信任）</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="text-gray-300">~28.4k Stars（快速增长中）</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- OpenClaw -->
+                <div class="card-hover bg-gradient-to-br from-green-900/50 to-green-900/20 rounded-2xl p-8 border border-green-500/50">
+                    <div class="flex items-center mb-6">
+                        <span class="text-5xl mr-4">🔧</span>
+                        <div>
+                            <h3 class="text-2xl font-bold text-green-400">OpenClaw</h3>
+                            <p class="text-gray-400">瑞士军刀型</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-6">
+                        像一把瑞士军刀。功能全面，以网关为核心，擅长对接各种聊天平台、插件和协作场景。
+                    </p>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-plug text-green-400"></i>
+                            <span class="text-gray-300">功能全面、多平台集成</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fab fa-js text-green-400"></i>
+                            <span class="text-gray-300">TypeScript（生态系统）</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="text-gray-300">~340k Stars（长期榜首）</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Comparison Table -->
+            <div class="bg-gray-900 rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-800">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-gray-300">对比维度</th>
+                                <th class="px-6 py-4 text-left text-blue-400">Hermes Agent</th>
+                                <th class="px-6 py-4 text-left text-green-400">OpenClaw</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            <tr>
+                                <td class="px-6 py-4 text-gray-400">核心理念</td>
+                                <td class="px-6 py-4 text-gray-300">自我进化、长期记忆、代码透明</td>
+                                <td class="px-6 py-4 text-gray-300">功能全面、多平台集成、任务调度</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-gray-400">开发语言</td>
+                                <td class="px-6 py-4 text-gray-300">Python（便于理解和信任）</td>
+                                <td class="px-6 py-4 text-gray-300">TypeScript</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-gray-400">设计哲学</td>
+                                <td class="px-6 py-4 text-gray-300">"精而强"，轻量模块化</td>
+                                <td class="px-6 py-4 text-gray-300">"大而全"，功能丰富</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-gray-400">代码库规模</td>
+                                <td class="px-6 py-4 text-gray-300">轻量级，易于理解和修改</td>
+                                <td class="px-6 py-4 text-gray-300">约12.5万行 TypeScript</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 text-gray-400">模型支持</td>
+                                <td class="px-6 py-4 text-gray-300">本地模型（7B-70B）支持更好</td>
+                                <td class="px-6 py-4 text-gray-300">更适合云端模型</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Memory System Section -->
+    <section class="py-20 px-6">
+        <div class="mb-8">
+            <img src="assets/cover.png" alt="Hermes Agent vs OpenClaw" class="w-full max-w-4xl mx-auto rounded-2xl shadow-2xl gallery-item cursor-pointer" onclick="openImageViewer(0)">
+        </div>
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">
+                <i class="fas fa-brain text-purple-500 mr-4"></i>
+                记忆系统：关键差异
+            </h2>
+            <p class="text-center text-gray-400 mb-12 text-lg">
+                记忆是区分两者的关键，直接影响 Agent 的长期价值
+            </p>
+            <img src="assets/illustration-memory.png" alt="记忆系统对比" class="w-full max-w-3xl mx-auto rounded-2xl shadow-2xl gallery-item cursor-pointer mb-12" onclick="openImageViewer(3)">
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- OpenClaw Memory -->
+                <div class="card-hover bg-gray-800 rounded-2xl p-8 border border-green-500/30">
+                    <h3 class="text-2xl font-bold text-green-400 mb-6">
+                        <i class="fas fa-file-alt mr-3"></i>OpenClaw 记忆系统
+                    </h3>
+                    <p class="text-gray-300 mb-4">相对简单，依赖文件存储：</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span class="text-gray-400">MEMORY.md - 记忆文件</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span class="text-gray-400">每日笔记 - 记录特定信息</span>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Hermes Memory -->
+                <div class="card-hover bg-gray-800 rounded-2xl p-8 border border-blue-500/30">
+                    <h3 class="text-2xl font-bold text-blue-400 mb-6">
+                        <i class="fas fa-layer-group mr-3"></i>Hermes Agent 记忆系统
+                    </h3>
+                    <p class="text-gray-300 mb-4">分层结构化，四级记忆：</p>
+                    <div class="space-y-4">
+                        <div class="bg-blue-900/30 rounded-lg p-4">
+                            <h4 class="text-blue-400 font-semibold mb-2">1. 提示记忆 (Prompt Memory)</h4>
+                            <p class="text-gray-400 text-sm">核心事实和用户画像，每个会话开始时加载</p>
+                        </div>
+                        <div class="bg-purple-900/30 rounded-lg p-4">
+                            <h4 class="text-purple-400 font-semibold mb-2">2. 会话归档 (Session Archive)</h4>
+                            <p class="text-gray-400 text-sm">完整对话记录存储在 SQLite 数据库中</p>
+                        </div>
+                        <div class="bg-green-900/30 rounded-lg p-4">
+                            <h4 class="text-green-400 font-semibold mb-2">3. 技能库 (Skills)</h4>
+                            <p class="text-gray-400 text-sm">自动生成可复用的"技能文档"，实现自我进化</p>
+                        </div>
+                        <div class="bg-yellow-900/30 rounded-lg p-4">
+                            <h4 class="text-yellow-400 font-semibold mb-2">4. 外部提供商 (External Provider)</h4>
+                            <p class="text-gray-400 text-sm">可选的、更强大的外部记忆服务</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Features Grid -->
+    <section id="features" class="py-20 px-6 bg-gray-800">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-16">
+                <i class="fas fa-rocket text-blue-500 mr-4"></i>
+                核心维度对比
+            </h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1: 代码质量 -->
+                <div class="card-hover bg-gray-700 rounded-2xl p-8 border border-blue-500/30">
+                    <div class="text-5xl mb-6">💻</div>
+                    <h3 class="text-2xl font-bold text-blue-400 mb-4">代码质量</h3>
+                    <p class="text-gray-300 mb-4">社区普遍反馈 Hermes Agent 的代码质量更高。</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-blue-400 font-semibold">Hermes:</span>
+                            <span class="text-gray-400 text-sm">更理解上下文、架构模式、边界情况</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-green-400 font-semibold">OpenClaw:</span>
+                            <span class="text-gray-400 text-sm">代码有时被形容为"初级的"</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Feature 2: 模型支持 -->
+                <div class="card-hover bg-gray-700 rounded-2xl p-8 border border-purple-500/30">
+                    <div class="text-5xl mb-6">🤖</div>
+                    <h3 class="text-2xl font-bold text-purple-400 mb-4">模型支持</h3>
+                    <p class="text-gray-300 mb-4">两者在模型支持方面各有优势。</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-blue-400 font-semibold">Hermes:</span>
+                            <span class="text-gray-400 text-sm">本地模型（7B-70B）支持更好</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-green-400 font-semibold">OpenClaw:</span>
+                            <span class="text-gray-400 text-sm">更适合调用功能强大的云端模型</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Feature 3: 部署易用性 -->
+                <div class="card-hover bg-gray-700 rounded-2xl p-8 border border-green-500/30">
+                    <div class="text-5xl mb-6">🚀</div>
+                    <h3 class="text-2xl font-bold text-green-400 mb-4">部署易用性</h3>
+                    <p class="text-gray-300 mb-4">安装和使用体验差异明显。</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-blue-400 font-semibold">Hermes:</span>
+                            <span class="text-gray-400 text-sm">一键安装，可在Docker中轻松运行</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-green-400 font-semibold">OpenClaw:</span>
+                            <span class="text-gray-400 text-sm">功能全面，但代码库较庞大</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Feature 4: 社区生态 -->
+                <div class="card-hover bg-gray-700 rounded-2xl p-8 border border-yellow-500/30">
+                    <div class="text-5xl mb-6">👥</div>
+                    <h3 class="text-2xl font-bold text-yellow-400 mb-4">社区生态</h3>
+                    <p class="text-gray-300 mb-4">背后的支持力量各有特点。</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-blue-400 font-semibold">Hermes:</span>
+                            <span class="text-gray-400 text-sm">Nous Research 专业实验室支持</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-green-400 font-semibold">OpenClaw:</span>
+                            <span class="text-gray-400 text-sm">Peter Steinberger 等社区开发者主导</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Feature 5: 更新活跃度 -->
+                <div class="card-hover bg-gray-700 rounded-2xl p-8 border border-pink-500/30">
+                    <div class="text-5xl mb-6">⚡</div>
+                    <h3 class="text-2xl font-bold text-pink-400 mb-4">更新活跃度</h3>
+                    <p class="text-gray-300 mb-4">开发节奏和响应速度。</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-blue-400 font-semibold">Hermes:</span>
+                            <span class="text-gray-400 text-sm">响应迅速，更新非常活跃</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-green-400 font-semibold">OpenClaw:</span>
+                            <span class="text-gray-400 text-sm">拥有丰富的插件生态</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Feature 6: GitHub 热度 -->
+                <div class="card-hover bg-gray-700 rounded-2xl p-8 border border-cyan-500/30">
+                    <div class="text-5xl mb-6">⭐</div>
+                    <h3 class="text-2xl font-bold text-cyan-400 mb-4">GitHub 热度</h3>
+                    <p class="text-gray-300 mb-4">社区关注度指标。</p>
+                    <div class="space-y-3">
+                        <div class="bg-blue-900/30 rounded-lg p-3">
+                            <span class="text-blue-400 font-bold text-lg">~28.4k</span>
+                            <span class="text-gray-400 ml-2">Hermes Stars</span>
+                        </div>
+                        <div class="bg-green-900/30 rounded-lg p-3">
+                            <span class="text-green-400 font-bold text-lg">~340k</span>
+                            <span class="text-gray-400 ml-2">OpenClaw Stars</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Migration Section -->
+    <section class="py-20 px-6">
+        <div class="max-w-5xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-8">
+                <i class="fas fa-exchange-alt text-purple-500 mr-4"></i>
+                平滑迁移路径
+            </h2>
+            <p class="text-xl text-gray-300 mb-12">
+                如果你已是 OpenClaw 用户，可以一键迁移到 Hermes Agent
+            </p>
+            <img src="assets/illustration-migrate.png" alt="迁移路径" class="w-full max-w-3xl mx-auto rounded-2xl shadow-2xl gallery-item cursor-pointer mb-12" onclick="openImageViewer(4)">
+            <div class="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl p-8 border border-purple-500/30 mb-8">
+                <h3 class="text-2xl font-bold text-purple-400 mb-6">
+                    <i class="fas fa-terminal mr-3"></i>迁移命令
+                </h3>
+                <div class="bg-gray-900 rounded-xl p-6 mb-6">
+                    <code class="text-green-400 text-lg">hermes claw migrate</code>
+                </div>
+                <p class="text-gray-400">一键导入你的一切配置</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6 text-left">
+                <div class="bg-gray-800 rounded-xl p-6">
+                    <div class="text-3xl mb-4">📝</div>
+                    <h4 class="text-xl font-bold text-blue-400 mb-2">人设文件</h4>
+                    <p class="text-gray-400">SOUL.md 等人设配置自动导入</p>
+                </div>
+                <div class="bg-gray-800 rounded-xl p-6">
+                    <div class="text-3xl mb-4">🧠</div>
+                    <h4 class="text-xl font-bold text-purple-400 mb-2">记忆数据</h4>
+                    <p class="text-gray-400">MEMORY.md 和记忆记录完整迁移</p>
+                </div>
+                <div class="bg-gray-800 rounded-xl p-6">
+                    <div class="text-3xl mb-4">🔑</div>
+                    <h4 class="text-xl font-bold text-green-400 mb-2">API 密钥</h4>
+                    <p class="text-gray-400">API 密钥和平台配置自动同步</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Recommendations Section -->
+    <section id="quick-start" class="py-20 px-6 bg-gray-800">
+        <div class="max-w-5xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12">
+                <i class="fas fa-question-circle text-blue-500 mr-4"></i>
+                如何选择？
+            </h2>
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <!-- Choose Hermes -->
+                <div class="card-hover bg-gradient-to-br from-blue-900/50 to-blue-900/20 rounded-2xl p-8 border border-blue-500/50">
+                    <div class="text-5xl mb-6">✅</div>
+                    <h3 class="text-2xl font-bold text-blue-400 mb-4">选择 Hermes Agent</h3>
+                    <p class="text-gray-300 mb-6">如果你需要：</p>
+                    <ul class="space-y-3 text-left">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-blue-400 mt-1"></i>
+                            <span class="text-gray-300">透明、可控且能不断学习进化的 AI 编程伙伴</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-blue-400 mt-1"></i>
+                            <span class="text-gray-300">高质量的代码生成能力</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-blue-400 mt-1"></i>
+                            <span class="text-gray-300">本地模型支持（7B-70B）</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-blue-400 mt-1"></i>
+                            <span class="text-gray-300">轻量级、易于理解和修改的代码库</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-blue-400 mt-1"></i>
+                            <span class="text-gray-300">专业实验室的持续支持</span>
+                        </li>
+                    </ul>
+                    <a href="https://github.com/hermes-agent" target="_blank" class="inline-block mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
+                        <i class="fab fa-github mr-2"></i>访问 Hermes
+                    </a>
+                </div>
+                <!-- Choose OpenClaw -->
+                <div class="card-hover bg-gradient-to-br from-green-900/50 to-green-900/20 rounded-2xl p-8 border border-green-500/50">
+                    <div class="text-5xl mb-6">✅</div>
+                    <h3 class="text-2xl font-bold text-green-400 mb-4">选择 OpenClaw</h3>
+                    <p class="text-gray-300 mb-6">如果你需要：</p>
+                    <ul class="space-y-3 text-left">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-400 mt-1"></i>
+                            <span class="text-gray-300">多面手，将 AI 能力嵌入各种场景</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-400 mt-1"></i>
+                            <span class="text-gray-300">丰富的插件生态和集成能力</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-400 mt-1"></i>
+                            <span class="text-gray-300">强大的云端模型调用能力</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-400 mt-1"></i>
+                            <span class="text-gray-400">庞大的社区和丰富的文档</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-400 mt-1"></i>
+                            <span class="text-gray-300">多聊天平台集成（钉钉、微信等）</span>
+                        </li>
+                    </ul>
+                    <a href="https://github.com/openclaw" target="_blank" class="inline-block mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors">
+                        <i class="fab fa-github mr-2"></i>访问 OpenClaw
+                    </a>
+                </div>
+            </div>
+            <div class="bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl p-8 border border-purple-500/30">
+                <p class="text-2xl font-bold text-white mb-4">
+                    <i class="fas fa-lightbulb text-yellow-400 mr-3"></i>
+                    核心理念
+                </p>
+                <p class="text-xl text-gray-300">
+                    OpenClaw 像"瑞士军刀"，功能全面；<br>
+                    Hermes Agent 像"资深专家"，注重进化。
+                </p>
+                <p class="text-lg text-purple-400 mt-4">
+                    选对框架，效率翻倍
+                </p>
+            </div>
+        </div>
+    </section>
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-16">
+                <i class="fas fa-images text-purple-500 mr-4"></i>
+                视觉资源
+            </h2>
+            <p class="text-center text-gray-400 mb-12">点击任意图片可查看大图，支持缩放、旋转、幻灯片播放</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card-hover bg-gray-800 rounded-2xl p-6 border border-blue-500/30">
+                    <img src="assets/cover.png" alt="封面图" class="w-full rounded-xl shadow-lg gallery-item cursor-pointer mb-4" onclick="openImageViewer(0)">
+                    <h3 class="text-xl font-bold text-blue-400 mb-2">
+                        <i class="fas fa-image mr-2"></i>项目封面
+                    </h3>
+                    <p class="text-gray-400">Hermes Agent vs OpenClaw 对比封面</p>
+                </div>
+                <div class="card-hover bg-gray-800 rounded-2xl p-6 border border-blue-500/30">
+                    <img src="assets/illustration-hermes.png" alt="Hermes Agent" class="w-full rounded-xl shadow-lg gallery-item cursor-pointer mb-4" onclick="openImageViewer(1)">
+                    <h3 class="text-xl font-bold text-blue-400 mb-2">
+                        <i class="fas fa-robot mr-2"></i>Hermes Agent
+                    </h3>
+                    <p class="text-gray-400">资深专家型框架架构示意</p>
+                </div>
+                <div class="card-hover bg-gray-800 rounded-2xl p-6 border border-green-500/30">
+                    <img src="assets/illustration-openclaw.png" alt="OpenClaw" class="w-full rounded-xl shadow-lg gallery-item cursor-pointer mb-4" onclick="openImageViewer(2)">
+                    <h3 class="text-xl font-bold text-green-400 mb-2">
+                        <i class="fas fa-toolbox mr-2"></i>OpenClaw
+                    </h3>
+                    <p class="text-gray-400">瑞士军刀型框架架构示意</p>
+                </div>
+                <div class="card-hover bg-gray-800 rounded-2xl p-6 border border-purple-500/30">
+                    <img src="assets/illustration-memory.png" alt="记忆系统" class="w-full rounded-xl shadow-lg gallery-item cursor-pointer mb-4" onclick="openImageViewer(3)">
+                    <h3 class="text-xl font-bold text-purple-400 mb-2">
+                        <i class="fas fa-brain mr-2"></i>记忆系统对比
+                    </h3>
+                    <p class="text-gray-400">两大框架的记忆系统差异</p>
+                </div>
+                <div class="card-hover bg-gray-800 rounded-2xl p-6 border border-yellow-500/30">
+                    <img src="assets/illustration-migrate.png" alt="迁移路径" class="w-full rounded-xl shadow-lg gallery-item cursor-pointer mb-4" onclick="openImageViewer(4)">
+                    <h3 class="text-xl font-bold text-yellow-400 mb-2">
+                        <i class="fas fa-exchange-alt mr-2"></i>迁移路径
+                    </h3>
+                    <p class="text-gray-400">从 OpenClaw 到 Hermes 的迁移</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Documents Section -->
+    <section id="documents" class="py-20 px-6 bg-gray-800">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-16">
+                <i class="fas fa-file-alt text-blue-500 mr-4"></i>
+                项目文档
+            </h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="card-hover bg-gray-700 rounded-xl p-6 border border-blue-500/30">
+                    <div class="text-blue-400 text-3xl mb-4">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">原始文章</h3>
+                    <p class="text-gray-400 mb-4">详细的 Hermes Agent vs OpenClaw 对比分析</p>
+                    <a href="article.md" class="text-blue-400 hover:text-blue-300">
+                        <i class="fas fa-external-link-alt mr-1"></i>查看文档
+                    </a>
+                </div>
+                <div class="card-hover bg-gray-700 rounded-xl p-6 border border-purple-500/30">
+                    <div class="text-purple-400 text-3xl mb-4">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">视频脚本</h3>
+                    <p class="text-gray-400 mb-4">60秒竖屏视频的分镜脚本和场景描述</p>
+                    <a href="video-script.md" class="text-purple-400 hover:text-purple-300">
+                        <i class="fas fa-external-link-alt mr-1"></i>查看文档
+                    </a>
+                </div>
+                <div class="card-hover bg-gray-700 rounded-xl p-6 border border-pink-500/30">
+                    <div class="text-pink-400 text-3xl mb-4">
+                        <i class="fab fa-weixin"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">公众号文案</h3>
+                    <p class="text-gray-400 mb-4">适配微信公众号的推广文案</p>
+                    <a href="wechat-copy.md" class="text-pink-400 hover:text-pink-300">
+                        <i class="fas fa-external-link-alt mr-1"></i>查看文档
+                    </a>
+                </div>
+                <div class="card-hover bg-gray-700 rounded-xl p-6 border border-yellow-500/30">
+                    <div class="text-yellow-400 text-3xl mb-4">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">发布指南</h3>
+                    <p class="text-gray-400 mb-4">小红书、视频号、抖音、YouTube 多平台发布指南</p>
+                    <a href="posting-guide.md" class="text-yellow-400 hover:text-yellow-300">
+                        <i class="fas fa-external-link-alt mr-1"></i>查看文档
+                    </a>
+                </div>
+                <div class="card-hover bg-gray-700 rounded-xl p-6 border border-green-500/30">
+                    <div class="text-green-400 text-3xl mb-4">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Hermes Agent</h3>
+                    <p class="text-gray-400 mb-4">访问 Hermes Agent 官方开源仓库</p>
+                    <a href="https://github.com/hermes-agent" target="_blank" class="text-green-400 hover:text-green-300">
+                        <i class="fas fa-external-link-alt mr-1"></i>访问仓库
+                    </a>
+                </div>
+                <div class="card-hover bg-gray-700 rounded-xl p-6 border border-cyan-500/30">
+                    <div class="text-cyan-400 text-3xl mb-4">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">OpenClaw</h3>
+                    <p class="text-gray-400 mb-4">访问 OpenClaw 官方开源仓库</p>
+                    <a href="https://github.com/openclaw" target="_blank" class="text-cyan-400 hover:text-cyan-300">
+                        <i class="fas fa-external-link-alt mr-1"></i>访问仓库
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer class="py-12 px-6 text-center text-gray-500 border-t border-gray-800">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <i class="fas fa-balance-scale text-2xl text-blue-500"></i>
+                <span class="text-xl font-bold gradient-text">AI Agent 对比</span>
+            </div>
+            <p class="mb-4">Hermes Agent vs OpenClaw - 自主 AI 智能体框架深度对比</p>
+            <p class="text-sm">
+                框架来源:
+                <a href="https://github.com/hermes-agent" target="_blank" class="text-blue-400 hover:underline">Hermes Agent</a>
+                &amp;
+                <a href="https://github.com/openclaw" target="_blank" class="text-green-400 hover:underline">OpenClaw</a>
+            </p>
+            <p class="text-xs mt-4 text-gray-600">
+                本页面由 AI 辅助生成，用于展示 AI Agent 框架对比内容
+            </p>
+        </div>
+    </footer>
+    <!-- Image Viewer Modal - Professional Style -->
+    <div id="imageViewer" class="image-viewer">
+        <div class="viewer-toolbar">
+            <div class="viewer-toolbar-left">
+                <button class="viewer-toolbar-btn" onclick="closeImageViewer()" title="关闭 (ESC)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="viewer-toolbar-divider"></div>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(-90)" title="向左旋转">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(90)" title="向右旋转">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="flipHorizontal()" title="水平翻转">
+                    <i class="fas fa-arrows-alt-h"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="flipVertical()" title="垂直翻转">
+                    <i class="fas fa-arrows-alt-v"></i>
+                </button>
+            </div>
+            <div class="viewer-toolbar-center">
+                <button class="viewer-toolbar-btn" onclick="zoomOut()" title="缩小 (-)">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <div class="viewer-zoom-slider-container">
+                    <input type="range" id="zoomSlider" class="viewer-zoom-slider" min="10" max="500" value="100">
+                    <span id="zoomDisplay" class="viewer-zoom-display">100%</span>
+                </div>
+                <button class="viewer-toolbar-btn" onclick="zoomIn()" title="放大 (+)">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="fitToScreen()" title="适应屏幕 (0)">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="toggleFullscreen()" title="全屏 (F)">
+                    <i class="fas fa-expand" id="fullscreenIcon"></i>
+                </button>
+            </div>
+            <div class="viewer-toolbar-right">
+                <button class="viewer-toolbar-btn" onclick="toggleSlideShow()" title="幻灯片播放" id="slideShowBtn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <div class="viewer-toolbar-divider"></div>
+                <button class="viewer-toolbar-btn" onclick="downloadImage()" title="下载图片">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="openInNewTab()" title="新窗口打开">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+            </div>
+        </div>
+        <div class="viewer-main" id="viewerMain">
+            <div class="viewer-canvas" id="viewerCanvas">
+                <div class="viewer-image-container" id="imageContainer">
+                    <img id="viewerImage" class="viewer-image" src="" alt="">
+                </div>
+            </div>
+            <button class="viewer-nav prev" id="prevBtn" onclick="prevImage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="viewer-nav next" id="nextBtn" onclick="nextImage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="viewer-bottom-bar">
+                <div class="viewer-info">
+                    <span id="imageTitle">图片</span>
+                    <span class="viewer-divider">|</span>
+                    <span id="imageCounter">1 / 1</span>
+                    <span class="viewer-divider">|</span>
+                    <span id="imageDimensions">-</span>
+                </div>
+            </div>
+        </div>
+        <div class="viewer-thumbnail-strip" id="thumbnailStrip"></div>
+        <div class="viewer-toast" id="viewerToast"></div>
+        <div class="viewer-loading" id="viewerLoading">
+            <div class="viewer-loading-spinner"></div>
+            <span>加载中...</span>
+        </div>
+    </div>
+    <script>
+        // 图片数组（延迟初始化，等待 DOM 完全就绪）
+        let images = [];
+
+        // 状态变量
+        let currentIndex = 0;
+        let scale = 1;
+        let rotation = 0;
+        let flipX = 1;
+        let flipY = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let initialScale = 1;
+        let slideShowInterval = null;
+        let slideShowPlaying = false;
+        let currentImageDimensions = { width: 0, height: 0 };
+
+        // 自动收集图片（优先收集 gallery-item 中的图片）
+        function collectImages() {
+            const images = [];
+            const seenSrc = new Set();
+
+            // 只收集 gallery-item 中的图片（用于预览）
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                const img = item.querySelector('img');
+                if (img && img.src && !img.src.includes('data:')) {
+                    if (!seenSrc.has(img.src)) {
+                        seenSrc.add(img.src);
+                        images.push({
+                            src: img.src,
+                            title: img.alt || '图片 ' + (images.length + 1),
+                            thumbnail: img.src
+                        });
+                    }
+                }
+            });
+
+            // 如果没有 gallery-item，则收集所有有意义的图片
+            if (images.length === 0) {
+                document.querySelectorAll('img').forEach(img => {
+                    if (!seenSrc.has(img.src) && img.src && !img.src.includes('data:')) {
+                        // 排除 viewerImage（预览器的图片）
+                        if (img.id !== 'viewerImage') {
+                            seenSrc.add(img.src);
+                            images.push({
+                                src: img.src,
+                                title: img.alt || '图片 ' + (images.length + 1),
+                                thumbnail: img.src
+                            });
+                        }
+                    }
+                });
+            }
+
+            return images;
+        }
+
+        // 打开查看器
+        function openImageViewer(index) {
+            // 如果图片数组为空，先收集图片
+            if (images.length === 0) {
+                images = collectImages();
+            }
+
+            if (images.length === 0) return;
+
+            currentIndex = Math.max(0, Math.min(index, images.length - 1));
+            resetViewState();
+            loadImage(currentIndex);
+            buildThumbnailStrip();
+            updateUI();
+
+            document.getElementById('imageViewer').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            preloadAdjacentImages();
+        }
+
+        // 关闭查看器
+        function closeImageViewer() {
+            stopSlideShow();
+            document.getElementById('imageViewer').classList.remove('active');
+            document.body.style.overflow = '';
+
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        }
+
+        // 重置视图
+        function resetViewState() {
+            scale = 1;
+            rotation = 0;
+            flipX = 1;
+            flipY = 1;
+            translateX = 0;
+            translateY = 0;
+            updateSliderValue();
+        }
+
+        // 加载图片
+        function loadImage(index) {
+            const loading = document.getElementById('viewerLoading');
+            const img = document.getElementById('viewerImage');
+
+            if (loading) loading.classList.add('active');
+
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                img.src = images[index].src;
+                currentImageDimensions = {
+                    width: tempImg.naturalWidth,
+                    height: tempImg.naturalHeight
+                };
+                if (loading) loading.classList.remove('active');
+                updateImageInfo();
+                updateTransform();
+            };
+            tempImg.onerror = () => {
+                if (loading) loading.classList.remove('active');
+                showToast('图片加载失败');
+            };
+            tempImg.src = images[index].src;
+        }
+
+        // 上一张（循环）
+        function prevImage() {
+            if (images.length <= 1) return;
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            resetViewState();
+            loadImage(currentIndex);
+            updateUI();
+            preloadAdjacentImages();
+        }
+
+        // 下一张（循环）
+        function nextImage() {
+            if (images.length <= 1) return;
+            currentIndex = (currentIndex + 1) % images.length;
+            resetViewState();
+            loadImage(currentIndex);
+            updateUI();
+            preloadAdjacentImages();
+        }
+
+        // 缩放
+        function zoom(delta) {
+            const newScale = Math.max(0.1, Math.min(5, scale + delta));
+            if (newScale !== scale) {
+                scale = newScale;
+                updateTransform();
+                updateZoomDisplay();
+                updateSliderValue();
+            }
+        }
+
+        function zoomIn() { zoom(0.25); }
+        function zoomOut() { zoom(-0.25); }
+
+        function fitToScreen() {
+            resetViewState();
+            updateTransform();
+            updateZoomDisplay();
+            updateSliderValue();
+            showToast('已适应屏幕');
+        }
+
+        // 旋转
+        function rotateImage(deg) {
+            rotation = (rotation + deg) % 360;
+            updateTransform();
+            showToast('旋转 ' + rotation + '°');
+        }
+
+        // 翻转
+        function flipHorizontal() {
+            flipX *= -1;
+            updateTransform();
+            showToast(flipX === -1 ? '已水平翻转' : '已取消水平翻转');
+        }
+
+        function flipVertical() {
+            flipY *= -1;
+            updateTransform();
+            showToast(flipY === -1 ? '已垂直翻转' : '已取消垂直翻转');
+        }
+
+        // 全屏
+        function toggleFullscreen() {
+            const viewer = document.getElementById('imageViewer');
+            const icon = document.getElementById('fullscreenIcon');
+
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+                if (icon) icon.className = 'fas fa-expand';
+                showToast('已退出全屏');
+            } else {
+                viewer.requestFullscreen();
+                if (icon) icon.className = 'fas fa-compress-alt';
+                showToast('已进入全屏');
+            }
+        }
+
+        // 幻灯片
+        function toggleSlideShow() {
+            if (slideShowPlaying) {
+                stopSlideShow();
+            } else {
+                startSlideShow();
+            }
+        }
+
+        function startSlideShow() {
+            if (images.length <= 1) {
+                showToast('只有一张图片，无法播放幻灯片');
+                return;
+            }
+
+            slideShowPlaying = true;
+            updateSlideShowButton();
+            showToast('幻灯片播放中...');
+
+            slideShowInterval = setInterval(() => {
+                nextImage();
+            }, 3000);
+        }
+
+        function stopSlideShow() {
+            slideShowPlaying = false;
+            updateSlideShowButton();
+
+            if (slideShowInterval) {
+                clearInterval(slideShowInterval);
+                slideShowInterval = null;
+            }
+        }
+
+        // 下载
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.href = images[currentIndex].src;
+            link.download = images[currentIndex].title || 'image';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('开始下载...');
+        }
+
+        // 新窗口打开
+        function openInNewTab() {
+            window.open(images[currentIndex].src, '_blank');
+        }
+
+        // Toast 提示
+        function showToast(text) {
+            const toast = document.getElementById('viewerToast');
+            if (!toast) return;
+
+            toast.textContent = text;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // 更新变换
+        function updateTransform() {
+            const container = document.getElementById('imageContainer');
+            if (container) {
+                container.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scaleX(${flipX}) scaleY(${flipY}) scale(${scale})`;
+            }
+        }
+
+        // 构建缩略图条
+        function buildThumbnailStrip() {
+            const strip = document.getElementById('thumbnailStrip');
+            if (!strip) return;
+
+            strip.innerHTML = '';
+
+            images.forEach((img, index) => {
+                const thumb = document.createElement('img');
+                thumb.className = 'viewer-thumbnail' + (index === currentIndex ? ' active' : '');
+                thumb.src = img.thumbnail;
+                thumb.alt = img.title;
+                thumb.onclick = () => {
+                    currentIndex = index;
+                    resetViewState();
+                    loadImage(currentIndex);
+                    updateUI();
+                };
+                strip.appendChild(thumb);
+            });
+        }
+
+        // 更新 UI 状态
+        function updateUI() {
+            // 更新缩略图激活状态
+            document.querySelectorAll('.viewer-thumbnail').forEach((thumb, index) => {
+                thumb.classList.toggle('active', index === currentIndex);
+            });
+
+            // 更新图片信息
+            updateImageInfo();
+        }
+
+        // 更新图片信息
+        function updateImageInfo() {
+            const titleEl = document.getElementById('imageTitle');
+            const counterEl = document.getElementById('imageCounter');
+            const dimensionsEl = document.getElementById('imageDimensions');
+
+            if (titleEl) titleEl.textContent = images[currentIndex]?.title || '图片';
+            if (counterEl) counterEl.textContent = (currentIndex + 1) + ' / ' + images.length;
+            if (dimensionsEl) dimensionsEl.textContent = currentImageDimensions.width + ' × ' + currentImageDimensions.height;
+        }
+
+        // 更新缩放显示
+        function updateZoomDisplay() {
+            const display = document.getElementById('zoomDisplay');
+            if (display) display.textContent = Math.round(scale * 100) + '%';
+        }
+
+        // 更新滑块值
+        function updateSliderValue() {
+            const slider = document.getElementById('zoomSlider');
+            if (slider) slider.value = scale * 100;
+        }
+
+        // 更新幻灯片按钮
+        function updateSlideShowButton() {
+            const btn = document.getElementById('slideShowBtn');
+            if (btn) {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = slideShowPlaying ? 'fas fa-pause' : 'fas fa-play';
+                }
+            }
+        }
+
+        // 预加载相邻图片
+        function preloadAdjacentImages() {
+            const preloadIndices = [
+                (currentIndex - 1 + images.length) % images.length,
+                (currentIndex + 1) % images.length
+            ];
+
+            preloadIndices.forEach(index => {
+                if (images[index]) {
+                    const img = new Image();
+                    img.src = images[index].src;
+                }
+            });
+        }
+
+        // 绑定事件（需要在 DOM 加载后调用）
+        function bindViewerEvents() {
+            const canvas = document.getElementById('viewerMain');
+            const zoomSlider = document.getElementById('zoomSlider');
+
+            if (!canvas) return;
+
+            // 鼠标拖拽
+            canvas.addEventListener('mousedown', (e) => {
+                if (e.button === 0) {
+                    isDragging = true;
+                    startX = e.clientX - translateX;
+                    startY = e.clientY - translateY;
+                    canvas.style.cursor = 'grabbing';
+                }
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    translateX = e.clientX - startX;
+                    translateY = e.clientY - startY;
+                    updateTransform();
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                canvas.style.cursor = 'grab';
+            });
+
+            // 滚轮缩放
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                zoom(e.deltaY > 0 ? -0.15 : 0.15);
+            }, { passive: false });
+
+            // 双击适应屏幕
+            canvas.addEventListener('dblclick', (e) => {
+                if (scale !== 1) {
+                    fitToScreen();
+                } else {
+                    scale = 2;
+                    updateTransform();
+                    updateZoomDisplay();
+                    updateSliderValue();
+                }
+            });
+
+            // 缩放滑块
+            if (zoomSlider) {
+                zoomSlider.addEventListener('input', (e) => {
+                    scale = e.target.value / 100;
+                    updateTransform();
+                    updateZoomDisplay();
+                });
+            }
+
+            // 键盘快捷键
+            document.addEventListener('keydown', (e) => {
+                if (!document.getElementById('imageViewer').classList.contains('active')) return;
+
+                switch (e.key) {
+                    case 'Escape': closeImageViewer(); break;
+                    case 'ArrowLeft': prevImage(); break;
+                    case 'ArrowRight': nextImage(); break;
+                    case '+': case '=': zoomIn(); break;
+                    case '-': zoomOut(); break;
+                    case '0': fitToScreen(); break;
+                    case ' ': e.preventDefault(); toggleSlideShow(); break;
+                    case 'f': case 'F': toggleFullscreen(); break;
+                    case 'd': case 'D': downloadImage(); break;
+                }
+            });
+
+            // 触摸手势
+            let lastTouchDistance = 0;
+            let touchStartTime = 0;
+
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    startX = e.touches[0].clientX - translateX;
+                    startY = e.touches[0].clientY - translateY;
+                    touchStartTime = Date.now();
+                } else if (e.touches.length === 2) {
+                    lastTouchDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    initialScale = scale;
+                }
+            }, { passive: true });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1) {
+                    translateX = e.touches[0].clientX - startX;
+                    translateY = e.touches[0].clientY - startY;
+                    updateTransform();
+                } else if (e.touches.length === 2) {
+                    e.preventDefault();
+                    const currentDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    scale = Math.max(0.1, Math.min(5, initialScale * (currentDistance / lastTouchDistance)));
+                    updateTransform();
+                    updateZoomDisplay();
+                    updateSliderValue();
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', (e) => {
+                if (e.touches.length === 0) {
+                    const touchDuration = Date.now() - touchStartTime;
+                    const diff = Math.abs(translateX) + Math.abs(translateY);
+
+                    if (diff > 50 && touchDuration < 300) {
+                        translateX > 0 ? prevImage() : nextImage();
+                    }
+                }
+            });
+
+            // 点击背景关闭
+            canvas.addEventListener('click', (e) => {
+                if (e.target === canvas) {
+                    closeImageViewer();
+                }
+            });
+
+            // 全屏变化
+            document.addEventListener('fullscreenchange', () => {
+                const icon = document.getElementById('fullscreenIcon');
+                if (icon) {
+                    icon.className = document.fullscreenElement ? 'fas fa-compress-alt' : 'fas fa-expand';
+                }
+            });
+        }
+
+        // 页面加载完成后初始化（重要！）
+        document.addEventListener('DOMContentLoaded', () => {
+            // 延迟初始化图片查看器，确保 DOM 完全就绪
+            setTimeout(() => {
+                // 先收集图片
+                images = collectImages();
+
+                if (images.length === 0) {
+                    console.warn('没有找到图片');
+                    return;
+                }
+                buildThumbnailStrip();
+                bindViewerEvents();
+            }, 100);
+        });
+
+        // 如果 DOM 已加载则立即初始化
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(() => {
+                // 先收集图片
+                images = collectImages();
+
+                if (images.length > 0) {
+                    buildThumbnailStrip();
+                    bindViewerEvents();
+                }
+            }, 200);
+        }
+    </script>
+</body>
+
+</html>

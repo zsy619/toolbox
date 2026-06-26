@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Harness - LLM Self-Healing 浏览器 Harness</title>
+  <link href="https://cdn.bootcdn.net/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <style>
+    * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    body { background: #0F172A; color: #E2E8F0; }
+    .gradient-text { background: linear-gradient(135deg, #10B981, #3B82F6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .article-content { line-height: 1.8; }
+    .article-content h2 { font-size: 1.5rem; font-weight: 700; margin: 2rem 0 1rem; color: #F8FAFC; }
+    .article-content p { margin-bottom: 1rem; color: #CBD5E1; }
+    .article-content ul { margin: 1rem 0; padding-left: 1.5rem; }
+    .article-content li { margin-bottom: 0.5rem; color: #CBD5E1; }
+    .article-content code { background: #1E293B; padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.9em; }
+    .code-block { background: #1E293B; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; overflow-x: auto; }
+    .code-block pre { margin: 0; color: #10B981; font-family: monospace; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="max-w-2xl mx-auto py-12 px-6">
+    <!-- Header -->
+    <header class="mb-12">
+      <div class="text-sm text-emerald-400 mb-4">AI 工具 / 浏览器自动化</div>
+      <h1 class="text-4xl font-bold mb-4 leading-tight">
+        592行代码<br>
+        <span class="gradient-text">让 AI 自己操作浏览器</span>
+      </h1>
+      <div class="flex items-center gap-4 text-slate-500 text-sm">
+        <span>Browser Harness</span>
+        <span>·</span>
+        <span>2026-04-22</span>
+      </div>
+    </header>
+
+    <!-- Article -->
+    <article class="article-content">
+      <p class="text-xl text-slate-300 mb-6">
+        You will never use the browser again.
+      </p>
+
+      <h2>这个工具是什么</h2>
+      <p>
+        Browser Harness 是最简单的、最薄的、<strong>self-healing</strong> 的 harness，让 LLM 能够完全自由地完成任何浏览器任务。
+      </p>
+      <p>
+        直接建立在 CDP (Chrome DevTools Protocol) 上。Agent 在任务中途发现缺什么函数，直接自己写进去。
+      </p>
+
+      <h2>Self-healing 原理</h2>
+      <div class="code-block">
+        <pre>
+  ● agent: wants to upload a file
+  │
+  ● helpers.py → upload_file() missing
+  │
+  ● agent edits the harness and writes it
+  │   helpers.py   192 → 199 lines
+  │                   + upload_file()
+  ✓ file uploaded
+        </pre>
+      </div>
+      <p>
+        Agent 在任务中途发现缺少某个函数，它会直接动手写进去，然后继续执行。这就是真正的 self-healing。
+      </p>
+
+      <h2>极简架构</h2>
+      <p>
+        整个项目只有 592 行 Python 代码：
+      </p>
+      <ul>
+        <li><strong>run.py</strong> (~36 lines) — 运行预加载 helper 的 Python</li>
+        <li><strong>helpers.py</strong> (~195 lines) — 起始工具调用，agent 会编辑这些</li>
+        <li><strong>admin.py + daemon.py</strong> (~361 lines) — CDP websocket 和 socket bridge</li>
+      </ul>
+
+      <h2>CDP 直连</h2>
+      <p>
+        直接建立在 Chrome DevTools Protocol 上，一个 WebSocket 连 Chrome，中间什么都不夹。
+      </p>
+      <p>
+        无框架、无配方、无护栏。
+      </p>
+
+      <h2>免费远程浏览器</h2>
+      <ul>
+        <li>3 个并发浏览器</li>
+        <li>代理支持</li>
+        <li>Captcha 解决</li>
+        <li>完全免费，无需信用卡</li>
+      </ul>
+
+      <p class="text-center text-slate-400 mt-8">
+        去 GitHub 搜索 browser-use/browser-harness 🚀
+      </p>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
+      <p>视频号：元曜科技</p>
+      <p class="mt-2">持续分享 AI 效率工具</p>
+    </footer>
+  </div>
+</body>
+</html>

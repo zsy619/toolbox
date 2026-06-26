@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>
+      12-Factor App 与容器化原则 | Docker 实战教程
+    </title>
+    <meta name="description" content="详解 Heroku 12-Factor App 12 要素在容器化时代的实践:代码/依赖/配置/后端服务/构建发布运行/进程/端口绑定/并发/可处置/环境等价/日志/管理进程。">
+    <meta name="keywords" content="Docker, 12-Factor App 与容器化原则, 容器化教程, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/24-12-factor-app-containerization.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="12-Factor App 与容器化原则">
+    <meta property="og:description" content="详解 Heroku 12-Factor App 12 要素在容器化时代的实践:代码/依赖/配置/后端服务/构建发布运行/进程/端口绑定/并发/可处置/环境等价/日志/管理进程。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/24-12-factor-app-containerization.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="12-Factor App 与容器化原则">
+    <meta name="twitter:description" content="详解 Heroku 12-Factor App 12 要素在容器化时代的实践:代码/依赖/配置/后端服务/构建发布运行/进程/端口绑定/并发/可处置/环境等价/日志/管理进程。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"12-Factor App 与容器化原则","description":"详解 Heroku 12-Factor App 12 要素在容器化时代的实践:代码/依赖/配置/后端服务/构建发布运行/进程/端口绑定/并发/可处置/环境等价/日志/管理进程。","author":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 教程","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"12-Factor App 与容器化原则","item":"https://tools.yy24365.com/ai-tools/docker/24-12-factor-app-containerization.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            D
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 教程
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              12-Factor App 与容器化原则
+            </span>
+          </nav>
+          <h1 id="hero-title">
+            12-Factor App 与容器化原则
+          </h1>
+          <p class="hero-sub">
+            Heroku 12 要素 + 容器化最佳实践
+          </p>
+          <p class="hero-desc">
+            详解 Heroku 12-Factor App 12 要素在容器化时代的实践:代码/依赖/配置/后端服务/构建发布运行/进程/端口绑定/并发/可处置/环境等价/日志/管理进程。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                课程编号
+              </strong>
+              第 24 课
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                分类
+              </strong>
+              方法论
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              中级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                字数
+              </strong>
+              ~ 4000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <nav class="toc" id="toc">
+          <h2 class="toc-title">
+            本文目录
+          </h2>
+          <ul class="toc-grid">
+            <li>
+              <a href="#s1">
+                <span class="toc-num">
+                  01
+                </span>
+                12 要素概览
+              </a>
+            </li>
+            <li>
+              <a href="#s2">
+                <span class="toc-num">
+                  02
+                </span>
+                后 6 要素
+              </a>
+            </li>
+            <li>
+              <a href="#s3">
+                <span class="toc-num">
+                  03
+                </span>
+                容器化对应实践
+              </a>
+            </li>
+            <li>
+              <a href="#s4">
+                <span class="toc-num">
+                  04
+                </span>
+                Build/Release/Run 容器化
+              </a>
+            </li>
+            <li>
+              <a href="#s5">
+                <span class="toc-num">
+                  05
+                </span>
+                12-Factor 现代化扩展
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">
+            Chapter 01
+          </span>
+          <h2 id="s1-title">
+            12 要素概览
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  1) Codebase:一份代码库,多份部署
+                </li>
+                <li>
+                  2) Dependencies:显式声明依赖
+                </li>
+                <li>
+                  3) Config:配置存储在环境
+                </li>
+                <li>
+                  4) Backing Services:后端服务作为附加资源
+                </li>
+                <li>
+                  5) Build/Release/Run:严格分离
+                </li>
+                <li>
+                  6) Processes:无状态进程
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">
+            Chapter 02
+          </span>
+          <h2 id="s2-title">
+            后 6 要素
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  7) Port Binding:通过端口绑定暴露服务
+                </li>
+                <li>
+                  8) Concurrency:通过进程模型扩展
+                </li>
+                <li>
+                  9) Disposability:快速启动 + 优雅关闭
+                </li>
+                <li>
+                  10) Dev/Prod Parity:环境尽量一致
+                </li>
+                <li>
+                  11) Logs:日志作为事件流
+                </li>
+                <li>
+                  12) Admin Processes:管理进程作为一次性任务
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">
+            Chapter 03
+          </span>
+          <h2 id="s3-title">
+            容器化对应实践
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  Codebase:git tag/release 对应镜像 tag
+                </li>
+                <li>
+                  Dependencies:requirements.txt / package.json / go.mod
+                </li>
+                <li>
+                  Config:ConfigMap / env file / Vault
+                </li>
+                <li>
+                  Backing Services:DB/Redis 独立容器,通过网络访问
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">
+            Chapter 04
+          </span>
+          <h2 id="s4-title">
+            Build/Release/Run 容器化
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  Build:Dockerfile 多阶段构建生成镜像
+                </li>
+                <li>
+                  Release:镜像 tag + ConfigMap 组成不可变 Release
+                </li>
+                <li>
+                  Run:docker run / kubectl apply 启动容器
+                </li>
+                <li>
+                  可回滚:Release 有版本号,镜像可回退到任意历史 tag
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s5" aria-labelledby="s5-title">
+          <span class="section-num">
+            Chapter 05
+          </span>
+          <h2 id="s5-title">
+            12-Factor 现代化扩展
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  13) API First:OpenAPI / gRPC 接口优先
+                </li>
+                <li>
+                  14) Telemetry:统一可观测性(Metrics+Logs+Traces)
+                </li>
+                <li>
+                  15) Auth/Authz:身份认证与授权分离
+                </li>
+                <li>
+                  16) 安全性:DevSecOps 全流程安全检查
+                </li>
+                <li>
+                  这些是 Cloud Native 12-Factor 的扩展
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <div class="alert alert-tip">
+          <span class="alert-icon">
+            💡 实战工具
+          </span>
+          <div class="alert-body">
+            <p>
+              Helm 模板 + Kustomize + Argo CD 实现 12-Factor 自动化
+            </p>
+          </div>
+        </div>
+        <div class="alert alert-info">
+          <span class="alert-icon">
+            🎯 选型
+          </span>
+          <div class="alert-body">
+            <p>
+              微服务架构优先遵循 12-Factor,单体应用也建议逐步对齐
+            </p>
+          </div>
+        </div>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">
+            FAQ
+          </span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                12 要素概览
+              </h3>
+              <p class="faq-a">
+                1) Codebase:一份代码库,多份部署
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                后 6 要素
+              </h3>
+              <p class="faq-a">
+                7) Port Binding:通过端口绑定暴露服务
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                容器化对应实践
+              </h3>
+              <p class="faq-a">
+                Codebase:git tag/release 对应镜像 tag
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Build/Release/Run 容器化
+              </h3>
+              <p class="faq-a">
+                Build:Dockerfile 多阶段构建生成镜像
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                12-Factor 现代化扩展
+              </h3>
+              <p class="faq-a">
+                13) API First:OpenAPI / gRPC 接口优先
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本课程
+        </h3>
+        <p class="footer-meta">
+          12-Factor App 与容器化原则 · Docker 24 节系统化教程。所有代码均经过实测,可运行于 Docker 20+ / K8s 1.24+ 环境。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            完整 24 节课
+          </strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            回到索引
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 完整指南 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-lesson-24';
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

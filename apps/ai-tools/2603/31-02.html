@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code 配置深度指南：月账单下降40%的秘密</title>
+  <meta name="description" content="响应跑偏？上下文失控？花一个月系统性配置测试后的实战经验。">
+  
+  <!-- 国内 CDN CSS -->
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-color: #1a1a2e;
+      --secondary-color: #16213e;
+      --accent-blue: #2563EB;
+      --accent-purple: #7C3AED;
+      --accent-green: #10B981;
+      --accent-orange: #F59E0B;
+      --text-dark: #333;
+      --bg-light: #fafafa;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      line-height: 1.8;
+      font-size: 17px;
+    }
+    
+    /* 导航栏 */
+    .top-nav {
+      background: white;
+      border-bottom: 1px solid #eee;
+      padding: 12px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .top-nav .nav-link {
+      color: var(--text-dark);
+      text-decoration: none;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.3s;
+    }
+    
+    .top-nav .nav-link:hover {
+      color: var(--accent-blue);
+    }
+    
+    .article-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      padding: 48px 24px;
+      text-align: center;
+    }
+    
+    .article-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+    
+    @media (min-width: 768px) {
+      .article-header h1 {
+        font-size: 28px;
+      }
+    }
+    
+    .article-header .meta {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .article-content {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 20px;
+      background: #fff;
+    }
+    
+    .quote-block {
+      background: #f8f9fa;
+      border-left: 4px solid var(--primary-color);
+      padding: 16px 20px;
+      margin: 24px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    
+    .highlight-box {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      text-align: center;
+    }
+    
+    .highlight-box .number {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--accent-green);
+    }
+    
+    .section-title {
+      font-size: 20px;
+      color: var(--primary-color);
+      margin: 32px 0 16px;
+      font-weight: 600;
+    }
+    
+    .check-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .check-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .check-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .check-list li i {
+      color: var(--accent-green);
+      margin-right: 8px;
+    }
+    
+    .config-card {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      height: 100%;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .config-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .config-card h4 {
+      font-size: 17px;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+    }
+    
+    .config-card p {
+      font-size: 15px;
+      color: #666;
+      margin-bottom: 0;
+    }
+    
+    .code-block {
+      background: var(--primary-color);
+      color: var(--accent-green);
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 14px;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+    
+    .divider {
+      height: 1px;
+      background: #eee;
+      margin: 32px 0;
+    }
+    
+    .checklist {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+    
+    .checklist li {
+      padding: 6px 0;
+    }
+    
+    /* 底部 */
+    .article-footer {
+      background: #f5f5f5;
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid #eee;
+      margin-top: 24px;
+    }
+    
+    .article-footer a {
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .article-footer a:hover {
+      text-decoration: underline;
+    }
+    
+    .back-to-index {
+      background: white;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .back-to-index a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+    
+    .back-to-index a:hover {
+      background: #f0f9ff;
+    }
+  </style>
+</head>
+<body>
+  <!-- 返回导航 -->
+  <nav class="top-nav">
+    <div class="container">
+      <a href="index.html" class="nav-link">
+        <i class="fas fa-arrow-left"></i>
+        返回目录
+      </a>
+    </div>
+  </nav>
+  
+  <!-- 文章头部 -->
+  <header class="article-header">
+    <div class="container">
+      <h1>Claude Code 配置深度指南：月账单下降40%的秘密</h1>
+      <p class="meta">作者：元曜科技 · 2026-03-31</p>
+    </div>
+  </header>
+  
+  <!-- 文章内容 -->
+  <main class="article-content">
+    
+    <blockquote class="quote-block">
+      <p><strong>配置比代码更重要</strong></p>
+    </blockquote>
+    
+    <p>装好 Claude Code 的第一件事，大多数人直接就开始用了。</p>
+    
+    <p>我也是，然后用了三周，一直觉得"还行，但感觉差点什么"——响应有时候跑偏，上下文动不动失控。</p>
+    
+    <p>后来花了整整一个月，系统性翻遍所有配置项，做了大量对比测试。这篇文章是结果，不是官方文档的翻译，是我真正在用的那套配置。</p>
+    
+    <div class="divider"></div>
+    
+    <h2 class="section-title">
+      <i class="fas fa-cog text-primary me-2"></i>为什么配置比你想象的重要得多
+    </h2>
+    
+    <p>Claude Code 的默认配置，是为"通用用户"设计的，不是为你设计的。</p>
+    
+    <p>如果你是做出海 Web 开发的，你的场景有很强的特殊性——多语言、Stripe 支付、UTC 时区、Next.js 技术栈……</p>
+    
+    <p class="text-center text-success fw-bold">好的配置，是让 Claude Code 在开口之前就已经了解你。</p>
+    
+    <div class="divider"></div>
+    
+    <h2 class="section-title">
+      <i class="fas fa-file-alt text-primary me-2"></i>一、CLAUDE.md：最被低估的配置文件
+    </h2>
+    
+    <p>这是整套配置里投入产出比最高的一项。</p>
+    
+    <p>CLAUDE.md 放在项目根目录，Claude Code 每次启动时会自动读取它，把里面的内容当作项目级的"系统提示词"。</p>
+    
+    <!-- 配置模板 -->
+    <div class="config-card">
+      <h4>我的 CLAUDE.md 模板（300字以内精简版）</h4>
+    </div>
+    
+    <div class="code-block">
+# 项目背景<br>
+出海 SaaS 产品，技术栈：Next.js + TypeScript + Prisma + PostgreSQL + Tailwind CSS<br>
+<br>
+# 开发规范<br>
+- 代码风格：函数式写法，async/await，类型放 types/ 目录<br>
+- 出海要求：UTC 时区，金额用整数（分），文案走 i18n<br>
+- 数据库：snake_case，软删除用 deleted_at<br>
+<br>
+# 常用命令<br>
+npm run dev / npx prisma migrate dev / git push origin main
+    </div>
+    
+    <p><strong>关键教训：</strong>CLAUDE.md 不是越全越好，是越精准越好。精简到 300 字以内后，遵守率明显提升。</p>
+    
+    <div class="divider"></div>
+    
+    <h2 class="section-title">
+      <i class="fas fa-brain text-purple me-2"></i>二、模型选择：日常开发别用 Opus
+    </h2>
+    
+    <p>日常编码任务，Sonnet 比 Opus 更适合。</p>
+    
+    <p>不是因为 Sonnet 更强，而是因为 Opus 想太多——给它一个明确需求，它会开始考虑各种边界情况、给你三个方案让你选。</p>
+    
+    <!-- 模型分配 -->
+    <div class="row text-center mb-4">
+      <div class="col-4">
+        <div class="h5 mb-1"><strong class="text-primary">Sonnet</strong></div>
+        <p class="small mb-0">日常开发</p>
+      </div>
+      <div class="col-4">
+        <div class="h5 mb-1"><strong class="text-purple">Opus</strong></div>
+        <p class="small mb-0">架构讨论</p>
+      </div>
+      <div class="col-4">
+        <div class="h5 mb-1"><strong class="text-success">Haiku</strong></div>
+        <p class="small mb-0">样板代码</p>
+      </div>
+    </div>
+    
+    <div class="highlight-box">
+      <div class="number">40%</div>
+      <p class="mb-0 text-muted">月账单下降，效率没下降</p>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h2 class="section-title">
+      <i class="fas fa-layer-group text-warning me-2"></i>三、上下文管理
+    </h2>
+    
+    <p>用久了一定会遇到这个问题：聊到后面，它开始"记错事"。这不是 Bug，是上下文窗口满了之后的正常退化。</p>
+    
+    <h4 style="font-size: 16px; color: var(--primary-color); margin: 16px 0;">我的三个策略：</h4>
+    
+    <ul class="check-list">
+      <li><i class="fas fa-check-circle"></i><strong>任务拆小</strong>：每个对话聚焦一个功能点，不要一次塞太多</li>
+      <li><i class="fas fa-check-circle"></i><strong>摘要接力</strong>：对话快到上限时，让它做 200 字摘要带到下一个对话</li>
+      <li><i class="fas fa-check-circle"></i><strong>敏感配置单独声明</strong>：涉及 Stripe、数据库的关键任务开头主动声明</li>
+    </ul>
+    
+    <div class="divider"></div>
+    
+    <h2 class="section-title">
+      <i class="fas fa-shield-alt text-primary me-2"></i>四、Permission 设置
+    </h2>
+    
+    <p>Claude Code 执行某些操作时会询问是否允许，默认配置太保守，会频繁打断节奏。</p>
+    
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="config-card text-center">
+          <h4 class="text-success">总是允许</h4>
+          <p class="small mb-0">读取文件<br>创建文件<br>npm run<br>git status</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="config-card text-center">
+          <h4 class="text-warning">每次确认</h4>
+          <p class="small mb-0">删除文件<br>git push<br>数据库迁移<br>安装 npm 包</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="config-card text-center">
+          <h4 class="text-danger">总是拒绝</h4>
+          <p class="small mb-0">项目外文件<br>网络请求</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h2 class="section-title">
+      <i class="fas fa-globe text-info me-2"></i>五、出海项目专项配置
+    </h2>
+    
+    <h4 style="font-size: 16px; color: var(--primary-color);">Stripe 规范</h4>
+    <div class="code-block">
+- 金额统一用最小货币单位（分）<br>
+- 所有 Stripe API 调用必须有错误处理<br>
+- Webhook 处理必须先验证签名
+    </div>
+    
+    <h4 style="font-size: 16px; color: var(--primary-color);">i18n 规范</h4>
+    <div class="code-block">
+- 使用 next-intl，locale 文件放 messages/ 目录<br>
+- 新增文案必须同时在 en.json 和 zh.json 里添加<br>
+- 日期格式使用 Intl.DateTimeFormat
+    </div>
+    
+    <h4 style="font-size: 16px; color: var(--primary-color);">GDPR 规范</h4>
+    <div class="code-block">
+- 用户数据采集必须有明确法律依据<br>
+- 删除账号必须真正删除或匿名化<br>
+- 日志里不能出现用户的真实邮箱、姓名、IP
+    </div>
+    
+    <div class="divider"></div>
+    
+    <!-- 检查清单 -->
+    <h2 class="section-title">
+      <i class="fas fa-clipboard-check text-success me-2"></i>配置检查清单
+    </h2>
+    
+    <div class="checklist">
+      <ul class="check-list mb-0">
+        <li><i class="fas fa-check-circle"></i>CLAUDE.md 已创建，字数控制在 300 字以内</li>
+        <li><i class="fas fa-check-circle"></i>日常任务默认使用 Sonnet，架构讨论切换 Opus</li>
+        <li><i class="fas fa-check-circle"></i>Permission 已按"读写分级"原则配置</li>
+        <li><i class="fas fa-check-circle"></i>上下文管理：任务拆小 + 摘要接力</li>
+        <li><i class="fas fa-check-circle"></i>出海专项配置已写入 CLAUDE.md</li>
+        <li><i class="fas fa-check-circle"></i>子目录 CLAUDE.md 已为高风险模块单独配置</li>
+      </ul>
+    </div>
+    
+    <div class="highlight-box">
+      <p class="mb-2">配置的本质，是把你的判断固化成规则，让 AI 不需要猜。</p>
+      <p class="mb-0 fw-bold">花两小时做好配置，省的是之后每天的反复纠偏。</p>
+    </div>
+    
+  </main>
+  
+  <!-- 返回引导页 -->
+  <div class="back-to-index">
+    <a href="index.html">
+      <i class="fas fa-th-large"></i>
+      查看全部文章
+    </a>
+  </div>
+  
+  <!-- 原文链接 -->
+  <footer class="article-footer">
+    <p class="text-muted mb-2">原文链接</p>
+    <a href="https://zhuanlan.zhihu.com/p/2015035448003691398" target="_blank" rel="noopener noreferrer">知乎专栏</a>
+  </footer>
+  
+  <!-- 国内 CDN JS -->
+  <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

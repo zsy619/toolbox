@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>B-05 Remotion 渲染基础 | Studio/render/still/compositions 命令详解</title>
+<meta name="description" content="Remotion 渲染命令完整手册:Studio 交互预览、render 输出 MP4、still 截单帧、compositions 列出、bundling 打包机制、并发数与质量参数调优,本地与 CI 渲染入门。">
+<meta name="keywords" content="Remotion render, Remotion CLI, still, 渲染命令, Studio">
+<link rel="canonical" href="https://example.com/remotion/B-05-rendering-basics.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 渲染基础与 CLI 命令">
+<meta property="og:description" content="Studio / render / still / compositions 命令详解。">
+<meta property="og:url" content="https://example.com/remotion/B-05-rendering-basics.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"B-05 Remotion 渲染基础","description":"Studio、render、still、compositions 四大命令与渲染参数详解。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 渲染"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="S-01-code-walkthrough.html">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-basic">基础层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">B-05 渲染基础</span>
+    </nav>
+    <h1 id="hero-title">B-05 Remotion 渲染基础 <span class="level-badge level-B">B 基础</span></h1>
+    <p class="hero-sub">Studio / render / still / compositions 四大命令与渲染参数详解。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 8 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> B-03 第一个视频</div>
+      <div class="hero-meta-item"><strong>类型</strong> 入门</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>四大核心命令</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>命令</th><th>作用</th><th>典型场景</th></tr></thead>
+<tbody>
+<tr><td><code>npx remotion studio</code></td><td>启动交互预览</td><td>开发调试、热更新</td></tr>
+<tr><td><code>npx remotion render</code></td><td>导出 MP4 视频</td><td>生成最终视频文件</td></tr>
+<tr><td><code>npx remotion still</code></td><td>导出单帧图片</td><td>封面图、海报、缩略图</td></tr>
+<tr><td><code>npx remotion compositions</code></td><td>列出已注册的视频</td><td>检查 Composition 状态</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>render 命令详解</h2>
+<p>最常用的命令,完整签名:</p>
+<pre class="line-numbers"><code class="language-bash">npx remotion render &lt;composition-id&gt; &lt;output-file&gt; [options]</code></pre>
+<p>常用 options:</p>
+<pre class="line-numbers"><code class="language-bash"># 并发数(默认 CPU 核心数的一半)
+npx remotion render HelloWorld out/hello.mp4 --concurrency=4
+
+# 输出质量(0-100,默认 80)
+npx remotion render HelloWorld out/hello.mp4 --quality=90
+
+# 指定编码格式(支持 mp4 / webm / mov)
+npx remotion render HelloWorld out/hello.webm
+
+# 自定义 bundle 路径(适合 CI)
+npx remotion render HelloWorld out/hello.mp4 --bundle=build
+
+# 限制帧率(快速预览)
+npx remotion render HelloWorld out/preview.mp4 --fps=15</code></pre>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>still 命令:截取单帧</h2>
+<p>导出特定帧的 PNG/JPG,常用于封面图:</p>
+<pre class="line-numbers"><code class="language-bash"># 截取第 75 帧
+npx remotion still HelloWorld out/cover.png --frame=75
+
+# 输出 JPG
+npx remotion still HelloWorld out/thumb.jpg --frame=0</code></pre>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>渲染流程:Bundle + 帧渲染 + 合流</h2>
+<p>render 内部执行 3 个阶段:</p>
+<ol>
+  <li><strong>Bundle</strong>:Webpack 打包你的 React 代码到 <code>build/</code> 目录</li>
+  <li><strong>帧渲染</strong>:Puppeteer 打开每个帧对应的 HTML 截图</li>
+  <li><strong>合流</strong>:FFmpeg 把所有帧合并为 MP4</li>
+</ol>
+<div class="alert alert-tip"><span class="alert-icon">⚡</span><div class="alert-body"><p>--concurrency 增大可以并行渲染多帧,但每个 Puppeteer 实例约耗 300MB 内存,需根据机器配置调整。</p></div></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>remotion.config.ts 常用配置</h2>
+<p>在项目根目录的 <code>remotion.config.ts</code> 中持久化配置:</p>
+<pre class="line-numbers"><code class="language-ts">import { Config } from '@remotion/cli/config';
+
+Config.setVideoImageFormat('jpeg');         // 帧截图用 jpeg(更快)
+Config.setConcurrency(4);                   // 默认并发
+Config.setEntryPoint('src/index.ts');      // 入口文件
+Config.setCachingEnabled(true);             // 启用 bundle 缓存</code></pre>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>常见问题</h2>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p><strong>Q: 渲染卡在 bundle 阶段?</strong><br>A: 检查 Node.js 版本是否 >= 18,或删除 <code>build/</code> 目录后重试。</p></div></div>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p><strong>Q: 内存不足崩溃?</strong><br>A: 降低 <code>--concurrency</code>;大视频可拆为多个 Composition 单独渲染再拼接。</p></div></div>
+</section>
+
+<div class="source-note">Remotion CLI(2025)、Puppeteer 配置、FFmpeg 合流参数</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>frameRange:精确帧范围渲染</h2>
+<p>Remotion 4.0 起,渲染指定帧范围替代了已废弃的 <code>&lt;Clipper&gt;</code> 组件:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash"># CLI:只渲染第 100-199 帧
+npx remotion render Video out.mp4 --frame-range=100-199
+
+# 从指定帧到结尾
+npx remotion render Video out.mp4 --frame-range=100-</code></pre></div>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">import { renderMedia } from '@remotion/renderer';
+
+await renderMedia({
+  composition, serveUrl, outputLocation: 'out.mp4',
+  frameRange: [100, 199],  // [start, end] 或 [start, null]
+});</code></pre></div>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p>&lt;Clipper&gt; 组件已在 v4.0.228 删除,因性能反而比完整渲染慢。务必迁移到 frameRange。</p></div></div>
+</section>
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>SSR API 全集</h2>
+<p>Node.js 端 API 完整列表:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>API</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>getCompositions()</code></td><td>列出 bundle 中所有 Composition</td></tr>
+<tr><td><code>selectComposition()</code></td><td>按 id 获取单个 Composition</td></tr>
+<tr><td><code>renderMedia()</code></td><td>渲染视频</td></tr>
+<tr><td><code>renderFrames()</code></td><td>逐帧渲染为图片序列</td></tr>
+<tr><td><code>renderStill()</code></td><td>渲染单帧图片</td></tr>
+<tr><td><code>stitchFramesToVideo()</code></td><td>把图片序列合成为视频</td></tr>
+<tr><td><code>openBrowser()</code></td><td>手动打开浏览器供多次渲染复用</td></tr>
+<tr><td><code>makeCancelSignal()</code></td><td>创建可取消信号,中断长时间渲染</td></tr>
+</tbody>
+</table></div>
+</section>
+
+
+<section class="section" id="s9">
+<span class="section-num">Chapter 09</span>
+<h2>@remotion/player 嵌入到 React App</h2>
+<p>Player 让你把 Remotion 视频嵌入到任何 React 应用(Next.js/Vite/CRA/Remix),无需重新渲染即可自定义 props 实时预览:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { Player } from '@remotion/player';
+import { MyVideo } from './remotion/MyVideo';
+
+&lt;Player
+  component={MyVideo}
+  durationInFrames={120}
+  compositionWidth={1920}
+  compositionHeight={1080}
+  fps={30}
+  controls  // 显示原生控件
+  loop      // 循环播放
+  autoPlay  // 自动播放
+  inputProps={{ name: 'World' }}  // 注入 props
+/&gt;</code></pre></div>
+<p>常用回调:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { useRef } from 'react';
+import { Player, PlayerRef } from '@remotion/player';
+
+const ref = useRef&lt;PlayerRef&gt;(null);
+ref.current?.seekTo(60);  // 跳到第 60 帧
+ref.current?.play();
+ref.current?.pause();
+ref.current?.addEventListener('pause', () =&gt; console.log('paused'));</code></pre></div>
+<p>自定义控件用 <code>renderPlayPauseButton</code> / <code>renderFullscreenButton</code> / <code>renderSeekBar</code> 等,完全替换默认 UI。CSS 变量可定制全部样式:<code>--remotion-seek-bar-progress-color</code>、<code>--remotion-button-hover-color</code> 等。</p>
+</section>
+
+<section class="section" id="s10">
+<span class="section-num">Chapter 10</span>
+<h2>&lt;Thumbnail&gt; 静态图组件</h2>
+<p>为 Composition 生成可拖拽的缩略图,常用于时间轴预览:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { Thumbnail } from '@remotion/player';
+
+&lt;Thumbnail
+  component={MyVideo}
+  frameToDisplay={30}        // 显示第 30 帧
+  durationInFrames={120}
+  compositionWidth={1920}
+  compositionHeight={1080}
+  fps={30}
+/&gt;</code></pre></div>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="B-04-basic-hooks.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">B-04 基础 Hooks</span></a>
+  <a href="A-01-data-driven.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">A-01 数据驱动视频</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

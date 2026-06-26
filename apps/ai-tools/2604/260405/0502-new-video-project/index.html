@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolonCode CLI v2026.4.5 发布 | 编码智能体 - Claude Code 国产开源替代</title>
+    <meta name="description" content="SolonCode CLI 是基于 Java + Solon AI 开发的 Claude Code 国产开源实现版本。100%开源 + 全中文提示词 + 支持任意编程语言。">
+    <meta name="keywords" content="SolonCode, CLI工具, 编码智能体, Claude Code替代, Java开源, AI编程, 程序员工具">
+    <meta name="author" content="无更生">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="SolonCode CLI v2026.4.5 发布 | 编码智能体">
+    <meta property="og:description" content="Claude Code国产开源实现，100%开源 + 全中文提示词 + 支持任意编程语言">
+    <meta property="og:image" content="./assets/img-001-c43c18d23ff0475fbb8521df6b623702-tplv-tt-origin-.jpg">
+    <meta property="og:locale" content="zh_CN">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SolonCode CLI 发布 - Claude Code国产替代">
+    <meta name="twitter:description" content="基于Java开发的编程终端智能体，100%开源">
+    <meta name="twitter:image" content="./assets/img-001-c43c18d23ff0475fbb8521df6b623702-tplv-tt-origin-.jpg">
+    
+    <link rel="canonical" href="./index.html">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#2563EB',
+                        accent: '#60A5FA',
+                        dark: '#0F172A',
+                        darker: '#1E293B'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+            line-height: 1.6;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 50%, #93C5FD 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-base {
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card-base:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .nav-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .hero-bg {
+            background: linear-gradient(180deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+        }
+
+        .section-bg-alt {
+            background-color: #1E293B;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+        }
+
+        .code-block {
+            background-color: #0F172A;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            overflow-x: auto;
+        }
+
+        .feature-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        /* Image Viewer Modal */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background-color: rgba(0, 0, 0, 0.98);
+        }
+
+        .image-viewer.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viewer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-toolbar-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            color: white;
+            font-size: 0.875rem;
+        }
+
+        .viewer-toolbar-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .viewer-toolbar-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .viewer-main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .viewer-canvas {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+        }
+
+        .viewer-canvas:active {
+            cursor: grabbing;
+        }
+
+        .viewer-image-wrapper {
+            position: absolute;
+            transform-origin: center center;
+            transition: none;
+            user-select: none;
+        }
+
+        .viewer-image {
+            display: block;
+            max-width: 95%;
+            max-height: 85vh;
+            object-fit: contain;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .viewer-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3.5rem;
+            height: 3.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .viewer-nav:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .viewer-nav.prev {
+            left: 1rem;
+        }
+
+        .viewer-nav.next {
+            right: 1rem;
+        }
+
+        .viewer-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .viewer-nav:disabled:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-50%);
+        }
+
+        .viewer-info {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .viewer-zoom-display {
+            font-family: monospace;
+            min-width: 4rem;
+            text-align: center;
+        }
+
+        .viewer-thumbnail-strip {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+
+        .viewer-thumbnail-strip::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .viewer-thumbnail-strip::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .viewer-thumbnail-strip::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .viewer-thumbnail {
+            width: 4rem;
+            height: 3rem;
+            border-radius: 0.375rem;
+            object-fit: cover;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            flex-shrink: 0;
+        }
+
+        .viewer-thumbnail:hover {
+            opacity: 0.8;
+        }
+
+        .viewer-thumbnail.active {
+            opacity: 1;
+            border-color: rgba(59, 130, 246, 0.8);
+        }
+
+        .zoom-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 10001;
+        }
+
+        .zoom-toast.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem !important;
+            }
+            
+            .section-title {
+                font-size: 2rem !important;
+            }
+            
+            .viewer-nav {
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+            
+            .viewer-nav.prev {
+                left: 0.5rem;
+            }
+            
+            .viewer-nav.next {
+                right: 0.5rem;
+            }
+            
+            .viewer-image {
+                max-width: 98%;
+                max-height: 75vh;
+            }
+            
+            .viewer-toolbar {
+                padding: 0.75rem 1rem;
+            }
+            
+            .viewer-toolbar-btn {
+                width: 2rem;
+                height: 2rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav-fixed">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <i class="fas fa-code text-white text-lg"></i>
+                    </div>
+                    <span class="font-bold text-xl">SolonCode CLI</span>
+                </div>
+                
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#features" class="text-gray-400 hover:text-white transition-colors">核心特性</a>
+                    <a href="#installation" class="text-gray-400 hover:text-white transition-colors">快速安装</a>
+                    <a href="#comparison" class="text-gray-400 hover:text-white transition-colors">差异对比</a>
+                    <a href="#gallery" class="text-gray-400 hover:text-white transition-colors">产品展示</a>
+                </div>
+                
+                <button class="md:hidden text-white" onclick="toggleMenu()">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-dark/95 border-t border-white/10">
+            <div class="px-4 py-4 space-y-3">
+                <a href="#features" class="block text-gray-400 hover:text-white py-2">核心特性</a>
+                <a href="#installation" class="block text-gray-400 hover:text-white py-2">快速安装</a>
+                <a href="#comparison" class="block text-gray-400 hover:text-white py-2">差异对比</a>
+                <a href="#gallery" class="block text-gray-400 hover:text-white py-2">产品展示</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center pt-20 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-500/30 rounded-full px-4 py-2 mb-6">
+                    <i class="fas fa-rocket text-blue-400"></i>
+                    <span class="text-sm font-medium">v2026.4.5 发布</span>
+                </div>
+                
+                <h1 class="hero-title text-5xl sm:text-6xl lg:text-7xl font-black mb-6 gradient-text">
+                    SolonCode CLI
+                </h1>
+                
+                <p class="text-xl sm:text-2xl text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    编码智能体 · Claude Code 国产开源实现<br>
+                    <span class="text-white font-semibold">100%开源 + 全中文提示词 + 支持任意编程语言</span>
+                </p>
+                
+                <div class="flex flex-wrap justify-center gap-4 mb-8">
+                    <span class="bg-white/5 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10 text-sm">
+                        <i class="fas fa-code text-green-400 mr-2"></i>100% 开源
+                    </span>
+                    <span class="bg-white/5 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10 text-sm">
+                        <i class="fas fa-language text-purple-400 mr-2"></i>全中文提示词
+                    </span>
+                    <span class="bg-white/5 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10 text-sm">
+                        <i class="fas fa-shield-alt text-orange-400 mr-2"></i>强沙盒模式
+                    </span>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+                    <a href="#installation" class="btn-primary text-lg">
+                        <i class="fas fa-download"></i>
+                        快速安装
+                    </a>
+                    <a href="https://solon.noear.org/" target="_blank" class="bg-white/10 border border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition-all inline-flex items-center gap-2">
+                        <i class="fas fa-globe"></i>
+                        官方文档
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-blue-400 mb-2">70MB</div>
+                    <div class="text-gray-400 text-sm">启动内存</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-green-400 mb-2">Java 8+</div>
+                    <div class="text-gray-400 text-sm">运行环境</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-purple-400 mb-2">全平台</div>
+                    <div class="text-gray-400 text-sm">支持系统</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-orange-400 mb-2">126s</div>
+                    <div class="text-gray-400 text-sm">视频时长</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Features Section -->
+    <section id="features" class="section-bg-alt py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-blue-500/20 text-blue-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-star"></i>
+                    <span class="text-sm font-medium">Core Features</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">核心特性</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    基于 Java 开发的独特优势，带来企业级稳定性
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-blue-500/30 transition-colors">
+                    <div class="feature-icon bg-blue-500/20 text-blue-400 mb-6">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">企业级友好</h3>
+                    <p class="text-gray-400">JVM 生态成熟稳定，易于改造成其它形态的智能体，易于在服务器环境部署</p>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-green-500/30 transition-colors">
+                    <div class="feature-icon bg-green-500/20 text-green-400 mb-6">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">安装简单</h3>
+                    <p class="text-gray-400">一行命令即可完成安装或更新，无需复杂的配置过程</p>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-purple-500/30 transition-colors">
+                    <div class="feature-icon bg-purple-500/20 text-purple-400 mb-6">
+                        <i class="fas fa-memory"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">资源占用低</h3>
+                    <p class="text-gray-400">内存占用小，启动速度快，启动内存仅 70MB 左右</p>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-orange-500/30 transition-colors">
+                    <div class="feature-icon bg-orange-500/20 text-orange-400 mb-6">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">跨语言支持</h3>
+                    <p class="text-gray-400">作为通用编码助手，支持任意编程语言，不受语言限制</p>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-cyan-500/30 transition-colors">
+                    <div class="feature-icon bg-cyan-500/20 text-cyan-400 mb-6">
+                        <i class="fas fa-terminal"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">纯系统命令</h3>
+                    <p class="text-gray-400">可以在控制台、IDE 控制台、批处理调度中运行，无界面即处处是界面</p>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-red-500/30 transition-colors">
+                    <div class="feature-icon bg-red-500/20 text-red-400 mb-6">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">强沙盒模式</h3>
+                    <p class="text-gray-400">安全又放心，隔离运行环境保护系统安全</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Comparison Section -->
+    <section id="comparison" class="py-20" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-purple-500/20 text-purple-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-balance-scale"></i>
+                    <span class="text-sm font-medium">Comparison</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">与 Claude Code 的差异</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    功能相似，但关键差异带来独特优势
+                </p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-dark rounded-2xl p-8 border border-white/10">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                SolonCode CLI 优势
+                            </h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-check text-green-400 mt-1"></i>
+                                    <div>
+                                        <strong class="text-white">100% 开源</strong>
+                                        <p class="text-gray-400 text-sm">完全开源，代码透明可控</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-check text-green-400 mt-1"></i>
+                                    <div>
+                                        <strong class="text-white">全中文提示词</strong>
+                                        <p class="text-gray-400 text-sm">更适合中文开发者</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-check text-green-400 mt-1"></i>
+                                    <div>
+                                        <strong class="text-white">不绑定提供商</strong>
+                                        <p class="text-gray-400 text-sm">需要配置模型，provider-agnostic</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-check text-green-400 mt-1"></i>
+                                    <div>
+                                        <strong class="text-white">支持远程通讯</strong>
+                                        <p class="text-gray-400 text-sm">ACP 协议进行远程通信</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                                <i class="fas fa-code text-blue-400"></i>
+                                技术实现
+                            </h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-java text-orange-400 mt-1"></i>
+                                    <div>
+                                        <strong class="text-white">Java 实现</strong>
+                                        <p class="text-gray-400 text-sm">支持 Java 8 到 Java 26</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-plug text-purple-400 mt-1"></i>
+                                    <div>
+                                        <strong class="text-white">Solon AI 驱动</strong>
+                                        <p class="text-gray-400 text-sm">基于 Solon AI 框架</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-desktop text-cyan-400 mt-1"></i>
+                                    <div>
+                                        <strong class="text-white">聚焦 CLI</strong>
+                                        <p class="text-gray-400 text-sm">终端命令行界面</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Installation Section -->
+    <section id="installation" class="section-bg-alt py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-green-500/20 text-green-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-download"></i>
+                    <span class="text-sm font-medium">Installation</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">快速安装</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    系统要求：Java 8+ | 支持 macOS、Linux、Windows
+                </p>
+            </div>
+            
+            <div class="max-w-3xl mx-auto space-y-8">
+                <!-- Mac/Linux -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-3">
+                        <i class="fab fa-apple text-gray-400 text-2xl"></i>
+                        Mac / Linux
+                    </h3>
+                    <div class="code-block relative">
+                        <button class="absolute top-3 right-3 bg-blue-500/20 text-blue-400 px-3 py-1 rounded text-sm hover:bg-blue-500/30 transition-colors" onclick="copyCode(this)" data-code="curl -fsSL https://solon.noear.org/soloncode/setup.sh | bash">
+                            <i class="fas fa-copy mr-1"></i>复制
+                        </button>
+                        <pre class="text-green-400 text-sm overflow-x-auto"><code>curl -fsSL https://solon.noear.org/soloncode/setup.sh | bash</code></pre>
+                    </div>
+                </div>
+                
+                <!-- Windows -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-3">
+                        <i class="fab fa-windows text-gray-400 text-2xl"></i>
+                        Windows (PowerShell)
+                    </h3>
+                    <div class="code-block relative">
+                        <button class="absolute top-3 right-3 bg-blue-500/20 text-blue-400 px-3 py-1 rounded text-sm hover:bg-blue-500/30 transition-colors" onclick="copyCode(this)" data-code="irm https://solon.noear.org/soloncode/setup.ps1 | iex">
+                            <i class="fas fa-copy mr-1"></i>复制
+                        </button>
+                        <pre class="text-green-400 text-sm overflow-x-auto"><code>irm https://solon.noear.org/soloncode/setup.ps1 | iex</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 bg-gradient-to-r from-green-500/20 via-blue-500/20 to-purple-500/20 rounded-2xl p-8 border border-green-500/30 text-center">
+                <i class="fas fa-info-circle text-blue-400 text-2xl mb-4"></i>
+                <p class="text-gray-400">安装包自动下载约 <span class="text-white font-bold">23MB</span>，安装过程简单快捷</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider" id="galleryDivider"></div>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="section-bg-alt py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-pink-500/20 text-pink-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-images"></i>
+                    <span class="text-sm font-medium">Gallery</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">产品展示</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    了解 SolonCode CLI 的使用界面
+                </p>
+            </div>
+            
+            <div id="galleryGrid" class="grid md:grid-cols-2 gap-8">
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider" id="galleryEndDivider"></div>
+
+    <!-- CTA Section -->
+    <section class="py-20" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), #0F172A, rgba(37, 99, 235, 0.2));">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="section-title text-4xl sm:text-5xl font-bold mb-6">开始使用 SolonCode CLI</h2>
+            <p class="text-gray-400 text-2xl mb-10">体验 Claude Code 国产开源替代方案</p>
+            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                <a href="#installation" class="btn-primary text-xl px-12 py-5">
+                    <i class="fas fa-download"></i>
+                    立即安装
+                </a>
+                <a href="https://solon.noear.org/" target="_blank" class="bg-white/10 border border-white/20 text-white px-12 py-5 rounded-2xl font-bold text-xl hover:bg-white/20 transition-all inline-flex items-center gap-3">
+                    <i class="fas fa-external-link-alt"></i>
+                    官方文档
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-16 border-t border-white/10" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <i class="fas fa-code text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-xl">SolonCode CLI</span>
+                        <p class="text-gray-500 text-sm">Claude Code 国产开源实现</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-8 text-sm text-gray-400">
+                    <a href="#features" class="hover:text-white transition-colors">核心特性</a>
+                    <a href="#installation" class="hover:text-white transition-colors">快速安装</a>
+                    <a href="#comparison" class="hover:text-white transition-colors">差异对比</a>
+                    <a href="#gallery" class="hover:text-white transition-colors">产品展示</a>
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-white/5 text-center">
+                <p class="text-gray-600">SolonCode CLI v2026.4.5 | 编码智能体 · 国产开源替代</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="fixed bottom-8 right-8 bg-primary hover:bg-secondary text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition opacity-0 invisible cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Image Viewer Modal -->
+    <div id="imageViewer" class="image-viewer">
+        <div class="viewer-toolbar">
+            <div class="viewer-toolbar-group">
+                <button class="viewer-toolbar-btn" onclick="closeImageViewer()" title="关闭 (ESC)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(-90)" title="向左旋转">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(90)" title="向右旋转">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+            
+            <div class="viewer-toolbar-group">
+                <button class="viewer-toolbar-btn" onclick="zoomOut()" title="缩小">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="resetZoom()" title="重置">
+                    <i class="fas fa-compress-arrows-alt"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="zoomIn()" title="放大">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+            </div>
+            
+            <div class="viewer-toolbar-group">
+                <button class="viewer-toolbar-btn" onclick="fitToScreen()" title="适应屏幕">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="viewer-main">
+            <div class="viewer-canvas" id="viewerCanvas">
+                <div class="viewer-image-wrapper" id="imageWrapper">
+                    <img id="viewerImage" class="viewer-image" src="" alt="">
+                </div>
+            </div>
+            
+            <button class="viewer-nav prev" id="prevBtn" onclick="prevImage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <button class="viewer-nav next" id="nextBtn" onclick="nextImage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <div class="viewer-info">
+                <span id="imageCounter">1 / 2</span>
+                <span class="viewer-zoom-display" id="zoomDisplay">100%</span>
+            </div>
+        </div>
+        
+        <div class="viewer-thumbnail-strip" id="thumbnailStrip"></div>
+    </div>
+
+    <div id="zoomToast" class="zoom-toast">100%</div>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "SolonCode CLI v2026.4.5 发布 | 编码智能体",
+        "description": "SolonCode CLI 是基于 Java + Solon AI 开发的 Claude Code 国产开源实现版本",
+        "author": {
+            "@type": "Person",
+            "name": "无更生"
+        }
+    }
+    </script>
+
+    <script>
+        const imageConfigs = [
+            { filename: 'img-001-c43c18d23ff0475fbb8521df6b623702-tplv-tt-origin-.jpg', title: 'SolonCode CLI 界面', icon: 'terminal', color: 'primary' },
+            { filename: 'img-002-529e7f011311404884a216fd2d33258e-tplv-tt-shrink-.jpg', title: '命令行工具', icon: 'code', color: 'purple' }
+        ];
+        
+        const images = [];
+
+        let currentIndex = 0;
+        let scale = 1;
+        let rotation = 0;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX, startY;
+        let lastTranslateX = 0, lastTranslateY = 0;
+        let initialDistance = 0;
+        let initialScale = 1;
+
+        function loadGalleryImages() {
+            const gallerySection = document.getElementById('gallery');
+            const galleryGrid = document.getElementById('galleryGrid');
+            const galleryDivider = document.getElementById('galleryDivider');
+            const galleryEndDivider = document.getElementById('galleryEndDivider');
+            
+            if (!gallerySection || !galleryGrid) return;
+            
+            imageConfigs.forEach((config, index) => {
+                const img = new Image();
+                img.src = './assets/' + config.filename;
+                
+                img.onload = function() {
+                    const imageData = {
+                        src: './assets/' + config.filename,
+                        title: config.title
+                    };
+                    images.push(imageData);
+                    
+                    const card = document.createElement('div');
+                    card.className = 'card-base';
+                    card.onclick = () => openImageViewer(images.length - 1);
+                    
+                    const iconClass = config.color === 'primary' ? 'fa-terminal text-primary' : 'fa-code text-purple-400';
+                    
+                    card.innerHTML = `
+                        <img src="./assets/${config.filename}" alt="${config.title}" class="w-full h-64 object-cover" loading="lazy">
+                        <div class="p-6">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fas ${iconClass} text-xl"></i>
+                                <h3 class="text-xl font-bold">${config.title}</h3>
+                            </div>
+                            <p class="text-gray-400 text-sm">点击查看大图</p>
+                        </div>
+                    `;
+                    
+                    galleryGrid.appendChild(card);
+                    
+                    if (images.length === imageConfigs.length) {
+                        gallerySection.style.display = 'block';
+                        galleryDivider.style.display = 'block';
+                        galleryEndDivider.style.display = 'block';
+                        
+                        if (images.length === 1) {
+                            galleryGrid.className = 'flex justify-center';
+                            card.className = 'card-base max-w-xl w-full';
+                        } else {
+                            galleryGrid.className = 'grid md:grid-cols-2 gap-8';
+                        }
+                    }
+                };
+                
+                img.onerror = function() {
+                    if (index === imageConfigs.length - 1) {
+                        if (images.length === 0) {
+                            gallerySection.style.display = 'none';
+                            galleryDivider.style.display = 'none';
+                            galleryEndDivider.style.display = 'none';
+                        }
+                    }
+                };
+            });
+            
+            if (imageConfigs.length === 0) {
+                gallerySection.style.display = 'none';
+                galleryDivider.style.display = 'none';
+                galleryEndDivider.style.display = 'none';
+            }
+        }
+
+        function openImageViewer(index) {
+            currentIndex = index;
+            resetViewState();
+            updateImageViewer();
+            buildThumbnailStrip();
+            document.getElementById('imageViewer').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageViewer() {
+            document.getElementById('imageViewer').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function resetViewState() {
+            scale = 1;
+            rotation = 0;
+            translateX = 0;
+            translateY = 0;
+        }
+
+        function updateImageViewer() {
+            const wrapper = document.getElementById('imageWrapper');
+            const img = document.getElementById('viewerImage');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            wrapper.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scale(${scale})`;
+            img.src = images[currentIndex].src;
+            
+            document.getElementById('imageCounter').textContent = `${currentIndex + 1} / ${images.length}`;
+            updateZoomDisplay();
+            
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === images.length - 1;
+        }
+
+        function buildThumbnailStrip() {
+            const strip = document.getElementById('thumbnailStrip');
+            strip.innerHTML = '';
+            images.forEach((img, i) => {
+                const thumb = document.createElement('img');
+                thumb.src = img.src;
+                thumb.className = 'viewer-thumbnail' + (i === currentIndex ? ' active' : '');
+                thumb.onclick = () => {
+                    currentIndex = i;
+                    resetViewState();
+                    updateImageViewer();
+                };
+                strip.appendChild(thumb);
+            });
+        }
+
+        function prevImage() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                resetViewState();
+                updateImageViewer();
+            }
+        }
+
+        function nextImage() {
+            if (currentIndex < images.length - 1) {
+                currentIndex++;
+                resetViewState();
+                updateImageViewer();
+            }
+        }
+
+        function zoom(delta) {
+            const newScale = Math.max(0.1, Math.min(5, scale + delta));
+            if (newScale !== scale) {
+                scale = newScale;
+                updateTransform();
+                updateZoomDisplay();
+            }
+        }
+
+        function zoomIn() { zoom(0.25); }
+        function zoomOut() { zoom(-0.25); }
+        function fitToScreen() { resetViewState(); updateTransform(); updateZoomDisplay(); }
+        function resetZoom() { resetViewState(); updateTransform(); updateZoomDisplay(); showToast('视图已重置'); }
+
+        function updateTransform() {
+            const wrapper = document.getElementById('imageWrapper');
+            wrapper.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scale(${scale})`;
+        }
+
+        function updateZoomDisplay() {
+            document.getElementById('zoomDisplay').textContent = Math.round(scale * 100) + '%';
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('zoomToast');
+            toast.textContent = text;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1000);
+        }
+
+        function rotateImage(deg) {
+            rotation = (rotation + deg) % 360;
+            updateTransform();
+            showToast(rotation + '°');
+        }
+
+        const canvas = document.getElementById('viewerCanvas');
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.button === 0) {
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                canvas.style.cursor = 'grabbing';
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                updateTransform();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            canvas.style.cursor = 'grab';
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            zoom(e.deltaY > 0 ? -0.1 : 0.1);
+        });
+
+        canvas.addEventListener('dblclick', fitToScreen);
+
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('imageViewer').classList.contains('active')) return;
+            switch(e.key) {
+                case 'Escape': closeImageViewer(); break;
+                case 'ArrowLeft': prevImage(); break;
+                case 'ArrowRight': nextImage(); break;
+                case '+': case '=': zoomIn(); break;
+                case '-': zoomOut(); break;
+                case '0': fitToScreen(); break;
+            }
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                startX = e.touches[0].clientX - translateX;
+                startY = e.touches[0].clientY - translateY;
+            } else if (e.touches.length === 2) {
+                initialDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                initialScale = scale;
+            }
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (e.touches.length === 1) {
+                translateX = e.touches[0].clientX - startX;
+                translateY = e.touches[0].clientY - startY;
+                updateTransform();
+            } else if (e.touches.length === 2) {
+                const dist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                scale = Math.max(0.1, Math.min(5, initialScale * (dist / initialDistance)));
+                updateTransform();
+                updateZoomDisplay();
+            }
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            if (e.touches.length === 0) {
+                const diff = Math.abs(translateX) + Math.abs(translateY);
+                if (diff < 10) {
+                    const dir = startX - e.changedTouches[0].clientX;
+                    if (Math.abs(dir) > 50) {
+                        dir > 0 ? nextImage() : prevImage();
+                    }
+                }
+            }
+        });
+
+        function toggleMenu() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        }
+
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('backToTop');
+            btn.classList.toggle('opacity-0', window.scrollY < 500);
+            btn.classList.toggle('invisible', window.scrollY < 500);
+            btn.classList.toggle('opacity-100', window.scrollY > 500);
+            btn.classList.toggle('visible', window.scrollY > 500);
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+                    document.getElementById('mobileMenu').classList.add('hidden');
+                }
+            });
+        });
+
+        function copyCode(button) {
+            const code = button.getAttribute('data-code');
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check mr-1"></i>已复制';
+                button.classList.add('bg-green-500/20', 'text-green-400');
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-green-500/20', 'text-green-400');
+                }, 2000);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGalleryImages();
+        });
+    </script>
+</body>
+</html>

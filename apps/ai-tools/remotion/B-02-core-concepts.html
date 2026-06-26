@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>B-02 Remotion 核心概念 | Composition / Sequence / Series</title>
+<meta name="description" content="Remotion 三大核心组件 Composition/Sequence/Series 详解,Frame 与 FPS 时间模型深入讲解,Z-Index 层级与 AbsoluteFill 布局规则,视频数据结构化的入门必读。">
+<meta name="keywords" content="Remotion Composition, Sequence, Series, Frame, FPS, 视频帧">
+<link rel="canonical" href="https://example.com/remotion/B-02-core-concepts.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 核心概念详解">
+<meta property="og:description" content="Composition / Sequence / Series / Frame 四大基石。">
+<meta property="og:url" content="https://example.com/remotion/B-02-core-concepts.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"B-02 Remotion 核心概念","description":"Composition、Sequence、Series、Frame 四大基础概念的深度解析。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 核心概念"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="S-01-code-walkthrough.html">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-basic">基础层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">B-02 核心概念</span>
+    </nav>
+    <h1 id="hero-title">B-02 Remotion 核心概念 <span class="level-badge level-B">B 基础</span></h1>
+    <p class="hero-sub">Composition / Sequence / Series / Frame / FPS —— 视频数据结构化的四大基石。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 10 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> B-01 安装</div>
+      <div class="hero-meta-item"><strong>类型</strong> 入门</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>Composition:视频的元数据</h2>
+<p><code>&lt;Composition&gt;</code> 是 Remotion 的根节点,描述一个"视频是什么":</p>
+<ul>
+  <li><strong>id</strong>:Composition 唯一标识,渲染时通过此名选择</li>
+  <li><strong>component</strong>:要渲染的 React 组件</li>
+  <li><strong>durationInFrames</strong>:总帧数(必填)</li>
+  <li><strong>fps</strong>:帧率,默认 30</li>
+  <li><strong>width/height</strong>:分辨率,默认 1920×1080</li>
+</ul>
+<pre class="line-numbers"><code class="language-tsx">&lt;Composition
+  id="MyVideo"
+  component={MyVideo}
+  durationInFrames={300}  // 10 秒,30 fps
+  fps={30}
+  width={1920}
+  height={1080}
+/&gt;</code></pre>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>Sequence:时间轴切片</h2>
+<p><code>&lt;Sequence&gt;</code> 控制子组件在视频中出现的时间段:</p>
+<pre class="line-numbers"><code class="language-tsx">&lt;Sequence from={30} durationInFrames={60}&gt;
+  &lt;Title /&gt;
+&lt;/Sequence&gt;</code></pre>
+<p>该片段从第 30 帧开始,持续 60 帧(2 秒)。Sequence 内的 <code>useCurrentFrame()</code> 从 0 重新计数,便于嵌套时间轴。</p>
+<div class="alert alert-tip"><span class="alert-icon">💡</span><div class="alert-body"><p>Sequence 嵌套 Sequence 可以构建层级时间轴,内层时间从外层的"经过帧数"开始重新计算,极大简化复杂动画。</p></div></div>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>Series:顺序拼接场景</h2>
+<p><code>&lt;Series&gt;</code> 是顺序播放多个 Sequence 的语法糖:</p>
+<pre class="line-numbers"><code class="language-tsx">&lt;Series&gt;
+  &lt;Series.Sequence durationInFrames={90}&gt;
+    &lt;Intro /&gt;
+  &lt;/Series.Sequence&gt;
+  &lt;Series.Sequence durationInFrames={120}&gt;
+    &lt;Main /&gt;
+  &lt;/Series.Sequence&gt;
+  &lt;Series.Sequence durationInFrames={60}&gt;
+    &lt;Outro /&gt;
+  &lt;/Series.Sequence&gt;
+&lt;/Series&gt;</code></pre>
+<p>自动累加 from,无需手动计算时间偏移。</p>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>Frame 与 FPS 时间模型</h2>
+<p>Remotion 采用<strong>离散帧时间</strong>而非真实时间:</p>
+<ul>
+  <li>时间单位是<strong>帧号</strong>(整数),不是毫秒</li>
+  <li>FPS(帧率)= 一秒播放多少帧</li>
+  <li>30 fps 视频第 90 帧 = 第 3 秒</li>
+</ul>
+<p>读取当前帧的方式:</p>
+<pre class="line-numbers"><code class="language-tsx">import { useCurrentFrame, useVideoConfig } from 'remotion';
+
+const frame = useCurrentFrame();         // 当前帧号(从 0 开始)
+const { fps, width, height, durationInFrames } = useVideoConfig();
+const timeInSeconds = frame / fps;       // 转秒</code></pre>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>布局:AbsoluteFill</h2>
+<p>视频的根元素默认是 1920×1080 的画布。子组件需要用 <code>AbsoluteFill</code> 绝对定位才能覆盖:</p>
+<pre class="line-numbers"><code class="language-tsx">import { AbsoluteFill } from 'remotion';
+
+&lt;AbsoluteFill style={{ background: 'black' }}&gt;
+  &lt;h1 style={{ position: 'absolute', top: 100, left: 100 }}&gt;
+    Hello Remotion
+  &lt;/h1&gt;
+&lt;/AbsoluteFill&gt;</code></pre>
+<p>组件顺序即 Z-Index 渲染顺序,后写的覆盖先写的。</p>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>概念关系图</h2>
+<pre class="line-numbers"><code class="language-bash">┌─ Root.tsx ──────────────────────┐
+│  &lt;Composition&gt;  ← 1 个视频 = 1 Composition
+│    └─ &lt;MyVideo&gt;   ← 视频的 React 组件
+│        ├─ &lt;Sequence from=0 dur=60&gt;
+│        │    └─ &lt;SceneA /&gt;
+│        ├─ &lt;Sequence from=60 dur=60&gt;
+│        │    └─ &lt;SceneB /&gt;
+│        └─ &lt;Sequence from=120 dur=60&gt;
+│             └─ &lt;SceneC /&gt;
+└──────────────────────────────────┘</code></pre>
+</section>
+
+<div class="source-note">Remotion 官方文档(2025)、React 18 文档、Adobe Frame Timing 规范</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>其它核心组件</h2>
+<p>除 Composition/Sequence/Series 外,Remotion 还提供 4 个常用容器组件:</p>
+<div class="rules-grid">
+<div class="rule-card"><span class="rule-num">01</span><p><strong>&lt;Still&gt;</strong>:静态图,代替 Composition 表达单帧海报/封面,无 durationInFrames</p></div>
+<div class="rule-card"><span class="rule-num">02</span><p><strong>&lt;Folder&gt;</strong>:在 Studio 侧边栏分组管理多个 Composition</p></div>
+<div class="rule-card"><span class="rule-num">03</span><p><strong>&lt;Freeze&gt;</strong>:冻结某一帧的子组件,常用于长视频中插入定格画面</p></div>
+<div class="rule-card"><span class="rule-num">04</span><p><strong>&lt;Loop&gt;</strong>:循环播放子组件 N 帧,适合 GIF 风格重复动画</p></div>
+</div>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">&lt;Still id="Cover" component={Cover} width={1920} height={1080} /&gt;
+&lt;Folder title="营销素材"&gt;
+  &lt;Composition id="ad-15s" ... /&gt;
+  &lt;Composition id="ad-30s" ... /&gt;
+&lt;/Folder&gt;</code></pre></div>
+</section>
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>registerRoot() 入口</h2>
+<p>项目入口文件 <code>src/index.ts</code> 调用 <code>registerRoot()</code> 注册根组件,告诉引擎从何处开始渲染:</p>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">import { registerRoot } from 'remotion';
+import { RemotionRoot } from './Root';
+registerRoot(RemotionRoot);</code></pre></div>
+<div class="alert alert-info"><span class="alert-icon">💡</span><div class="alert-body"><p>registerRoot() 必须在<strong>独立文件</strong>(如 index.ts)中,不要和 Root.tsx 混在一起。原因是 React Fast Refresh 会重新执行被修改的文件,而 registerRoot 应只调用一次。</p></div></div>
+</section>
+
+
+<section class="section" id="s9">
+<span class="section-num">Chapter 09</span>
+<h2>Easing 与数学函数</h2>
+<p>Remotion 提供 4 类数学函数驱动动画:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>函数</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>interpolate(input, range, output, options?)</code></td><td>线性插值,核心动画原语</td></tr>
+<tr><td><code>interpolateColors(input, range, colors, options?)</code></td><td>颜色插值,支持多种色彩空间</td></tr>
+<tr><td><code>spring({ frame, fps, config? })</code></td><td>弹簧物理动画</td></tr>
+<tr><td><code>Easing.bezier(x1, y1, x2, y2)</code></td><td>自定义贝塞尔曲线</td></tr>
+<tr><td><code>random(name)</code></td><td>种子化随机数(关键帧之间保持一致)</td></tr>
+<tr><td><code>measureSpring({ ... })</code></td><td>预计算弹簧总时长(用于序列同步)</td></tr>
+<tr><td><code>watchStaticFile(file)</code></td><td>监听静态文件变化,自动重渲染</td></tr>
+<tr><td><code>prefetch(url)</code></td><td>主动预加载资源(headers/视频/图片)</td></tr>
+<tr><td><code>getStaticFiles()</code></td><td>列出所有静态文件(SSR 用)</td></tr>
+</tbody>
+</table></div>
+<p>典型使用:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">// 种子随机 - 不同帧/不同实例保持一致
+const v = random('particle-0');  // 0~1
+
+// 弹簧 - 物理自然动画
+const t = spring({ frame, fps, config: { damping: 12, mass: 0.5 } });
+
+// 贝塞尔 - 自定义缓动
+const ease = Easing.bezier(0.25, 0.1, 0.25, 1);  // ease-out 风格</code></pre></div>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="B-01-installation.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">B-01 安装与环境配置</span></a>
+  <a href="B-03-first-video.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">B-03 第一个视频</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body>
+</html>

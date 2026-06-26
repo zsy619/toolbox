@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>
+      Docker 镜像仓库 Registry 深入 | Docker 实战教程
+    </title>
+    <meta name="description" content="详解 Registry v2 协议、Distribution 项目、manifest/sha256/标签机制;Harbor / Quay / ECR / GCR 核心原理;镜像复制与签名验证。">
+    <meta name="keywords" content="Docker, Docker 镜像仓库 Registry 深入, 容器化教程, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/15-registry-distribution-internals.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker 镜像仓库 Registry 深入">
+    <meta property="og:description" content="详解 Registry v2 协议、Distribution 项目、manifest/sha256/标签机制;Harbor / Quay / ECR / GCR 核心原理;镜像复制与签名验证。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/15-registry-distribution-internals.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Docker 镜像仓库 Registry 深入">
+    <meta name="twitter:description" content="详解 Registry v2 协议、Distribution 项目、manifest/sha256/标签机制;Harbor / Quay / ECR / GCR 核心原理;镜像复制与签名验证。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Docker 镜像仓库 Registry 深入","description":"详解 Registry v2 协议、Distribution 项目、manifest/sha256/标签机制;Harbor / Quay / ECR / GCR 核心原理;镜像复制与签名验证。","author":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 教程","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"Docker 镜像仓库 Registry 深入","item":"https://tools.yy24365.com/ai-tools/docker/15-registry-distribution-internals.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            D
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 教程
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Docker 镜像仓库 Registry 深入
+            </span>
+          </nav>
+          <h1 id="hero-title">
+            Docker 镜像仓库 Registry 深入
+          </h1>
+          <p class="hero-sub">
+            Registry v2 协议 + Distribution + 镜像同步
+          </p>
+          <p class="hero-desc">
+            详解 Registry v2 协议、Distribution 项目、manifest/sha256/标签机制;Harbor / Quay / ECR / GCR 核心原理;镜像复制与签名验证。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                课程编号
+              </strong>
+              第 15 课
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                分类
+              </strong>
+              镜像仓库
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              高级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                字数
+              </strong>
+              ~ 4000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <nav class="toc" id="toc">
+          <h2 class="toc-title">
+            本文目录
+          </h2>
+          <ul class="toc-grid">
+            <li>
+              <a href="#s1">
+                <span class="toc-num">
+                  01
+                </span>
+                Registry v2 协议 5 大概念
+              </a>
+            </li>
+            <li>
+              <a href="#s2">
+                <span class="toc-num">
+                  02
+                </span>
+                OCI Distribution Spec
+              </a>
+            </li>
+            <li>
+              <a href="#s3">
+                <span class="toc-num">
+                  03
+                </span>
+                镜像层与 Tag 关系
+              </a>
+            </li>
+            <li>
+              <a href="#s4">
+                <span class="toc-num">
+                  04
+                </span>
+                主流仓库对比
+              </a>
+            </li>
+            <li>
+              <a href="#s5">
+                <span class="toc-num">
+                  05
+                </span>
+                镜像同步与复制
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">
+            Chapter 01
+          </span>
+          <h2 id="s1-title">
+            Registry v2 协议 5 大概念
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  Manifest:列出镜像所有层与配置,JSON 格式
+                </li>
+                <li>
+                  Blob:实际数据层,按 digest 寻址(sha256)
+                </li>
+                <li>
+                  Tag:可变标签,docker push 写入
+                </li>
+                <li>
+                  Digest:不可变内容寻址,sha256:abc123
+                </li>
+                <li>
+                  Repository:相同名称的 tag 集合
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">
+            Chapter 02
+          </span>
+          <h2 id="s2-title">
+            OCI Distribution Spec
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  specs.opencontainers.org/distribution-spec/
+                </li>
+                <li>
+                  Pull/Push API 标准化,镜像格式不再依赖 Docker 私有协议
+                </li>
+                <li>
+                  镜像由 manifest + config + layers 组成
+                </li>
+                <li>
+                  Helm chart 也基于相同 spec 实现 OCI artifact
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">
+            Chapter 03
+          </span>
+          <h2 id="s3-title">
+            镜像层与 Tag 关系
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  tag → digest → manifest → layers
+                </li>
+                <li>
+                  同一 digest 可对应多个 tag(共享层)
+                </li>
+                <li>
+                  层按 digest 去重,digest 即 sha256 不可变
+                </li>
+                <li>
+                  多架构镜像:1 个 tag → 多个 manifest → 不同架构 layers
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">
+            Chapter 04
+          </span>
+          <h2 id="s4-title">
+            主流仓库对比
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  Docker Hub:官方,免费私有仓库限制 1 个
+                </li>
+                <li>
+                  Harbor:开源企业级,RBAC + 漏洞扫描 + 镜像复制
+                </li>
+                <li>
+                  Quay:Red Hat 出品,Build trigger + Clair 扫描
+                </li>
+                <li>
+                  AWS ECR / GCP GCR / Azure ACR:云厂商托管,深度集成
+                </li>
+                <li>
+                  registry:2.8+ 官方轻量级,适合自建小型仓库
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s5" aria-labelledby="s5-title">
+          <span class="section-num">
+            Chapter 05
+          </span>
+          <h2 id="s5-title">
+            镜像同步与复制
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  Harbor 跨实例同步:push-based/pull-based 双向
+                </li>
+                <li>
+                  Skopeo 工具:不下载镜像直接复制(skopeo copy)
+                </li>
+                <li>
+                  CRIU 实时迁移:几乎零停机跨主机迁移
+                </li>
+                <li>
+                  镜像签名:cosign 签名 → OCI 验证 cosign verify
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <div class="alert alert-tip">
+          <span class="alert-icon">
+            💡 选择建议
+          </span>
+          <div class="alert-body">
+            <p>
+              中小项目 Harbor,云原生 ECR/GCR,小型自建 registry:2.8
+            </p>
+          </div>
+        </div>
+        <div class="alert alert-info">
+          <span class="alert-icon">
+            🎯 签名验证
+          </span>
+          <div class="alert-body">
+            <p>
+              cosign + Notary v2 是 OCI 官方签名方案,防中间人攻击
+            </p>
+          </div>
+        </div>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">
+            FAQ
+          </span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Registry v2 协议 5 大概念
+              </h3>
+              <p class="faq-a">
+                Manifest:列出镜像所有层与配置,JSON 格式
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                OCI Distribution Spec
+              </h3>
+              <p class="faq-a">
+                specs.opencontainers.org/distribution-spec/
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                镜像层与 Tag 关系
+              </h3>
+              <p class="faq-a">
+                tag → digest → manifest → layers
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                主流仓库对比
+              </h3>
+              <p class="faq-a">
+                Docker Hub:官方,免费私有仓库限制 1 个
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                镜像同步与复制
+              </h3>
+              <p class="faq-a">
+                Harbor 跨实例同步:push-based/pull-based 双向
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本课程
+        </h3>
+        <p class="footer-meta">
+          Docker 镜像仓库 Registry 深入 · Docker 24 节系统化教程。所有代码均经过实测,可运行于 Docker 20+ / K8s 1.24+ 环境。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            完整 24 节课
+          </strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            回到索引
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 完整指南 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-lesson-15';
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

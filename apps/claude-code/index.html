@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code | AI 编程助手</title>
+  <!-- Claude (Anthropic) 风格字体：Inter（无衬线替代 Anthropic Sans）+ JetBrains Mono（代码）+ Georgia 作为衬线替代 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       Claude (Anthropic) 风格设计令牌
+       - 主背景使用 Parchment 暖色羊皮纸 #f5f4ed
+       - 强调色使用 Terracotta 品牌色 #c96442
+       - 单一衬线字重 500（Georgia 作为 Anthropic Serif 的网络替代）
+       - 所有阴影使用"环形"阴影（0px 0px 0px 1px）模拟描边
+       - 章节在 Parchment 和 Near Black 之间交替
+       ============================================================ */
+    :root {
+      /* 浅色面 (Parchment 系) */
+      --color-parchment: #f5f4ed;     /* 页面主背景，暖羊皮纸 */
+      --color-ivory: #faf9f5;         /* 卡片表面，比 parchment 略亮 */
+      --color-pure-white: #ffffff;    /* 高对比表面（按钮等） */
+      --color-warm-sand: #e8e6dc;     /* 次级交互表面 */
+
+      /* 深色面 (Near Black 系) */
+      --color-near-black: #141413;    /* 深色主背景，温暖而非纯黑 */
+      --color-dark-surface: #30302e;  /* 深色卡片/容器 */
+
+      /* 文字 */
+      --color-text-primary: #141413;  /* Anthropic Near Black */
+      --color-text-secondary: #5e5d59; /* Olive Gray */
+      --color-text-tertiary: #87867f;  /* Stone Gray */
+      --color-text-muted: #b0aea5;     /* Warm Silver（深色面用） */
+      --color-text-emphasis: #3d3d3a;  /* Dark Warm */
+
+      /* 品牌强调 */
+      --color-terracotta: #c96442;     /* 主品牌色（CTA） */
+      --color-coral: #d97757;          /* 较亮变体（链接、次级强调） */
+      --color-error: #b53333;          /* 错误态 */
+      --color-focus-blue: #3898ec;     /* 唯一冷色，仅用于焦点环 */
+
+      /* 边框（暖色调） */
+      --color-border-cream: #f0eee6;   /* 浅色面描边 */
+      --color-border-warm: #e8e6dc;    /* 强调描边 */
+      --color-border-dark: #30302e;    /* 深色面描边 */
+
+      /* 环形阴影（Claude 签名技法：阴影假装成描边） */
+      --color-ring-warm: #d1cfc5;
+      --color-ring-subtle: #dedc01;
+      --color-ring-deep: #c2c0b6;
+
+      /* 阴影系统 */
+      --shadow-whisper: 0 4px 24px rgba(0, 0, 0, 0.05);
+      --shadow-card-warm: 0 4px 24px rgba(20, 20, 19, 0.08);
+      --shadow-card-dark: 0 4px 24px rgba(0, 0, 0, 0.3);
+      --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      /* Anthropic Sans 替代品：Inter */
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--color-parchment);
+      color: var(--color-text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* 全部标题使用衬线（Georgia 替代 Anthropic Serif），单字重 500
+       这是 Claude 设计的核心特征：衬线权威 + 无衬线实用 */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: Georgia, 'Times New Roman', 'Source Serif Pro', serif;
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--color-text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* 代码字体严格只用于 code/pre 元素 */
+    code, pre {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    /* Navigation - Claude 风格：浅色 Parchment 滚动底 + 暖色描边 */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 20px 0;
+      transition: var(--transition-smooth);
+      background: transparent;
+    }
+
+    .nav.scrolled {
+      /* 滚动后显示 Parchment 半透明 + 暖色底部描边 */
+      background: rgba(245, 244, 237, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-border-cream);
+      padding: 16px 0;
+    }
+
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--color-terracotta);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* 环形阴影模拟描边 */
+      box-shadow: 0 0 0 1px var(--color-ring-warm);
+    }
+
+    .nav-logo-icon svg {
+      width: 20px;
+      height: 20px;
+      color: var(--color-ivory);
+    }
+
+    .nav-logo span {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      color: var(--color-text-primary);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      transition: var(--transition-smooth);
+    }
+
+    .nav-links a:hover {
+      color: var(--color-text-primary);
+    }
+
+    /* 主 CTA - Terracotta 品牌按钮 */
+    .nav-cta {
+      padding: 8px 16px;
+      background: var(--color-terracotta);
+      color: var(--color-ivory);
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      /* Claude 风格的环形阴影 */
+      box-shadow: 0 0 0 1px var(--color-terracotta);
+    }
+
+    .nav-cta:hover {
+      background: var(--color-coral);
+      box-shadow: 0 0 0 1px var(--color-coral);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .mobile-menu-btn span {
+      width: 24px;
+      height: 2px;
+      background: var(--color-text-primary);
+      transition: var(--transition-smooth);
+    }
+
+    /* Hero Section - Claude 风格：编辑性浅色版面 + 衬线大字 */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: 140px 0 100px;
+      background: var(--color-parchment);
+    }
+
+    /* 移除原蓝紫渐变背景，Claude 设计用环境层次代替装饰渐变 */
+    .hero-bg {
+      display: none;
+    }
+
+    .hero-grid {
+      display: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* 顶部小标签：暖色调版本 */
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--color-ivory);
+      border: 1px solid var(--color-border-warm);
+      border-radius: 30px;
+      font-size: 12px;
+      color: var(--color-text-emphasis);
+      font-weight: 500;
+      margin-bottom: 32px;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-badge svg {
+      width: 14px;
+      height: 14px;
+      color: var(--color-terracotta);
+    }
+
+    /* 主标题 - 衬线 Georgia，64px，weight 500，单一字重保持一致性 */
+    .hero h1 {
+      font-size: 64px;
+      font-weight: 500;
+      margin-bottom: 24px;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: var(--color-text-primary);
+    }
+
+    /* 高亮词使用 Terracotta 而非渐变 */
+    .hero h1 .highlight {
+      color: var(--color-terracotta);
+      font-style: italic;
+    }
+
+    .hero-desc {
+      font-size: 20px;
+      color: var(--color-text-secondary);
+      margin-bottom: 48px;
+      line-height: 1.6;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 64px;
+    }
+
+    /* 主 CTA - Terracotta 品牌色 + 环形阴影 */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: var(--color-terracotta);
+      color: var(--color-ivory);
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      box-shadow: 0 0 0 1px var(--color-terracotta);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-coral);
+      box-shadow: 0 0 0 1px var(--color-coral);
+    }
+
+    /* 次级 CTA - Warm Sand + Charcoal Warm 文字 */
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: var(--color-warm-sand);
+      color: var(--color-text-emphasis);
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      box-shadow: 0 0 0 1px var(--color-ring-warm);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-ivory);
+    }
+
+    /* 终端预览 - Ivory 表面 + 暖色边框 + 32px 圆角（Very Rounded 等级） */
+    .hero-terminal {
+      background: var(--color-ivory);
+      border: 1px solid var(--color-border-warm);
+      border-radius: 32px;
+      overflow: hidden;
+      max-width: 800px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-card-warm);
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 20px;
+      background: var(--color-warm-sand);
+      border-bottom: 1px solid var(--color-border-warm);
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    /* 终端圆点改用温暖色调：赤陶、暗金、墨绿 */
+    .terminal-dot.red { background: var(--color-terracotta); }
+    .terminal-dot.yellow { background: #c9a23d; }
+    .terminal-dot.green { background: #5a7a4c; }
+
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      font-size: 13px;
+      color: var(--color-text-tertiary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .terminal-body {
+      padding: 28px;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .terminal-line {
+      display: flex;
+      margin-bottom: 8px;
+    }
+
+    .terminal-prompt {
+      color: var(--color-terracotta);
+      margin-right: 12px;
+      user-select: none;
+    }
+
+    .terminal-command {
+      color: var(--color-text-primary);
+    }
+
+    .terminal-output {
+      color: var(--color-text-secondary);
+      padding-left: 24px;
+      margin-bottom: 16px;
+    }
+
+    .terminal-output.success {
+      color: #5a7a4c; /* 暖墨绿代替亮绿 */
+    }
+
+    .terminal-output.highlight {
+      color: var(--color-text-emphasis);
+    }
+
+    .terminal-input-line {
+      display: flex;
+      align-items: center;
+    }
+
+    .terminal-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 18px;
+      background: var(--color-terracotta);
+      animation: blink 1s infinite;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* Features Section - Claude 风格：编辑性轻量版式 + Ivory 卡片 */
+    .features {
+      padding: 120px 0;
+      position: relative;
+      background: var(--color-parchment);
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto 72px;
+    }
+
+    .section-badge {
+      display: inline-block;
+      padding: 5px 14px;
+      background: var(--color-ivory);
+      border: 1px solid var(--color-border-warm);
+      border-radius: 20px;
+      font-size: 11px;
+      color: var(--color-text-emphasis);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+      font-size: 52px;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .section-header p {
+      font-size: 18px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    /* 卡片：Ivory 表面 + Border Cream 描边 + 16px 圆角 + whisper 阴影 */
+    .feature-card {
+      background: var(--color-ivory);
+      border: 1px solid var(--color-border-cream);
+      border-radius: 16px;
+      padding: 32px;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+
+    /* 悬停：环形阴影加深 + 轻微上浮，取代原渐变条 */
+    .feature-card:hover {
+      box-shadow:
+        0 0 0 1px var(--color-ring-warm),
+        var(--shadow-card-warm);
+      transform: translateY(-2px);
+    }
+
+    /* 图标容器 - 暖色 Warm Sand 底 + Terracotta 图标 */
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--color-warm-sand);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .feature-icon svg {
+      width: 22px;
+      height: 22px;
+      color: var(--color-terracotta);
+    }
+
+    /* 卡片标题：衬线，weight 500 */
+    .feature-card h3 {
+      font-size: 22px;
+      margin-bottom: 12px;
+      color: var(--color-text-primary);
+      line-height: 1.25;
+    }
+
+    .feature-card p {
+      font-size: 15px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Capabilities Section - 深色 Near Black 章节，提供明暗对比节奏 */
+    .capabilities {
+      padding: 120px 0;
+      background: var(--color-near-black);
+      color: var(--color-ivory);
+    }
+
+    .capabilities-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .capabilities-text h2 {
+      font-size: 52px;
+      margin-bottom: 24px;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ivory);
+    }
+
+    /* 强调文本使用 Terracotta 而非蓝色 */
+    .capabilities-text h2 span {
+      color: var(--color-coral);
+      font-style: italic;
+    }
+
+    .capabilities-text > p {
+      font-size: 18px;
+      color: var(--color-text-muted);
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .capability-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .capability-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--color-dark-surface);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 1px var(--color-border-dark);
+    }
+
+    .capability-icon svg {
+      width: 18px;
+      height: 18px;
+      color: var(--color-coral);
+    }
+
+    .capability-text h4 {
+      font-size: 17px;
+      margin-bottom: 4px;
+      color: var(--color-ivory);
+    }
+
+    .capability-text p {
+      font-size: 14px;
+      color: var(--color-text-muted);
+    }
+
+    /* 代码演示卡片 - Dark Surface + Dark Border */
+    .capabilities-demo {
+      background: var(--color-dark-surface);
+      border: 1px solid var(--color-border-dark);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card-dark);
+    }
+
+    .demo-header {
+      padding: 16px 20px;
+      background: var(--color-near-black);
+      border-bottom: 1px solid var(--color-border-dark);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .demo-tab {
+      padding: 6px 14px;
+      background: var(--color-dark-surface);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--color-text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .demo-tab.active {
+      background: var(--color-terracotta);
+      color: var(--color-ivory);
+    }
+
+    .demo-body {
+      padding: 24px;
+    }
+
+    .demo-code {
+      background: var(--color-near-black);
+      border-radius: 8px;
+      padding: 20px;
+      font-size: 14px;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+
+    /* 代码高亮 - Claude 风格暖色调 */
+    .code-keyword { color: var(--color-coral); }
+    .code-string { color: #a8b67a; }  /* 暖橄榄绿 */
+    .code-comment { color: var(--color-text-tertiary); }
+    .code-function { color: #d4a574; }  /* 暖琥珀 */
+    .code-variable { color: #8fa9b8; }  /* 暖灰蓝 */
+    .code-type { color: #b89b6e; }     /* 暖褐 */
+
+    /* How It Works - 浅色 Parchment 编辑性版式 */
+    .how-it-works {
+      padding: 120px 0;
+      background: var(--color-parchment);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      margin-top: 64px;
+      position: relative;
+    }
+
+    .step {
+      text-align: center;
+      position: relative;
+    }
+
+    /* 步骤之间用暖色虚线连接，替代原蓝紫渐变条 */
+    .step::after {
+      content: '';
+      position: absolute;
+      top: 36px;
+      right: -24px;
+      width: 48px;
+      height: 1px;
+      border-top: 1px dashed var(--color-border-warm);
+    }
+
+    .step:last-child::after {
+      display: none;
+    }
+
+    /* 步骤编号 - 暖色描边圆形而非渐变 */
+    .step-number {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 24px;
+      background: var(--color-ivory);
+      border: 1px solid var(--color-border-warm);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--color-terracotta);
+      box-shadow: 0 0 0 1px var(--color-ring-warm);
+    }
+
+    .step h3 {
+      font-size: 22px;
+      margin-bottom: 12px;
+      color: var(--color-text-primary);
+      line-height: 1.25;
+    }
+
+    .step p {
+      font-size: 15px;
+      color: var(--color-text-secondary);
+      max-width: 280px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* CTA Section - 浅色编辑版面，warm sand 背景 + Terracotta 强调按钮 */
+    .cta {
+      padding: 120px 0;
+      background: var(--color-warm-sand);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 移除原蓝紫渐变辐射，Claude 风格不依赖装饰渐变 */
+    .cta::before {
+      display: none;
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .cta h2 {
+      font-size: 56px;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-text-primary);
+    }
+
+    .cta p {
+      font-size: 18px;
+      color: var(--color-text-secondary);
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+
+    .cta-note {
+      font-size: 13px;
+      color: var(--color-text-tertiary);
+    }
+
+    .cta-note svg {
+      width: 14px;
+      height: 14px;
+      color: #5a7a4c;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
+    /* Footer - 深色 Near Black 收尾，与 Capabilities 区呼应 */
+    .footer {
+      background: var(--color-near-black);
+      border-top: 1px solid var(--color-border-dark);
+      padding: 64px 0 40px;
+      color: var(--color-ivory);
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 60px;
+      margin-bottom: 48px;
+    }
+
+    .footer-brand p {
+      font-size: 14px;
+      color: var(--color-text-muted);
+      margin: 16px 0 24px;
+      line-height: 1.6;
+      max-width: 300px;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .footer-logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--color-terracotta);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 1px var(--color-ring-warm);
+    }
+
+    .footer-logo-icon svg {
+      width: 16px;
+      height: 16px;
+      color: var(--color-ivory);
+    }
+
+    .footer-logo span {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--color-ivory);
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 10px;
+    }
+
+    .footer-social a {
+      width: 36px;
+      height: 36px;
+      background: var(--color-dark-surface);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+      box-shadow: 0 0 0 1px var(--color-border-dark);
+    }
+
+    .footer-social a:hover {
+      background: var(--color-terracotta);
+    }
+
+    .footer-social svg {
+      width: 18px;
+      height: 18px;
+      color: var(--color-text-muted);
+    }
+
+    .footer-social a:hover svg {
+      color: var(--color-ivory);
+    }
+
+    /* 列标题：使用衬线而非 monospace，与 Claude 一致 */
+    .footer-column h4 {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 15px;
+      margin-bottom: 20px;
+      color: var(--color-ivory);
+    }
+
+    .footer-column ul {
+      list-style: none;
+    }
+
+    .footer-column li {
+      margin-bottom: 12px;
+    }
+
+    .footer-column a {
+      font-size: 14px;
+      color: var(--color-text-muted);
+      transition: var(--transition-smooth);
+    }
+
+    .footer-column a:hover {
+      color: var(--color-coral);
+    }
+
+    .footer-bottom {
+      padding-top: 32px;
+      border-top: 1px solid var(--color-border-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-bottom p {
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      transition: var(--transition-smooth);
+    }
+
+    .footer-links a:hover {
+      color: var(--color-ivory);
+    }
+
+    /* Mobile Responsive - 保持原 1024/768 断点，按 Claude 渐次缩放标题 */
+    @media (max-width: 1024px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .capabilities-content {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+
+      .step::after {
+        display: none;
+      }
+
+      .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      /* 平板尺寸下衬线标题适度缩小 */
+      .hero h1 {
+        font-size: 52px;
+      }
+
+      .section-header h2,
+      .capabilities-text h2,
+      .cta h2 {
+        font-size: 40px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links,
+      .nav-cta {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: flex;
+      }
+
+      /* 移动端衬线标题渐进缩放：64 → 36 */
+      .hero h1 {
+        font-size: 36px;
+        letter-spacing: -0.01em;
+      }
+
+      .hero-desc {
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
+      .hero-btns {
+        flex-direction: column;
+        align-items: stretch;
+        max-width: 280px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-header h2,
+      .capabilities-text h2,
+      .cta h2 {
+        font-size: 32px;
+      }
+
+      .section-header p,
+      .capabilities-text > p,
+      .cta p {
+        font-size: 16px;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: stretch;
+        max-width: 280px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+    }
+
+    /* Animation */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="container">
+      <div class="nav-inner">
+        <a href="#" class="nav-logo">
+          <div class="nav-logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <span>Claude Code</span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="#features">功能特性</a></li>
+          <li><a href="#capabilities">核心能力</a></li>
+          <li><a href="#how-it-works">如何使用</a></li>
+          <li><a href="https://docs.anthropic.com" target="_blank">文档</a></li>
+        </ul>
+        <a href="#cta" class="nav-cta">立即下载</a>
+        <button class="mobile-menu-btn" aria-label="菜单">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+          全新 AI 编程体验
+        </div>
+        <h1>用 <span class="highlight">Claude Code</span> <br>重新定义编程</h1>
+        <p class="hero-desc">直接通过终端与 Claude 对话，完成代码编写、调试、重构和文档生成。告别繁琐，专注于创造。</p>
+        <div class="hero-btns">
+          <a href="#cta" class="btn-primary">
+            开始使用
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a href="#features" class="btn-secondary">
+            了解更多
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 17l9.2-9.2M17 17V7H7"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Terminal Preview -->
+        <div class="hero-terminal">
+          <div class="terminal-header">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+            <span class="terminal-title">terminal</span>
+          </div>
+          <div class="terminal-body">
+            <div class="terminal-line">
+              <span class="terminal-prompt">→</span>
+              <span class="terminal-command">claude-code</span>
+            </div>
+            <div class="terminal-output success">✓ Claude Code 已启动</div>
+            <div class="terminal-output">输入您想要实现的功能，Claude 将帮您完成</div>
+            <div class="terminal-output highlight">问：帮我创建一个用户登录的 React 组件</div>
+            <div class="terminal-output">✓ 已创建 components/LoginForm.tsx</div>
+            <div class="terminal-output">✓ 包含表单验证和错误处理</div>
+            <div class="terminal-output success">✓ 组件已准备就绪</div>
+            <div class="terminal-input-line">
+              <span class="terminal-prompt">→</span>
+              <span class="terminal-cursor"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">功能特性</span>
+        <h2>为开发者打造的智能助手</h2>
+        <p>Claude Code 深度集成开发工作流，让 AI 成为您编程旅程中的得力伙伴</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z"/>
+              <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+            </svg>
+          </div>
+          <h3>智能代码生成</h3>
+          <p>根据自然语言描述自动生成高质量代码，支持多种编程语言和框架，自动遵循最佳实践。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+          </div>
+          <h3>代码重构与优化</h3>
+          <p>自动分析代码问题，提供重构建议，一键优化代码结构和性能，提升代码可维护性。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+          </div>
+          <h3>Bug 调试助手</h3>
+          <p>快速定位问题根源，提供修复建议和示例代码，让调试过程更加高效精准。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+            </svg>
+          </div>
+          <h3>文档自动生成</h3>
+          <p>为函数、组件和模块自动生成规范的文档注释和 API 说明，保持文档与代码同步更新。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <h3>Git 操作简化</h3>
+          <p>智能生成提交信息，创建分支，处理合并冲突，让版本控制变得简单直观。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+            </svg>
+          </div>
+          <h3>项目上下文理解</h3>
+          <p>深度理解整个项目结构和技术栈，提供符合项目规范的代码和建议，保持一致性。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Capabilities Section -->
+  <section class="capabilities" id="capabilities">
+    <div class="container">
+      <div class="capabilities-content">
+        <div class="capabilities-text">
+          <span class="section-badge">核心能力</span>
+          <h2>不只是代码补全，<span>更是编程伙伴</span></h2>
+          <p>Claude Code 基于 Claude 3.5 Sonnet 构建，具备深度推理能力和代码理解力，能够处理复杂的编程任务。</p>
+
+          <div class="capability-item">
+            <div class="capability-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+            </div>
+            <div class="capability-text">
+              <h4>全栈开发支持</h4>
+              <p>前后端、数据库、DevOps，多种技术栈一网打尽</p>
+            </div>
+          </div>
+
+          <div class="capability-item">
+            <div class="capability-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+            </div>
+            <div class="capability-text">
+              <h4>安全代码审查</h4>
+              <p>自动检测安全漏洞，提供修复建议，保障代码安全</p>
+            </div>
+          </div>
+
+          <div class="capability-item">
+            <div class="capability-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+            </div>
+            <div class="capability-text">
+              <h4>测试自动生成</h4>
+              <p>智能生成单元测试、集成测试，覆盖关键路径</p>
+            </div>
+          </div>
+
+          <div class="capability-item">
+            <div class="capability-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+            </div>
+            <div class="capability-text">
+              <h4>代码解释与学习</h4>
+              <p>详细解释代码逻辑，帮助理解复杂系统和学习新技术</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="capabilities-demo">
+          <div class="demo-header">
+            <div class="demo-tab active">LoginForm.tsx</div>
+            <div class="demo-tab">App.tsx</div>
+          </div>
+          <div class="demo-body">
+            <div class="demo-code">
+<span class="code-keyword">import</span> { useState } <span class="code-keyword">from</span> <span class="code-string">'react'</span>;
+
+<span class="code-keyword">interface</span> <span class="code-type">LoginFormProps</span> {
+  onSuccess: () => <span class="code-keyword">void</span>;
+}
+
+<span class="code-keyword">export default</span> <span class="code-keyword">function</span> <span class="code-function">LoginForm</span>({ onSuccess }: <span class="code-type">LoginFormProps</span>) {
+  <span class="code-keyword">const</span> [email, setEmail] = <span class="code-function">useState</span>(<span class="code-string">''</span>);
+  <span class="code-keyword">const</span> [password, setPassword] = <span class="code-function">useState</span>(<span class="code-string">''</span>);
+  <span class="code-keyword">const</span> [error, setError] = <span class="code-function">useState</span>(<span class="code-string">''</span>);
+
+  <span class="code-keyword">const</span> <span class="code-function">handleSubmit</span> = <span class="code-keyword">async</span> (e: <span class="code-type">React.FormEvent</span>) => {
+    e.preventDefault();
+    <span class="code-keyword">try</span> {
+      <span class="code-keyword">await</span> <span class="code-function">authService</span>.login(email, password);
+      onSuccess();
+    } <span class="code-keyword">catch</span> (err) {
+      setError(<span class="code-string">'登录失败，请检查邮箱和密码'</span>);
+    }
+  };
+
+  <span class="code-keyword">return</span> (
+    &lt;<span class="code-function">form</span> <span class="code-variable">onSubmit</span>={handleSubmit}&gt;
+      <span class="code-comment">// ... 表单内容</span>
+    &lt;/<span class="code-function">form</span>&gt;
+  );
+}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">快速上手</span>
+        <h2>三步开始智能编程</h2>
+        <p>简单几步，即可开启 AI 编程新体验</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>安装 CLI</h3>
+          <p>通过 npm 或 Homebrew 一键安装 Claude Code 命令行工具</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>启动对话</h3>
+          <p>在项目目录运行 claude-code，开始与 AI 编程助手对话</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>高效开发</h3>
+          <p>描述您的需求，Claude 将帮您完成代码编写、调试和优化</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta" id="cta">
+    <div class="container">
+      <div class="cta-content">
+        <h2>准备好提升编程效率了吗？</h2>
+        <p>加入全球开发者行列，体验 AI 赋能的编程方式</p>
+        <div class="cta-buttons">
+          <a href="https://docs.anthropic.com/claude-code" target="_blank" class="btn-primary">
+            文档中心
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+          </a>
+          <a href="https://github.com/anthropics/claude-code" target="_blank" class="btn-secondary">
+            GitHub
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+          </a>
+        </div>
+        <p class="cta-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+            <path d="M22 4L12 14.01l-3-3"/>
+          </svg>
+          免费使用 · 支持 macOS、Linux、Windows
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <div class="footer-logo-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <span>Claude Code</span>
+          </div>
+          <p>由 Anthropic 开发的 AI 编程助手，基于 Claude 系列模型构建，帮助开发者更高效地完成编程任务。</p>
+          <div class="footer-social">
+            <a href="https://twitter.com/AnthropicAI" aria-label="Twitter" target="_blank">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </a>
+            <a href="https://github.com/anthropics" aria-label="GitHub" target="_blank">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+            </a>
+            <a href="https://docs.anthropic.com" aria-label="文档" target="_blank">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-column">
+          <h4>资源</h4>
+          <ul>
+            <li><a href="https://docs.anthropic.com/claude-code" target="_blank">文档</a></li>
+            <li><a href="https://github.com/anthropics/claude-code" target="_blank">GitHub</a></li>
+            <li><a href="https://docs.anthropic.com/claude-code/changelog" target="_blank">更新日志</a></li>
+            <li><a href="https://status.anthropic.com" target="_blank">状态页面</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>社区</h4>
+          <ul>
+            <li><a href="https://discourse.anthropic.com" target="_blank">论坛</a></li>
+            <li><a href="https://discord.gg/anthropic" target="_blank">Discord</a></li>
+            <li><a href="https://twitter.com/AnthropicAI" target="_blank">Twitter</a></li>
+            <li><a href="https://blog.anthropic.com" target="_blank">博客</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>公司</h4>
+          <ul>
+            <li><a href="https://www.anthropic.com" target="_blank">关于 Anthropic</a></li>
+            <li><a href="https://www.anthropic.com/safety" target="_blank">安全</a></li>
+            <li><a href="https://www.anthropic.com/careers" target="_blank">加入我们</a></li>
+            <li><a href="https://www.anthropic.com/contact" target="_blank">联系我们</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2024 Anthropic. Claude Code 相关商标归 Anthropic 所有。</p>
+        <div class="footer-links">
+          <a href="https://www.anthropic.com/privacy" target="_blank">隐私政策</a>
+          <a href="https://www.anthropic.com/terms" target="_blank">使用条款</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navigation scroll effect
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

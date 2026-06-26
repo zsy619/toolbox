@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>P-01 Remotion 内部架构 | 渲染器与浏览器协作机制</title>
+<meta name="description" content="Remotion 内部架构高级解析:Webpack bundle、Puppeteer 浏览器调度、Chrome DevTools Protocol 帧通信、React reconciler 重写、remotion-cli 与 @remotion/renderer 包边界。">
+<meta name="keywords" content="Remotion 架构, Puppeteer, Chrome DevTools, React reconciler, Webpack">
+<link rel="canonical" href="https://example.com/remotion/P-01-internal-architecture.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 内部架构">
+<meta property="og:description" content="渲染器、浏览器、Bundle 三大子系统协作。">
+<meta property="og:url" content="https://example.com/remotion/P-01-internal-architecture.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"P-01 Remotion 内部架构","description":"Remotion 渲染器与浏览器、Bundle 机制、Chrome DevTools Protocol 集成。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 架构"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="P-01-internal-architecture.html" class="active">高级</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-pro">高级层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">P-01 内部架构</span>
+    </nav>
+    <h1 id="hero-title">P-01 内部架构 <span class="level-badge level-P">P 高级</span></h1>
+    <p class="hero-sub">渲染器 / 浏览器 / Bundle 三大子系统的协作机制。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 14 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> A-05 性能优化</div>
+      <div class="hero-meta-item"><strong>类型</strong> 高级</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>包边界</h2>
+<p>Remotion 4.x 是 monorepo,主要 npm 包及其职责:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>包</th><th>职责</th></tr></thead>
+<tbody>
+<tr><td><code>remotion</code></td><td>运行时 API (Composition/Sequence/spring/Hooks)</td></tr>
+<tr><td><code>@remotion/cli</code></td><td>命令行工具 (studio/render/still)</td></tr>
+<tr><td><code>@remotion/renderer</code></td><td>Node.js 端渲染引擎</td></tr>
+<tr><td><code>@remotion/bundler</code></td><td>Webpack 打包用户代码</td></tr>
+<tr><td><code>@remotion/lambda</code></td><td>AWS Lambda 云渲染</td></tr>
+<tr><td><code>@remotion/media-utils</code></td><td>ffmpeg 辅助 (getVideoMetadata 等)</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>整体数据流</h2>
+<pre class="line-numbers"><code class="language-bash">┌─ 用户 React 代码 (src/Root.tsx) ────┐
+│        ↓ Webpack 打包                │
+│   build/ (静态资源 + JS Bundle)      │
+│        ↓ Puppeteer 启动              │
+│  Chrome (打开 index.html)            │
+│        ↓ 注入 currentFrame           │
+│  React 渲染该帧 DOM                  │
+│        ↓ Chrome 截图                 │
+│   raw PNG/JPEG (每帧)                │
+│        ↓ FFmpeg 合并                 │
+│   out.mp4 (最终视频)                 │
+└──────────────────────────────────────┘</code></pre>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>Bundle 机制</h2>
+<p><code>@remotion/bundler</code> 基于 Webpack 5,核心配置:</p>
+<pre class="line-numbers"><code class="language-ts">// remotion.config.ts
+Config.setWebpackOverride((config) =&gt; {
+  config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+  return config;
+});</code></pre>
+<p>支持 <code>--public-url</code> 自定义 bundle 输出目录,便于 CDN 部署。</p>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>浏览器调度:Puppeteer</h2>
+<p>每个并发实例是一个独立 Chrome 进程,通过 Chrome DevTools Protocol (CDP) 与 Node.js 通信:</p>
+<ul>
+  <li><strong>Page.navigate</strong>:加载 bundle URL</li>
+  <li><strong>Runtime.evaluate</strong>:注入 <code>window.remotion_setFrame(frame)</code></li>
+  <li><strong>Page.captureScreenshot</strong>:截图该帧</li>
+  <li><strong>Page.close</strong>:释放资源</li>
+</ul>
+<div class="alert alert-info"><span class="alert-icon">💡</span><div class="alert-body"><p>Remotion 不使用 Puppeteer 自身的 <code>screenshot</code> 截整个页面,而是截特定 DOM 容器,避免头部 URL 栏等干扰。</p></div></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>React 渲染细节</h2>
+<p>每帧切换时,Remotion 用全局变量传递 frame:</p>
+<pre class="line-numbers"><code class="language-tsx">// @remotion/renderer 内部(简化)
+await page.evaluate((frame) =&gt; {
+  (window as any).__remotion_setCurrentFrame(frame);
+}, targetFrame);</code></pre>
+<p>Remotion 在 Root 顶层拦截 useCurrentFrame,直接返回该全局值,避免每帧重建 React 树。</p>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>FFmpeg 桥接</h2>
+<p>Node.js 端通过 <code>child_process.spawn('ffmpeg', args)</code> 调用:</p>
+<pre class="line-numbers"><code class="language-ts">// 内部命令(简化)
+const args = [
+  '-framerate', String(fps),
+  '-i', 'frame-%05d.jpeg',
+  '-i', 'audio.mp3',
+  '-c:v', 'libx264', '-pix_fmt', 'yuv420p',
+  '-c:a', 'aac', outputFile,
+];</code></pre>
+<p>每个 Composition 一次合流,临时文件自动清理。</p>
+</section>
+
+<div class="source-note">Remotion 4.x 源码、@remotion/renderer API、Puppeteer 文档</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>浏览器与 Puppeteer</h2>
+<p>Remotion 渲染实际是 <strong>控制 Chrome 无头浏览器</strong> 截屏:用 Puppeteer 打开本地 URL,逐帧截屏,最后用 FFmpeg 合成视频。</p>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">import { renderMedia, openBrowser } from '@remotion/renderer';
+
+// 显式复用浏览器(适合批量渲染)
+const browser = await openBrowser('chrome');
+for (const composition of compositions) {
+  await renderMedia({ browser, composition, ... });
+}
+await browser.close({ graceful: true });</code></pre></div>
+<p>Remotion 4.0.455+ 预编译了特殊 Chrome(开启 <code>HTML-in-canvas</code> 标志),默认优于标准 Chrome。WebGL 默认使用 <code>--gl=angle</code>(ANGLE 后端),可用 <code>Config.setChromiumOpenGlRenderer('egl')</code> 切换。</p>
+</section>
+
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>serveUrl 缓存与 CDN</h2>
+<p>每个 Lambda 调用都会传 <code>serveUrl</code>(项目打包后的 URL)。生产最佳实践:</p>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">// 1) 启动时打包一次
+import { bundle } from '@remotion/bundler';
+import { deploySite, getSites } from '@remotion/lambda';
+
+const bundleLocation = await bundle({ entryPoint: 'src/index.ts' });
+const { serveUrl } = await deploySite({
+  bundleLocation, region, entryPointName: 'index', siteName: 'video-app',
+});
+
+// 2) 后续渲染复用(避免重复打包)
+for (const data of jobs) {
+  await renderMediaOnLambda({ serveUrl, composition, inputProps: data });
+}</code></pre></div>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="A-05-performance.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">A-05 性能优化</span></a>
+  <a href="P-02-render-pipeline.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">P-02 渲染管线</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

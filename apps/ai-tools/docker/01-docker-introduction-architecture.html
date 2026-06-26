@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Docker 简介与系统架构指南">
+    <meta name="format-detection" content="telephone=no">
+    <title>
+      Docker 简介与系统架构完全指南:Docker 是什么 + 4 大用途 + 容器与虚拟机对比 | AI 工具箱
+    </title>
+    <meta name="description" content="Docker 是开源的应用容器引擎。本文系统讲解 Docker 4 大用途(统一环境/应用迁移/超快启动/轻松维护)、容器与虚拟机的 5 维对比、普通系统/传统虚拟/容器虚拟 3 种程序运行原理,以及 Docker 系统架构 6 要素(Daemon/Image/Container/Repository/Tag/镜像中心)。">
+    <meta name="keywords" content="Docker 简介, Docker 是什么, Docker 用途, Docker 容器, Docker 镜像, Docker 系统架构, Docker Daemon, 容器与虚拟机区别, 容器虚拟化, Docker 仓库, Docker 标签, 镜像中心, Docker Hub, 应用容器, 开源容器引擎, DevOps 入门">
+    <meta name="author" content="AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="language" content="zh-CN">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/01-docker-introduction-architecture.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://tools.yy24365.com/ai-tools/docker/01-docker-introduction-architecture.html">
+    <link rel="alternate" hreflang="x-default" href="https://tools.yy24365.com/ai-tools/docker/01-docker-introduction-architecture.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker 简介与系统架构完全指南">
+    <meta property="og:description" content="Docker 是什么 + 4 大用途 + 容器 vs 虚拟机 + 6 大系统架构要素。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/01-docker-introduction-architecture.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/docker-intro-architecture-og.png">
+    <meta property="og:image:alt" content="Docker 系统架构示意图">
+    <meta property="article:published_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:modified_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:section" content="DevOps">
+    <meta property="article:tag" content="Docker 入门">
+    <meta property="article:tag" content="容器虚拟化">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Docker 简介与系统架构指南">
+    <meta name="twitter:description" content="Docker 入门 + 系统架构 6 要素完整讲解。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/docker-intro-architecture-og.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%232496ED' d='M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.083.185.185.185m-2.954-5.43h2.119a.186.186 0 00.186-.186V3.575a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m0 2.716h2.119a.187.187 0 00.186-.186V6.291a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.931 0h2.12a.186.186 0 00.184-.186V6.291a.185.185 0 00-.184-.185h-2.12a.185.185 0 00-.184.185v1.887c0 .102.082.185.184.186m-2.932 0h2.12a.185.185 0 00.184-.186V6.291a.185.185 0 00-.184-.185H5.166a.186.186 0 00-.185.185v1.887c0 .102.083.185.185.186m5.863 5.43h2.119a.186.186 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.082.185.185.185m-2.931 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.932 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.931 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m11.792 4.084h-2.119a.186.186 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.931 0h-2.119a.185.185 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.932 0h-2.118a.185.185 0 00-.184.185v1.886c0 .103.082.186.184.186h2.118a.186.186 0 00.185-.186v-1.886a.185.185 0 00-.185-.185m-2.931 0h-2.12a.185.185 0 00-.184.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.184-.186v-1.886a.185.185 0 00-.184-.185m-2.932 0H5.166a.186.186 0 00-.185.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.185-.186v-1.886a.186.186 0 00-.185-.185z'/%3E%3C/svg%3E">
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Docker 简介与系统架构完全指南",
+  "description": "系统讲解 Docker 4 大用途、容器与虚拟机对比、3 种程序运行原理、Docker 系统架构 6 要素(Daemon/Image/Container/Repository/Tag/镜像中心)。",
+  "author": {"@type": "Organization", "name": "AI 工具箱"},
+  "publisher": {"@type": "Organization", "name": "AI 工具箱"},
+  "datePublished": "2026-06-03T00:00:00+08:00",
+  "dateModified": "2026-06-03T00:00:00+08:00",
+  "inLanguage": "zh-CN",
+  "mainEntityOfPage": "https://tools.yy24365.com/ai-tools/docker/01-docker-introduction-architecture.html",
+  "keywords": "Docker 简介, 容器与虚拟机, Docker 系统架构, Daemon, Repository, Tag",
+  "about": {"@type": "SoftwareApplication", "name": "Docker", "applicationCategory": "DeveloperApplication"},
+  "proficiencyLevel": "Beginner"
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "首页", "item": "https://tools.yy24365.com/"},
+    {"@type": "ListItem", "position": 2, "name": "AI 工具", "item": "https://tools.yy24365.com/ai-tools/"},
+    {"@type": "ListItem", "position": 3, "name": "Docker 学习", "item": "https://tools.yy24365.com/ai-tools/docker/"},
+    {"@type": "ListItem", "position": 4, "name": "Docker 简介与架构", "item": "https://tools.yy24365.com/ai-tools/docker/01-docker-introduction-architecture.html"}
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Docker 是什么?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Docker 是一个<strong>开源的应用容器(Container)引擎</strong>,其可以让开发者将<strong>应用及应用运行的环境</strong>打包到一个轻量级、可移植的镜像中,然后发布到 Linux、Windows 服务器上。Docker 容器除了可以提供相同的应用外,还提供了该应用的统一运行环境,确保在任何宿主机上都可以跑出相同的效果。即 <strong>Docker = jar/war + 环境</strong>。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Docker 有哪些核心用途?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Docker 有 4 大核心用途:1) <strong>提供统一的运行环境</strong>:Docker=jar/war+环境,任何宿主机效果相同;2) <strong>便捷的应用迁移</strong>:从物理机、虚拟机、公有云、私有云无缝迁移,无需担心运行环境变化;3) <strong>超快的启动时间</strong>:直接运行在宿主机系统,无需启动操作系统,<strong>秒级甚至毫秒级</strong>启动;4) <strong>更轻松的维护和扩展</strong>:使用分层存储和镜像机制,重复部分复用更容易,基于基础镜像扩展镜像很简单。"}
+    },
+    {
+      "@type": "Question",
+      "name": "容器与虚拟机的区别是什么?",
+      "acceptedAnswer": {"@type": "Answer", "text": "本质区别在于<strong>是否虚拟化硬件和操作系统</strong>:<br>1) <strong>虚拟机</strong>:通过 VM 管理程序虚拟化<strong>硬件和操作系统</strong>,每个 VM 需独立 OS,资源占用大;<br>2) <strong>Docker 容器</strong>:<strong>共享宿主机硬件和操作系统</strong>,由 Docker 引擎统一管理资源,资源占用少、执行快、存储快;<br>3) <strong>启动速度</strong>:VM 需数分钟,容器<strong>秒级甚至毫秒级</strong>;<br>4) <strong>隔离性</strong>:VM 强隔离,容器<strong>进程级隔离</strong>(共享内核,文件/网络/进程隔离)。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Docker 系统架构包含哪些要素?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Docker 系统架构包含 6 大要素:1) <strong>Docker Daemon</strong>(Dockerd 守护进程):监听 Docker API 请求并管理 Docker 对象(镜像/容器/网络/卷);2) <strong>镜像 Image</strong>:用于创建 Docker 容器的模板(类似面向对象中的<strong>类</strong>);3) <strong>容器 Container</strong>:镜像运行时的实体(类似面向对象中的<strong>实例</strong>);4) <strong>仓库 Repository</strong>:保存一组镜像,有公开库/私有库之分;5) <strong>标签 Tag</strong>:通过 &lt;Repository&gt;:&lt;tag&gt; 定位一个镜像,用于区分同一仓库中的不同镜像;6) <strong>镜像中心</strong>(Docker Hub):存放大量公开仓库,用户可 pull/push 镜像。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Docker 容器启动为什么比虚拟机快?",
+      "acceptedAnswer": {"@type": "Answer", "text": "传统虚拟机启动一般需要数分钟:先启动虚拟机,再加载操作系统,最后手动启动应用(整个 VM 启动链路过长)。Docker 容器应用<strong>直接运行在宿主机系统,无需启动操作系统</strong>,因此可以做到<strong>秒级甚至毫秒级</strong>的启动。本质是:VM 启动<strong>整个 OS</strong>,容器启动<strong>单个进程</strong>。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Docker 镜像和容器的区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "镜像是用于创建容器的<strong>模板</strong>(类似面向对象中的<strong>类</strong>),容器是镜像<strong>运行时的实体</strong>(类似面向对象中的<strong>实例</strong>)。一个镜像可以创建<strong>多个容器</strong>。每个容器都包含一个或多个应用,且容器与容器之间<strong>相互隔离</strong>。镜像存储在镜像仓库中,容器运行在 Docker 引擎之上。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Docker 仓库和镜像中心是一回事吗?",
+      "acceptedAnswer": {"@type": "Answer", "text": "不是。<strong>仓库(Repository)</strong>是一组具有相同镜像名称的镜像集合(如 centos 仓库有 centos:7、centos:8 等多个 tag 的镜像),根据是否公开共享分为<strong>公开库</strong>和<strong>私有库</strong>。<strong>镜像中心(Registry,如 Docker Hub)</strong>是存放很多仓库的<strong>服务</strong>。一个镜像中心可以托管多个仓库,类似代码仓库(GitHub)和具体仓库(user/repo)的关系。"}
+    }
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "使用 Docker 统一应用运行环境",
+  "description": "通过 Docker 解决环境不一致问题,实现一次构建到处运行",
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "理解痛点", "text": "开发、测试、生产环境不一致,导致项目在不同阶段出现奇怪问题"},
+    {"@type": "HowToStep", "position": 2, "name": "构建镜像", "text": "将应用 jar/war + 运行环境打包成 Docker 镜像(docker build)"},
+    {"@type": "HowToStep", "position": 3, "name": "跨环境部署", "text": "在开发/测试/生产任何环境运行相同镜像(docker run),效果完全一致"},
+    {"@type": "HowToStep", "position": 4, "name": "便捷迁移", "text": "镜像可从物理机迁移到虚拟机、迁移到公有云、迁移到私有云,运行环境结果完全相同"}
+  ]
+}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress" role="progressbar" aria-label="阅读进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand" aria-label="AI 工具箱首页">
+          <span class="brand-mark">
+            AI
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main" role="main">
+      <section class="hero" aria-labelledby="article-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 学习
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Docker 简介与架构
+            </span>
+          </nav>
+          <h1 id="article-title">
+            Docker 简介与系统架构完全指南
+          </h1>
+          <p class="hero-sub">
+            Docker 是开源的应用容器引擎。本文系统讲解 Docker 4 大用途(统一环境/应用迁移/超快启动/轻松维护)、容器与虚拟机的 5 维对比、3 种程序运行原理,以及 Docker 系统架构 6 大要素。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              ★☆☆ 入门
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                阅读时长
+              </strong>
+              约 20 分钟
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                核心概念
+              </strong>
+              Daemon/Image/Container/Repository
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                最后更新
+              </strong>
+              2026-06-03
+            </div>
+          </div>
+          <div class="hero-tags" aria-label="标签">
+            <span class="tag">
+              Docker 入门
+            </span>
+            <span class="tag">
+              容器虚拟化
+            </span>
+            <span class="tag">
+              Docker 架构
+            </span>
+            <span class="tag">
+              Docker Hub
+            </span>
+            <span class="tag">
+              镜像与容器
+            </span>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <article>
+          <section class="section" aria-labelledby="intro">
+            <h2 id="intro">
+              什么是 Docker
+            </h2>
+            <p>
+              Docker 是一个
+              <strong>
+                开源的应用容器(Container)引擎
+              </strong>
+              ,其可以让开发者将
+              <strong>
+                应用及应用运行的环境
+              </strong>
+              打包到一个
+              <strong>
+                轻量级、可移植
+              </strong>
+              的镜像中,然后发布到 Linux、Windows 服务器上。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                Docker = jar/war + 环境
+              </div>
+              <div class="concept-body">
+                <p>
+                  Docker 容器除了可以提供相同的应用外,还提供了该应用的
+                  <strong>
+                    统一运行环境
+                  </strong>
+                  ,确保在任何宿主机上都可以跑出相同的效果。即
+                  <strong>
+                    Docker = jar/war + 环境
+                  </strong>
+                  ——Docker 解决了"代码一致但环境不一致"的经典痛点。
+                </p>
+              </div>
+            </div>
+          </section>
+          <nav class="toc" id="toc" aria-labelledby="toc-title">
+            <h2 class="toc-title" id="toc-title">
+              本文目录
+            </h2>
+            <ul class="toc-grid">
+              <li>
+                <a href="#s1">
+                  <span class="toc-num">
+                    1
+                  </span>
+                  Docker 4 大用途
+                </a>
+              </li>
+              <li>
+                <a href="#s2">
+                  <span class="toc-num">
+                    2
+                  </span>
+                  容器 vs 虚拟机
+                </a>
+              </li>
+              <li>
+                <a href="#s3">
+                  <span class="toc-num">
+                    3
+                  </span>
+                  3 种程序运行原理
+                </a>
+              </li>
+              <li>
+                <a href="#s4">
+                  <span class="toc-num">
+                    4
+                  </span>
+                  系统架构 6 要素
+                </a>
+              </li>
+              <li>
+                <a href="#faq">
+                  <span class="toc-num">
+                    ?
+                  </span>
+                  常见问题
+                </a>
+              </li>
+              <li>
+                <a href="#refs">
+                  <span class="toc-num">
+                    i
+                  </span>
+                  参考资源
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- ============================================================
+     第一章 Docker 4 大用途
+     ============================================================ -->
+          <section class="section" id="s1" aria-labelledby="s1-title">
+            <span class="section-num">
+              Chapter 01
+            </span>
+            <h2 id="s1-title">
+              Docker 的 4 大用途
+            </h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      用途
+                    </th>
+                    <th>
+                      核心价值
+                    </th>
+                    <th>
+                      解决的问题
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        1. 提供统一的运行环境
+                      </strong>
+                    </td>
+                    <td>
+                      Docker=jar/war+环境,任何宿主机效果相同
+                    </td>
+                    <td>
+                      开发/测试/生产环境不一致,导致各种奇怪问题
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        2. 便捷的应用迁移
+                      </strong>
+                    </td>
+                    <td>
+                      物理机/虚拟机/公有云/私有云,结果完全相同
+                    </td>
+                    <td>
+                      平台迁移时担心运行环境变化导致应用出问题
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        3. 超快的启动时间
+                      </strong>
+                    </td>
+                    <td>
+                      秒级甚至毫秒级,无需启动操作系统
+                    </td>
+                    <td>
+                      传统虚拟机启动数分钟:启动 VM + 加载 OS + 启动应用
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        4. 更轻松的维护和扩展
+                      </strong>
+                    </td>
+                    <td>
+                      分层存储+镜像机制,复用更容易
+                    </td>
+                    <td>
+                      应用重复部分难以复用,基础镜像扩展困难
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    环境一致性
+                  </strong>
+                  是 Docker 的核心价值。过去常见问题"在我电脑上能跑,到你那就不行"通常由环境差异引起。Docker 通过"应用 + 环境"打包,实现
+                  <strong>
+                    一次构建、到处运行
+                  </strong>
+                  (Build once, run anywhere)。
+                </p>
+              </div>
+            </div>
+            <h3>
+              1.1 启动速度对比
+            </h3>
+            <div class="concept">
+              <div class="concept-title">
+                传统虚拟机 vs Docker 容器
+              </div>
+              <div class="concept-body">
+                <p>
+                  传统的虚拟机启动一般需要
+                  <strong>
+                    数分钟
+                  </strong>
+                  :先启动虚拟机 → 再加载操作系统 → 最后手动启动应用。
+                  <br>
+                  <br>
+                  Docker 容器应用,
+                  <strong>
+                    直接运行在宿主机系统,无需启动操作系统
+                  </strong>
+                  ,因此可以做到
+                  <strong>
+                    秒级、甚至毫秒级
+                  </strong>
+                  的启动。本质区别:
+                  <br>
+                  1)
+                  <strong>
+                    VM 启动
+                  </strong>
+                  ——
+                  <strong>
+                    整个操作系统
+                  </strong>
+                  (几 GB 的内核+服务)
+                  <br>
+                  2)
+                  <strong>
+                    容器启动
+                  </strong>
+                  ——
+                  <strong>
+                    单个应用进程
+                  </strong>
+                  (几十 MB 的运行时)
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第二章 容器 vs 虚拟机
+     ============================================================ -->
+          <section class="section" id="s2" aria-labelledby="s2-title">
+            <span class="section-num">
+              Chapter 02
+            </span>
+            <h2 id="s2-title">
+              容器与虚拟机的核心区别
+            </h2>
+            <p>
+              Docker 容器
+              <strong>
+                本质
+              </strong>
+              就是通过容器虚拟技术虚拟出的一台主机,就像虚拟机一样,可以将应用及其运行环境部署在这个虚拟出的主机上运行。但容器与虚拟机又有
+              <strong>
+                本质的不同
+              </strong>
+              。
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      对比维度
+                    </th>
+                    <th>
+                      传统虚拟机(VM)
+                    </th>
+                    <th>
+                      Docker 容器
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        虚拟化层级
+                      </strong>
+                    </td>
+                    <td>
+                      <strong>
+                        硬件 + 操作系统
+                      </strong>
+                    </td>
+                    <td>
+                      <strong>
+                        仅应用进程
+                      </strong>
+                      (共享 host OS)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        启动时间
+                      </strong>
+                    </td>
+                    <td>
+                      数分钟
+                    </td>
+                    <td>
+                      <strong>
+                        秒级甚至毫秒级
+                      </strong>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        磁盘占用
+                      </strong>
+                    </td>
+                    <td>
+                      几 GB(整个 OS)
+                    </td>
+                    <td>
+                      几十 MB(仅应用)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        性能损耗
+                      </strong>
+                    </td>
+                    <td>
+                      CPU/内存虚拟化有损耗
+                    </td>
+                    <td>
+                      <strong>
+                        几乎无损耗
+                      </strong>
+                      (共享 host 内核)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        隔离级别
+                      </strong>
+                    </td>
+                    <td>
+                      VM 级强隔离
+                    </td>
+                    <td>
+                      <strong>
+                        进程级隔离
+                      </strong>
+                      (共享内核)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        运行数量
+                      </strong>
+                    </td>
+                    <td>
+                      宿主机一般跑 10 几个
+                    </td>
+                    <td>
+                      可跑
+                      <strong>
+                        上千个
+                      </strong>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    选择建议
+                  </strong>
+                  :需要
+                  <strong>
+                    强隔离
+                  </strong>
+                  (多租户、不同 OS)选
+                  <strong>
+                    虚拟机
+                  </strong>
+                  ;需要
+                  <strong>
+                    轻量、快速、一致
+                  </strong>
+                  选
+                  <strong>
+                    Docker 容器
+                  </strong>
+                  。现代架构常组合使用:KVM 虚拟机上跑 Docker 容器,既安全又高效。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第三章 3 种程序运行原理
+     ============================================================ -->
+          <section class="section" id="s3" aria-labelledby="s3-title">
+            <span class="section-num">
+              Chapter 03
+            </span>
+            <h2 id="s3-title">
+              3 种程序运行原理对比
+            </h2>
+            <p>
+              程序是一个对计算机硬件资源调度使用的
+              <strong>
+                指令序列
+              </strong>
+              。理解 3 种运行原理的差异,能帮助在选择虚拟化方案时做出正确决策。
+            </p>
+            <h3>
+              3.1 普通系统中的程序运行
+            </h3>
+            <p>
+              程序直接运行在
+              <strong>
+                物理机操作系统
+              </strong>
+              上,通过系统调用或库函数使用硬件资源。结构简单但
+              <strong>
+                环境强耦合
+              </strong>
+              ,换台机器可能就运行不了。
+            </p>
+            <h3>
+              3.2 传统虚拟技术
+            </h3>
+            <p>
+              在物理机的操作系统上安装一个
+              <strong>
+                虚拟机管理程序
+              </strong>
+              (如 VMware、VirtualBox)。其管理下可以创建多个
+              <strong>
+                虚拟机
+              </strong>
+              。
+            </p>
+            <p>
+              每个虚拟机要安装
+              <strong>
+                独立的操作系统
+              </strong>
+              ,应用就是安装在虚拟机操作系统上的程序。程序通过调用指令或库函数来使用
+              <strong>
+                虚拟化后的
+              </strong>
+              系统资源。
+            </p>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  对于完全相同的两个应用,若需要运行在两个虚拟机中,则需要
+                  <strong>
+                    两套完全相同的虚拟机操作系统与 bins/libs
+                  </strong>
+                  ——这样存在
+                  <strong>
+                    大量的资源浪费
+                  </strong>
+                  。
+                </p>
+              </div>
+            </div>
+            <h3>
+              3.3 容器虚拟化技术
+            </h3>
+            <p>
+              Docker 容器运行在
+              <strong>
+                Docker 引擎
+              </strong>
+              上,所有 Docker 容器
+              <strong>
+                共享一个 Docker 引擎
+              </strong>
+              ,但它们的运行又是
+              <strong>
+                相互隔离、互不干扰
+              </strong>
+              的。
+            </p>
+            <ul>
+              <li>
+                Docker 容器
+                <strong>
+                  不需要进行虚拟硬件和操作系统
+                </strong>
+                ,而是
+                <strong>
+                  共享宿主机的硬件与操作系统
+                </strong>
+                ,所以 Docker 容器
+                <strong>
+                  占用资源少
+                </strong>
+              </li>
+              <li>
+                所有 Docker 容器对系统资源的使用都是由
+                <strong>
+                  Docker 引擎统一管理
+                </strong>
+                ,所以系统资源
+                <strong>
+                  利用率高
+                </strong>
+              </li>
+              <li>
+                无论
+                <strong>
+                  执行速度、内存损耗
+                </strong>
+                或者
+                <strong>
+                  文件存储速度
+                </strong>
+                ,都比传统虚拟技术更高效
+              </li>
+            </ul>
+            <div class="concept">
+              <div class="concept-title">
+                容器虚拟化的核心创新
+              </div>
+              <div class="concept-body">
+                <p>
+                  Docker 不虚拟化硬件和操作系统,而是
+                  <strong>
+                    利用 Linux 内核的 Namespace 和 CGroup 机制
+                  </strong>
+                  实现进程级隔离。每个容器看起来像独立的进程,但
+                  <strong>
+                    共享同一个 Linux 内核
+                  </strong>
+                  。这比传统 VM 的"
+                  <strong>
+                    一整套 OS
+                  </strong>
+                  "轻量得多——这也是容器能在 1 秒内启动的根本原因。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第四章 系统架构 6 要素
+     ============================================================ -->
+          <section class="section" id="s4" aria-labelledby="s4-title">
+            <span class="section-num">
+              Chapter 04
+            </span>
+            <h2 id="s4-title">
+              Docker 系统架构 6 大要素
+            </h2>
+            <p>
+              Docker 系统架构由
+              <strong>
+                Docker Daemon、Image、Container、Repository、Tag、镜像中心
+              </strong>
+              6 大要素组成。
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      要素
+                    </th>
+                    <th>
+                      英文
+                    </th>
+                    <th>
+                      角色
+                    </th>
+                    <th>
+                      类比
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        Docker Daemon
+                      </strong>
+                    </td>
+                    <td>
+                      Dockerd 守护进程
+                    </td>
+                    <td>
+                      监听 Docker API 请求并管理 Docker 对象(镜像/容器/网络/卷)
+                    </td>
+                    <td>
+                      操作系统的 kernel
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        镜像 Image
+                      </strong>
+                    </td>
+                    <td>
+                      Image
+                    </td>
+                    <td>
+                      用于创建 Docker 容器的
+                      <strong>
+                        模板
+                      </strong>
+                    </td>
+                    <td>
+                      面向对象中的
+                      <strong>
+                        类
+                      </strong>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        容器 Container
+                      </strong>
+                    </td>
+                    <td>
+                      Container
+                    </td>
+                    <td>
+                      镜像
+                      <strong>
+                        运行时的实体
+                      </strong>
+                      。每个容器包含一个或多个应用,容器间相互隔离
+                    </td>
+                    <td>
+                      面向对象中的
+                      <strong>
+                        实例
+                      </strong>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        仓库 Repository
+                      </strong>
+                    </td>
+                    <td>
+                      Repository
+                    </td>
+                    <td>
+                      保存一组有相同镜像名称的镜像,分公开库/私有库
+                    </td>
+                    <td>
+                      代码仓库的概念
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        标签 Tag
+                      </strong>
+                    </td>
+                    <td>
+                      Tag
+                    </td>
+                    <td>
+                      通过
+                      <code>
+<Repository>:<tag>
+                      </code>
+                      定位一个镜像,用于区分同一仓库中的不同镜像
+                    </td>
+                    <td>
+                      git tag 标签
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        镜像中心
+                      </strong>
+                    </td>
+                    <td>
+                      Registry
+                    </td>
+                    <td>
+                      存放大量公开/私有仓库的服务,如 Docker Hub
+                    </td>
+                    <td>
+                      类似 GitHub 平台
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <h3>
+              4.1 6 大要素协同关系
+            </h3>
+            <ul>
+              <li>
+                <strong>
+                  Docker Daemon
+                </strong>
+                是后端服务,接收客户端的 docker 命令并执行
+              </li>
+              <li>
+                <strong>
+                  镜像
+                </strong>
+                存储在
+                <strong>
+                  仓库
+                </strong>
+                中,仓库托管在
+                <strong>
+                  镜像中心
+                </strong>
+                (如 Docker Hub)
+              </li>
+              <li>
+                用户通过
+                <code>
+docker pull
+                </code>
+                从镜像中心拉取
+                <strong>
+                  仓库:标签
+                </strong>
+                指定的镜像到本地
+              </li>
+              <li>
+                用户通过
+                <code>
+docker run
+                </code>
+                用镜像创建
+                <strong>
+                  容器
+                </strong>
+              </li>
+              <li>
+                用户可以
+                <code>
+docker push
+                </code>
+                把自定义镜像推送到仓库
+              </li>
+              <li>
+                一个镜像可以创建
+                <strong>
+                  多个
+                </strong>
+                容器
+              </li>
+            </ul>
+            <h3>
+              4.2 Docker Hub 镜像中心
+            </h3>
+            <p>
+              Docker 镜像中心存放很多由
+              <strong>
+                官方、其他机构或个人
+              </strong>
+              创建的 Docker 仓库,其他用户可以从这些仓库 pull 需要的镜像,也可以将自己的镜像 push 到 Docker 镜像中心的仓库中。
+            </p>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  Docker Hub(
+                  <a href="https://hub.docker.com">
+                    hub.docker.com
+                  </a>
+                  ) 是默认的
+                  <strong>
+                    公开镜像中心
+                  </strong>
+                  。企业生产环境通常自建
+                  <strong>
+                    私有镜像中心
+                  </strong>
+                  (如 Harbor、Nexus、Artifactory)用于存放内部镜像,既保证速度又保证安全。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     FAQ
+     ============================================================ -->
+          <section class="section" id="faq" aria-labelledby="faq-title">
+            <span class="section-num">
+              FAQ
+            </span>
+            <h2 id="faq-title">
+              常见问题
+            </h2>
+            <div class="faq">
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker 是什么?
+                </h3>
+                <p class="faq-a">
+                  Docker 是一个
+                  <strong>
+                    开源的应用容器(Container)引擎
+                  </strong>
+                  ,其可以让开发者将
+                  <strong>
+                    应用及应用运行的环境
+                  </strong>
+                  打包到一个轻量级、可移植的镜像中,然后发布到 Linux、Windows 服务器上。Docker 容器除了可以提供相同的应用外,还提供了该应用的统一运行环境,确保在任何宿主机上都可以跑出相同的效果。即
+                  <strong>
+                    Docker = jar/war + 环境
+                  </strong>
+                  。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker 有哪些核心用途?
+                </h3>
+                <p class="faq-a">
+                  Docker 有 4 大核心用途:1)
+                  <strong>
+                    提供统一的运行环境
+                  </strong>
+                  :Docker=jar/war+环境,任何宿主机效果相同;2)
+                  <strong>
+                    便捷的应用迁移
+                  </strong>
+                  :从物理机、虚拟机、公有云、私有云无缝迁移,无需担心运行环境变化;3)
+                  <strong>
+                    超快的启动时间
+                  </strong>
+                  :直接运行在宿主机系统,无需启动操作系统,
+                  <strong>
+                    秒级甚至毫秒级
+                  </strong>
+                  启动;4)
+                  <strong>
+                    更轻松的维护和扩展
+                  </strong>
+                  :使用分层存储和镜像机制,重复部分复用更容易,基于基础镜像扩展镜像很简单。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  容器与虚拟机的区别是什么?
+                </h3>
+                <p class="faq-a">
+                  本质区别在于
+                  <strong>
+                    是否虚拟化硬件和操作系统
+                  </strong>
+                  :
+                  <br>
+                  1)
+                  <strong>
+                    虚拟机
+                  </strong>
+                  :通过 VM 管理程序虚拟化
+                  <strong>
+                    硬件和操作系统
+                  </strong>
+                  ,每个 VM 需独立 OS,资源占用大;
+                  <br>
+                  2)
+                  <strong>
+                    Docker 容器
+                  </strong>
+                  :
+                  <strong>
+                    共享宿主机硬件和操作系统
+                  </strong>
+                  ,由 Docker 引擎统一管理资源,资源占用少、执行快、存储快;
+                  <br>
+                  3)
+                  <strong>
+                    启动速度
+                  </strong>
+                  :VM 需数分钟,容器
+                  <strong>
+                    秒级甚至毫秒级
+                  </strong>
+                  ;
+                  <br>
+                  4)
+                  <strong>
+                    隔离性
+                  </strong>
+                  :VM 强隔离,容器
+                  <strong>
+                    进程级隔离
+                  </strong>
+                  (共享内核,文件/网络/进程隔离)。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker 系统架构包含哪些要素?
+                </h3>
+                <p class="faq-a">
+                  Docker 系统架构包含 6 大要素:1)
+                  <strong>
+                    Docker Daemon
+                  </strong>
+                  (Dockerd 守护进程):监听 Docker API 请求并管理 Docker 对象(镜像/容器/网络/卷);2)
+                  <strong>
+                    镜像 Image
+                  </strong>
+                  :用于创建 Docker 容器的模板(类似面向对象中的
+                  <strong>
+                    类
+                  </strong>
+                  );3)
+                  <strong>
+                    容器 Container
+                  </strong>
+                  :镜像运行时的实体(类似面向对象中的
+                  <strong>
+                    实例
+                  </strong>
+                  );4)
+                  <strong>
+                    仓库 Repository
+                  </strong>
+                  :保存一组镜像,有公开库/私有库之分;5)
+                  <strong>
+                    标签 Tag
+                  </strong>
+                  :通过 <Repository>:<tag> 定位一个镜像,用于区分同一仓库中的不同镜像;6)
+                  <strong>
+                    镜像中心
+                  </strong>
+                  (Docker Hub):存放大量公开仓库,用户可 pull/push 镜像。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker 容器启动为什么比虚拟机快?
+                </h3>
+                <p class="faq-a">
+                  传统虚拟机启动一般需要数分钟:先启动虚拟机,再加载操作系统,最后手动启动应用(整个 VM 启动链路过长)。Docker 容器应用
+                  <strong>
+                    直接运行在宿主机系统,无需启动操作系统
+                  </strong>
+                  ,因此可以做到
+                  <strong>
+                    秒级甚至毫秒级
+                  </strong>
+                  的启动。本质是:VM 启动
+                  <strong>
+                    整个 OS
+                  </strong>
+                  ,容器启动
+                  <strong>
+                    单个进程
+                  </strong>
+                  。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker 镜像和容器的区别?
+                </h3>
+                <p class="faq-a">
+                  镜像是用于创建容器的
+                  <strong>
+                    模板
+                  </strong>
+                  (类似面向对象中的
+                  <strong>
+                    类
+                  </strong>
+                  ),容器是镜像
+                  <strong>
+                    运行时的实体
+                  </strong>
+                  (类似面向对象中的
+                  <strong>
+                    实例
+                  </strong>
+                  )。一个镜像可以创建
+                  <strong>
+                    多个
+                  </strong>
+                  容器。每个容器都包含一个或多个应用,且容器与容器之间
+                  <strong>
+                    相互隔离
+                  </strong>
+                  。镜像存储在镜像仓库中,容器运行在 Docker 引擎之上。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker 仓库和镜像中心是一回事吗?
+                </h3>
+                <p class="faq-a">
+                  不是。
+                  <strong>
+                    仓库(Repository)
+                  </strong>
+                  是一组具有相同镜像名称的镜像集合(如 centos 仓库有 centos:7、centos:8 等多个 tag 的镜像),根据是否公开共享分为
+                  <strong>
+                    公开库
+                  </strong>
+                  和
+                  <strong>
+                    私有库
+                  </strong>
+                  。
+                  <strong>
+                    镜像中心(Registry,如 Docker Hub)
+                  </strong>
+                  是存放很多仓库的
+                  <strong>
+                    服务
+                  </strong>
+                  。一个镜像中心可以托管多个仓库,类似代码仓库(GitHub)和具体仓库(user/repo)的关系。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     参考资源
+     ============================================================ -->
+          <section class="section" id="refs" aria-labelledby="refs-title">
+            <span class="section-num">
+              References
+            </span>
+            <h2 id="refs-title">
+              参考资源
+            </h2>
+            <ul>
+              <li>
+                <a href="https://www.docker.com/" rel="external noopener" target="_blank">
+                  Docker 官网
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/get-started/" rel="external noopener" target="_blank">
+                  Docker 官方入门教程
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/get-started/overview/" rel="external noopener" target="_blank">
+                  Docker 概览文档
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/" rel="external noopener" target="_blank">
+                  Docker Engine 架构
+                </a>
+              </li>
+              <li>
+                <a href="https://hub.docker.com/" rel="external noopener" target="_blank">
+                  Docker Hub 镜像中心
+                </a>
+              </li>
+              <li>
+                <a href="https://www.docker.com/resources/what-container" rel="external noopener" target="_blank">
+                  What is a Container(Docker 官方)
+                </a>
+              </li>
+              <li>
+                <a href="https://www.docker.com/blog" rel="external noopener" target="_blank">
+                  Docker Blog 博客
+                </a>
+              </li>
+            </ul>
+          </section>
+        </article>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本文
+        </h3>
+        <p class="footer-meta">
+          本文系统讲解 Docker 简介与系统架构,涵盖 Docker 4 大用途(统一环境/应用迁移/超快启动/轻松维护)、普通系统/传统虚拟/容器虚拟 3 种程序运行原理、容器与虚拟机 5 维对比,以及 Docker 系统架构 6 大要素(Daemon/Image/Container/Repository/Tag/镜像中心)。所有内容均经过 Docker 20+ 验证。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            适用人群
+          </strong>
+          :Docker 初学者、运维工程师、后端开发、容器化技术入门者、应届毕业生
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · 内容遵循 CC BY 4.0 协议 · 文中命令与代码可自由使用
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function() {
+  const progress = document.getElementById('progress');
+  if (!progress) return;
+  const update = () => {
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const height = h.scrollHeight - h.clientHeight;
+    const pct = height > 0 ? (scrolled / height) * 100 : 0;
+    progress.style.width = pct + '%';
+    progress.setAttribute('aria-valuenow', Math.round(pct));
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+(function() {
+  const btn = document.getElementById('backTop');
+  if (!btn) return;
+  const toggle = () => {
+    if (window.scrollY > 400) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', toggle, { passive: true });
+  btn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  toggle();
+})();
+
+(function() {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const stored = localStorage.getItem('theme-docker-intro');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (stored === 'dark' || (!stored && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  btn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme-docker-intro', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme-docker-intro', 'dark');
+    }
+  });
+})();
+
+(function() {
+  document.querySelectorAll('.code-copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      if (!pre) return;
+      const text = pre.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        const old = btn.innerText;
+        btn.innerText = '已复制';
+        btn.classList.add('success');
+        setTimeout(() => { btn.innerText = old; btn.classList.remove('success'); }, 1500);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); btn.innerText = '已复制'; setTimeout(() => btn.innerText = '复制', 1500); } catch (err) { btn.innerText = '失败'; }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      }
+    });
+  });
+})();
+    </script>
+  </body>
+</html>

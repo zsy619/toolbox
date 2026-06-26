@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Remotion 基础:核心组件 API 速查 | Remotion 知识库</title>
+<meta name="description" content="Remotion 4.x 核心 remotion 包全部组件、Hook、工具函数完整参考:Composition/Sequence/Series/Audio/Video/Img/IFrame/Still/Folder/Freeze/Loop + useCurrentFrame/useVideoConfig/useDelayRender 等 35+ API。">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Remotion 核心组件 API 速查","description":"35+ 核心 API 完整参考。","inLanguage":"zh-CN"}</script>
+</head><body>
+<header class="site-header"><nav class="nav-wrap">
+<a href="index.html" class="brand"><span class="brand-mark">R</span><span>Remotion 知识库</span></a>
+<div class="nav-links"><a href="index.html">总目录</a><a href="B-07-cli-commands.html">← CLI</a></div>
+</nav></header>
+<main class="container">
+<nav class="breadcrumb"><a href="index.html">首页</a> / <a href="index.html#basic">基础层</a> / 核心 API 速查</nav>
+<h1>核心组件 API 速查</h1>
+<p class="hero-sub">remotion 包 35+ API 一站式参考</p>
+<div class="alert alert-info"><span class="alert-icon">📚</span><div class="alert-body"><p>来源:Remotion 官方 remotion 包 API 文档(2025-2026)。</p></div></div>
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>时间容器组件</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>组件</th><th>作用</th><th>关键 props</th></tr></thead>
+<tbody>
+<tr><td><code>&lt;Composition&gt;</code></td><td>注册可渲染视频</td><td>id, component, durationInFrames, fps, width, height, defaultProps, calculateMetadata</td></tr>
+<tr><td><code>&lt;Sequence&gt;</code></td><td>子组件时间偏移</td><td>from, durationInFrames, name, layout</td></tr>
+<tr><td><code>&lt;Series&gt;</code></td><td>顺序播放子 Sequence</td><td>(无,内部用 Sequence)</td></tr>
+<tr><td><code>&lt;Loop&gt;</code></td><td>循环 N 帧</td><td>durationInFrames, times</td></tr>
+<tr><td><code>&lt;Freeze&gt;</code></td><td>冻结某一帧</td><td>frame</td></tr>
+<tr><td><code>&lt;Still&gt;</code></td><td>单帧图,无 duration</td><td>id, component, width, height</td></tr>
+<tr><td><code>&lt;Folder&gt;</code></td><td>Studio 侧边栏分组</td><td>title</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>媒体组件</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>组件</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>&lt;OffthreadVideo&gt;</code></td><td>Rust 解码,帧精确(SSR 首选)</td></tr>
+<tr><td><code>&lt;Html5Video&gt;</code></td><td>HTML5 video 标签(预览好)</td></tr>
+<tr><td><code>&lt;Video&gt;</code> @remotion/media</td><td>WebCodecs 版,新项目推荐</td></tr>
+<tr><td><code>&lt;Html5Audio&gt;</code></td><td>音频播放</td></tr>
+<tr><td><code>&lt;Audio&gt;</code> @remotion/media</td><td>WebCodecs 音频</td></tr>
+<tr><td><code>&lt;Img&gt;</code></td><td>图片(用 staticFile/URL)</td></tr>
+<tr><td><code>&lt;AnimatedImage&gt;</code></td><td>动画图片(APNG/GIF)</td></tr>
+<tr><td><code>&lt;IFrame&gt;</code></td><td>嵌入外部网页</td></tr>
+<tr><td><code>&lt;Artifact&gt;</code></td><td>渲染时输出文件</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>Hooks</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Hook</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>useCurrentFrame()</code></td><td>当前帧(0 索引,Sequence 内是相对值)</td></tr>
+<tr><td><code>useVideoConfig()</code></td><td>{ fps, width, height, durationInFrames, id }</td></tr>
+<tr><td><code>useDelayRender()</code></td><td>异步数据加载(替代全局 delayRender)</td></tr>
+<tr><td><code>useBufferState()</code></td><td>资源缓冲状态</td></tr>
+<tr><td><code>useCurrentScale()</code></td><td>Player 实际缩放比</td></tr>
+<tr><td><code>useRemotionEnvironment()</code></td><td>{ isStudio, isRendering, isPlayer, ... }</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>异步控制</h2>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">import {
+  delayRender, continueRender, cancelRender,
+} from 'remotion';
+
+// 阻塞渲染
+const handle = delayRender('Loading data');
+
+try {
+  const data = await fetchData();
+  setData(data);
+  continueRender(handle);  // 解除阻塞
+} catch (e) {
+  cancelRender(e);  // 出错终止
+}</code></pre></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>数学/动画工具</h2>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">// 线性插值
+interpolate(frame, [0, 100], [0, 1], { extrapolateLeft: 'clamp' });
+
+// 颜色插值(支持 sRGB / sRGB-linear / OKLCH)
+interpolateColors(frame, [0, 30], ['#fff', '#000']);
+
+// 弹簧(物理)
+spring({ frame, fps, config: { damping: 200, mass: 1, stiffness: 100 } });
+
+// 预计算弹簧总帧数
+measureSpring({ fps, config: {...} });  // → 帧数
+
+// 缓动
+Easing.bezier(0.25, 0.1, 0.25, 1);
+Easing.in(Easing.cubic);
+Easing.out(Easing.exp);
+
+// 随机(种子化)
+random('particle-0');  // 0~1,同 name 跨帧同值</code></pre></div>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>资源 API</h2>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">// 解析 public/ 内文件 URL
+staticFile('video.mp4');  // → /video.mp4
+
+// 预加载
+prefetch(staticFile('big.png'));
+
+// 监听文件变化触发重渲染
+watchStaticFile(staticFile('data.json'));
+
+// 列出所有静态文件(SSR)
+getStaticFiles();  // [{ name, fullPath, size }]</code></pre></div>
+</section>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>配置 / 元数据 / 输入</h2>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">// 入口
+registerRoot(RemotionRoot);  // 通常 src/index.ts 调用一次
+
+// 输入 props
+getInputProps();  // SSR 阶段由 --props 或 inputProps 提供
+
+// 动态元数据
+const calculateMetadata: CalculateMetadataFunction&lt;Props&gt; = async ({props}) =&gt; ({
+  durationInFrames: ...,
+  width: ..., height: ..., fps: ...,
+  props: ...,  // 转换 props
+  defaultOutName: ...,
+  defaultCodec: 'h264',
+});</code></pre></div>
+</section>
+
+<nav class="page-nav">
+<a href="B-07-cli-commands.html" class="prev">← 上一页:CLI 完整参考</a>
+<a href="index.html" class="next">回到总目录 →</a>
+</nav>
+</main>
+<footer class="site-footer"><p>© 2026 AI 工具箱 · Remotion 知识库 · 内容基于官方文档整理</p></footer>
+<script src="scripts.js"></script>
+</body></html>

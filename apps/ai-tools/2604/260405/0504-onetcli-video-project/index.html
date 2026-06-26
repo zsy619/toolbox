@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnetCli - Rust + GPUI 一站式开发工具 | 国产开源项目推荐</title>
+    <meta name="description" content="OnetCli 是一个基于 Rust + GPUI 打造的跨平台桌面客户端，主打数据库、SSH、终端与AI一站式管理。支持PostgreSQL、MySQL、Redis、MongoDB等主流数据库。">
+    <meta name="keywords" content="OnetCli, Rust, GPUI, 数据库工具, SSH客户端, 终端工具, AI助手, 国产开源, Zed编辑器, 开发工具">
+    <meta name="author" content="开源技术爱好者">
+    
+    <link rel="canonical" href="./index.html">
+    
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="OnetCli - Rust + GPUI 一站式开发工具">
+    <meta property="og:description" content="一个工具搞定数据库连接、SSH、终端和AI助手，基于GPUI框架，GPU加速渲染">
+    <meta property="og:locale" content="zh_CN">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="OnetCli 国产开源项目">
+    <meta name="twitter:description" content="Rust + GPUI 一站式开发工具">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#F97316',
+                        secondary: '#EA580C',
+                        accent: '#FB923C',
+                        dark: '#0F172A',
+                        darker: '#1E293B'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+            line-height: 1.7;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #F97316 0%, #FB923C 50%, #FDBA74 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-bg {
+            background: linear-gradient(180deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+        }
+
+        .section-bg-alt {
+            background-color: #1E293B;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.3), transparent);
+        }
+
+        .card-base {
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card-base:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(249, 115, 22, 0.2);
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+
+        .nav-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #F97316, #EA580C);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .feature-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: rgba(249, 115, 22, 0.2);
+            color: #FB923C;
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #CBD5E1;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .quote-block {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(234, 88, 12, 0.05));
+            border-left: 4px solid #F97316;
+            padding: 1.5rem 2rem;
+            border-radius: 0 1rem 1rem 0;
+            margin: 2rem 0;
+        }
+
+        .quote-block p {
+            font-style: italic;
+            color: #E2E8F0;
+            font-size: 1.125rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.1));
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box h4 {
+            color: #FB923C;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            gap: 0.25rem;
+        }
+
+        .tag-orange {
+            background-color: rgba(249, 115, 22, 0.2);
+            color: #FB923C;
+        }
+
+        .tag-blue {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #60A5FA;
+        }
+
+        .tag-green {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #22C55E;
+        }
+
+        .tag-purple {
+            background-color: rgba(168, 85, 247, 0.2);
+            color: #A855F7;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, #F97316, #EA580C);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(249, 115, 22, 0.5);
+        }
+
+        .toc-card {
+            position: sticky;
+            top: 6rem;
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .toc-link {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #94A3B8;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .toc-link:hover {
+            background-color: rgba(249, 115, 22, 0.2);
+            color: #FB923C;
+        }
+
+        .toc-link.active {
+            background-color: rgba(249, 115, 22, 0.3);
+            color: #FB923C;
+        }
+
+        @media (max-width: 1024px) {
+            .toc-card {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem !important;
+            }
+            
+            .section-title {
+                font-size: 1.75rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav-fixed">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <i class="fas fa-terminal text-white text-lg"></i>
+                    </div>
+                    <span class="font-bold text-xl">OnetCli</span>
+                </div>
+                
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#overview" class="text-gray-400 hover:text-white transition-colors">项目简介</a>
+                    <a href="#features" class="text-gray-400 hover:text-white transition-colors">功能一览</a>
+                    <a href="#tech" class="text-gray-400 hover:text-white transition-colors">技术栈</a>
+                    <a href="#platform" class="text-gray-400 hover:text-white transition-colors">平台支持</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center pt-20 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center gap-2 bg-orange-500/20 border border-orange-500/30 rounded-full px-4 py-2 mb-6">
+                    <i class="fas fa-star text-orange-400"></i>
+                    <span class="text-sm font-medium">国产开源项目</span>
+                </div>
+                
+                <h1 class="hero-title text-5xl sm:text-6xl lg:text-7xl font-black mb-6 gradient-text">
+                    OnetCli
+                </h1>
+                
+                <p class="text-xl sm:text-2xl text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    Rust + GPUI 打造的一站式开发工具<br>
+                    <span class="text-white font-semibold">数据库 · SSH · 终端 · AI 助手</span>
+                </p>
+                
+                <div class="quote-block max-w-2xl mx-auto text-left">
+                    <p>一个工具搞定数据库连接、SSH、终端和 AI 助手</p>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-3 mb-8">
+                    <span class="tag tag-orange">
+                        <i class="fab fa-github"></i> 开源
+                    </span>
+                    <span class="tag tag-blue">
+                        <i class="fas fa-database"></i> 多数据库
+                    </span>
+                    <span class="tag tag-green">
+                        <i class="fas fa-robot"></i> AI 集成
+                    </span>
+                    <span class="tag tag-purple">
+                        <i class="fas fa-bolt"></i> GPU 加速
+                    </span>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="https://github.com/feigeCode/onetcli" target="_blank" class="btn-primary text-lg">
+                        <i class="fab fa-github"></i>
+                        GitHub 仓库
+                    </a>
+                    <a href="https://github.com/feigeCode/onetcli/releases/tag/v0.2.2" target="_blank" class="btn-outline text-lg">
+                        <i class="fas fa-download"></i>
+                        下载 v0.2.2
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-orange-400 mb-2">7+</div>
+                    <div class="text-gray-400 text-sm">支持数据库</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-blue-400 mb-2">100%</div>
+                    <div class="text-gray-400 text-sm">Rust 实现</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-green-400 mb-2">GPU</div>
+                    <div class="text-gray-400 text-sm">加速渲染</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-purple-400 mb-2">3+</div>
+                    <div class="text-gray-400 text-sm">操作系统</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Main Content -->
+    <section class="py-16" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+                
+                <!-- Table of Contents -->
+                <aside class="lg:col-span-1">
+                    <div class="toc-card">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-list text-orange-400"></i>
+                            目录导航
+                        </h3>
+                        <nav class="space-y-2">
+                            <a href="#overview" class="toc-link active">
+                                <i class="fas fa-info-circle mr-2"></i>项目简介
+                            </a>
+                            <a href="#features" class="toc-link">
+                                <i class="fas fa-th-large mr-2"></i>功能一览
+                            </a>
+                            <a href="#tech" class="toc-link">
+                                <i class="fas fa-code mr-2"></i>技术栈
+                            </a>
+                            <a href="#platform" class="toc-link">
+                                <i class="fas fa-desktop mr-2"></i>平台支持
+                            </a>
+                            <a href="#license" class="toc-link">
+                                <i class="fas fa-file-contract mr-2"></i>开源协议
+                            </a>
+                        </nav>
+                    </div>
+                </aside>
+                
+                <!-- Article Content -->
+                <article class="lg:col-span-3">
+                    
+                    <!-- Overview Section -->
+                    <section id="overview" class="mb-16">
+                        <div class="bg-white/5 rounded-2xl p-8 border border-white/10 mb-8">
+                            <h2 class="section-title text-3xl font-bold mb-6 flex items-center gap-3">
+                                <i class="fas fa-info-circle text-orange-400"></i>
+                                项目简介
+                            </h2>
+                            
+                            <p class="text-gray-300 mb-6 leading-relaxed">
+                                <strong class="text-white">OnetCli</strong> (One Net Client) 是一个跨平台桌面客户端，主打「数据库、SSH、终端与 AI 一站式管理」。简单说，就是把开发者日常要用的好几个工具整合到了一起，不用来回切换。
+                            </p>
+                            
+                            <div class="highlight-box">
+                                <h4><i class="fas fa-rocket"></i> 核心技术</h4>
+                                <p class="text-gray-300">
+                                    项目基于 Zed 编辑器同款的 <strong class="text-orange-400">GPUI</strong> 框架构建，GPU 加速渲染，原生性能体验。
+                                </p>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-3 mt-6">
+                                <a href="https://github.com/feigeCode/onetcli" target="_blank" class="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 transition-colors">
+                                    <i class="fab fa-github"></i>
+                                    <span>https://github.com/feigeCode/onetcli</span>
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Features Section -->
+                    <section id="features" class="mb-16">
+                        <h2 class="section-title text-3xl font-bold mb-8 flex items-center gap-3">
+                            <i class="fas fa-th-large text-orange-400"></i>
+                            功能一览
+                        </h2>
+                        
+                        <!-- Database Support -->
+                        <div class="card-base mb-6">
+                            <div class="flex items-start gap-4 mb-4">
+                                <div class="feature-icon bg-blue-500/20 text-blue-400">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-2">多数据库支持</h3>
+                                    <p class="text-gray-400 text-sm mb-4">支持几乎所有主流数据库，不需要装多个客户端</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="tag tag-blue">PostgreSQL</span>
+                                <span class="tag tag-blue">MySQL</span>
+                                <span class="tag tag-blue">SQLite</span>
+                                <span class="tag tag-blue">SQL Server</span>
+                                <span class="tag tag-blue">Oracle</span>
+                                <span class="tag tag-blue">ClickHouse</span>
+                                <span class="tag tag-blue">DuckDB</span>
+                            </div>
+                        </div>
+                        
+                        <!-- NoSQL Support -->
+                        <div class="card-base mb-6">
+                            <div class="flex items-start gap-4 mb-4">
+                                <div class="feature-icon bg-green-500/20 text-green-400">
+                                    <i class="fas fa-leaf"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-2">NoSQL 支持</h3>
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="bg-white/5 rounded-lg p-4">
+                                    <h4 class="font-semibold text-green-400 mb-2">Redis</h4>
+                                    <p class="text-gray-400 text-sm">专用视图，支持键浏览、值查看、集群连接</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-4">
+                                    <h4 class="font-semibold text-green-400 mb-2">MongoDB</h4>
+                                    <p class="text-gray-400 text-sm">集合浏览、文档查看、查询支持</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- SSH & Terminal -->
+                        <div class="card-base mb-6">
+                            <div class="flex items-start gap-4 mb-4">
+                                <div class="feature-icon bg-purple-500/20 text-purple-400">
+                                    <i class="fas fa-server"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-2">SSH & SFTP & 终端</h3>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div class="bg-white/5 rounded-lg p-3 text-center">
+                                    <i class="fas fa-terminal text-purple-400 mb-2"></i>
+                                    <p class="text-sm">SSH 终端</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-3 text-center">
+                                    <i class="fas fa-folder text-purple-400 mb-2"></i>
+                                    <p class="text-sm">SFTP 管理</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-3 text-center">
+                                    <i class="fas fa-plug text-purple-400 mb-2"></i>
+                                    <p class="text-sm">串口连接</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-3 text-center">
+                                    <i class="fas fa-columns text-purple-400 mb-2"></i>
+                                    <p class="text-sm">多标签终端</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- AI Assistant -->
+                        <div class="card-base mb-6">
+                            <div class="flex items-start gap-4 mb-4">
+                                <div class="feature-icon bg-orange-500/20 text-orange-400">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-2">AI 助手整合</h3>
+                                    <p class="text-gray-400 text-sm">基于流式 LLM 集成，在应用内直接和 AI 对话处理数据</p>
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="bg-white/5 rounded-lg p-4">
+                                    <i class="fas fa-magic text-orange-400 mb-2"></i>
+                                    <h4 class="font-semibold mb-1">自然语言转 SQL</h4>
+                                    <p class="text-gray-400 text-sm">直接用中文描述需求，AI 生成 SQL</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-4">
+                                    <i class="fas fa-search text-orange-400 mb-2"></i>
+                                    <h4 class="font-semibold mb-1">解释复杂查询</h4>
+                                    <p class="text-gray-400 text-sm">自动解释 SQL 语句含义</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-4">
+                                    <i class="fas fa-chart-bar text-orange-400 mb-2"></i>
+                                    <h4 class="font-semibold mb-1">BI 数据分析</h4>
+                                    <p class="text-gray-400 text-sm">BI 风格数据分析</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-4">
+                                    <i class="fas fa-chart-pie text-orange-400 mb-2"></i>
+                                    <h4 class="font-semibold mb-1">生成图表</h4>
+                                    <p class="text-gray-400 text-sm">直接生成可视化图表</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Other Features -->
+                        <div class="card-base">
+                            <div class="flex items-start gap-4 mb-4">
+                                <div class="feature-icon bg-pink-500/20 text-pink-400">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-2">其他贴心功能</h3>
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="bg-white/5 rounded-lg p-4">
+                                    <i class="fas fa-cloud text-pink-400 mb-2"></i>
+                                    <h4 class="font-semibold mb-1">云端同步</h4>
+                                    <p class="text-gray-400 text-sm">AES-GCM + Ed25519 加密</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-4">
+                                    <i class="fas fa-adjust text-pink-400 mb-2"></i>
+                                    <h4 class="font-semibold mb-1">主题切换</h4>
+                                    <p class="text-gray-400 text-sm">亮色 / 暗色模式</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-4">
+                                    <i class="fas fa-globe text-pink-400 mb-2"></i>
+                                    <h4 class="font-semibold mb-1">国际化</h4>
+                                    <p class="text-gray-400 text-sm">英文、简中、繁中</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tech Stack Section -->
+                    <section id="tech" class="mb-16">
+                        <h2 class="section-title text-3xl font-bold mb-8 flex items-center gap-3">
+                            <i class="fas fa-code text-orange-400"></i>
+                            技术栈
+                        </h2>
+                        
+                        <div class="table-container mb-8">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>层级</th>
+                                        <th>技术选型</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="font-semibold text-white">UI 框架</td>
+                                        <td>GPUI（来自 Zed 编辑器）</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">数据库</td>
+                                        <td>tokio-postgres, mysql_async, rusqlite 等</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">SSH/SFTP</td>
+                                        <td>russh, russh-sftp</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">终端</td>
+                                        <td>alacritty_terminal</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">AI</td>
+                                        <td>llm-connector 流式输出</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">加密</td>
+                                        <td>aes-gcm, sha2, ed25519</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="highlight-box">
+                            <h4><i class="fas fa-rust"></i> 全栈 Rust</h4>
+                            <p class="text-gray-300">
+                                整个项目全栈 Rust，追求原生性能。GPUI 框架来自 Zed 编辑器，已经证明了其卓越的性能表现。
+                            </p>
+                        </div>
+                    </section>
+
+                    <!-- Platform Section -->
+                    <section id="platform" class="mb-16">
+                        <h2 class="section-title text-3xl font-bold mb-8 flex items-center gap-3">
+                            <i class="fas fa-desktop text-orange-400"></i>
+                            平台支持
+                        </h2>
+                        
+                        <div class="table-container mb-8">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>平台</th>
+                                        <th>架构</th>
+                                        <th>说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="font-semibold text-white">
+                                            <i class="fab fa-apple text-gray-400 mr-2"></i>macOS
+                                        </td>
+                                        <td>aarch64, x86_64</td>
+                                        <td>Metal 渲染</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">
+                                            <i class="fab fa-linux text-gray-400 mr-2"></i>Linux
+                                        </td>
+                                        <td>x86_64</td>
+                                        <td>Vulkan 渲染</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">
+                                            <i class="fab fa-windows text-gray-400 mr-2"></i>Windows
+                                        </td>
+                                        <td>x86_64</td>
+                                        <td>完全支持</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <p class="text-gray-400">
+                            已发布 <strong class="text-orange-400">v0.2.2</strong> 版本，可以直接到 Releases 下载预编译包。
+                        </p>
+                    </section>
+
+                    <!-- License Section -->
+                    <section id="license" class="mb-16">
+                        <h2 class="section-title text-3xl font-bold mb-8 flex items-center gap-3">
+                            <i class="fas fa-file-contract text-orange-400"></i>
+                            开源协议
+                        </h2>
+                        
+                        <div class="bg-white/5 rounded-2xl p-8 border border-white/10">
+                            <p class="text-gray-300 mb-6">
+                                项目主协议采用 <strong class="text-green-400">Apache 2.0</strong> 开源，但附加了一个补充许可证，增加了几个限制：
+                            </p>
+                            
+                            <ul class="space-y-3">
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-times-circle text-red-400 mt-1"></i>
+                                    <span class="text-gray-400">禁止二次分发转售作为独立产品</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-times-circle text-red-400 mt-1"></i>
+                                    <span class="text-gray-400">禁止基于此代码创建竞争性产品</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-times-circle text-red-400 mt-1"></i>
+                                    <span class="text-gray-400">禁止托管在未经授权的分发平台</span>
+                                </li>
+                            </ul>
+                            
+                            <p class="text-gray-500 text-sm mt-6">
+                                这种方式在开源项目里也不算罕见，作者保留了一定权利，方便后续商业运作。
+                            </p>
+                        </div>
+                    </section>
+
+                    <!-- CTA Section -->
+                    <section class="mb-16">
+                        <div class="bg-gradient-to-r from-orange-500/20 via-primary/20 to-orange-500/20 rounded-2xl p-8 border border-orange-500/30 text-center">
+                            <h3 class="text-2xl font-bold mb-4">体验地址</h3>
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+                                <a href="https://github.com/feigeCode/onetcli" target="_blank" class="btn-primary">
+                                    <i class="fab fa-github"></i>
+                                    GitHub 仓库
+                                </a>
+                                <a href="https://github.com/feigeCode/onetcli/releases/tag/v0.2.2" target="_blank" class="btn-outline">
+                                    <i class="fas fa-download"></i>
+                                    下载 v0.2.2
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Thoughts Section -->
+                    <section class="mb-16">
+                        <div class="bg-white/5 rounded-2xl p-8 border border-white/10">
+                            <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                                <i class="fas fa-comments text-orange-400"></i>
+                                聊聊想法
+                            </h3>
+                            
+                            <p class="text-gray-300 leading-relaxed mb-6">
+                                现在开发者工具其实很多，Navicat、DataGrip、TablePlus 都各有优势，但 OnetCli 这种「一站式整合」思路还是挺吸引人的：把数据库、SSH、终端、AI 放在同一个工作区，减少来回切换，效率确实会高一些。
+                            </p>
+                            
+                            <p class="text-gray-300 leading-relaxed mb-6">
+                                特别是 AI 直接整合进数据库客户端，自然语言转 SQL，对于不熟悉复杂查询的开发者来说，门槛降低了不少。
+                            </p>
+                            
+                            <p class="text-gray-300 leading-relaxed">
+                                另外，基于 Rust + GPUI 这个技术选型也很有意思，Zed 编辑器已经证明了 GPUI 的性能，现在有开源项目用它做开发工具，值得关注后续发展。
+                            </p>
+                        </div>
+                    </section>
+                    
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-white/10" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                    <i class="fas fa-terminal text-white"></i>
+                </div>
+                <span class="font-bold text-xl">OnetCli</span>
+            </div>
+            <p class="text-gray-500 mb-4">Rust + GPUI 一站式开发工具</p>
+            <div class="flex justify-center gap-4 mb-4 text-sm text-gray-400">
+                <a href="https://github.com/feigeCode/onetcli" target="_blank" class="hover:text-orange-400 transition-colors">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+                <span>•</span>
+                <a href="https://github.com/feigeCode/onetcli/releases/tag/v0.2.2" target="_blank" class="hover:text-orange-400 transition-colors">
+                    <i class="fas fa-download"></i> Releases
+                </a>
+            </div>
+            <p class="text-gray-600 text-sm">© 2026 OnetCli 开源项目. 仅供学习交流.</p>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "OnetCli - Rust + GPUI 一站式开发工具",
+        "description": "OnetCli 是一个基于 Rust + GPUI 打造的跨平台桌面客户端，主打数据库、SSH、终端与AI一站式管理",
+        "author": {
+            "@type": "Person",
+            "name": "开源技术爱好者"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "OnetCli"
+        },
+        "datePublished": "2026-04-05"
+    }
+    </script>
+
+    <script>
+        // Back to Top functionality
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('backToTop');
+            if (window.scrollY > 300) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        });
+
+        // TOC Active State
+        const sections = document.querySelectorAll('section[id]');
+        const tocLinks = document.querySelectorAll('.toc-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scroll for TOC links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

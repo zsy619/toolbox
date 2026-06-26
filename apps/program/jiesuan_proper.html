@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>灵活用工结算平台完整研发方案</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Heiti SC', sans-serif;
+    font-size: 12pt;
+    line-height: 1.8;
+    color: #333;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 30px;
+    background: #fff;
+}
+
+h1 {
+    font-size: 24pt;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #1a1a1a;
+    font-weight: 700;
+}
+
+.version-info {
+    text-align: center;
+    color: #666;
+    font-size: 10pt;
+    margin-bottom: 30px;
+}
+
+h2 {
+    font-size: 16pt;
+    margin-top: 30px;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #3B82F6;
+    color: #1a1a1a;
+    font-weight: 700;
+    page-break-before: always;
+}
+
+h3 {
+    font-size: 13pt;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #333;
+    font-weight: 700;
+}
+
+p { margin-bottom: 10px; text-align: justify; }
+
+ul, ol {
+    margin-left: 20px;
+    margin-bottom: 12px;
+}
+
+li { margin-bottom: 6px; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 10pt;
+    page-break-inside: avoid;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px 10px;
+    text-align: left;
+}
+
+th {
+    background: #f0f0f0;
+    font-weight: 700;
+}
+
+tr:nth-child(even) { background: #fafafa; }
+
+code {
+    background: #f5f5f5;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: 'Menlo', 'Monaco', monospace;
+    font-size: 9pt;
+}
+
+pre {
+    background: #f5f5f5;
+    padding: 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-size: 9pt;
+    page-break-inside: avoid;
+}
+
+pre code { background: none; padding: 0; }
+
+blockquote {
+    border-left: 4px solid #3B82F6;
+    margin: 12px 0;
+    padding-left: 14px;
+    color: #666;
+    font-style: italic;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 24px 0;
+}
+
+strong { font-weight: 700; color: #1a1a1a; }
+
+a { color: #3B82F6; text-decoration: none; }
+
+.mermaid {
+    background: #f9f9f9;
+    padding: 10px;
+    margin: 12px 0;
+    page-break-inside: avoid;
+}
+</style>
+</head>
+<body>
+
+<h1>灵活用工结算平台完整研发方案</h1>
+
+<p><strong>文档版本</strong>：V4.0</p>
+<p><strong>编制日期</strong>：2026年05月15日</p>
+<p><strong>项目代号</strong>：FLEX‑SETTLE</p>
+<p><strong>密级</strong>：客户对外</p>
+
+
+<h2>目录</h2>
+
+<p>1. [项目概述](#1-项目概述)</p>
+<p>2. [业务需求与功能范围](#2-业务需求与功能范围)</p>
+<p>3. [技术架构设计](#3-技术架构设计)</p>
+<p>4. [数据库设计](#4-数据库设计)</p>
+<p>5. [核心业务流程](#5-核心业务流程)</p>
+<p>6. [开发计划与里程碑](#6-开发计划与里程碑)</p>
+<p>7. <strong>报价与付款方案（首期40%）</strong></p>
+<p>8. [部署与运维方案（Docker）](#8-部署与运维方案docker)</p>
+<p>9. [质量保证与风险应对](#9-质量保证与风险应对)</p>
+<p>10. [交付物清单](#10-交付物清单)</p>
+
+
+<h2>1. 项目概述</h2>
+
+<h3>1.1 建设目标</h3>
+
+<p>建设一套面向灵活用工场景的<strong>结算管理平台</strong>，帮助企业完成对自由职业者（骑手、兼职等）的任务发布、接单执行、佣金结算、个税代扣、发票获取、资金对账等全流程线上化管理。平台采用多租户架构，支持多家企业独立入驻、数据物理隔离。</p>
+
+<h3>1.2 核心价值</h3>
+
+<li><strong>合规高效</strong>：自动完成个税计算与申报，打通银行虚拟账户实现秒级代付，形成“业务+资金+发票”三流合一。</li>
+<li><strong>成本可控</strong>：通过标准化 SaaS 模式降低企业自建成本，30 万元内完成 4 个月定制开发。</li>
+<li><strong>易于部署</strong>：采用 Docker 容器化，单机即可运行，无需 Kubernetes 复杂运维。</li>
+
+<h3>1.3 非功能性目标</h3>
+
+
+
+<h2>2. 业务需求与功能范围</h2>
+
+<h3>2.1 角色与用例</h3>
+
+
+<h3>2.2 功能模块清单（不含电子签名）</h3>
+
+
+
+<h2>3. 技术架构设计</h2>
+
+<h3>3.1 技术栈总览</h3>
+
+
+<h3>3.2 多租户设计</h3>
+
+<li><strong>隔离策略</strong>：Schema‑per‑tenant。每个租户独立 Schema <code>tenant_{code}</code>，公共表在 <code>public</code> Schema。</li>
+<li><strong>租户识别</strong>：前端请求头 <code>X-Tenant-ID</code> → 后端中间件校验 → 存入 <code>context</code> → GORM 回调动态设置 <code>search_path</code>。</li>
+<li><strong>连接池</strong>：每个租户使用独立连接池（<code>gorm-multitenancy</code> 管理）。</li>
+
+<h3>3.3 后端模块结构（单体+内部模块化）</h3>
+
+<pre><code>
+backend/
+├── cmd/server/main.go          # 入口（同时启动 API 与 Worker）
+├── internal/
+│   ├── handler/                # HTTP 控制器
+│   ├── service/                # 业务逻辑
+│   ├── repository/             # 数据访问
+│   ├── model/                  # GORM 模型
+│   ├── middleware/             # 租户/认证/日志/限流
+│   ├── worker/                 # 后台任务（消费 RabbitMQ）
+│   └── scheduler/              # 定时任务（如每日对账）
+├── pkg/                        # 公共库（errno, utils）
+├── migrations/                 # 迁移脚本（public + tenant 模板）
+└── configs/config.yaml
+</code></pre>
+
+<h3>3.4 前端结构（Feature‑Sliced）</h3>
+
+<pre><code>
+frontend/
+├── src/
+│   ├── app/                    # 路由、全局 store、入口
+│   ├── pages/                  # 页面组件（按模块）
+│   ├── features/               # 独立功能（上传、搜索）
+│   ├── entities/               # 实体类型定义
+│   └── shared/                 # UI 组件、API 客户端、工具
+├── Dockerfile
+└── nginx.conf
+</code></pre>
+
+<h3>3.5 API 设计规范</h3>
+
+<li>RESTful 风格，统一响应格式：</li>
+<pre><code>
+{
+  &quot;code&quot;: 0,
+  &quot;message&quot;: &quot;success&quot;,
+  &quot;data&quot;: {},
+  &quot;trace_id&quot;: &quot;xxx&quot;
+}
+</code></pre>
+<li>错误码：<code>1xxx</code> 参数错误，<code>2xxx</code> 认证/权限，<code>3xxx</code> 业务异常，<code>5xxx</code> 系统错误。</li>
+<li>认证：JWT（Access Token 2h，Refresh Token 7d），登录后返回。</li>
+
+
+<h2>4. 数据库设计</h2>
+
+<h3>4.1 ERD 核心表（租户 Schema）</h3>
+
+<pre><code>
+erDiagram
+    tenants ||--o{ tasks : owns
+    tenants ||--o{ workers : employs
+    tasks ||--o{ task_assignments : &quot;assigns&quot;
+    workers ||--o{ task_assignments : &quot;performs&quot;
+    task_assignments ||--o| settle_details : &quot;settles&quot;
+    settle_details }o--|| settle_batches : belongs
+    workers ||--o{ fund_accounts : has
+    fund_accounts ||--o{ fund_transactions : produces
+    tenants ||--o{ invoices : requests
+</code></pre>
+
+<h3>4.2 关键表结构（简化）</h3>
+
+
+<blockquote>完整表结构及 SQL 脚本随交付物提供。</blockquote>
+
+<h3>4.3 多租户迁移管理</h3>
+
+<li>使用 <code>golang-migrate</code> 管理 <code>public</code> 和租户模板。</li>
+<li>新租户注册时自动执行：<code>CREATE SCHEMA tenant_xxx</code> → 运行模板迁移。</li>
+
+
+<h2>5. 核心业务流程</h2>
+
+<h3>5.1 结算全流程</h3>
+
+<pre><code>
+sequenceDiagram
+    participant 企业
+    participant 平台
+    participant 资金中心
+    participant 银行系统
+    participant 税局
+
+    企业-&gt;&gt;平台: 选择已完成任务，发起结算
+    平台-&gt;&gt;平台: 计算个税（累进税率）
+    平台-&gt;&gt;资金中心: 冻结虚拟账户对应金额
+    资金中心-&gt;&gt;银行系统: 同步冻结指令
+    银行系统--&gt;&gt;资金中心: 冻结成功
+    资金中心--&gt;&gt;平台: 冻结完成
+    平台-&gt;&gt;银行系统: 批量代付（实发金额）
+    银行系统--&gt;&gt;平台: 异步返回代付结果
+    平台-&gt;&gt;税局: 申报个税
+    税局--&gt;&gt;平台: 申报回执
+    平台-&gt;&gt;平台: 更新结算状态为成功
+    平台-&gt;&gt;企业: 结算完成通知
+</code></pre>
+
+<h3>5.2 对账流程</h3>
+
+<li>每日凌晨 2:00 自动拉取银行对账单，与平台 <code>fund_transactions</code> 逐笔比对。</li>
+<li>差异记录到 <code>reconciliation_diff</code> 表，并发送告警。</li>
+
+
+<h2>6. 开发计划与里程碑</h2>
+
+<p>总工期 <strong>16 周</strong>（4 个月），采用敏捷迭代。</p>
+
+<h3>6.1 阶段划分</h3>
+
+
+<h3>6.2 时间节点示例</h3>
+
+
+
+<h2>7. 报价与付款方案</h2>
+
+<h3>7.1 总报价：30 万元（含税，包干价）</h3>
+
+
+<blockquote>注：不含银行/税局等第三方接口的年度服务费，不含生产环境云资源费用。</blockquote>
+
+<h3>7.2 付款计划（首期 40%）</h3>
+
+
+<h3>7.3 包含与不包含</h3>
+
+
+
+<h2>8. 部署与运维方案（Docker）</h2>
+
+<h3>8.1 硬件推荐配置</h3>
+
+<li><strong>最小</strong>：4核 CPU，8GB 内存，50GB SSD（适合日均单量 < 1000）</li>
+<li><strong>推荐</strong>：8核 CPU，16GB 内存，100GB SSD（日均单量 5000+）</li>
+
+<h3>8.2 部署架构（单机 Docker Compose）</h3>
+
+<pre><code>
+# docker-compose.yml 核心服务
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: flex_settle
+      POSTGRES_USER: flex
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+  redis:
+    image: redis:7-alpine
+  rabbitmq:
+    image: rabbitmq:3-management
+  backend:
+    build: ./backend
+    depends_on: [postgres, redis, rabbitmq]
+  worker:
+    build: ./backend
+    command: [&quot;./worker&quot;]
+  frontend:
+    build: ./frontend
+  nginx:
+    image: nginx:alpine
+    ports:
+      - &quot;80:80&quot;
+      - &quot;443:443&quot;
+</code></pre>
+
+<h3>8.3 数据备份策略</h3>
+
+<li>PostgreSQL：每日凌晨 3:00 执行 <code>pg_dump</code> 并上传至 OSS，保留 30 天。</li>
+<li>Redis：开启 AOF + RDB。</li>
+<li>容器日志：通过 <code>docker logs</code> 收集或映射到宿主机，使用 logrotate 轮转。</li>
+
+<h3>8.4 监控告警（轻量）</h3>
+
+<li>使用 <code>cAdvisor</code> + <code>Prometheus</code> + <code>Grafana</code> 可选（但不强制）。</li>
+<li>必需的健康检查：每个容器提供 <code>/health</code> 端点，docker-compose 配置 <code>healthcheck</code>。</li>
+
+
+<h2>9. 质量保证与风险应对</h2>
+
+<h3>9.1 测试策略</h3>
+
+
+<h3>9.2 风险应对表</h3>
+
+
+
+<h2>10. 交付物清单</h2>
+
+
+
+<h2>附录：联系与支持</h2>
+
+<li><strong>技术支持</strong>：项目交付后提供 1 个月免费远程缺陷修复，之后可按年收取 15% 维护费（可选）。</li>
+<li><strong>定制开发</strong>：超出本方案范围的电子签名模块、K8s 迁移等，另行评估报价。</li>
+
+
+</body></html>

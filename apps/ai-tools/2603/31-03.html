@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code 增强工具对比：10万星 vs 1万星，选哪个？</title>
+  <meta name="description" content="everything-claude-code vs oh-my-claudecode，功能完整 vs 团队优先，你选哪个？">
+  
+  <!-- 国内 CDN CSS -->
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-color: #1a1a2e;
+      --secondary-color: #16213e;
+      --accent-blue: #2563EB;
+      --accent-purple: #7C3AED;
+      --accent-green: #10B981;
+      --accent-orange: #F59E0B;
+      --text-dark: #333;
+      --bg-light: #fafafa;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      line-height: 1.8;
+      font-size: 17px;
+    }
+    
+    /* 导航栏 */
+    .top-nav {
+      background: white;
+      border-bottom: 1px solid #eee;
+      padding: 12px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .top-nav .nav-link {
+      color: var(--text-dark);
+      text-decoration: none;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.3s;
+    }
+    
+    .top-nav .nav-link:hover {
+      color: var(--accent-blue);
+    }
+    
+    .article-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      padding: 48px 24px;
+      text-align: center;
+    }
+    
+    .article-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+    
+    @media (min-width: 768px) {
+      .article-header h1 {
+        font-size: 28px;
+      }
+    }
+    
+    .article-header .meta {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .article-content {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 20px;
+      background: #fff;
+    }
+    
+    .quote-block {
+      background: #f8f9fa;
+      border-left: 4px solid var(--primary-color);
+      padding: 16px 20px;
+      margin: 24px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    
+    .highlight-box {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      text-align: center;
+    }
+    
+    .section-title {
+      font-size: 20px;
+      color: var(--primary-color);
+      margin: 32px 0 16px;
+      font-weight: 600;
+    }
+    
+    .check-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .check-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .check-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .check-list li i {
+      color: var(--accent-green);
+      margin-right: 8px;
+    }
+    
+    .project-card {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      height: 100%;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .project-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .project-card h4 {
+      font-size: 17px;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+    }
+    
+    .project-card p {
+      font-size: 15px;
+      color: #666;
+      margin-bottom: 0;
+    }
+    
+    .divider {
+      height: 1px;
+      background: #eee;
+      margin: 32px 0;
+    }
+    
+    .stat-box {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 16px;
+      height: 100%;
+    }
+    
+    .stat-box .number {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent-orange);
+    }
+    
+    @media (min-width: 768px) {
+      .stat-box .number {
+        font-size: 32px;
+      }
+    }
+    
+    .stat-box .label {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+    
+    .pros-cons-item {
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    
+    .pros-item {
+      background: #dcfce7;
+      color: #166534;
+    }
+    
+    .cons-item {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    /* 底部 */
+    .article-footer {
+      background: #f5f5f5;
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid #eee;
+      margin-top: 24px;
+    }
+    
+    .article-footer a {
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .article-footer a:hover {
+      text-decoration: underline;
+    }
+    
+    .back-to-index {
+      background: white;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .back-to-index a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+    
+    .back-to-index a:hover {
+      background: #f0f9ff;
+    }
+  </style>
+</head>
+<body>
+  <!-- 返回导航 -->
+  <nav class="top-nav">
+    <div class="container">
+      <a href="index.html" class="nav-link">
+        <i class="fas fa-arrow-left"></i>
+        返回目录
+      </a>
+    </div>
+  </nav>
+  
+  <!-- 文章头部 -->
+  <header class="article-header">
+    <div class="container">
+      <h1>Claude Code 增强工具对比：10万星 vs 1万星，选哪个？</h1>
+      <p class="meta">作者：元曜科技 · 2026-03-31</p>
+    </div>
+  </header>
+  
+  <!-- 文章内容 -->
+  <main class="article-content">
+    
+    <blockquote class="quote-block">
+      <p><strong>两个火遍全网的项目，哪个更适合你？</strong></p>
+    </blockquote>
+    
+    <p>GitHub 上正好有两个非常火的 Claude Code 增强项目：</p>
+    
+    <!-- 快速对比 -->
+    <div class="row text-center mb-4 g-3">
+      <div class="col-6">
+        <div class="stat-box">
+          <div class="number">105,000+</div>
+          <div class="label">GitHub Stars</div>
+          <div class="mt-2 fw-bold text-primary">everything</div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="stat-box">
+          <div class="number">11,300+</div>
+          <div class="label">GitHub Stars</div>
+          <div class="mt-2 fw-bold" style="color: var(--accent-purple);">oh-my</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <!-- Everything Section -->
+    <h2 class="section-title">
+      <i class="fas fa-cube text-primary me-2"></i>everything-claude-code
+    </h2>
+    <p>十年磨一剑的完整生态，斩获 10万+ Star。</p>
+    
+    <div class="project-card">
+      <h4>核心特点</h4>
+      <p>125+ 内置技能、28 个子代理、60 个命令，覆盖所有开发场景</p>
+    </div>
+    
+    <ul class="check-list">
+      <li><i class="fas fa-check-circle"></i>功能真全，你想要的基本都有</li>
+      <li><i class="fas fa-check-circle"></i>跨平台，支持 Claude Code、Codex、Cursor、OpenCode</li>
+      <li><i class="fas fa-check-circle"></i>自带持续学习，记忆优化系统</li>
+      <li><i class="fas fa-check-circle"></i>AgentShield 安全扫描</li>
+    </ul>
+    
+    <div class="pros-cons">
+      <div class="pros-cons-item pros-item">
+        <i class="fas fa-thumbs-up me-1"></i>生态完善
+      </div>
+      <div class="pros-cons-item cons-item">
+        <i class="fas fa-thumbs-down me-1"></i>对新手重量级
+      </div>
+    </div>
+    
+    <p><strong>适合：</strong>想要完整生态、看重稳定性的团队</p>
+    
+    <div class="divider"></div>
+    
+    <!-- Oh-My Section -->
+    <h2 class="section-title">
+      <i class="fas fa-layer-group me-2" style="color: var(--accent-purple);"></i>oh-my-claudecode
+    </h2>
+    <p>团队优先的编排大师，零学习曲线。</p>
+    
+    <div class="project-card">
+      <h4>核心特点</h4>
+      <p>32 个专业代理、零配置开箱即用、智能路由省 30-50% token</p>
+    </div>
+    
+    <ul class="check-list">
+      <li><i class="fas fa-check-circle"></i>零学习曲线，拿来就能用</li>
+      <li><i class="fas fa-check-circle"></i>多种编排模式：Team、自动巡航、极致并行</li>
+      <li><i class="fas fa-check-circle"></i>智能路由：简单任务 Haiku，复杂推理 Opus</li>
+      <li><i class="fas fa-check-circle"></i>HUD 状态栏实时进度</li>
+    </ul>
+    
+    <div class="pros-cons">
+      <div class="pros-cons-item pros-item">
+        <i class="fas fa-thumbs-up me-1"></i>零门槛
+      </div>
+      <div class="pros-cons-item cons-item">
+        <i class="fas fa-thumbs-down me-1"></i>社区较小
+      </div>
+    </div>
+    
+    <p><strong>适合：</strong>新手入门、团队协作、想省 token 的开发者</p>
+    
+    <div class="divider"></div>
+    
+    <!-- 深度对比 -->
+    <h2 class="section-title">
+      <i class="fas fa-balance-scale text-warning me-2"></i>深度对比
+    </h2>
+    
+    <div class="row mb-4 g-3">
+      <div class="col-6">
+        <div class="project-card text-center">
+          <h4 class="text-primary">大而全</h4>
+          <p class="small mb-0">everything</p>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="project-card text-center">
+          <h4 style="color: var(--accent-purple);">专而精</h4>
+          <p class="small mb-0">oh-my</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <!-- CTA -->
+    <div class="highlight-box">
+      <h3 class="mb-3">💡 选型建议</h3>
+      <div class="row text-start g-3">
+        <div class="col-6">
+          <p class="mb-1 fw-bold text-primary">选 everything：</p>
+          <p class="small mb-0">想要完整生态、看重稳定性</p>
+        </div>
+        <div class="col-6">
+          <p class="mb-1 fw-bold" style="color: var(--accent-purple);">选 oh-my：</p>
+          <p class="small mb-0">新手入门、团队协作、想省 token</p>
+        </div>
+      </div>
+    </div>
+    
+    <p class="text-center"><strong>两个可以都用！MIT 协议，完全可以自由组合。</strong></p>
+    
+  </main>
+  
+  <!-- 返回引导页 -->
+  <div class="back-to-index">
+    <a href="index.html">
+      <i class="fas fa-th-large"></i>
+      查看全部文章
+    </a>
+  </div>
+  
+  <!-- 原文链接 -->
+  <footer class="article-footer">
+    <p class="text-muted mb-2">相关链接</p>
+    <div class="mb-2">
+      <a href="https://github.com/affaan-m/everything-claude-code" target="_blank" rel="noopener noreferrer">everything-claude-code</a>
+    </div>
+    <div>
+      <a href="https://github.com/Yeachan-Heo/oh-my-claudecode" target="_blank" rel="noopener noreferrer">oh-my-claudecode</a>
+    </div>
+  </footer>
+  
+  <!-- 国内 CDN JS -->
+  <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

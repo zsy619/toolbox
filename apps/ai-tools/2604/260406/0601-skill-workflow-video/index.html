@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill 制作过程工作流 | 从需求到上线完整演示</title>
+    <meta name="description" content="完整展示使用 skill-creator 创建「周公解梦」skill 的全过程，从需求分析、编写SKILL.md、测试到制作配套视频的完整工作流。">
+    <meta name="keywords" content="skill-creator, AI技能, 工作流, 周公解梦, skill制作, Agent技能开发, 技能创建">
+    <meta name="author" content="Skill Creator">
+    
+    <link rel="canonical" href="./index.html">
+    
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Skill 制作过程工作流 | 从需求到上线完整演示">
+    <meta property="og:description" content="完整展示使用 skill-creator 创建技能的全过程，包括需求分析、编写SKILL.md、测试和制作配套视频">
+    <meta property="og:locale" content="zh_CN">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Skill 制作过程工作流">
+    <meta name="twitter:description" content="从需求到上线完整演示">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#06B6D4',
+                        secondary: '#0891B2',
+                        accent: '#22D3EE',
+                        dark: '#0F172A',
+                        darker: '#1E293B'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+            line-height: 1.7;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #06B6D4 0%, #22D3EE 50%, #67E8F9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-bg {
+            background: linear-gradient(180deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+        }
+
+        .section-bg-alt {
+            background-color: #1E293B;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.3), transparent);
+        }
+
+        .card-base {
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card-base:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(6, 182, 212, 0.2);
+            border-color: rgba(6, 182, 212, 0.3);
+        }
+
+        .nav-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #06B6D4, #0891B2);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #06B6D4, rgba(6, 182, 212, 0.3));
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            background: #06B6D4;
+            border-radius: 50%;
+        }
+
+        .feature-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .step-number {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, #06B6D4, #0891B2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(8, 145, 178, 0.1));
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box h4 {
+            color: #22D3EE;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .tag-cyan {
+            background-color: rgba(6, 182, 212, 0.2);
+            color: #22D3EE;
+        }
+
+        .tag-purple {
+            background-color: rgba(168, 85, 247, 0.2);
+            color: #A855F7;
+        }
+
+        .tag-green {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #22C55E;
+        }
+
+        .tag-orange {
+            background-color: rgba(249, 115, 22, 0.2);
+            color: #F97316;
+        }
+
+        .tag-pink {
+            background-color: rgba(236, 72, 153, 0.2);
+            color: #EC4899;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, #06B6D4, #0891B2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(6, 182, 212, 0.5);
+        }
+
+        .toc-card {
+            position: sticky;
+            top: 6rem;
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .toc-link {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #94A3B8;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .toc-link:hover {
+            background-color: rgba(6, 182, 212, 0.2);
+            color: #22D3EE;
+        }
+
+        .toc-link.active {
+            background-color: rgba(6, 182, 212, 0.3);
+            color: #22D3EE;
+        }
+
+        @media (max-width: 1024px) {
+            .toc-card {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem !important;
+            }
+            
+            .section-title {
+                font-size: 1.75rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav-fixed">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <i class="fas fa-magic text-white text-lg"></i>
+                    </div>
+                    <span class="font-bold text-xl">Skill Workflow</span>
+                </div>
+                
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#overview" class="text-gray-400 hover:text-white transition-colors">概述</a>
+                    <a href="#workflow" class="text-gray-400 hover:text-white transition-colors">工作流程</a>
+                    <a href="#example" class="text-gray-400 hover:text-white transition-colors">案例演示</a>
+                    <a href="#video" class="text-gray-400 hover:text-white transition-colors">视频规格</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center pt-20 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center gap-2 bg-cyan-500/20 border border-cyan-500/30 rounded-full px-4 py-2 mb-6">
+                    <i class="fas fa-video text-cyan-400"></i>
+                    <span class="text-sm font-medium">视频技能展示</span>
+                </div>
+                
+                <h1 class="hero-title text-5xl sm:text-6xl lg:text-7xl font-black mb-6 gradient-text">
+                    Skill 制作过程工作流
+                </h1>
+                
+                <p class="text-xl sm:text-2xl text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    从需求到上线的完整演示<br>
+                    <span class="text-white font-semibold">以「周公解梦」Skill 为例</span>
+                </p>
+                
+                <div class="flex flex-wrap justify-center gap-4 mb-8">
+                    <span class="tag tag-cyan">
+                        <i class="fas fa-magic mr-1"></i> AI 技能创建
+                    </span>
+                    <span class="tag tag-purple">
+                        <i class="fas fa-brain mr-1"></i> 意图捕获
+                    </span>
+                    <span class="tag tag-green">
+                        <i class="fas fa-code mr-1"></i> SKILL.md 编写
+                    </span>
+                    <span class="tag tag-orange">
+                        <i class="fas fa-film mr-1"></i> 配套视频
+                    </span>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="#workflow" class="btn-primary text-lg">
+                        <i class="fas fa-play"></i>
+                        开始观看
+                    </a>
+                    <a href="#example" class="btn-outline text-lg">
+                        <i class="fas fa-eye"></i>
+                        查看案例
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-cyan-400 mb-2">95s</div>
+                    <div class="text-gray-400 text-sm">视频时长</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-purple-400 mb-2">7</div>
+                    <div class="text-gray-400 text-sm">场景展示</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-green-400 mb-2">60fps</div>
+                    <div class="text-gray-400 text-sm">帧率</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-orange-400 mb-2">4</div>
+                    <div class="text-gray-400 text-sm">关键步骤</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Main Content -->
+    <section class="py-16" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+                
+                <!-- Table of Contents -->
+                <aside class="lg:col-span-1">
+                    <div class="toc-card">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-list text-cyan-400"></i>
+                            目录导航
+                        </h3>
+                        <nav class="space-y-2">
+                            <a href="#overview" class="toc-link active">
+                                <i class="fas fa-info-circle mr-2"></i>项目概述
+                            </a>
+                            <a href="#workflow" class="toc-link">
+                                <i class="fas fa-stream mr-2"></i>工作流程
+                            </a>
+                            <a href="#example" class="toc-link">
+                                <i class="fas fa-dream mr-2"></i>案例演示
+                            </a>
+                            <a href="#video" class="toc-link">
+                                <i class="fas fa-video mr-2"></i>视频规格
+                            </a>
+                        </nav>
+                    </div>
+                </aside>
+                
+                <!-- Article Content -->
+                <article class="lg:col-span-3">
+                    
+                    <!-- Overview Section -->
+                    <section id="overview" class="mb-16">
+                        <div class="bg-white/5 rounded-2xl p-8 border border-white/10 mb-8">
+                            <h2 class="section-title text-3xl font-bold mb-6 flex items-center gap-3">
+                                <i class="fas fa-info-circle text-cyan-400"></i>
+                                项目概述
+                            </h2>
+                            
+                            <p class="text-gray-300 mb-6 leading-relaxed">
+                                本视频展示使用 <strong class="text-cyan-400">skill-creator</strong> 创建「周公解梦」skill 的完整过程。通过这个案例，你可以学习到如何从零开始创建一个完整的 AI 技能。
+                            </p>
+                            
+                            <div class="highlight-box">
+                                <h4><i class="fas fa-star"></i> 核心亮点</h4>
+                                <ul class="space-y-2 text-gray-300 mt-3">
+                                    <li>• 完整的 Skill 创建流程演示</li>
+                                    <li>• 需求分析与定位技巧</li>
+                                    <li>• SKILL.md 文件编写规范</li>
+                                    <li>• 配套视频制作全流程</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Workflow Section -->
+                    <section id="workflow" class="mb-16">
+                        <h2 class="section-title text-3xl font-bold mb-8 flex items-center gap-3">
+                            <i class="fas fa-stream text-cyan-400"></i>
+                            完整工作流程
+                        </h2>
+                        
+                        <div class="space-y-8">
+                            <!-- Step 1 -->
+                            <div class="card-base flex gap-6">
+                                <div class="step-number flex-shrink-0">1</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-3">需求分析</h3>
+                                    <p class="text-gray-400 mb-4">分析用户需求，确定触发词和 Skill 定位</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="tag tag-cyan">解梦</span>
+                                        <span class="tag tag-cyan">做梦</span>
+                                        <span class="tag tag-cyan">梦见</span>
+                                    </div>
+                                    <div class="mt-4 p-4 bg-white/5 rounded-lg">
+                                        <p class="text-sm text-gray-400 mb-2">定位：</p>
+                                        <p class="text-cyan-400 font-medium">古风古韵、传统梦境解析</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 2 -->
+                            <div class="card-base flex gap-6">
+                                <div class="step-number flex-shrink-0">2</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-3">读取技能模板</h3>
+                                    <p class="text-gray-400 mb-4">读取 skill-creator/SKILL.md 了解创建流程</p>
+                                    <div class="highlight-box !m-0">
+                                        <h4 class="!text-sm"><i class="fas fa-book"></i> 核心流程</h4>
+                                        <div class="grid grid-cols-4 gap-2 mt-3">
+                                            <div class="text-center p-2 bg-white/5 rounded">
+                                                <i class="fas fa-bullseye text-cyan-400 mb-1"></i>
+                                                <p class="text-xs">捕获意图</p>
+                                            </div>
+                                            <div class="text-center p-2 bg-white/5 rounded">
+                                                <i class="fas fa-search text-purple-400 mb-1"></i>
+                                                <p class="text-xs">访谈研究</p>
+                                            </div>
+                                            <div class="text-center p-2 bg-white/5 rounded">
+                                                <i class="fas fa-edit text-green-400 mb-1"></i>
+                                                <p class="text-xs">编写SKILL.md</p>
+                                            </div>
+                                            <div class="text-center p-2 bg-white/5 rounded">
+                                                <i class="fas fa-vial text-orange-400 mb-1"></i>
+                                                <p class="text-xs">测试</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 3 -->
+                            <div class="card-base flex gap-6">
+                                <div class="step-number flex-shrink-0">3</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-3">创建 Skill 文件</h3>
+                                    <p class="text-gray-400 mb-4">创建目录并编写 SKILL.md 内容</p>
+                                    <div class="code-block bg-dark rounded-lg p-4 mb-4">
+                                        <code class="text-cyan-400 text-sm">~/.agents/skills/zhougong-dream/</code>
+                                    </div>
+                                    <div class="grid md:grid-cols-2 gap-3">
+                                        <div class="p-3 bg-white/5 rounded-lg">
+                                            <i class="fas fa-tag text-cyan-400 mb-2"></i>
+                                            <p class="text-sm font-medium">名称与描述</p>
+                                        </div>
+                                        <div class="p-3 bg-white/5 rounded-lg">
+                                            <i class="fas fa-balance-scale text-purple-400 mb-2"></i>
+                                            <p class="text-sm font-medium">解梦原则与框架</p>
+                                        </div>
+                                        <div class="p-3 bg-white/5 rounded-lg">
+                                            <i class="fas fa-table text-green-400 mb-2"></i>
+                                            <p class="text-sm font-medium">意象体系表格</p>
+                                        </div>
+                                        <div class="p-3 bg-white/5 rounded-lg">
+                                            <i class="fas fa-file-alt text-orange-400 mb-2"></i>
+                                            <p class="text-sm font-medium">解梦格式模板</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 4 -->
+                            <div class="card-base flex gap-6">
+                                <div class="step-number flex-shrink-0">4</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-3">测试 Skill</h3>
+                                    <p class="text-gray-400 mb-4">使用 subagent 调用新创建的 Skill 进行测试</p>
+                                    <div class="bg-white/5 rounded-lg p-4">
+                                        <p class="text-sm text-gray-400 mb-2">测试输入：</p>
+                                        <p class="text-cyan-400 italic mb-4">"梦见自己飞起来了"</p>
+                                        <p class="text-sm text-gray-400 mb-2">输出：</p>
+                                        <p class="text-green-400">古风解读输出 ✓</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Example Section -->
+                    <section id="example" class="mb-16">
+                        <h2 class="section-title text-3xl font-bold mb-8 flex items-center gap-3">
+                            <i class="fas fa-dream text-cyan-400"></i>
+                            「周公解梦」案例演示
+                        </h2>
+                        
+                        <div class="card-base mb-8">
+                            <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                                <i class="fas fa-folder text-cyan-400"></i>
+                                成品文件路径
+                            </h3>
+                            <div class="code-block">
+                                <code class="text-cyan-400">~/.agents/skills/zhougong-dream/</code>
+                            </div>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="card-base">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <i class="fas fa-file-code text-cyan-400 text-xl"></i>
+                                    <h3 class="text-lg font-bold">SKILL.md</h3>
+                                </div>
+                                <p class="text-gray-400 text-sm mb-4">核心配置文件，包含完整的解梦规则和模板</p>
+                                <ul class="space-y-2 text-sm text-gray-400">
+                                    <li>• 解梦原则与框架</li>
+                                    <li>• 意象体系表格</li>
+                                    <li>• 解梦格式模板</li>
+                                    <li>• 示例输出</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="card-base">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <i class="fas fa-video text-purple-400 text-xl"></i>
+                                    <h3 class="text-lg font-bold">配套视频</h3>
+                                </div>
+                                <p class="text-gray-400 text-sm mb-4">完整的制作视频，展示全过程</p>
+                                <ul class="space-y-2 text-sm text-gray-400">
+                                    <li>• 视频脚本编写</li>
+                                    <li>• 封面图与插图</li>
+                                    <li>• Remotion 视频代码</li>
+                                    <li>• MP4 渲染输出</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="card-base mt-6">
+                            <div class="flex items-center gap-3 mb-4">
+                                <i class="fas fa-microphone text-orange-400 text-xl"></i>
+                                <h3 class="text-lg font-bold">配音制作</h3>
+                            </div>
+                            <div class="grid md:grid-cols-4 gap-3">
+                                <div class="p-3 bg-white/5 rounded-lg text-center">
+                                    <i class="fas fa-pen text-orange-400 mb-2"></i>
+                                    <p class="text-sm">编写配音文稿</p>
+                                </div>
+                                <div class="p-3 bg-white/5 rounded-lg text-center">
+                                    <i class="fas fa-waveform text-cyan-400 mb-2"></i>
+                                    <p class="text-sm">edge-tts 生成</p>
+                                </div>
+                                <div class="p-3 bg-white/5 rounded-lg text-center">
+                                    <i class="fas fa-sliders-h text-purple-400 mb-2"></i>
+                                    <p class="text-sm">音频处理</p>
+                                </div>
+                                <div class="p-3 bg-white/5 rounded-lg text-center">
+                                    <i class="fas fa-file-video text-green-400 mb-2"></i>
+                                    <p class="text-sm">合并音视频</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Video Specs Section -->
+                    <section id="video" class="mb-16">
+                        <h2 class="section-title text-3xl font-bold mb-8 flex items-center gap-3">
+                            <i class="fas fa-video text-cyan-400"></i>
+                            视频技术规格
+                        </h2>
+                        
+                        <div class="card-base mb-8">
+                            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div class="text-center">
+                                    <div class="text-4xl font-black text-cyan-400 mb-2">1080x1920</div>
+                                    <p class="text-gray-400 text-sm">分辨率 (9:16)</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-4xl font-black text-purple-400 mb-2">~95s</div>
+                                    <p class="text-gray-400 text-sm">时长</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-4xl font-black text-green-400 mb-2">60fps</div>
+                                    <p class="text-gray-400 text-sm">帧率</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-4xl font-black text-orange-400 mb-2">8</div>
+                                    <p class="text-gray-400 text-sm">场景数</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="highlight-box">
+                            <h4><i class="fas fa-palette"></i> 视觉风格</h4>
+                            <div class="mt-4 flex items-center gap-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-full bg-dark border border-cyan-400"></div>
+                                    <span class="text-gray-400 text-sm">暗夜极简风</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded bg-gradient-to-br from-cyan-500 to-blue-600"></div>
+                                    <span class="text-gray-400 text-sm">Cyan 主题色</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Video Scenes -->
+                        <div class="mt-8">
+                            <h3 class="text-xl font-bold mb-6">视频场景结构</h3>
+                            <div class="timeline-item pb-8">
+                                <div class="text-cyan-400 font-medium mb-2">场景 1: 开场 (0-5秒)</div>
+                                <p class="text-gray-400 text-sm">「如何用 AI 制作一个 Skill」「从需求到上线完整演示」</p>
+                            </div>
+                            <div class="timeline-item pb-8">
+                                <div class="text-cyan-400 font-medium mb-2">场景 2: 需求分析 (5-15秒)</div>
+                                <p class="text-gray-400 text-sm">展示用户需求，分析触发词，确定 Skill 定位</p>
+                            </div>
+                            <div class="timeline-item pb-8">
+                                <div class="text-cyan-400 font-medium mb-2">场景 3: 读取技能模板 (15-25秒)</div>
+                                <p class="text-gray-400 text-sm">读取 skill-creator/SKILL.md，了解创建流程</p>
+                            </div>
+                            <div class="timeline-item pb-8">
+                                <div class="text-cyan-400 font-medium mb-2">场景 4: 创建 Skill 文件 (25-40秒)</div>
+                                <p class="text-gray-400 text-sm">创建目录，编写 SKILL.md 内容</p>
+                            </div>
+                            <div class="timeline-item pb-8">
+                                <div class="text-cyan-400 font-medium mb-2">场景 5: 测试 Skill (40-50秒)</div>
+                                <p class="text-gray-400 text-sm">使用 subagent 调用新创建的 Skill</p>
+                            </div>
+                            <div class="timeline-item pb-8">
+                                <div class="text-cyan-400 font-medium mb-2">场景 6: 制作配套视频 (50-70秒)</div>
+                                <p class="text-gray-400 text-sm">创建视频项目，编写脚本，生成封面和插图</p>
+                            </div>
+                            <div class="timeline-item pb-8">
+                                <div class="text-cyan-400 font-medium mb-2">场景 7: 添加配音 (70-85秒)</div>
+                                <p class="text-gray-400 text-sm">使用 edge-tts 生成神经网络配音</p>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="text-cyan-400 font-medium mb-2">场景 8: 结尾 (85-95秒)</div>
+                                <p class="text-gray-400 text-sm">展示成品，总结关键步骤，引导「收藏备用」</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- CTA Section -->
+                    <section class="mb-16">
+                        <div class="bg-gradient-to-r from-cyan-500/20 via-primary/20 to-cyan-500/20 rounded-2xl p-8 border border-cyan-500/30 text-center">
+                            <h3 class="text-2xl font-bold mb-4">收藏备用</h3>
+                            <p class="text-gray-400 mb-6">
+                                完整的 Skill 创建工作流，从需求到上线的每一步都有详细演示
+                            </p>
+                            <div class="flex flex-wrap justify-center gap-4">
+                                <button class="btn-primary">
+                                    <i class="fas fa-bookmark"></i>
+                                    收藏本文
+                                </button>
+                                <button class="btn-outline">
+                                    <i class="fas fa-share"></i>
+                                    分享给朋友
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                    
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-white/10" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                    <i class="fas fa-magic text-white"></i>
+                </div>
+                <span class="font-bold text-xl">Skill Workflow</span>
+            </div>
+            <p class="text-gray-500 mb-4">Skill 制作过程工作流 | 从需求到上线完整演示</p>
+            <div class="flex justify-center gap-4 mb-4 text-sm text-gray-400">
+                <span>skill-creator</span>
+                <span>•</span>
+                <span>周公解梦</span>
+                <span>•</span>
+                <span>Remotion</span>
+            </div>
+            <p class="text-gray-600 text-sm">© 2026 Skill Workflow. 仅供学习交流.</p>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Skill 制作过程工作流",
+        "description": "完整展示使用 skill-creator 创建「周公解梦」skill 的全过程",
+        "author": {
+            "@type": "Organization",
+            "name": "Skill Creator"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Skill Workflow"
+        },
+        "datePublished": "2026-04-05"
+    }
+    </script>
+
+    <script>
+        // Back to Top functionality
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('backToTop');
+            if (window.scrollY > 300) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        });
+
+        // TOC Active State
+        const sections = document.querySelectorAll('section[id]');
+        const tocLinks = document.querySelectorAll('.toc-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scroll for TOC links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

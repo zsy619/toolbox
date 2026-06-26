@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tools Collection - 2026年4月第二周</title>
+    <meta name="description" content="6个精选AI工具项目集合 - Web Access、Agent技能、终端工具等">
+    <meta property="og:title" content="AI Tools Collection - 2026年4月第二周">
+    <meta property="og:image" content="./2701-web-access-video/assets/cover.png">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://example.com/ai-tools/260427/">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/noto-sans-sc/35.5.0/noto-sans-sc.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .gradient-text { background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .project-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
+        .project-card { transition: all 0.3s ease; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .image-viewer { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10000; background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(20,20,30,0.98) 100%); backdrop-filter: blur(20px); overflow: hidden; }
+        .image-viewer.active { display: flex; flex-direction: column; animation: viewerFadeIn 0.3s ease; }
+        @keyframes viewerFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .viewer-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.5rem; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%); border-bottom: 1px solid rgba(255,255,255,0.1); gap: 1rem; flex-shrink: 0; }
+        .viewer-toolbar-left, .viewer-toolbar-center, .viewer-toolbar-right { display: flex; align-items: center; gap: 0.5rem; }
+        .viewer-toolbar-divider { width: 1px; height: 1.5rem; background: rgba(255,255,255,0.2); margin: 0 0.5rem; }
+        .viewer-toolbar-btn { width: 2.75rem; height: 2.75rem; background: rgba(255, 255, 255, 0.08); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.85); font-size: 0.9rem; }
+        .viewer-toolbar-btn:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.25); color: white; transform: translateY(-2px); }
+        .viewer-zoom-slider-container { display: flex; align-items: center; gap: 0.75rem; background: rgba(255, 255, 255, 0.08); border-radius: 0.75rem; padding: 0.25rem 1rem; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .viewer-zoom-slider { width: 120px; height: 4px; -webkit-appearance: none; background: rgba(255, 255, 255, 0.2); border-radius: 2px; cursor: pointer; }
+        .viewer-zoom-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: #3B82F6; border-radius: 50%; cursor: pointer; }
+        .viewer-zoom-display { font-size: 0.85rem; color: rgba(255, 255, 255, 0.9); min-width: 3.5rem; text-align: center; }
+        .viewer-main { flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: grab; min-height: 0; }
+        .viewer-canvas { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: visible; }
+        .viewer-image-container { position: absolute; transform-origin: center center; user-select: none; transition: transform 0.1s ease-out; }
+        .viewer-image { display: block; max-width: 92vw; max-height: 75vh; object-fit: contain; pointer-events: none; user-select: none; border-radius: 0.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .viewer-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 4rem; height: 4rem; background: rgba(255, 255, 255, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; border: 1px solid rgba(255, 255, 255, 0.15); color: white; font-size: 1.5rem; z-index: 10; }
+        .viewer-nav:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-50%) scale(1.1); }
+        .viewer-nav.prev { left: 1.5rem; }
+        .viewer-nav.next { right: 1.5rem; }
+        .viewer-bottom-bar { position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem 1.5rem; background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%); display: flex; justify-content: center; flex-shrink: 0; }
+        .viewer-info { display: flex; align-items: center; gap: 1rem; font-size: 0.9rem; color: rgba(255, 255, 255, 0.85); background: rgba(0, 0, 0, 0.5); padding: 0.5rem 1.25rem; border-radius: 2rem; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .viewer-thumbnail-strip { display: flex; gap: 0.75rem; padding: 1rem 1.5rem; background: rgba(0, 0, 0, 0.6); overflow-x: auto; max-height: 120px; border-top: 1px solid rgba(255, 255, 255, 0.05); flex-shrink: 0; }
+        .viewer-thumbnail { width: 80px; height: 60px; border-radius: 0.5rem; object-fit: cover; cursor: pointer; opacity: 0.4; transition: all 0.3s; border: 2px solid transparent; flex-shrink: 0; }
+        .viewer-thumbnail:hover { opacity: 0.7; transform: scale(1.05); }
+        .viewer-thumbnail.active { opacity: 1; border-color: #3B82F6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen">
+    <header class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 opacity-50"></div>
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 20% 80%, rgba(120, 119, 219, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.3) 0%, transparent 50%);"></div>
+        <div class="relative max-w-6xl mx-auto px-4 py-20">
+            <div class="text-center fade-in">
+                <div class="inline-block glass rounded-full px-4 py-1 mb-6">
+                    <span class="text-blue-300 text-sm"><i class="fas fa-calendar-alt mr-2"></i>2026年4月 · 第二周</span>
+                </div>
+                <h1 class="text-5xl md:text-6xl font-bold mb-4">
+                    <span class="gradient-text">AI Tools Collection</span>
+                </h1>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
+                    6个精选AI工具项目集合 · 涵盖AI Agent、Web开发、效率工具等领域的开源工具
+                </p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="#projects" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition">
+                        <i class="fas fa-compass mr-2"></i>浏览项目
+                    </a>
+                    <a href="https://github.com" target="_blank" class="glass hover:bg-white/10 text-white px-6 py-3 rounded-lg font-medium transition">
+                        <i class="fab fa-github mr-2"></i>GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="glass border-y border-gray-800">
+        <div class="max-w-6xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div>
+                    <div class="text-3xl font-bold text-blue-400">6</div>
+                    <div class="text-gray-400 text-sm">项目数量</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-purple-400">3000+</div>
+                    <div class="text-gray-400 text-sm">GitHub Stars</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-pink-400">5+</div>
+                    <div class="text-gray-400 text-sm">编程语言</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-green-400">250+</div>
+                    <div class="text-gray-400 text-sm">总视频时长(秒)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main id="projects" class="max-w-6xl mx-auto px-4 py-16">
+        <h2 class="text-3xl font-bold text-white mb-8 text-center">
+            <i class="fas fa-layer-group mr-3 text-blue-400"></i>项目列表
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <a href="2701-web-access-video/index.html" class="project-card block glass rounded-xl overflow-hidden">
+                <div class="h-40 bg-gradient-to-br from-purple-600 to-pink-700 flex items-center justify-center">
+                    <i class="fas fa-globe text-6xl text-white/80"></i>
+                </div>
+                <div class="p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs bg-purple-600/30 text-purple-300 px-2 py-1 rounded">Web</span>
+                        <span class="text-xs bg-pink-600/30 text-pink-300 px-2 py-1 rounded">AI</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">Web Access</h3>
+                    <p class="text-gray-400 text-sm mb-3">给AI Agent装上完整联网能力</p>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span><i class="fas fa-network-wired mr-1"></i>联网能力</span>
+                        <span><i class="fas fa-play-circle mr-1"></i>Agent</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="2702-pua-video/index.html" class="project-card block glass rounded-xl overflow-hidden">
+                <div class="h-40 bg-gradient-to-br from-red-600 to-orange-700 flex items-center justify-center">
+                    <i class="fas fa-fire text-6xl text-white/80"></i>
+                </div>
+                <div class="p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs bg-red-600/30 text-red-300 px-2 py-1 rounded">Skill</span>
+                        <span class="text-xs bg-orange-600/30 text-orange-300 px-2 py-1 rounded">AI</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">PUA</h3>
+                    <p class="text-gray-400 text-sm mb-3">让AI不敢偷懒的技能插件</p>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span><i class="fas fa-bolt mr-1"></i>效率工具</span>
+                        <span><i class="fas fa-play-circle mr-1"></i>Agent</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="2703-nvidia-ai-talent-video/index.html" class="project-card block glass rounded-xl overflow-hidden">
+                <div class="h-40 bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center">
+                    <i class="fas fa-microchip text-6xl text-white/80"></i>
+                </div>
+                <div class="p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs bg-emerald-600/30 text-emerald-300 px-2 py-1 rounded">AI</span>
+                        <span class="text-xs bg-teal-600/30 text-teal-300 px-2 py-1 rounded">NVIDIA</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">英伟达CEO黄仁勋</h3>
+                    <p class="text-gray-400 text-sm mb-3">AI时代的人才观</p>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span><i class="fas fa-user-tie mr-1"></i>人才战略</span>
+                        <span><i class="fas fa-play-circle mr-1"></i>CEO</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="2704-khazix-skills-video/index.html" class="project-card block glass rounded-xl overflow-hidden">
+                <div class="h-40 bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center">
+                    <i class="fas fa-tools text-6xl text-white/80"></i>
+                </div>
+                <div class="p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs bg-violet-600/30 text-violet-300 px-2 py-1 rounded">Skills</span>
+                        <span class="text-xs bg-purple-600/30 text-purple-300 px-2 py-1 rounded">AI</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">Khazix Skills</h3>
+                    <p class="text-gray-400 text-sm mb-3">数字生命卡兹克的AI工具箱</p>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span><i class="fas fa-toolbox mr-1"></i>技能库</span>
+                        <span><i class="fas fa-play-circle mr-1"></i>Prompts</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="2705-kaku-terminal-video/index.html" class="project-card block glass rounded-xl overflow-hidden">
+                <div class="h-40 bg-gradient-to-br from-teal-600 to-green-700 flex items-center justify-center">
+                    <i class="fas fa-terminal text-6xl text-white/80"></i>
+                </div>
+                <div class="p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs bg-teal-600/30 text-teal-300 px-2 py-1 rounded">Terminal</span>
+                        <span class="text-xs bg-green-600/30 text-green-300 px-2 py-1 rounded">AI</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">Kaku</h3>
+                    <p class="text-gray-400 text-sm mb-3">为AI编码而生的终端</p>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span><i class="fas fa-code mr-1"></i>编码工具</span>
+                        <span><i class="fas fa-play-circle mr-1"></i>Terminal</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="2706-ai-enterprise-dev-video/index.html" class="project-card block glass rounded-xl overflow-hidden">
+                <div class="h-40 bg-gradient-to-br from-indigo-600 to-blue-700 flex items-center justify-center">
+                    <i class="fas fa-building text-6xl text-white/80"></i>
+                </div>
+                <div class="p-5">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs bg-indigo-600/30 text-indigo-300 px-2 py-1 rounded">Enterprise</span>
+                        <span class="text-xs bg-blue-600/30 text-blue-300 px-2 py-1 rounded">AI</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">企业级AI开发</h3>
+                    <p class="text-gray-400 text-sm mb-3">AI应用策略探讨</p>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span><i class="fas fa-building mr-1"></i>企业级</span>
+                        <span><i class="fas fa-play-circle mr-1"></i>Dev</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <section class="max-w-6xl mx-auto px-4 py-12">
+        <h2 class="text-2xl font-bold text-white mb-6 text-center">
+            <i class="fas fa-tags mr-3 text-purple-400"></i>分类浏览
+        </h2>
+        <div class="flex flex-wrap justify-center gap-3">
+            <a href="#projects" class="glass hover:bg-white/10 text-gray-300 px-4 py-2 rounded-lg text-sm transition">
+                <i class="fas fa-network-wired mr-2"></i>AI联网 (1)
+            </a>
+            <a href="#projects" class="glass hover:bg-white/10 text-gray-300 px-4 py-2 rounded-lg text-sm transition">
+                <i class="fas fa-fire mr-2"></i>Agent技能 (1)
+            </a>
+            <a href="#projects" class="glass hover:bg-white/10 text-gray-300 px-4 py-2 rounded-lg text-sm transition">
+                <i class="fas fa-microchip mr-2"></i>人才战略 (1)
+            </a>
+            <a href="#projects" class="glass hover:bg-white/10 text-gray-300 px-4 py-2 rounded-lg text-sm transition">
+                <i class="fas fa-tools mr-2"></i>技能工具箱 (1)
+            </a>
+            <a href="#projects" class="glass hover:bg-white/10 text-gray-300 px-4 py-2 rounded-lg text-sm transition">
+                <i class="fas fa-terminal mr-2"></i>终端工具 (1)
+            </a>
+            <a href="#projects" class="glass hover:bg-white/10 text-gray-300 px-4 py-2 rounded-lg text-sm transition">
+                <i class="fas fa-building mr-2"></i>企业级 (1)
+            </a>
+        </div>
+    </section>
+
+    <footer class="glass border-t border-gray-800 mt-12">
+        <div class="max-w-6xl mx-auto px-4 py-8 text-center">
+            <p class="text-gray-500 text-sm">
+                <i class="fas fa-heart text-red-500 mr-1"></i> AI Tools Collection · 2026年4月第二周
+            </p>
+            <p class="text-gray-600 text-xs mt-2">
+                基于开源项目构建，仅供学习和交流使用
+            </p>
+        </div>
+    </footer>
+
+    <!-- Image Viewer -->
+    <div id="imageViewer" class="image-viewer">
+        <div class="viewer-toolbar">
+            <div class="viewer-toolbar-left">
+                <button class="viewer-toolbar-btn" onclick="closeImageViewer()"><i class="fas fa-times"></i></button>
+                <div class="viewer-toolbar-divider"></div>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(-90)"><i class="fas fa-undo"></i></button>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(90)"><i class="fas fa-redo"></i></button>
+            </div>
+            <div class="viewer-toolbar-center">
+                <button class="viewer-toolbar-btn" onclick="zoomOut()"><i class="fas fa-search-minus"></i></button>
+                <div class="viewer-zoom-slider-container">
+                    <input type="range" id="zoomSlider" class="viewer-zoom-slider" min="10" max="500" value="100">
+                    <span id="zoomDisplay" class="viewer-zoom-display">100%</span>
+                </div>
+                <button class="viewer-toolbar-btn" onclick="zoomIn()"><i class="fas fa-search-plus"></i></button>
+                <button class="viewer-toolbar-btn" onclick="fitToScreen()"><i class="fas fa-expand-arrows-alt"></i></button>
+            </div>
+            <div class="viewer-toolbar-right">
+                <button class="viewer-toolbar-btn" onclick="downloadImage()"><i class="fas fa-download"></i></button>
+            </div>
+        </div>
+        <div class="viewer-main" id="viewerMain">
+            <div class="viewer-canvas">
+                <div class="viewer-image-container" id="imageContainer">
+                    <img id="viewerImage" class="viewer-image" src="" alt="">
+                </div>
+            </div>
+            <button class="viewer-nav prev" onclick="prevImage()"><i class="fas fa-chevron-left"></i></button>
+            <button class="viewer-nav next" onclick="nextImage()"><i class="fas fa-chevron-right"></i></button>
+            <div class="viewer-bottom-bar">
+                <div class="viewer-info">
+                    <span id="imageTitle">图片</span>
+                    <span class="viewer-divider">|</span>
+                    <span id="imageCounter">1 / 1</span>
+                </div>
+            </div>
+        </div>
+        <div class="viewer-thumbnail-strip" id="thumbnailStrip"></div>
+    </div>
+
+    <script>
+    let images = [], currentIndex = 0, scale = 1, rotation = 0, flipX = 1, flipY = 1, translateX = 0, translateY = 0;
+    function collectImages() {
+        const imgs = []; const seen = new Set();
+        document.querySelectorAll('img').forEach(img => { if (!seen.has(img.src) && img.src && !img.src.includes('data:') && img.id !== 'viewerImage') { seen.add(img.src); imgs.push({ src: img.src, title: img.alt || '图片', thumbnail: img.src }); } });
+        return imgs;
+    }
+    function openImageViewer(index) {
+        if (images.length === 0) images = collectImages();
+        if (images.length === 0) return;
+        currentIndex = Math.max(0, Math.min(index, images.length - 1));
+        scale = 1; rotation = 0; flipX = 1; flipY = 1;
+        loadImage(currentIndex);
+        buildThumbnailStrip();
+        document.getElementById('imageViewer').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeImageViewer() {
+        document.getElementById('imageViewer').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    function loadImage(index) {
+        document.getElementById('viewerImage').src = images[index].src;
+        document.getElementById('imageTitle').textContent = images[index].title;
+        document.getElementById('imageCounter').textContent = (index + 1) + ' / ' + images.length;
+        updateTransform();
+    }
+    function updateTransform() { document.getElementById('imageContainer').style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px) rotate(' + rotation + 'deg) scaleX(' + flipX + ') scaleY(' + flipY + ') scale(' + scale + ')'; }
+    function prevImage() { if (images.length > 1) { currentIndex = (currentIndex - 1 + images.length) % images.length; loadImage(currentIndex); } }
+    function nextImage() { if (images.length > 1) { currentIndex = (currentIndex + 1) % images.length; loadImage(currentIndex); } }
+    function zoomIn() { scale = Math.min(5, scale + 0.25); updateTransform(); document.getElementById('zoomSlider').value = scale * 100; document.getElementById('zoomDisplay').textContent = Math.round(scale * 100) + '%'; }
+    function zoomOut() { scale = Math.max(0.1, scale - 0.25); updateTransform(); document.getElementById('zoomSlider').value = scale * 100; document.getElementById('zoomDisplay').textContent = Math.round(scale * 100) + '%'; }
+    function fitToScreen() { scale = 1; rotation = 0; flipX = 1; flipY = 1; translateX = 0; translateY = 0; updateTransform(); document.getElementById('zoomSlider').value = 100; document.getElementById('zoomDisplay').textContent = '100%'; }
+    function rotateImage(deg) { rotation = (rotation + deg) % 360; updateTransform(); }
+    function downloadImage() { const link = document.createElement('a'); link.href = images[currentIndex].src; link.download = images[currentIndex].title; link.target = '_blank'; document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+    function buildThumbnailStrip() {
+        const strip = document.getElementById('thumbnailStrip'); strip.innerHTML = '';
+        images.forEach((img, i) => { const t = document.createElement('img'); t.className = 'viewer-thumbnail' + (i === currentIndex ? ' active' : ''); t.src = img.thumbnail; t.alt = img.title; t.onclick = () => { currentIndex = i; loadImage(i); }; strip.appendChild(t); });
+    }
+    document.querySelectorAll('img').forEach((img, i) => { img.style.cursor = 'pointer'; img.onclick = () => openImageViewer(i); });
+    document.addEventListener('keydown', e => { if (!document.getElementById('imageViewer').classList.contains('active')) return; switch(e.key) { case 'Escape': closeImageViewer(); break; case 'ArrowLeft': prevImage(); break; case 'ArrowRight': nextImage(); break; case '+': case '=': zoomIn(); break; case '-': zoomOut(); break; case '0': fitToScreen(); } });
+    document.getElementById('viewerMain').addEventListener('wheel', e => { e.preventDefault(); e.deltaY > 0 ? zoomOut() : zoomIn(); }, { passive: false });
+    document.getElementById('zoomSlider').addEventListener('input', e => { scale = e.target.value / 100; updateTransform(); document.getElementById('zoomDisplay').textContent = Math.round(scale * 100) + '%'; });
+    </script>
+</body>
+</html>

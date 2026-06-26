@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2027年普通高考报名进度 · 实时热力图</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0f1923;
+            --bg-secondary: #1a2633;
+            --bg-card: #1e2d3d;
+            --text-primary: #e8edf2;
+            --text-secondary: #8fa3b8;
+            --text-muted: #5a7088;
+            --border: #2a3a4a;
+            --red: #E53935;
+            --orange: #FB8C00;
+            --yellow: #FDD835;
+            --light-green: #66BB6A;
+            --deep-green: #2E7D32;
+            --accent: #4fc3f7;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            --radius: 12px;
+            --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── 顶部标题栏 ── */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 28px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            position: relative;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #e8edf2, #4fc3f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .badge-live {
+            background: rgba(102, 187, 106, 0.15);
+            color: var(--light-green);
+        }
+
+        .badge-live .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--light-green);
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(1.5);
+            }
+        }
+
+        .header-deadline {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .header-deadline strong {
+            color: var(--orange);
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn.active {
+            background: rgba(79, 195, 247, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-fullscreen {
+            font-size: 16px;
+            padding: 8px 12px;
+        }
+
+        /* ── 主布局 ── */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            grid-template-rows: 1fr auto;
+            height: calc(100vh - 70px);
+            gap: 0;
+        }
+
+        .map-panel {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #mapChart {
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* ── 面包屑 ── */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .breadcrumb span {
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .breadcrumb span:hover {
+            color: var(--accent);
+            background: rgba(79, 195, 247, 0.08);
+        }
+
+        .breadcrumb .sep {
+            color: var(--text-muted);
+            cursor: default;
+        }
+
+        .breadcrumb .current {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ── 侧边栏 ── */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar-section {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        /* 统计卡片 */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 12px 14px;
+            text-align: center;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            transition: color var(--transition);
+        }
+
+        .stat-card .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .stat-card.primary .stat-value {
+            color: var(--accent);
+        }
+
+        /* 排行榜 */
+        .rank-list {
+            list-style: none;
+        }
+
+        .rank-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 2px;
+        }
+
+        .rank-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .rank-pos {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .rank-pos.top3 {
+            background: var(--accent);
+            color: #0f1923;
+        }
+
+        .rank-name {
+            flex: 1;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .rank-bar-wrap {
+            width: 60px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .rank-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background var(--transition);
+        }
+
+        .rank-pct {
+            width: 42px;
+            text-align: right;
+            font-size: 13px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+        }
+
+        /* 预警列表 */
+        .alert-list {
+            list-style: none;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            margin-bottom: 4px;
+            font-size: 12px;
+            animation: alert-slide-in 0.4s ease-out;
+        }
+
+        @keyframes alert-slide-in {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .alert-item.red {
+            background: rgba(229, 57, 53, 0.1);
+            border-left: 3px solid var(--red);
+        }
+
+        .alert-item.orange {
+            background: rgba(251, 140, 0, 0.1);
+            border-left: 3px solid var(--orange);
+        }
+
+        .alert-item.yellow {
+            background: rgba(253, 216, 53, 0.1);
+            border-left: 3px solid var(--yellow);
+        }
+
+        .alert-icon {
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .alert-content {
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .alert-content .alert-area {
+            font-weight: 600;
+        }
+
+        .alert-content .alert-detail {
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        /* ── 底部状态栏 ── */
+        .footer-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+        }
+
+        .footer-bar .trend-up {
+            color: var(--light-green);
+        }
+
+        .footer-bar .trend-flat {
+            color: var(--yellow);
+        }
+
+        .footer-metrics {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-metric {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-metric .val {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ── Toast通知 ── */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #fff;
+            box-shadow: var(--shadow);
+            animation: toast-in 0.4s ease-out, toast-out 0.3s 3.5s ease-in forwards;
+            max-width: 360px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .toast.warn {
+            background: #E65100;
+        }
+
+        .toast.danger {
+            background: #B71C1C;
+        }
+
+        .toast.info {
+            background: #0D47A1;
+        }
+
+        @keyframes toast-in {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes toast-out {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+
+        /* ── 响应式 ── */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr auto;
+            }
+
+            .sidebar {
+                border-left: none;
+                border-top: 1px solid var(--border);
+                max-height: 300px;
+            }
+
+            .header-title {
+                font-size: 18px;
+            }
+        }
+
+        /* ── 全屏模式 ── */
+        body.fullscreen .header {
+            padding: 10px 20px;
+        }
+
+        body.fullscreen .header-title {
+            font-size: 28px;
+        }
+
+        body.fullscreen .sidebar {
+            width: 400px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 顶部标题栏 -->
+    <div class="header">
+        <div class="header-left">
+            <span class="header-title">📊 2027年普通高考报名进度</span>
+            <span class="header-badge badge-live">
+                <span class="dot"></span> 实时监控
+            </span>
+        </div>
+        <div class="header-deadline">
+            距报名截止：<strong id="deadlineCountdown">3天12时28分</strong>
+        </div>
+        <div class="header-right">
+            <button class="btn" id="btnAutoRefresh" title="自动刷新">
+                ⏱ 自动刷新
+            </button>
+            <button class="btn" id="btnSound" title="预警音效">
+                🔔 预警
+            </button>
+            <button class="btn btn-fullscreen" id="btnFullscreen" title="全屏模式">
+                ⛶
+            </button>
+        </div>
+    </div>
+    <!-- 主体 -->
+    <div class="main-container">
+        <!-- 地图面板 -->
+        <div class="map-panel">
+            <div class="breadcrumb" id="breadcrumb">
+                <span data-level="province">🗺 全国</span>
+            </div>
+            <div id="mapChart"></div>
+        </div>
+        <!-- 侧边栏 -->
+        <div class="sidebar" id="sidebar">
+            <!-- 统计卡片 -->
+            <div class="sidebar-section">
+                <div class="section-title">📋 报名概览</div>
+                <div class="stat-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-value" id="statRate">--</div>
+                        <div class="stat-label">总完成率</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statRegistered">--</div>
+                        <div class="stat-label">已报名</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statTotal">--</div>
+                        <div class="stat-label">应报名</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statRemain">--</div>
+                        <div class="stat-label">未报名</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 排行榜 -->
+            <div class="sidebar-section">
+                <div class="section-title">🏆 完成率排行</div>
+                <ul class="rank-list" id="rankList"></ul>
+            </div>
+            <!-- 预警列表 -->
+            <div class="sidebar-section">
+                <div class="section-title">⚠️ 实时预警</div>
+                <ul class="alert-list" id="alertList">
+                    <li style="color:var(--text-muted);font-size:12px;padding:12px;">暂无预警，一切正常 ✅</li>
+                </ul>
+            </div>
+        </div>
+        <!-- 底部状态栏 -->
+        <div class="footer-bar">
+            <div class="footer-metrics">
+                <div class="footer-metric">
+                    📈 今日新增：<span class="val trend-up" id="todayNew">--</span>
+                </div>
+                <div class="footer-metric">
+                    📊 较昨日：<span class="val trend-up" id="vsYesterday">--</span>
+                </div>
+                <div class="footer-metric">
+                    ⚡ 最后更新：<span class="val" id="lastUpdate">--</span>
+                </div>
+            </div>
+            <div>
+                数据刷新间隔：<strong style="color:var(--accent);">2秒</strong>
+            </div>
+        </div>
+    </div>
+    <!-- Toast容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+    <script>
+        (function () {
+            // ═══════════════════════════════════════
+            // 一、数据模型
+            // ═══════════════════════════════════════
+
+            // 颜色映射：完成率 → 颜色
+            function getColorByRate(rate) {
+                if (rate >= 0.95) return '#2E7D32'; // 深绿
+                if (rate >= 0.80) return '#66BB6A'; // 浅绿
+                if (rate >= 0.60) return '#FDD835'; // 黄
+                if (rate >= 0.40) return '#FB8C00'; // 橙
+                return '#E53935';                   // 红
+            }
+
+            function getAlertLevel(rate) {
+                if (rate < 0.40) return 'red';
+                if (rate < 0.60) return 'orange';
+                if (rate < 0.80) return 'yellow';
+                return null;
+            }
+
+            // 生成模拟数据
+            function generateProvinceData() {
+                const provinces = [
+                    '北京市', '天津市', '河北省', '山西省', '内蒙古', '辽宁省', '吉林省', '黑龙江省',
+                    '上海市', '江苏省', '浙江省', '安徽省', '福建省', '江西省', '山东省', '河南省',
+                    '湖北省', '湖南省', '广东省', '广西', '海南省', '重庆市', '四川省', '贵州省',
+                    '云南省', '西藏', '陕西省', '甘肃省', '青海省', '宁夏', '新疆'
+                ];
+                // 注册地图时需要这些名称，简化为可直接使用的列表
+                const map = {};
+                provinces.forEach(name => {
+                    const base = 5000 + Math.floor(Math.random() * 45000);
+                    const rate = Math.random();
+                    // 让数据更有层次：少数省份滞后
+                    const adjustedRate = rate < 0.15 ? 0.25 + Math.random() * 0.3 :
+                        rate > 0.85 ? 0.7 + Math.random() * 0.3 :
+                            rate;
+                    map[name] = {
+                        name,
+                        total: base,
+                        registered: Math.floor(base * adjustedRate),
+                        cities: []
+                    };
+                    map[name].rate = map[name].registered / map[name].total;
+                });
+                // 确保有2-3个滞后省份
+                const laggards = ['西藏', '青海', '新疆'];
+                laggards.forEach(name => {
+                    if (map[name]) {
+                        map[name].rate = 0.25 + Math.random() * 0.30;
+                        map[name].registered = Math.floor(map[name].total * map[name].rate);
+                    }
+                });
+                // 确保有2-3个已完成省份
+                const leaders = ['上海市', '北京市', '浙江省'];
+                leaders.forEach(name => {
+                    if (map[name]) {
+                        map[name].rate = 0.92 + Math.random() * 0.08;
+                        map[name].registered = Math.floor(map[name].total * map[name].rate);
+                    }
+                });
+                return map;
+            }
+
+            function generateCityData(provinceName) {
+                const cityNames = {
+                    '广东省': ['广州市', '深圳市', '珠海市', '汕头市', '佛山市', '韶关市', '湛江市', '惠州市', '东莞市', '中山市'],
+                    '江苏省': ['南京市', '苏州市', '无锡市', '常州市', '南通市', '徐州市', '扬州市', '镇江市', '盐城市', '泰州市'],
+                    '四川省': ['成都市', '绵阳市', '德阳市', '宜宾市', '南充市', '泸州市', '达州市', '乐山市', '眉山市', '广元市'],
+                };
+                const names = cityNames[provinceName] || [
+                    '市一区', '市二区', '市三区', 'A市', 'B市', 'C市', 'D市', 'E市', 'F市', 'G市'
+                ];
+                const map = {};
+                names.forEach(name => {
+                    const total = 800 + Math.floor(Math.random() * 12000);
+                    const rate = Math.random();
+                    const adjustedRate = rate < 0.15 ? 0.20 + Math.random() * 0.35 :
+                        rate > 0.85 ? 0.70 + Math.random() * 0.30 :
+                            rate;
+                    map[name] = {
+                        name,
+                        total,
+                        registered: Math.floor(total * adjustedRate),
+                        rate: 0
+                    };
+                    map[name].rate = map[name].registered / map[name].total;
+                });
+                // 滞后城市
+                const lag = names[Math.floor(Math.random() * names.length)];
+                if (map[lag]) {
+                    map[lag].rate = 0.18 + Math.random() * 0.22;
+                    map[lag].registered = Math.floor(map[lag].total * map[lag].rate);
+                }
+                return map;
+            }
+
+            function generateDistrictData(cityName) {
+                const names = ['东区', '西区', '南区', '北区', '中区', '高新区', '开发区', '滨海区', '新城区', '老城区'];
+                const map = {};
+                names.forEach(name => {
+                    const total = 200 + Math.floor(Math.random() * 3000);
+                    const rate = Math.random();
+                    const adjustedRate = rate < 0.2 ? 0.15 + Math.random() * 0.30 :
+                        rate > 0.80 ? 0.75 + Math.random() * 0.25 :
+                            rate;
+                    map[name] = {
+                        name,
+                        total,
+                        registered: Math.floor(total * adjustedRate),
+                        rate: 0
+                    };
+                    map[name].rate = map[name].registered / map[name].total;
+                });
+                return map;
+            }
+
+            // ═══════════════════════════════════════
+            // 二、全局状态
+            // ═══════════════════════════════════════
+            const state = {
+                level: 'province',        // province | city | district
+                currentProvince: null,
+                currentCity: null,
+                provinceData: generateProvinceData(),
+                cityData: null,
+                districtData: null,
+                autoRefresh: true,
+                soundEnabled: true,
+                refreshTimer: null,
+                countdownTimer: null,
+                alerts: [],
+                lastUpdate: null,
+                todayNew: 0,
+                yesterdayTotal: 0,
+            };
+
+            // 初始化昨日基数
+            const allRegistered = Object.values(state.provinceData).reduce((s, p) => s + p.registered, 0);
+            state.yesterdayTotal = Math.floor(allRegistered * 0.88);
+            state.todayNew = allRegistered - state.yesterdayTotal;
+
+            // ═══════════════════════════════════════
+            // 三、ECharts 地图渲染
+            // ═══════════════════════════════════════
+            const mapChart = echarts.init(document.getElementById('mapChart'));
+
+            // 加载中国地图GeoJSON
+            let chinaGeoJSON = null;
+
+            async function loadChinaMap() {
+                try {
+                    const resp = await fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json');
+                    chinaGeoJSON = await resp.json();
+                    echarts.registerMap('china', chinaGeoJSON);
+                    renderProvinceMap();
+                } catch (e) {
+                    console.warn('加载中国地图失败，使用简化坐标数据', e);
+                    renderProvinceMapSimple();
+                }
+            }
+
+            function renderProvinceMapSimple() {
+                // 降级方案：使用散点图模拟
+                const data = Object.values(state.provinceData);
+                const coords = {
+                    '北京市': [116.4, 39.9], '天津市': [117.2, 39.1], '河北省': [114.5, 38.0], '山西省': [112.5, 37.8],
+                    '内蒙古': [111.7, 40.8], '辽宁省': [123.4, 41.8], '吉林省': [125.3, 43.9], '黑龙江省': [126.6, 45.8],
+                    '上海市': [121.5, 31.2], '江苏省': [118.8, 32.0], '浙江省': [120.2, 30.3], '安徽省': [117.3, 31.9],
+                    '福建省': [119.3, 26.1], '江西省': [115.9, 28.7], '山东省': [117.0, 36.7], '河南省': [113.7, 34.8],
+                    '湖北省': [114.3, 30.6], '湖南省': [113.0, 28.2], '广东省': [113.3, 23.1], '广西': [108.3, 22.8],
+                    '海南省': [110.3, 20.0], '重庆市': [106.5, 29.5], '四川省': [104.1, 30.7], '贵州省': [106.7, 26.6],
+                    '云南省': [102.7, 25.0], '西藏': [91.1, 29.6], '陕西省': [108.9, 34.3], '甘肃省': [103.8, 36.1],
+                    '青海省': [101.8, 36.6], '宁夏': [106.3, 38.5], '新疆': [87.6, 43.8]
+                };
+
+                const scatterData = data.map(d => ({
+                    name: d.name,
+                    value: [...(coords[d.name] || [100 + Math.random() * 30, 30 + Math.random() * 20]), d.rate * 100, d.registered, d.total]
+                }));
+
+                const option = {
+                    backgroundColor: 'transparent',
+                    tooltip: {
+                        trigger: 'item',
+                        backgroundColor: 'rgba(30,45,61,0.95)',
+                        borderColor: '#2a3a4a',
+                        textStyle: { color: '#e8edf2', fontSize: 13 },
+                        formatter: function (p) {
+                            const rate = (p.value[2] || 0).toFixed(1);
+                            const registered = (p.value[3] || 0).toLocaleString();
+                            const total = (p.value[4] || 0).toLocaleString();
+                            const color = getColorByRate(parseFloat(rate) / 100);
+                            return `<div style="font-weight:700;font-size:14px;margin-bottom:6px;">${p.name}</div>
+                                <div>完成率：<span style="color:${color};font-weight:700;font-size:18px;">${rate}%</span></div>
+                                <div>已报名：${registered} / ${total}</div>
+                                <div style="color:#8fa3b8;font-size:11px;">🖱 点击下钻查看详情</div>`;
+                        }
+                    },
+                    xAxis: { show: false, min: 75, max: 135 },
+                    yAxis: { show: false, min: 15, max: 55 },
+                    series: [{
+                        type: 'scatter',
+                        data: scatterData,
+                        symbolSize: function (val) {
+                            return 20 + (val[4] || 10000) / 2000;
+                        },
+                        itemStyle: {
+                            color: function (p) {
+                                const rate = (p.data.value?.[2] || p.value?.[2] || 50) / 100;
+                                return getColorByRate(rate);
+                            },
+                            shadowBlur: 12,
+                            shadowColor: 'rgba(0,0,0,0.4)',
+                            borderColor: 'rgba(255,255,255,0.2)',
+                            borderWidth: 1,
+                        },
+                        label: {
+                            show: true,
+                            formatter: '{b}',
+                            position: 'right',
+                            color: '#8fa3b8',
+                            fontSize: 11,
+                        },
+                        emphasis: {
+                            scale: 1.4,
+                            itemStyle: { shadowBlur: 24, shadowColor: 'rgba(79,195,247,0.6)' }
+                        }
+                    }]
+                };
+
+                mapChart.setOption(option, true);
+                mapChart.off('click');
+                mapChart.on('click', function (params) {
+                    if (params.name && state.level === 'province') {
+                        drillDownToCity(params.name);
+                    }
+                });
+            }
+
+            function renderProvinceMap() {
+                if (!chinaGeoJSON) {
+                    renderProvinceMapSimple();
+                    return;
+                }
+
+                const data = Object.values(state.provinceData).map(d => ({
+                    name: d.name,
+                    value: d.rate * 100,
+                    registered: d.registered,
+                    total: d.total,
+                }));
+
+                const option = {
+                    backgroundColor: 'transparent',
+                    tooltip: {
+                        trigger: 'item',
+                        backgroundColor: 'rgba(30,45,61,0.95)',
+                        borderColor: '#2a3a4a',
+                        textStyle: { color: '#e8edf2', fontSize: 13 },
+                        formatter: function (p) {
+                            if (!p.data) return p.name;
+                            const rate = (p.data.value || 0).toFixed(1);
+                            const registered = (p.data.registered || 0).toLocaleString();
+                            const total = (p.data.total || 0).toLocaleString();
+                            const color = getColorByRate(parseFloat(rate) / 100);
+                            return `<div style="font-weight:700;font-size:14px;margin-bottom:6px;">${p.name}</div>
+                                <div>完成率：<span style="color:${color};font-weight:700;font-size:18px;">${rate}%</span></div>
+                                <div>已报名：${registered} / ${total}</div>
+                                <div style="color:#8fa3b8;font-size:11px;">🖱 点击下钻查看详情</div>`;
+                        }
+                    },
+                    visualMap: {
+                        min: 0,
+                        max: 100,
+                        left: 20,
+                        bottom: 20,
+                        text: ['100%', '0%'],
+                        textStyle: { color: '#8fa3b8', fontSize: 11 },
+                        inRange: {
+                            color: ['#E53935', '#FB8C00', '#FDD835', '#66BB6A', '#2E7D32']
+                        },
+                        calculable: true,
+                        itemWidth: 12,
+                        itemHeight: 140,
+                    },
+                    series: [{
+                        name: '报名完成率',
+                        type: 'map',
+                        map: 'china',
+                        roam: true,
+                        zoom: 1.15,
+                        center: [104.5, 36],
+                        scaleLimit: { min: 0.8, max: 4 },
+                        label: {
+                            show: true,
+                            color: '#5a7088',
+                            fontSize: 9,
+                        },
+                        emphasis: {
+                            label: { show: true, color: '#fff', fontSize: 13, fontWeight: 'bold' },
+                            itemStyle: { areaColor: '#4fc3f7', shadowBlur: 20, shadowColor: 'rgba(79,195,247,0.5)' }
+                        },
+                        itemStyle: {
+                            borderColor: '#1a2633',
+                            borderWidth: 1.5,
+                        },
+                        data: data,
+                    }]
+                };
+
+                mapChart.setOption(option, true);
+                mapChart.off('click');
+                mapChart.on('click', function (params) {
+                    if (params.name && state.level === 'province' && state.provinceData[params.name]) {
+                        drillDownToCity(params.name);
+                    }
+                });
+            }
+
+            function renderCityMap() {
+                const data = Object.values(state.cityData).map(d => ({
+                    name: d.name,
+                    value: d.rate * 100,
+                    registered: d.registered,
+                    total: d.total,
+                }));
+
+                // 使用散点模拟市级地图（真实场景需加载市级GeoJSON）
+                const option = {
+                    backgroundColor: 'transparent',
+                    title: {
+                        text: state.currentProvince + ' · 各市报名进度',
+                        left: 'center',
+                        top: 10,
+                        textStyle: { color: '#8fa3b8', fontSize: 16, fontWeight: 600 }
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        backgroundColor: 'rgba(30,45,61,0.95)',
+                        borderColor: '#2a3a4a',
+                        textStyle: { color: '#e8edf2', fontSize: 13 },
+                        formatter: function (p) {
+                            const rate = (p.data.value || 0).toFixed(1);
+                            const registered = (p.data.registered || 0).toLocaleString();
+                            const total = (p.data.total || 0).toLocaleString();
+                            const color = getColorByRate(parseFloat(rate) / 100);
+                            return `<div style="font-weight:700;font-size:14px;margin-bottom:6px;">${p.name}</div>
+                                <div>完成率：<span style="color:${color};font-weight:700;font-size:18px;">${rate}%</span></div>
+                                <div>已报名：${registered} / ${total}</div>
+                                <div style="color:#8fa3b8;font-size:11px;">🖱 点击下钻查看区县详情</div>`;
+                        }
+                    },
+                    xAxis: { show: false },
+                    yAxis: { show: false },
+                    series: [{
+                        type: 'scatter',
+                        data: data.map((d, i) => {
+                            const angle = (i / data.length) * Math.PI * 2;
+                            const r = 8 + Math.random() * 4;
+                            return {
+                                name: d.name,
+                                value: [Math.cos(angle) * r, Math.sin(angle) * r, d.value, d.registered, d.total]
+                            };
+                        }),
+                        symbolSize: function (val) {
+                            return 30 + (val[4] || 3000) / 200;
+                        },
+                        itemStyle: {
+                            color: function (p) {
+                                const rate = (p.data.value?.[2] || p.value?.[2] || 50) / 100;
+                                return getColorByRate(rate);
+                            },
+                            shadowBlur: 16,
+                            shadowColor: 'rgba(0,0,0,0.5)',
+                            borderColor: 'rgba(255,255,255,0.3)',
+                            borderWidth: 2,
+                        },
+                        label: {
+                            show: true,
+                            formatter: '{b}',
+                            color: '#e8edf2',
+                            fontSize: 12,
+                            fontWeight: 600,
+                        },
+                        emphasis: {
+                            scale: 1.3,
+                            itemStyle: { shadowBlur: 30, shadowColor: 'rgba(79,195,247,0.7)' }
+                        }
+                    }]
+                };
+
+                mapChart.setOption(option, true);
+                mapChart.off('click');
+                mapChart.on('click', function (params) {
+                    if (params.name && state.level === 'city' && state.cityData[params.name]) {
+                        drillDownToDistrict(params.name);
+                    }
+                });
+            }
+
+            function renderDistrictMap() {
+                const data = Object.values(state.districtData);
+
+                const option = {
+                    backgroundColor: 'transparent',
+                    title: {
+                        text: state.currentCity + ' · 各区县报名进度',
+                        left: 'center',
+                        top: 10,
+                        textStyle: { color: '#8fa3b8', fontSize: 16, fontWeight: 600 }
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: 'rgba(30,45,61,0.95)',
+                        borderColor: '#2a3a4a',
+                        textStyle: { color: '#e8edf2', fontSize: 13 },
+                        formatter: function (params) {
+                            const d = params[0];
+                            const rate = (d.value || 0).toFixed(1);
+                            const color = getColorByRate(parseFloat(rate) / 100);
+                            return `<div style="font-weight:700;font-size:14px;margin-bottom:6px;">${d.name}</div>
+                                <div>完成率：<span style="color:${color};font-weight:700;font-size:18px;">${rate}%</span></div>`;
+                        }
+                    },
+                    grid: { left: '5%', right: '10%', top: '15%', bottom: '10%' },
+                    xAxis: {
+                        type: 'category',
+                        data: data.map(d => d.name),
+                        axisLabel: { color: '#8fa3b8', fontSize: 11, rotate: 30 },
+                        axisLine: { lineStyle: { color: '#2a3a4a' } },
+                    },
+                    yAxis: {
+                        type: 'value',
+                        max: 100,
+                        axisLabel: { color: '#8fa3b8', formatter: '{value}%' },
+                        splitLine: { lineStyle: { color: '#1e2d3d' } },
+                    },
+                    series: [{
+                        type: 'bar',
+                        data: data.map(d => ({
+                            name: d.name,
+                            value: (d.rate * 100).toFixed(1),
+                            itemStyle: {
+                                color: getColorByRate(d.rate),
+                                borderRadius: [6, 6, 0, 0],
+                                shadowBlur: 8,
+                                shadowColor: 'rgba(0,0,0,0.3)',
+                            }
+                        })),
+                        barWidth: '50%',
+                        emphasis: {
+                            itemStyle: { shadowBlur: 20, shadowColor: 'rgba(79,195,247,0.5)' }
+                        },
+                        animationDuration: 800,
+                        animationEasing: 'elasticOut',
+                    }]
+                };
+
+                mapChart.setOption(option, true);
+                mapChart.off('click'); // 区县级不再下钻
+            }
+
+            // ═══════════════════════════════════════
+            // 四、下钻导航
+            // ═══════════════════════════════════════
+            function drillDownToCity(provinceName) {
+                state.level = 'city';
+                state.currentProvince = provinceName;
+                state.cityData = generateCityData(provinceName);
+                state.currentCity = null;
+                state.districtData = null;
+                updateBreadcrumb();
+                renderCityMap();
+                updateSidebar();
+            }
+
+            function drillDownToDistrict(cityName) {
+                state.level = 'district';
+                state.currentCity = cityName;
+                state.districtData = generateDistrictData(cityName);
+                updateBreadcrumb();
+                renderDistrictMap();
+                updateSidebar();
+            }
+
+            function goToLevel(level) {
+                if (level === 'province') {
+                    state.level = 'province';
+                    state.currentProvince = null;
+                    state.currentCity = null;
+                    state.cityData = null;
+                    state.districtData = null;
+                    updateBreadcrumb();
+                    renderProvinceMap();
+                    updateSidebar();
+                } else if (level === 'city' && state.currentProvince) {
+                    state.level = 'city';
+                    state.currentCity = null;
+                    state.districtData = null;
+                    state.cityData = generateCityData(state.currentProvince);
+                    updateBreadcrumb();
+                    renderCityMap();
+                    updateSidebar();
+                }
+            }
+
+            function updateBreadcrumb() {
+                const bc = document.getElementById('breadcrumb');
+                let html = '<span data-level="province" onclick="window._goToLevel(\'province\')">🗺 全国</span>';
+                if (state.currentProvince) {
+                    html += '<span class="sep">▸</span>';
+                    if (state.level === 'city' || state.level === 'district') {
+                        html += `<span data-level="city" onclick="window._goToLevel('city')">📍 ${state.currentProvince}</span>`;
+                    } else {
+                        html += `<span class="current">📍 ${state.currentProvince}</span>`;
+                    }
+                }
+                if (state.currentCity && state.level === 'district') {
+                    html += '<span class="sep">▸</span>';
+                    html += `<span class="current">🏙 ${state.currentCity}</span>`;
+                }
+                bc.innerHTML = html;
+            }
+
+            // 暴露全局函数给onclick
+            window._goToLevel = goToLevel;
+
+            // ═══════════════════════════════════════
+            // 五、侧边栏更新
+            // ═══════════════════════════════════════
+            function getCurrentDataMap() {
+                if (state.level === 'province') return state.provinceData;
+                if (state.level === 'city') return state.cityData;
+                if (state.level === 'district') return state.districtData;
+                return {};
+            }
+
+            function updateSidebar() {
+                const dataMap = getCurrentDataMap();
+                const entries = Object.values(dataMap);
+                if (entries.length === 0) return;
+
+                const totalRegistered = entries.reduce((s, e) => s + e.registered, 0);
+                const totalAll = entries.reduce((s, e) => s + e.total, 0);
+                const overallRate = totalAll > 0 ? totalRegistered / totalAll : 0;
+                const remain = totalAll - totalRegistered;
+
+                // 统计卡片 - 数字跳动动画
+                animateNumber('statRate', overallRate * 100, 1, '%');
+                animateNumber('statRegistered', totalRegistered, 0, '');
+                animateNumber('statTotal', totalAll, 0, '');
+                animateNumber('statRemain', remain, 0, '');
+
+                // 更新颜色
+                const rateEl = document.getElementById('statRate');
+                rateEl.style.color = getColorByRate(overallRate);
+
+                // 排行榜
+                const sorted = [...entries].sort((a, b) => a.rate - b.rate);
+                const rankList = document.getElementById('rankList');
+                rankList.innerHTML = sorted.map((e, i) => {
+                    const posClass = i < 3 ? ' top3' : '';
+                    return `
+                <li class="rank-item" onclick="window._drillRank('${e.name.replace(/'/g, "\\'")}')">
+                    <span class="rank-pos${posClass}">${i + 1}</span>
+                    <span class="rank-name" title="${e.name}">${e.name}</span>
+                    <span class="rank-bar-wrap">
+                        <span class="rank-bar-fill" style="width:${e.rate * 100}%;background:${getColorByRate(e.rate)};"></span>
+                    </span>
+                    <span class="rank-pct" style="color:${getColorByRate(e.rate)}">${(e.rate * 100).toFixed(1)}%</span>
+                </li>`;
+                }).join('');
+
+                // 预警
+                updateAlerts(entries);
+
+                // 底部状态栏
+                document.getElementById('todayNew').textContent = state.todayNew.toLocaleString();
+                const vsYesterday = state.yesterdayTotal > 0 ?
+                    ((totalRegistered - state.yesterdayTotal) / state.yesterdayTotal * 100) : 0;
+                const vsEl = document.getElementById('vsYesterday');
+                vsEl.textContent = (vsYesterday >= 0 ? '+' : '') + vsYesterday.toFixed(1) + '%';
+                vsEl.className = 'val ' + (vsYesterday >= 0 ? 'trend-up' : 'trend-flat');
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('zh-CN');
+            }
+
+            function animateNumber(elementId, targetValue, decimals, suffix) {
+                const el = document.getElementById(elementId);
+                const currentText = el.textContent.replace(/[^0-9.\-]/g, '');
+                const current = parseFloat(currentText) || 0;
+                const diff = targetValue - current;
+
+                if (Math.abs(diff) < 0.01) {
+                    el.textContent = targetValue.toFixed(decimals) + suffix;
+                    return;
+                }
+
+                const duration = 600;
+                const start = performance.now();
+
+                function step(timestamp) {
+                    const elapsed = timestamp - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    // ease-out
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const val = current + diff * eased;
+                    el.textContent = val.toFixed(decimals) + suffix;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    }
+                }
+
+                requestAnimationFrame(step);
+            }
+
+            function updateAlerts(entries) {
+                const alertList = document.getElementById('alertList');
+                const newAlerts = [];
+
+                entries.forEach(e => {
+                    const level = getAlertLevel(e.rate);
+                    if (level) {
+                        const label = state.level === 'province' ? '省' :
+                            state.level === 'city' ? '市' : '区县';
+                        newAlerts.push({
+                            level,
+                            name: e.name,
+                            label,
+                            rate: e.rate,
+                            registered: e.registered,
+                            total: e.total,
+                            remain: e.total - e.registered,
+                        });
+                    }
+                });
+
+                // 检测新增预警（与上次对比）
+                const prevNames = new Set(state.alerts.map(a => a.name));
+                newAlerts.forEach(a => {
+                    if (!prevNames.has(a.name)) {
+                        showToast(
+                            a.level === 'red' ? 'danger' : 'warn',
+                            `⚠️ ${a.level === 'red' ? '严重滞后' : '进度偏慢'}`,
+                            `${a.name}完成率仅${(a.rate * 100).toFixed(1)}%，${a.label === '省' ? '全省' : '该' + a.label}排名靠后`
+                        );
+                    }
+                });
+
+                state.alerts = newAlerts;
+
+                if (newAlerts.length === 0) {
+                    alertList.innerHTML = '<li style="color:var(--text-muted);font-size:12px;padding:12px;">暂无预警，一切正常 ✅</li>';
+                } else {
+                    alertList.innerHTML = newAlerts.map(a => `
+                <li class="alert-item ${a.level}">
+                    <span class="alert-icon">${a.level === 'red' ? '🔴' : a.level === 'orange' ? '🟠' : '🟡'}</span>
+                    <div class="alert-content">
+                        <div class="alert-area">${a.name} <span style="color:${getColorByRate(a.rate)};font-weight:700;">${(a.rate * 100).toFixed(1)}%</span></div>
+                        <div class="alert-detail">未报名 ${a.remain.toLocaleString()} 人 | ${a.label}排名垫底</div>
+                    </div>
+                </li>`).join('');
+                }
+            }
+
+            // 排行榜点击下钻
+            window._drillRank = function (name) {
+                if (state.level === 'province' && state.provinceData[name]) {
+                    drillDownToCity(name);
+                } else if (state.level === 'city' && state.cityData[name]) {
+                    drillDownToDistrict(name);
+                }
+            };
+
+            // ═══════════════════════════════════════
+            // 六、Toast通知
+            // ═══════════════════════════════════════
+            function showToast(type, title, message) {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `<span>${type === 'danger' ? '🔴' : type === 'warn' ? '⚠️' : 'ℹ️'}</span>
+                <div><strong>${title}</strong><br><span style="font-size:11px;opacity:0.85;">${message}</span></div>`;
+                container.appendChild(toast);
+
+                // 播放提示音
+                if (state.soundEnabled && type !== 'info') {
+                    playBeep(type);
+                }
+
+                // 4秒后移除
+                setTimeout(() => {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 4000);
+            }
+
+            function playBeep(type) {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.value = type === 'danger' ? 880 : 660;
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.3);
+                } catch (e) { /* 静默处理 */ }
+            }
+
+            // ═══════════════════════════════════════
+            // 七、实时数据模拟
+            // ═══════════════════════════════════════
+            function simulateDataUpdate() {
+                if (!state.autoRefresh) return;
+
+                const dataMap = getCurrentDataMap();
+                const entries = Object.values(dataMap);
+                if (entries.length === 0) return;
+
+                // 随机选1-3个区域更新
+                const updateCount = 1 + Math.floor(Math.random() * 3);
+                const shuffled = [...entries].sort(() => Math.random() - 0.5);
+
+                for (let i = 0; i < Math.min(updateCount, shuffled.length); i++) {
+                    const entry = shuffled[i];
+                    if (entry.rate >= 0.999) continue; // 已满的不再增长
+
+                    const increment = Math.floor(Math.random() * entry.total * 0.03) + 1;
+                    entry.registered = Math.min(entry.total, entry.registered + increment);
+                    entry.rate = entry.registered / entry.total;
+                    state.todayNew += increment;
+                }
+
+                state.lastUpdate = new Date();
+                updateSidebar();
+
+                // 同步更新地图颜色（不重新渲染整个地图以保持性能）
+                updateMapColors();
+            }
+
+            function updateMapColors() {
+                const currentOption = mapChart.getOption();
+                if (!currentOption || !currentOption.series || !currentOption.series[0]) return;
+
+                const dataMap = getCurrentDataMap();
+
+                if (state.level === 'province' && chinaGeoJSON && currentOption.series[0].type === 'map') {
+                    const newData = Object.values(dataMap).map(d => ({
+                        name: d.name,
+                        value: d.rate * 100,
+                        registered: d.registered,
+                        total: d.total,
+                    }));
+                    mapChart.setOption({ series: [{ data: newData }] });
+                } else if (currentOption.series[0].type === 'scatter') {
+                    // 散点图模式：仅更新颜色
+                    const series = currentOption.series[0];
+                    if (series.data) {
+                        const newData = series.data.map(d => {
+                            const name = d.name;
+                            const entry = dataMap[name];
+                            if (entry && d.value && Array.isArray(d.value)) {
+                                d.value[2] = entry.rate * 100;
+                                d.value[3] = entry.registered;
+                                d.value[4] = entry.total;
+                            }
+                            return d;
+                        });
+                        mapChart.setOption({ series: [{ data: newData }] });
+                    }
+                } else if (state.level === 'district' && currentOption.series[0].type === 'bar') {
+                    const newData = Object.values(dataMap).map(d => ({
+                        name: d.name,
+                        value: (d.rate * 100).toFixed(1),
+                        itemStyle: {
+                            color: getColorByRate(d.rate),
+                            borderRadius: [6, 6, 0, 0],
+                            shadowBlur: 8,
+                            shadowColor: 'rgba(0,0,0,0.3)',
+                        }
+                    }));
+                    mapChart.setOption({ series: [{ data: newData }] });
+                }
+            }
+
+            function startSimulation() {
+                state.refreshTimer = setInterval(simulateDataUpdate, 2000);
+            }
+
+            function stopSimulation() {
+                if (state.refreshTimer) {
+                    clearInterval(state.refreshTimer);
+                    state.refreshTimer = null;
+                }
+            }
+
+            // ═══════════════════════════════════════
+            // 八、倒计时
+            // ═══════════════════════════════════════
+            function updateCountdown() {
+                // 模拟：距离截止还有 3天12时左右的倒计时
+                const now = new Date();
+                const deadline = new Date(now.getTime() + 3.5 * 24 * 60 * 60 * 1000 -
+                    (Math.random() * 2 * 60 * 60 * 1000));
+                const diff = deadline - now;
+
+                if (diff <= 0) {
+                    document.getElementById('deadlineCountdown').textContent = '已截止';
+                    document.getElementById('deadlineCountdown').style.color = '#E53935';
+                    return;
+                }
+
+                const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+                const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                const mins = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
+
+                const el = document.getElementById('deadlineCountdown');
+                el.textContent = `${days}天${hours}时${mins}分`;
+                el.style.color = days === 0 ? '#E53935' : '#FB8C00';
+            }
+
+            function startCountdown() {
+                updateCountdown();
+                state.countdownTimer = setInterval(updateCountdown, 60000);
+            }
+
+            // ═══════════════════════════════════════
+            // 九、按钮事件
+            // ═══════════════════════════════════════
+            document.getElementById('btnAutoRefresh').addEventListener('click', function () {
+                state.autoRefresh = !state.autoRefresh;
+                this.classList.toggle('active', state.autoRefresh);
+                if (state.autoRefresh) {
+                    startSimulation();
+                    showToast('info', '自动刷新已开启', '热力图将每2秒自动更新');
+                } else {
+                    stopSimulation();
+                    showToast('info', '自动刷新已暂停', '点击"自动刷新"按钮恢复');
+                }
+            });
+            // 默认激活
+            document.getElementById('btnAutoRefresh').classList.add('active');
+
+            document.getElementById('btnSound').addEventListener('click', function () {
+                state.soundEnabled = !state.soundEnabled;
+                this.classList.toggle('active', state.soundEnabled);
+            });
+            document.getElementById('btnSound').classList.add('active');
+
+            document.getElementById('btnFullscreen').addEventListener('click', function () {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                    document.body.classList.add('fullscreen');
+                } else {
+                    document.exitFullscreen();
+                    document.body.classList.remove('fullscreen');
+                }
+            });
+
+            // 监听全屏变化
+            document.addEventListener('fullscreenchange', function () {
+                if (!document.fullscreenElement) {
+                    document.body.classList.remove('fullscreen');
+                }
+            });
+
+            // 键盘快捷键
+            document.addEventListener('keydown', function (e) {
+                switch (e.key) {
+                    case 'Escape':
+                        if (state.level !== 'province') {
+                            goToLevel('province');
+                            showToast('info', '已返回全国视图', '');
+                        }
+                        break;
+                    case 'Backspace':
+                        if (state.level === 'district') {
+                            goToLevel('city');
+                        } else if (state.level === 'city') {
+                            goToLevel('province');
+                        }
+                        break;
+                    case 'f':
+                        if (e.ctrlKey) break;
+                        document.getElementById('btnFullscreen').click();
+                        break;
+                    case ' ':
+                        e.preventDefault();
+                        document.getElementById('btnAutoRefresh').click();
+                        break;
+                }
+            });
+
+            // 窗口resize
+            window.addEventListener('resize', function () {
+                mapChart.resize();
+            });
+
+            // ═══════════════════════════════════════
+            // 十、初始化
+            // ═══════════════════════════════════════
+            function init() {
+                loadChinaMap();
+                updateSidebar();
+                updateBreadcrumb();
+                startSimulation();
+                startCountdown();
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('zh-CN');
+            }
+
+            init();
+
+            console.log(`
+        ╔══════════════════════════════════════════╗
+        ║   📊 报名进度实时热力图 · 已就绪          ║
+        ║                                          ║
+        ║   🖱  点击省份 → 下钻到市                 ║
+        ║   🖱  点击城市 → 下钻到区县               ║
+        ║   ⌨  Esc → 返回全国视图                  ║
+        ║   ⌨  Backspace → 返回上一级              ║
+        ║   ⌨  空格 → 切换自动刷新                 ║
+        ║   ⌨  F → 全屏模式                       ║
+        ║   📱 侧边栏 → 排行榜点击可快速下钻        ║
+        ╚══════════════════════════════════════════╝
+        `);
+        })();
+    </script>
+</body>
+
+</html>

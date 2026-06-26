@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12TB本地知识库搭建指南 | 2026年RAG解决方案完整评测</title>
+    <meta name="description" content="为12TB PDF文档库搭建本地知识库的完整指南。涵盖Ollama、Dify、MaxKB、AnythingLLM、RAGFlow等主流方案对比，硬件配置、软件选型、搭建步骤详解，助您构建智能RAG知识库系统。">
+    <meta name="keywords" content="本地知识库, RAG, 12TB知识库, 向量数据库, Ollama, Dify, MaxKB, AnythingLLM, RAGFlow, 知识管理, AI, DeepSeek, BGE">
+    
+    <link rel="canonical" href="./kbmax_rag_solution.html">
+    
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="12TB本地知识库搭建指南 | 2026年RAG解决方案">
+    <meta property="og:description" content="主流RAG方案深度评测：Ollama+Dify、MaxKB、AnythingLLM、RAGFlow完整对比">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="12TB本地知识库搭建指南">
+    <meta name="twitter:description" content="本地RAG知识库完整解决方案">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6',
+                        secondary: '#7C3AED',
+                        accent: '#A78BFA',
+                        dark: '#0F172A',
+                        darker: '#1E293B'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+            line-height: 1.7;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 50%, #C4B5FD 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-bg {
+            background: linear-gradient(180deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+        }
+
+        .section-bg-alt {
+            background-color: #1E293B;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent);
+        }
+
+        .card-base {
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card-base:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(139, 92, 246, 0.2);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .nav-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .quote-block {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(124, 58, 237, 0.05));
+            border-left: 4px solid #8B5CF6;
+            padding: 1.5rem 2rem;
+            border-radius: 0 1rem 1rem 0;
+            margin: 2rem 0;
+        }
+
+        .quote-block p {
+            font-style: italic;
+            color: #E2E8F0;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .toc-card {
+            position: sticky;
+            top: 6rem;
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .toc-link {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #94A3B8;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .toc-link:hover {
+            background-color: rgba(139, 92, 246, 0.2);
+            color: #A78BFA;
+        }
+
+        .toc-link.active {
+            background-color: rgba(139, 92, 246, 0.3);
+            color: #A78BFA;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th {
+            background-color: rgba(139, 92, 246, 0.2);
+            color: #A78BFA;
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #CBD5E1;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(139, 92, 246, 0.05);
+        }
+
+        .step-number {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+        }
+
+        .feature-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box h4 {
+            color: #A78BFA;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .highlight-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .highlight-box li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: #CBD5E1;
+        }
+
+        .highlight-box li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #8B5CF6;
+        }
+
+        .code-block {
+            background-color: #0F172A;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .code-block code {
+            color: #10B981;
+            font-size: 0.875rem;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.5);
+        }
+
+        .solution-card {
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .solution-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(139, 92, 246, 0.2);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .solution-card-header {
+            padding: 1.25rem 1.5rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(124, 58, 237, 0.05));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .solution-card-body {
+            padding: 1.5rem;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .tag-easy {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #22C55E;
+        }
+
+        .tag-medium {
+            background-color: rgba(251, 191, 36, 0.2);
+            color: #FBBF24;
+        }
+
+        .tag-hard {
+            background-color: rgba(249, 115, 22, 0.2);
+            color: #F97316;
+        }
+
+        .tip-box {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.05));
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .tip-box h4 {
+            color: #FBBF24;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.05));
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .warning-box h4 {
+            color: #F97316;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .toc-card {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem !important;
+            }
+            
+            .section-title {
+                font-size: 1.75rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav-fixed">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <i class="fas fa-database text-white text-lg"></i>
+                    </div>
+                    <span class="font-bold text-xl">本地RAG知识库</span>
+                </div>
+                
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#overview" class="text-gray-400 hover:text-white transition-colors">概述</a>
+                    <a href="#hardware" class="text-gray-400 hover:text-white transition-colors">硬件配置</a>
+                    <a href="#software" class="text-gray-400 hover:text-white transition-colors">软件选型</a>
+                    <a href="#deployment" class="text-gray-400 hover:text-white transition-colors">部署指南</a>
+                    <a href="#tips" class="text-gray-400 hover:text-white transition-colors">实战技巧</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center pt-20 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center gap-2 bg-purple-500/20 border border-purple-500/30 rounded-full px-4 py-2 mb-6">
+                    <i class="fas fa-lightbulb text-purple-400"></i>
+                    <span class="text-sm font-medium">2026年完整解决方案</span>
+                </div>
+                
+                <h1 class="hero-title text-5xl sm:text-6xl lg:text-7xl font-black mb-6 gradient-text">
+                    12TB 本地知识库<br>搭建完全指南
+                </h1>
+                
+                <p class="text-xl sm:text-2xl text-gray-400 mb-8 max-w-4xl mx-auto leading-relaxed">
+                    为海量PDF文档库构建智能RAG知识库系统<br>
+                    <span class="text-white font-semibold">Ollama + Dify/MaxKB/AnythingLLM/RAGFlow 完整对比评测</span>
+                </p>
+                
+                <div class="quote-block max-w-3xl mx-auto text-left">
+                    <p>核心装备："硬盘阵列 + 大容量内存 + 强力显卡" = 超级大脑 + 高速书架</p>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-purple-400 mb-2">12TB+</div>
+                    <div class="text-gray-400 text-sm">海量文档存储</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-blue-400 mb-2">6+</div>
+                    <div class="text-gray-400 text-sm">主流方案评测</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-green-400 mb-2">100%</div>
+                    <div class="text-gray-400 text-sm">数据本地存储</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-orange-400 mb-2">免费</div>
+                    <div class="text-gray-400 text-sm">开源方案汇总</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Main Content -->
+    <section class="py-16" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+                
+                <!-- Table of Contents -->
+                <aside class="lg:col-span-1">
+                    <div class="toc-card">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-list text-purple-400"></i>
+                            目录导航
+                        </h3>
+                        <nav class="space-y-2">
+                            <a href="#overview" class="toc-link active">
+                                <i class="fas fa-rocket mr-2"></i>核心思路
+                            </a>
+                            <a href="#hardware" class="toc-link">
+                                <i class="fas fa-server mr-2"></i>硬件配置
+                            </a>
+                            <a href="#software" class="toc-link">
+                                <i class="fas fa-cubes mr-2"></i>软件选型
+                            </a>
+                            <a href="#deployment" class="toc-link">
+                                <i class="fas fa-download mr-2"></i>部署指南
+                            </a>
+                            <a href="#tips" class="toc-link">
+                                <i class="fas fa-star mr-2"></i>实战技巧
+                            </a>
+                        </nav>
+                    </div>
+                </aside>
+                
+                <!-- Article Content -->
+                <article class="lg:col-span-3">
+                    
+                    <!-- Core Concept Section -->
+                    <section id="overview" class="mb-16">
+                        <div class="bg-white/5 rounded-2xl p-8 border border-white/10 mb-8">
+                            <h2 class="section-title text-3xl font-bold mb-6 flex items-center gap-3">
+                                <i class="fas fa-brain text-purple-400"></i>
+                                核心思路：不只是存储，更是智能对话
+                            </h2>
+                            
+                            <p class="text-gray-300 mb-6 leading-relaxed">
+                                过去靠人脑记忆去硬盘里翻找，效率确实很低。现在的"本地知识库"，本质上是构建一个能和你"对话"的智能系统。
+                            </p>
+                            
+                            <div class="highlight-box">
+                                <h4><i class="fas fa-star"></i> RAG（检索增强生成）技术</h4>
+                                <ul>
+                                    <li><strong>检索：</strong>当你提问时，系统会在12TB文档中快速找到最相关的部分</li>
+                                    <li><strong>生成：</strong>由本地运行的大语言模型（LLM），根据找到的内容生成精确、有依据的答案</li>
+                                </ul>
+                            </div>
+                            
+                            <p class="text-gray-300 mt-6">
+                                所有数据都保留在你的本地硬盘上，既解决了手动翻找的痛点，又确保了数据的安全可控。
+                            </p>
+                        </div>
+                    </section>
+
+                    <!-- Hardware Section -->
+                    <section id="hardware" class="mb-16">
+                        <h2 class="section-title text-3xl font-bold mb-8 flex items-center gap-3">
+                            <i class="fas fa-server text-purple-400"></i>
+                            硬件配置：为12TB知识库提供强大动力
+                        </h2>
+                        
+                        <p class="text-gray-300 mb-8">
+                            要流畅运行一个12TB体量的本地知识库，硬件的"堆料"必不可少。以下是针对海量文档场景的详细配置建议：
+                        </p>
+                        
+                        <div class="table-container mb-8">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>硬件部件</th>
+                                        <th>基础入门 (个人尝鲜)</th>
+                                        <th class="bg-purple-500/30">推荐配置 (12TB数据)</th>
+                                        <th>顶配工作站</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="font-semibold text-white">CPU</td>
+                                        <td>8核以上，支持AVX2指令集</td>
+                                        <td class="bg-purple-500/10">16核以上，高频<br>(Intel Xeon / AMD EPYC)</td>
+                                        <td>32核以上服务器级CPU</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">内存 (RAM)</td>
+                                        <td>32GB (勉强运行)</td>
+                                        <td class="bg-purple-500/10">128GB 或更高</td>
+                                        <td>256GB+</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">显卡 (GPU)</td>
+                                        <td>RTX 3060 12GB</td>
+                                        <td class="bg-purple-500/10">RTX 4090 24GB 或双卡</td>
+                                        <td>多路高端GPU (双A100)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">存储方案</td>
+                                        <td>纯SSD (成本极高)</td>
+                                        <td class="bg-purple-500/10">NVMe SSD(1-2TB) + HDD阵列</td>
+                                        <td>全闪NVMe阵列</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">预算参考</td>
+                                        <td>¥8,000 - 15,000</td>
+                                        <td class="bg-purple-500/10">¥30,000 - 60,000+</td>
+                                        <td>¥100,000+</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Key Points -->
+                        <div class="grid md:grid-cols-2 gap-6 mb-8">
+                            <div class="card-base">
+                                <div class="flex items-start gap-4">
+                                    <div class="feature-icon bg-blue-500/20 text-blue-400">
+                                        <i class="fas fa-microchip"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg mb-2">CPU 核心要点</h3>
+                                        <p class="text-gray-400 text-sm">负责数据预处理和索引构建，核心数越多越好。推荐16核以上高性能CPU。</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-base">
+                                <div class="flex items-start gap-4">
+                                    <div class="feature-icon bg-green-500/20 text-green-400">
+                                        <i class="fas fa-memory"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg mb-2">内存 关键因素</h3>
+                                        <p class="text-gray-400 text-sm">向量索引需要大量内存。对于12TB体量，推荐128GB或更高。</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-base">
+                                <div class="flex items-start gap-4">
+                                    <div class="feature-icon bg-orange-500/20 text-orange-400">
+                                        <i class="fas fa-tv"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg mb-2">GPU 推荐</h3>
+                                        <p class="text-gray-400 text-sm">影响AI推理速度。推荐RTX 4090 24GB，多显卡可显著提升响应速度。</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-base">
+                                <div class="flex items-start gap-4">
+                                    <div class="feature-icon bg-purple-500/20 text-purple-400">
+                                        <i class="fas fa-hdd"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg mb-2">存储方案</h3>
+                                        <p class="text-gray-400 text-sm">NVMe SSD放索引 + HDD阵列存原始PDF。建议组建RAID 5/6或UnRAID阵列。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tip-box">
+                            <h4><i class="fas fa-lightbulb"></i> 存储优化建议</h4>
+                            <p class="text-gray-300 text-sm">
+                                <strong>SSD + HDD 混合方案</strong>：高速NVMe SSD (1-2TB) 用于存放操作系统、数据库软件和向量索引；大容量HDD阵列用于存放原始PDF文件。将索引放在SSD上是保证快速检索的关键。
+                            </p>
+                            <p class="text-gray-300 text-sm mt-3">
+                                <strong>零散硬盘利用</strong>：可将多块零散硬盘组建为RAID 5/6或UnRAID阵列，既能合并容量又能提供数据冗余保护。
+                            </p>
+                        </div>
+                    </section>
+
+                    <!-- Software Section -->
+                    <section id="software" class="mb-16">
+                        <h2 class="section-title text-3xl font-bold mb-8 flex items-center gap-3">
+                            <i class="fas fa-cubes text-purple-400"></i>
+                            软件选型：2026年主流方案完整评测
+                        </h2>
+                        
+                        <p class="text-gray-300 mb-8">
+                            2026年，本地RAG知识库生态已经非常成熟。以下是针对不同场景的方案对比：
+                        </p>
+                        
+                        <!-- Solution Cards -->
+                        <div class="grid md:grid-cols-2 gap-6 mb-12">
+                            
+                            <!-- AnythingLLM -->
+                            <div class="solution-card">
+                                <div class="solution-card-header">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="text-xl font-bold flex items-center gap-2">
+                                            <i class="fas fa-comment-dots text-purple-400"></i>
+                                            AnythingLLM
+                                        </h3>
+                                        <span class="tag tag-easy">极低门槛</span>
+                                    </div>
+                                </div>
+                                <div class="solution-card-body">
+                                    <p class="text-gray-400 text-sm mb-4">
+                                        开源一站式RAG工具，集成了完整检索增强生成流程。专为个人用户和小团队设计，开箱即用。
+                                    </p>
+                                    <div class="space-y-2 mb-4">
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>图形化界面，无需编码</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>支持本地LLM和嵌入模型</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>多模型集成，支持Ollama</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>默认本地化数据存储</span>
+                                        </div>
+                                    </div>
+                                    <div class="code-block">
+                                        <code>ollama run deepseek-r1:7b</code>
+                                    </div>
+                                    <p class="text-gray-500 text-xs">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        适合零基础用户快速搭建私有知识库
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Dify -->
+                            <div class="solution-card">
+                                <div class="solution-card-header">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="text-xl font-bold flex items-center gap-2">
+                                            <i class="fas fa-layer-group text-blue-400"></i>
+                                            Dify
+                                        </h3>
+                                        <span class="tag tag-easy">低门槛</span>
+                                    </div>
+                                </div>
+                                <div class="solution-card-body">
+                                    <p class="text-gray-400 text-sm mb-4">
+                                        功能强大的开源LLM应用开发平台，提供丰富的知识库管理功能，支持标签、版本控制等企业级特性。
+                                    </p>
+                                    <div class="space-y-2 mb-4">
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>知识库管理（标签、版本控制）</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>通用模式 + 父子分段模式</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>可视化Prompt编辑器</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>支持国产模型（通义千问、智谱GLM）</span>
+                                        </div>
+                                    </div>
+                                    <div class="code-block">
+                                        <code>docker compose up -d</code>
+                                    </div>
+                                    <p class="text-gray-500 text-xs">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        适合需要精细化管理知识的用户
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- MaxKB -->
+                            <div class="solution-card">
+                                <div class="solution-card-header">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="text-xl font-bold flex items-center gap-2">
+                                            <i class="fas fa-brain text-green-400"></i>
+                                            MaxKB
+                                        </h3>
+                                        <span class="tag tag-medium">中等门槛</span>
+                                    </div>
+                                </div>
+                                <div class="solution-card-body">
+                                    <p class="text-gray-400 text-sm mb-4">
+                                        基于LLM大语言模型的知识库问答系统，企业级特性，支持多模型切换，适合有高并发需求的用户。
+                                    </p>
+                                    <div class="space-y-2 mb-4">
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>开箱即用，3分钟快速部署</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>企业级特性，多模型切换</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>高并发支持，Agent智能体</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>阿里云轻量应用服务器支持</span>
+                                        </div>
+                                    </div>
+                                    <div class="code-block">
+                                        <code>docker run -d --name=maxkb -p 8080:8080</code>
+                                    </div>
+                                    <p class="text-gray-500 text-xs">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        适合企业级应用和高并发场景
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- RAGFlow -->
+                            <div class="solution-card">
+                                <div class="solution-card-header">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="text-xl font-bold flex items-center gap-2">
+                                            <i class="fas fa-flow text-orange-400"></i>
+                                            RAGFlow
+                                        </h3>
+                                        <span class="tag tag-medium">中等门槛</span>
+                                    </div>
+                                </div>
+                                <div class="solution-card-body">
+                                    <p class="text-gray-400 text-sm mb-4">
+                                        基于深度文档理解的开源RAG引擎，从文档解析到检索生成提供完整链路，适合开发者深度定制。
+                                    </p>
+                                    <div class="space-y-2 mb-4">
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>DeepDoc解析引擎（PDF/Word/Excel）</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>专业化分块模板（General/Table/Laws）</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>向量检索 + BM25混合召回</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-green-400"></i>
+                                            <span>无限上下文（token级别控制）</span>
+                                        </div>
+                                    </div>
+                                    <div class="code-block">
+                                        <code>git clone && docker compose up</code>
+                                    </div>
+                                    <p class="text-gray-500 text-xs">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        适合深度定制和专业文档处理
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Solutions Table -->
+                        <h3 class="text-2xl font-bold mb-6">进阶方案对比</h3>
+                        <div class="table-container mb-8">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>方案</th>
+                                        <th>核心特点</th>
+                                        <th>适用场景</th>
+                                        <th>技术门槛</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="font-semibold text-white">openGauss + DeepSeek</td>
+                                        <td>国产开源数据库，自主可控</td>
+                                        <td>对数据安全有极致要求的企业</td>
+                                        <td><span class="text-orange-400">较高</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">Cherry Studio + Ollama</td>
+                                        <td>轻量级客户端，BGE-M3向量化</td>
+                                        <td>个人开发者快速验证</td>
+                                        <td><span class="text-green-400">低</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold text-white">Trilium Notes</td>
+                                        <td>非AI，强大笔记系统</td>
+                                        <td>手动构建知识体系</td>
+                                        <td><span class="text-green-400">低</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Model Recommendations -->
+                        <div class="highlight-box">
+                            <h4><i class="fas fa-robot"></i> 推荐模型组合</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <p class="text-purple-400 font-semibold mb-2">大语言模型 (LLM)</p>
+                                    <div class="space-y-2 text-sm text-gray-400">
+                                        <p><code class="bg-white/10 px-2 py-1 rounded text-green-400">deepseek-r1:7b</code> - 入门推荐，4.7GB</p>
+                                        <p><code class="bg-white/10 px-2 py-1 rounded text-green-400">deepseek-r1:14b</code> - 平衡之选，9GB</p>
+                                        <p><code class="bg-white/10 px-2 py-1 rounded text-green-400">qwen2.5:14b</code> - 中文优化</p>
+                                        <p><code class="bg-white/10 px-2 py-1 rounded text-green-400">llama3.3</code> - 国际标杆</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-blue-400 font-semibold mb-2">嵌入模型 (Embedding)</p>
+                                    <div class="space-y-2 text-sm text-gray-400">
+                                        <p><code class="bg-white/10 px-2 py-1 rounded text-green-400">nomic-embed-text</code> - Ollama官方推荐</p>
+                                        <p><code class="bg-white/10 px-2 py-1 rounded text-green-400">bge-m3</code> - 智源开源，100+语言支持</p>
+                                        <p><code class="bg-white/10 px-2 py-1 rounded text-green-400">bge-large-zh</code> - 中文优化版</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Deployment Guide Section -->
+                    <section id="deployment" class="mb-16">
+                        <h2 class="section-title text-3xl font-bold mb-8 flex items-center gap-3">
+                            <i class="fas fa-download text-purple-400"></i>
+                            部署指南：从零到一的完整流程
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <!-- Step 1 -->
+                            <div class="bg-white/5 rounded-2xl p-6 border border-white/10 flex gap-6">
+                                <div class="step-number">1</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-2">硬件就位与系统准备</h3>
+                                    <p class="text-gray-400 mb-3">将零散硬盘组建为阵列，准备好硬件环境后，安装操作系统。</p>
+                                    <div class="bg-dark rounded-lg p-4 font-mono text-sm">
+                                        <p class="text-gray-500 mb-2"># 推荐使用 Ubuntu 22.04 LTS</p>
+                                        <p class="text-green-400"># 安装 Docker</p>
+                                        <p class="text-blue-400">curl -fsSL https://get.docker.com | sh</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 2 -->
+                            <div class="bg-white/5 rounded-2xl p-6 border border-white/10 flex gap-6">
+                                <div class="step-number">2</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-2">安装 Ollama</h3>
+                                    <p class="text-gray-400 mb-3">Ollama是目前最简单的本地大模型部署工具，支持macOS、Linux和Windows。</p>
+                                    <div class="bg-dark rounded-lg p-4 font-mono text-sm">
+                                        <p class="text-gray-500 mb-2"># Linux/macOS 安装</p>
+                                        <p class="text-green-400">curl -fsSL https://ollama.com/install.sh | sh</p>
+                                        <p class="text-gray-500 mt-3 mb-2"># 下载模型</p>
+                                        <p class="text-blue-400">ollama pull deepseek-r1:7b</p>
+                                        <p class="text-blue-400">ollama pull nomic-embed-text</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 3 -->
+                            <div class="bg-white/5 rounded-2xl p-6 border border-white/10 flex gap-6">
+                                <div class="step-number">3</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-2">部署知识库软件</h3>
+                                    <p class="text-gray-400 mb-3">从推荐方案中选择一个，通过Docker快速启动。</p>
+                                    
+                                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                        <div class="bg-dark rounded-lg p-4">
+                                            <p class="text-purple-400 font-semibold mb-2">AnythingLLM</p>
+                                            <div class="code-block !p-0 !bg-transparent">
+                                                <code class="text-sm">docker pull mintplexlabs/anythingllm</code>
+                                            </div>
+                                        </div>
+                                        <div class="bg-dark rounded-lg p-4">
+                                            <p class="text-blue-400 font-semibold mb-2">Dify</p>
+                                            <div class="code-block !p-0 !bg-transparent">
+                                                <code class="text-sm">git clone https://github.com/dify/dify</code>
+                                            </div>
+                                        </div>
+                                        <div class="bg-dark rounded-lg p-4">
+                                            <p class="text-green-400 font-semibold mb-2">MaxKB</p>
+                                            <div class="code-block !p-0 !bg-transparent">
+                                                <code class="text-sm">docker run -d -p 8080:8080 maxkb</code>
+                                            </div>
+                                        </div>
+                                        <div class="bg-dark rounded-lg p-4">
+                                            <p class="text-orange-400 font-semibold mb-2">RAGFlow</p>
+                                            <div class="code-block !p-0 !bg-transparent">
+                                                <code class="text-sm">git clone ragflow && cd ragflow</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 4 -->
+                            <div class="bg-white/5 rounded-2xl p-6 border border-white/10 flex gap-6">
+                                <div class="step-number">4</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-2">导入数据</h3>
+                                    <p class="text-gray-400 mb-3">在软件界面上创建"知识库"，添加PDF文件夹路径。系统会自动解析和向量化文档。</p>
+                                    <div class="tip-box !m-0">
+                                        <h4><i class="fas fa-clock"></i> 耗时说明</h4>
+                                        <p class="text-sm text-gray-400">12TB文档的解析和向量化可能需要数天甚至数周。建议先从核心文档开始验证。</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 5 -->
+                            <div class="bg-white/5 rounded-2xl p-6 border border-white/10 flex gap-6">
+                                <div class="step-number">5</div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold mb-2">智能问答</h3>
+                                    <p class="text-gray-400 mb-3">导入完成后，就可以像和ChatGPT对话一样向你的知识库提问。</p>
+                                    <div class="bg-dark rounded-lg p-4 mt-4">
+                                        <p class="text-gray-400 text-sm mb-2">示例问题：</p>
+                                        <p class="text-purple-400 italic">"请总结2020年到2025年间，所有关于'人工智能芯片'技术报告的演进趋势。"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tips Section -->
+                    <section id="tips" class="mb-16">
+                        <h2 class="section-title text-3xl font-bold mb-8 flex items-center gap-3">
+                            <i class="fas fa-star text-purple-400"></i>
+                            实战技巧与避坑指南
+                        </h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-6 mb-8">
+                            
+                            <div class="tip-box">
+                                <h4><i class="fas fa-check-circle"></i> 分块策略</h4>
+                                <ul class="space-y-2 text-sm text-gray-400 mt-3">
+                                    <li>• <strong>通用模式</strong>：适合结构清晰的文档</li>
+                                    <li>• <strong>父子分段</strong>：保留上下文关联，适合复杂文档</li>
+                                    <li>• <strong>智能分块</strong>：RAGFlow的DeepDoc可识别标题、段落、表格</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="tip-box">
+                                <h4><i class="fas fa-check-circle"></i> 召回优化</h4>
+                                <ul class="space-y-2 text-sm text-gray-400 mt-3">
+                                    <li>• <strong>混合召回</strong>：向量检索 + BM25结合</li>
+                                    <li>• <strong>重排序</strong>：使用Rerank模型优化结果</li>
+                                    <li>• <strong>大海捞针测试</strong>：10万字文档嵌入5个关键信息验证</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="tip-box">
+                                <h4><i class="fas fa-check-circle"></i> 模型选型</h4>
+                                <ul class="space-y-2 text-sm text-gray-400 mt-3">
+                                    <li>• <strong>7B模型</strong>：入门推荐，4.7GB，RTX 3060可运行</li>
+                                    <li>• <strong>14B模型</strong>：平衡之选，9GB，RTX 4090流畅</li>
+                                    <li>• <strong>70B+模型</strong>：需要双卡或服务器级硬件</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="tip-box">
+                                <h4><i class="fas fa-check-circle"></i> 性能优化</h4>
+                                <ul class="space-y-2 text-sm text-gray-400 mt-3">
+                                    <li>• <strong>量化模型</strong>：Q4/Q8量化减少显存占用</li>
+                                    <li>• <strong>批处理</strong>：批量导入文档提高效率</li>
+                                    <li>• <strong>SSD索引</strong>：确保向量索引在SSD上</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="warning-box">
+                            <h4><i class="fas fa-exclamation-triangle"></i> 常见误区</h4>
+                            <ul class="space-y-2 text-sm text-gray-400 mt-3">
+                                <li>1. <strong>盲目追求大模型</strong>：7B模型在大多数场景下足够好用</li>
+                                <li>2. <strong>忽略数据质量</strong>：garbage in, garbage out，文档预处理很重要</li>
+                                <li>3. <strong>分块太大或太小</strong>：一般建议256-512tokens</li>
+                                <li>4. <strong>忽视Embedding质量</strong>：中文场景推荐使用bge-large-zh</li>
+                                <li>5. <strong>一次导入全部数据</strong>：建议分批验证，确保质量</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Start Small Tip -->
+                        <div class="bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-purple-500/20 rounded-2xl p-8 border border-purple-500/30 mt-8">
+                            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-rocket text-purple-400"></i>
+                                建议：从核心文档开始
+                            </h3>
+                            <p class="text-gray-300">
+                                如果觉得当前方案成本或技术门槛较高，可以先从<strong class="text-purple-400">几百GB的核心文档</strong>开始，用小规模数据进行验证。确认效果后再扩展到全部12TB数据。
+                            </p>
+                            <p class="text-gray-400 text-sm mt-4">
+                                希望这份指南能为你提供一个清晰的起点。如果在部署过程中遇到具体的技术难题，随时可以进一步交流。
+                            </p>
+                        </div>
+                        
+                        <!-- CTA -->
+                        <div class="mt-12 text-center">
+                            <h3 class="text-2xl font-bold mb-6">准备好开始了吗？</h3>
+                            <div class="flex flex-wrap justify-center gap-4">
+                                <button class="btn-primary text-lg px-8 py-4">
+                                    <i class="fas fa-question-circle"></i>
+                                    咨询更多问题
+                                </button>
+                                <a href="#software" class="btn-outline text-lg px-8 py-4">
+                                    <i class="fas fa-redo"></i>
+                                    重新选择方案
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+                    
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-white/10" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                    <i class="fas fa-database text-white"></i>
+                </div>
+                <span class="font-bold text-xl">本地RAG知识库</span>
+            </div>
+            <p class="text-gray-500 mb-4">12TB+ 本地知识库解决方案 | 2026年完整评测</p>
+            <div class="flex justify-center gap-4 mb-4 text-sm text-gray-400">
+                <span>Ollama</span>
+                <span>•</span>
+                <span>Dify</span>
+                <span>•</span>
+                <span>MaxKB</span>
+                <span>•</span>
+                <span>AnythingLLM</span>
+                <span>•</span>
+                <span>RAGFlow</span>
+            </div>
+            <p class="text-gray-600 text-sm">© 2026 本地RAG知识库指南. 仅供学习交流.</p>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "12TB本地知识库搭建指南 | 2026年RAG解决方案",
+        "description": "为12TB PDF文档库搭建本地知识库的完整指南，涵盖Ollama、Dify、MaxKB、AnythingLLM、RAGFlow等主流方案对比",
+        "author": {
+            "@type": "Organization",
+            "name": "本地RAG知识库"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "本地RAG知识库"
+        },
+        "datePublished": "2026-04-05"
+    }
+    </script>
+
+    <script>
+        // Back to Top functionality
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('backToTop');
+            if (window.scrollY > 300) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        });
+
+        // TOC Active State
+        const sections = document.querySelectorAll('section[id]');
+        const tocLinks = document.querySelectorAll('.toc-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scroll for TOC links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

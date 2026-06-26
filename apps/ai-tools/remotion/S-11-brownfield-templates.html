@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Remotion 场景:Brownfield 集成与 30+ 官方模板 | Remotion 知识库</title>
+<meta name="description" content="详解 Remotion 4.x 集成到现有项目(Next.js/React Router/Vite/CRA)+ 代码共享(Studio↔Player↔SSR)+ 30+ 官方模板全收录(免费+付费)+ Express 渲染服务器搭建 + Recorder 浏览器录制。">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Remotion Brownfield 集成与 30+ 官方模板","description":"Brownfield 集成 + 30+ 模板全收录。","inLanguage":"zh-CN"}</script>
+</head><body>
+<header class="site-header"><nav class="nav-wrap">
+<a href="index.html" class="brand"><span class="brand-mark">R</span><span>Remotion 知识库</span></a>
+<div class="nav-links"><a href="index.html">总目录</a><a href="S-10-best-practices-faq.html">← FAQ</a></div>
+</nav></header>
+<main class="container">
+<nav class="breadcrumb"><a href="index.html">首页</a> / <a href="index.html#scene">场景层</a> / Brownfield + 模板</nav>
+<h1>Brownfield 集成与 30+ 官方模板</h1>
+<p class="hero-sub">将 Remotion 集成到 Next.js/React Router/Vite + 全部官方模板分类</p>
+<div class="alert alert-info"><span class="alert-icon">📚</span><div class="alert-body"><p>来源:Remotion 官方 Brownfield 文档 + templates.remotion.dev 官方模板库(2025-2026)。</p></div></div>
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>Brownfield 集成:加进现有项目</h2>
+<p>Remotion 4.x 可装入 Next.js / React Router 7 / Vite / CRA 等任意 React 项目:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npm i --save-exact remotion@4.0.468 @remotion/cli@4.0.468
+# 装在已有 Next.js 项目里
+cd my-next-app
+mkdir -p src/remotion</code></pre></div>
+<p>三件套文件结构:</p>
+<div class="code-block"><div class="code-block-header">text</div><pre class="line-numbers"><code class="language-text">src/
+├── remotion/
+│   ├── index.ts          # registerRoot(MyVideo)
+│   ├── Root.tsx          # 列出所有 Composition
+│   └── MyComp.tsx        # 单个视频组件
+├── app/
+└── App.tsx</code></pre></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>代码共享(Studio ↔ Player ↔ SSR)</h2>
+<p>写一次组件,3 个地方复用:Studio 预览 / Player 嵌入 / Lambda 渲染。</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">// remotion/MyComp.tsx
+export const MyComp: React.FC&lt;{ text: string }&gt; = ({ text }) =&gt; (
+  &lt;AbsoluteFill&gt;Hello {text}!&lt;/AbsoluteFill&gt;
+);
+
+// app/page.tsx(Next.js 页面) - 嵌入 Player
+import { Player } from '@remotion/player';
+import { MyComp } from '@/remotion/MyComp';
+
+&lt;Player
+  component={MyComp}
+  inputProps={{ text: 'World' }}
+  durationInFrames={120}
+  compositionWidth={1920}
+  compositionHeight={1080}
+  fps={30}
+  style={{ width: 1280, height: 720 }}
+  controls
+/&gt;
+
+// server.ts - SSR 渲染
+import { bundle } from '@remotion/bundler';
+import { renderMedia, selectComposition } from '@remotion/renderer';
+const bundled = await bundle(path.join(cwd, 'src/remotion/index.ts'));
+const comp = await selectComposition({ serveUrl: bundled, id: 'MyComp', inputProps: {} });
+await renderMedia({ composition: comp, serveUrl: bundled, outputLocation: 'out.mp4', codec: 'h264' });</code></pre></div>
+<p>注意:Remotion 和宿主项目用不同 Webpack 配置,自定义配置时两边都要覆盖。</p>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>30+ 官方模板分类</h2>
+
+<h3>3.1 基础模板(4)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>模板</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td>blank</td><td>空白起点</td></tr>
+<tr><td>hello-world</td><td>简单动画示例</td></tr>
+<tr><td>javascript</td><td>纯 JS 模板</td></tr>
+<tr><td>still</td><td>动态 PNG/JPEG + 内置 server</td></tr>
+</tbody>
+</table></div>
+
+<h3>3.2 SaaS Next.js 模板(5)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>模板</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td>next</td><td>Next.js App dir + Player + Lambda</td></tr>
+<tr><td>vercel</td><td>Next.js + Vercel Sandbox 部署</td></tr>
+<tr><td>next-no-tailwind</td><td>Next.js 不带 Tailwind</td></tr>
+<tr><td>next-pages-dir</td><td>Next.js Pages 目录</td></tr>
+<tr><td>react-router</td><td>React Router 7(Remix)</td></tr>
+</tbody>
+</table></div>
+
+<h3>3.3 渲染服务器(3)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>模板</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td>render-server</td><td>Express.js 渲染服务器</td></tr>
+<tr><td>electron</td><td>桌面应用渲染</td></tr>
+<tr><td>recorder</td><td>浏览器视频录制工具(JS)</td></tr>
+</tbody>
+</table></div>
+
+<h3>3.4 可视化(6)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>模板</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td>three</td><td>Remotion + React Three Fiber 3D 起步</td></tr>
+<tr><td>skia</td><td>React Native Skia 起步</td></tr>
+<tr><td>audiogram</td><td>播客文本 + 波形可视化</td></tr>
+<tr><td>music-visualization</td><td>音乐频谱可视化</td></tr>
+<tr><td>overlay</td><td>视频编辑软件叠加层</td></tr>
+<tr><td>code-hike</td><td>代码动画</td></tr>
+</tbody>
+</table></div>
+
+<h3>3.5 AI / 文本生成(3)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>模板</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td>prompt-to-video</td><td>从 prompt 生成图片+配音视频</td></tr>
+<tr><td>prompt-to-motion-graphics</td><td>AI 动画生成 SaaS</td></tr>
+<tr><td>tiktok</td><td>词词高亮字幕</td></tr>
+</tbody>
+</table></div>
+
+<h3>3.6 文本转语音 TTS(2)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>模板</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td>text-to-speech-azure</td><td>Azure TTS</td></tr>
+<tr><td>text-to-speech-google</td><td>Google TTS</td></tr>
+</tbody>
+</table></div>
+
+<h3>3.7 其他免费(3)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>模板</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td>stargazer</td><td>GitHub stars 庆祝视频</td></tr>
+<tr><td>hello-world-pr-previews</td><td>PR 自动视频预览</td></tr>
+<tr><td>library-starter</td><td>Remotion 库开发起步(最佳实践)</td></tr>
+</tbody>
+</table></div>
+
+<h3>3.8 付费模板(3)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>模板</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td>editor-starter</td><td>启动你自己的视频编辑器</td></tr>
+<tr><td>watercolor-map</td><td>旅行视频的 2D 水彩地图</td></tr>
+<tr><td>timeline</td><td>时间轴编辑组件</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>模板安装命令</h2>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash"># CLI 交互选择
+npx create-video@latest
+
+# 指定模板
+npx create-video@latest --template next my-app
+npx create-video@latest --template three my-3d
+npx create-video@latest --template tiktok my-tiktok
+npx create-video@latest --template render-server my-api</code></pre></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>Recorder:浏览器内视频录制</h2>
+<p>用 <code>MediaRecorder</code> + Remotion 实时录制:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">// 1. MediaRecorder 录制 canvas 流
+const stream = canvas.captureStream(30);  // 30fps
+const chunks: Blob[] = [];
+const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+recorder.ondataavailable = e =&gt; chunks.push(e.data);
+recorder.start();
+
+// 2. 渲染时每帧推进
+useEffect(() =&gt; {
+  return () =&gt; {
+    recorder.stop();
+    const blob = new Blob(chunks, { type: 'video/webm' });
+    saveAs(blob, 'output.webm');
+  };
+}, []);</code></pre></div>
+<p>官方 <code>recorder</code> 模板是端到端完整实现,推荐直接基于它定制。</p>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>View Transitions 浏览器 API</h2>
+<p>v4.0+ 实验性支持 Chrome 浏览器原生 View Transitions API:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">// Player 内启用
+&lt;Player component={MyComp} enableExperimentalViewTransitions /&gt;
+
+// 组件内触发
+if (document.startViewTransition) {
+  document.startViewTransition(() =&gt; {
+    setView('next');
+  });
+}</code></pre></div>
+<p>Studio 中开启:<code>--enable-experimental-client-side-rendering</code> + <code>--allow-html-in-canvas</code>。</p>
+</section>
+
+<nav class="page-nav">
+<a href="S-10-best-practices-faq.html" class="prev">← 上一页:FAQ 全收录</a>
+<a href="index.html" class="next">回到总目录 →</a>
+</nav>
+</main>
+<footer class="site-footer"><p>© 2026 AI 工具箱 · Remotion 知识库 · 内容基于官方文档整理</p></footer>
+<script src="scripts.js"></script>
+</body></html>

@@ -1,0 +1,748 @@
+/**
+ * Editorial Enhance — Claude-style 全站统一规范
+ *
+ * 严格遵循 DESIGN.md (Claude Editorial) 规范:
+ * - 暖米色画布 #faf9f5 + 珊瑚 CTA #cc785c + 深色产品面 #181715
+ * - 衬线显示字体 (Cormorant Garamond) + 人文无衬线正文 (Inter)
+ * - 8 级间距 + 7 级圆角 + 极简阴影
+ * - 显示字重 400 (不加粗)，负字距 -0.01em ~ -1.5px
+ * - 96px section 节奏 + 32px 卡片内边距
+ *
+ * 使用:
+ *   在 HTML <head> 引入 design-system.css 之后:
+ *   <link href="assets/styles/editorial-enhance.css" rel="stylesheet">
+ */
+
+/* ============================================
+   1. 基础重置 (DESIGN.md 配色 + 字体)
+   ============================================ */
+
+:root {
+    /* 严格对齐 DESIGN.md colors */
+    --canvas: #faf9f5;
+    --ink: #141413;
+    --body: #3d3d3a;
+    --body-strong: #252523;
+    --muted: #6c6a64;
+    --muted-soft: #8e8b82;
+    --hairline: #e6dfd8;
+    --hairline-soft: #ebe6df;
+    --surface-soft: #f5f0e8;
+    --surface-card: #efe9de;
+    --surface-cream-strong: #e8e0d2;
+    --surface-dark: #181715;
+    --surface-dark-elevated: #252320;
+    --surface-dark-soft: #1f1e1b;
+    --primary: #cc785c;
+    --primary-active: #a9583e;
+    --primary-disabled: #e6dfd8;
+    --on-primary: #ffffff;
+    --on-dark: #faf9f5;
+    --on-dark-soft: #a09d96;
+    --accent-teal: #5db8a6;
+    --accent-amber: #e8a55a;
+    --success: #5db872;
+    --warning: #d4a017;
+    --error: #c64545;
+
+    /* DESIGN.md spacing scale */
+    --sp-xxs: 4px;
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-md: 16px;
+    --sp-lg: 24px;
+    --sp-xl: 32px;
+    --sp-xxl: 48px;
+    --sp-section: 96px;
+
+    /* DESIGN.md radius scale */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-pill: 9999px;
+    --r-full: 9999px;
+
+    /* DESIGN.md typography (Cormorant Garamond + Inter 替代 Copernicus + StyreneB) */
+    --font-display: 'Cormorant Garamond', 'EB Garamond', 'Tiempos Headline', 'Songti SC', 'Noto Serif SC', Georgia, serif;
+    --font-sans: 'Inter', 'StyreneB', 'PingFang SC', 'Noto Sans SC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+}
+
+/* ============================================
+   2. 字体栈 + 全局基础 (DESIGN.md 字号/字重/行高)
+   ============================================ */
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.55;
+    letter-spacing: 0;
+    color: var(--body);
+    background-color: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* 强制 h1-h6 使用衬线显示字体（DESIGN.md 不可破）*/
+h1, h2, h3, h4, h5, h6,
+.hero-title, .section-title, .featured-card-title,
+.book-title, .gradient-text, .display, .display-xl,
+.display-lg, .display-md, .display-sm, .title-lg,
+.title-md, .title-sm {
+    font-family: var(--font-display);
+    font-weight: 400;        /* DESIGN.md: 显示字重 400，绝不加粗 */
+    letter-spacing: -0.01em; /* DESIGN.md: 负字距必备 */
+    color: var(--ink);
+    margin: 0 0 var(--sp-md) 0;
+}
+
+/* DESIGN.md typography scale */
+.display-xl, h1 {
+    font-size: clamp(2.5rem, 6vw, 4rem);  /* 64px desktop */
+    line-height: 1.05;
+    letter-spacing: -0.023em;  /* -1.5px */
+}
+.display-lg, h2 {
+    font-size: clamp(2rem, 5vw, 3rem);  /* 48px */
+    line-height: 1.1;
+    letter-spacing: -0.02em;  /* -1px */
+}
+.display-md, h3 {
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);  /* 36px */
+    line-height: 1.15;
+    letter-spacing: -0.014em;  /* -0.5px */
+}
+.display-sm {
+    font-size: clamp(1.25rem, 3vw, 1.75rem);  /* 28px */
+    line-height: 1.2;
+    letter-spacing: -0.011em;  /* -0.3px */
+}
+.title-lg {
+    font-family: var(--font-sans);
+    font-size: 1.375rem;  /* 22px */
+    font-weight: 500;
+    line-height: 1.3;
+}
+.title-md {
+    font-family: var(--font-sans);
+    font-size: 1.125rem;  /* 18px */
+    font-weight: 500;
+    line-height: 1.4;
+}
+.title-sm {
+    font-family: var(--font-sans);
+    font-size: 1rem;  /* 16px */
+    font-weight: 500;
+    line-height: 1.4;
+}
+.body-md, p {
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--body);
+}
+.body-sm {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--body);
+}
+.caption {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;  /* 13px */
+    font-weight: 500;
+    line-height: 1.4;
+}
+.caption-uppercase {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;  /* 12px */
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.115em;  /* 1.5px */
+    text-transform: uppercase;
+}
+code, pre, .code {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;  /* 14px */
+    line-height: 1.6;
+}
+
+/* ============================================
+   3. 容器与栅格 (DESIGN.md max-width 1200px)
+   ============================================ */
+
+.content-container, .container, .max-w-7xl, .max-w-6xl, .max-w-5xl {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: clamp(1rem, 3vw, 2rem);
+    padding-right: clamp(1rem, 3vw, 2rem);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+main, #main-content {
+    display: block;
+    min-height: 60vh;
+    background-color: var(--canvas);
+}
+
+/* ============================================
+   4. 顶部导航 (top-nav DESIGN.md)
+   ============================================ */
+
+.nav-glass, .top-nav, nav.sticky, nav.fixed, nav[aria-label] {
+    background-color: rgba(250, 249, 245, 0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--hairline);
+    height: 64px;  /* DESIGN.md top-nav height */
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.nav-glass .content-container,
+nav .content-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+}
+
+.nav-link, nav a {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;  /* 14px */
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--ink);
+    text-decoration: none;
+    padding: var(--sp-xs) var(--sp-sm);
+    border-radius: var(--r-md);
+    transition: background-color 0.15s ease;
+}
+.nav-link:hover {
+    background-color: var(--surface-soft);
+}
+
+.nav-link-cta, .btn-primary {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1;
+    padding: 12px 20px;  /* DESIGN.md padding */
+    height: 40px;
+    border: none;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease;
+}
+.nav-link-cta:hover, .btn-primary:hover {
+    background-color: var(--primary-active);
+}
+.nav-link-cta:active, .btn-primary:active {
+    transform: translateY(0.5px);
+}
+
+/* ============================================
+   5. 英雄区 (hero-band DESIGN.md)
+   ============================================ */
+
+.hero-section, .hero {
+    background-color: var(--canvas);
+    color: var(--ink);
+    padding: var(--sp-section) 0;  /* 96px */
+    position: relative;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.hero-title {
+    font-size: clamp(2.5rem, 6vw, 4rem);  /* display-xl */
+    line-height: 1.05;
+    letter-spacing: -0.023em;
+    margin-bottom: var(--sp-lg);
+    color: var(--ink);
+}
+
+.gradient-text, .text-gradient {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-active) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
+/* ============================================
+   6. 按钮 (DESIGN.md button-primary)
+   ============================================ */
+
+.btn, button, input[type="button"], input[type="submit"] {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;  /* 14px */
+    font-weight: 500;
+    line-height: 1;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    padding: 12px 20px;
+    height: 40px;
+    border-radius: var(--r-md);
+}
+.btn-primary:hover {
+    background-color: var(--primary-active);
+}
+
+.btn-secondary {
+    background-color: var(--canvas);
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+    padding: 12px 20px;
+    height: 40px;
+    border-radius: var(--r-md);
+}
+.btn-secondary:hover {
+    background-color: var(--surface-soft);
+}
+
+.btn-text-link {
+    background-color: transparent;
+    color: var(--primary);
+    padding: 0;
+    text-decoration: none;
+    border-radius: 0;
+}
+.btn-text-link:hover {
+    text-decoration: underline;
+}
+
+.btn-icon-circular {
+    background-color: var(--canvas);
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-full);
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.text-link {
+    color: var(--primary);
+    text-decoration: none;
+    cursor: pointer;
+}
+.text-link:hover {
+    text-decoration: underline;
+}
+
+/* ============================================
+   7. 卡片 (DESIGN.md feature-card / connector-tile)
+   ============================================ */
+
+.feature-card, .card, .book-card, .featured-card,
+.mood-card, .stat-card, .principle-card,
+.connector-tile, .pricing-tier-card {
+    background-color: var(--surface-card);
+    color: var(--ink);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xl);  /* 32px */
+    border: 1px solid var(--hairline);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+.feature-card:hover, .card:hover,
+.book-card:hover, .featured-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(20, 20, 19, 0.06);
+}
+
+/* 白卡（book-card、book-grid 中卡片）使用画布色背景 */
+.book-card, .featured-card, .mood-card {
+    background-color: #ffffff;
+    padding: 0;  /* 封面图占满，无内边距 */
+    overflow: hidden;
+}
+
+/* 暗色产品卡 (DESIGN.md product-mockup-card-dark) */
+.product-mockup-card-dark, .code-window-card, .dark-card {
+    background-color: var(--surface-dark);
+    color: var(--on-dark);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xl);
+    border: 1px solid var(--surface-dark-elevated);
+}
+
+/* ============================================
+   8. 输入框 (DESIGN.md text-input)
+   ============================================ */
+
+input[type="text"], input[type="email"], input[type="search"],
+input[type="password"], textarea, .search-input {
+    font-family: var(--font-sans);
+    font-size: 1rem;  /* 16px */
+    color: var(--ink);
+    background-color: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+    height: 40px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    outline: none;
+}
+input:focus, textarea:focus, .search-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+}
+
+/* ============================================
+   9. 标签 / 徽章 (DESIGN.md badge-pill / badge-coral)
+   ============================================ */
+
+.badge-pill, .badge {
+    background-color: var(--surface-card);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;  /* 13px */
+    font-weight: 500;
+    line-height: 1.4;
+    padding: 4px 12px;
+    border-radius: var(--r-pill);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-coral {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;  /* 12px */
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.115em;  /* 1.5px */
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: var(--r-pill);
+}
+
+/* 分类筛选标签 (DESIGN.md category-tab) */
+.cat-chip, .diff-chip, .chip, .filter-chip {
+    background-color: transparent;
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;  /* 14px */
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--hairline);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.cat-chip:hover, .diff-chip:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+.cat-chip.active, .diff-chip.active {
+    background-color: var(--surface-card);
+    color: var(--ink);
+    border-color: var(--surface-card);
+}
+
+/* ============================================
+   10. 书库网格 (book-grid)
+   ============================================ */
+
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--sp-md);
+    padding: var(--sp-lg) 0;
+    align-items: start;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.chip-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-xs);
+    justify-content: center;
+    margin-bottom: var(--sp-lg);
+}
+
+/* ============================================
+   11. 章节 (DESIGN.md section rhythm 96px)
+   ============================================ */
+
+section {
+    padding-top: var(--sp-section);
+    padding-bottom: var(--sp-section);
+    background-color: var(--canvas);
+    position: relative;
+    z-index: 1;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: var(--sp-xxl);
+}
+.section-title {
+    font-size: clamp(1.75rem, 4vw, 3rem);  /* display-md */
+    line-height: 1.15;
+    letter-spacing: -0.014em;
+    margin-bottom: var(--sp-sm);
+}
+.section-subtitle {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+/* ============================================
+   12. 页脚 (DESIGN.md footer)
+   ============================================ */
+
+footer, .footer {
+    background-color: var(--surface-dark);
+    color: var(--on-dark-soft);
+    padding: var(--sp-xxl) 0;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;  /* 14px */
+    line-height: 1.55;
+}
+footer a, .footer a {
+    color: var(--on-dark-soft);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+footer a:hover, .footer a:hover {
+    color: var(--on-dark);
+}
+
+/* ============================================
+   13. 链接 (DESIGN.md text-link)
+   ============================================ */
+
+a {
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.text-link, a.coral, a.text-coral {
+    color: var(--primary);
+}
+.text-link:hover {
+    text-decoration: underline;
+}
+
+/* ============================================
+   14. 隐藏无意义装饰元素
+   ============================================ */
+
+.blob, .hero-bg-grid, .reading-progress {
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* 隐藏干扰性背景 */
+[style*="background: linear-gradient(135deg, #1"],
+[style*="background:linear-gradient(135deg,#1"],
+[style*="background: linear-gradient(135deg,#0"],
+[style*="background:linear-gradient(135deg,#0"] {
+    background: var(--canvas) !important;
+}
+
+/* ============================================
+   15. 响应式 (DESIGN.md Breakpoints)
+   ============================================ */
+
+@media (max-width: 1024px) {
+    section {
+        padding-top: var(--sp-xxl);
+        padding-bottom: var(--sp-xxl);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section, .hero {
+        padding: var(--sp-xxl) 0;
+    }
+    .display-xl, .hero-title {
+        font-size: 2rem;  /* 32px */
+        line-height: 1.1;
+    }
+    .display-lg {
+        font-size: 1.75rem;
+    }
+    .book-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: var(--sp-sm);
+    }
+    .nav-glass, .top-nav, nav[aria-label] {
+        height: 56px;
+    }
+}
+
+@media (max-width: 480px) {
+    .book-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--sp-xs);
+    }
+}
+
+/* ============================================
+   16. 强调框 / 引用 (callout-card-coral)
+   ============================================ */
+
+.callout-card-coral {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xxl);  /* 48px */
+    text-align: center;
+}
+.callout-card-coral h2, .callout-card-coral .display-sm {
+    color: var(--on-primary);
+    margin-bottom: var(--sp-md);
+}
+.callout-card-coral .btn-primary {
+    background-color: var(--canvas);
+    color: var(--ink);
+}
+.callout-card-coral .btn-primary:hover {
+    background-color: #ffffff;
+}
+
+.cta-band-coral {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xxl);
+}
+.cta-band-dark {
+    background-color: var(--surface-dark);
+    color: var(--on-dark);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xxl);
+}
+
+/* ============================================
+   17. 内联代码 / 引用
+   ============================================ */
+
+blockquote {
+    border-left: 3px solid var(--primary);
+    padding-left: var(--sp-lg);
+    margin: var(--sp-lg) 0;
+    color: var(--body-strong);
+    font-style: italic;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    line-height: 1.5;
+}
+
+/* ============================================
+   18. 表格
+   ============================================ */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--sp-lg) 0;
+    font-size: 0.875rem;
+}
+table th {
+    text-align: left;
+    padding: var(--sp-sm) var(--sp-md);
+    border-bottom: 2px solid var(--hairline);
+    font-weight: 500;
+    color: var(--ink);
+}
+table td {
+    padding: var(--sp-sm) var(--sp-md);
+    border-bottom: 1px solid var(--hairline-soft);
+    color: var(--body);
+}
+table tr:hover {
+    background-color: var(--surface-soft);
+}
+
+/* ============================================
+   19. 滚动条
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: var(--canvas);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--hairline);
+    border-radius: var(--r-pill);
+    border: 2px solid var(--canvas);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-soft);
+}
+
+/* ============================================
+   20. 焦点环 (A11y)
+   ============================================ */
+
+:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--r-xs);
+}
+
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    background: var(--ink);
+    color: var(--on-primary);
+    padding: var(--sp-sm) var(--sp-md);
+    border-radius: var(--r-md);
+    z-index: 9999;
+}
+.skip-link:focus {
+    left: var(--sp-md);
+    top: var(--sp-md);
+}

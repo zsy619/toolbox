@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <title>博主.skill - 把任何博主变成你的 AI 对话伙伴</title>
+    <meta name="description" content="你关注的博主断更了？崇拜的 V 转型了？「博主.skill」让你用博主的语气和风格继续对话！采集文字内容，生成模拟人格的 Skill，在 Claude Code 里用他的方式聊天。">
+    <meta name="keywords" content="AI人格, 社交媒体, Persona Skill, Claude Code, 数字克隆, 推特采集, 小红书, 语料库">
+    <meta name="author" content="YourongZhou">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/YourongZhou/chat_with_me">
+    <meta property="og:title" content="博主.skill - 把任何博主变成你的 AI 对话伙伴">
+    <meta property="og:description" content="采集文字内容，生成模拟人格的 Skill，在 Claude Code 里用他的方式聊天。">
+    <meta property="og:image" content="assets/cover.png">
+    <meta property="og:locale" content="zh_CN">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://github.com/YourongZhou/chat_with_me">
+    <meta name="twitter:title" content="博主.skill - 把任何博主变成你的 AI 对话伙伴">
+    <meta name="twitter:description" content="采集文字内容，生成模拟人格的 Skill，在 Claude Code 里用他的方式聊天。">
+    <meta name="twitter:image" content="assets/cover.png">
+    
+    <!-- WeChat Share -->
+    <meta property="wechat-share:title" content="博主.skill - 把任何博主变成你的 AI 对话伙伴">
+    <meta property="wechat-share:description" content="采集文字内容，生成模拟人格的 Skill，在 Claude Code 里用他的方式聊天。">
+    <meta property="wechat-share:image" content="assets/cover.png">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://github.com/YourongZhou/chat_with_me">
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "博主.skill",
+        "alternateName": "chat_with_me",
+        "description": "把任何博主的语气风格打包成 AI，随时对话",
+        "url": "https://github.com/YourongZhou/chat_with_me",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "macOS, Linux, Windows",
+        "author": {
+            "@type": "Person",
+            "name": "YourongZhou",
+            "url": "https://github.com/YourongZhou"
+        },
+        "keywords": "AI人格, Persona Skill, Claude Code, 数字克隆, 推特采集, 小红书"
+    }
+    </script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.loli.net">
+    <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
+    <link href="https://fonts.loli.net/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 自定义 Tailwind 样式 */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        /* 渐变文字效果 */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* 玻璃态效果 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 悬浮卡片效果 */
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 图片网格 */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            cursor: pointer;
+            aspect-ratio: 16/10;
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        .gallery-item .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .gallery-item:hover .overlay {
+            transform: translateY(0);
+        }
+        
+        /* 代码块样式 */
+        .code-block {
+            background: #1e1e1e;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'SF Mono', Monaco, Inconsolata, monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .code-block code {
+            color: #d4d4d4;
+        }
+        
+        .code-block .keyword {
+            color: #569cd6;
+        }
+        
+        .code-block .string {
+            color: #ce9178;
+        }
+        
+        .code-block .comment {
+            color: #6a9955;
+        }
+        
+        /* 平台标签 */
+        .platform-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* 动画延迟工具类 */
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    
+    <!-- Hero Section -->
+    <header class="relative overflow-hidden">
+        <!-- 背景装饰 -->
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-gray-900"></div>
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+        
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+            <div class="text-center space-y-8">
+                <!-- Logo -->
+                <div class="animate__animated animate__fadeIn">
+                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-sm font-medium">
+                        <i class="fas fa-rocket"></i>
+                        开源项目
+                    </span>
+                </div>
+                
+                <!-- 主标题 -->
+                <h1 class="text-5xl lg:text-7xl font-extrabold tracking-tight animate__animated animate__fadeIn animate__delay-100">
+                    <span class="gradient-text">博主.skill</span>
+                </h1>
+                
+                <!-- 副标题 -->
+                <p class="text-2xl lg:text-3xl text-gray-300 font-light max-w-4xl mx-auto animate__animated animate__fadeIn animate__delay-200">
+                    把任何博主的语气风格打包成 <span class="text-blue-400 font-medium">AI</span>，随时对话！
+                </p>
+                
+                <!-- 痛点描述 -->
+                <div class="animate__animated animate__fadeIn animate__delay-300">
+                    <p class="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
+                        你关注的博主断更了？崇拜的 V 转型了？咱要的是情绪价值，不是具体的人！
+                    </p>
+                </div>
+                
+                <!-- CTA 按钮 -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate__animated animate__fadeIn animate__delay-400">
+                    <a href="https://github.com/YourongZhou/chat_with_me" target="_blank" 
+                       class="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+                        <i class="fab fa-github text-xl"></i>
+                        <span>查看 GitHub</span>
+                    </a>
+                    <a href="#features" 
+                       class="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-medium rounded-full transition-all border border-white/20">
+                        <i class="fas fa-play-circle"></i>
+                        <span>了解更多</span>
+                    </a>
+                </div>
+                
+                <!-- 支持平台 -->
+                <div class="animate__animated animate__fadeIn animate__delay-500">
+                    <div class="flex flex-wrap justify-center gap-3">
+                        <span class="platform-badge">
+                            <i class="fab fa-x-twitter text-blue-400"></i>
+                            <span>X / Twitter</span>
+                            <i class="fas fa-check text-green-400"></i>
+                        </span>
+                        <span class="platform-badge">
+                            <i class="fab fa-instagram text-pink-400"></i>
+                            <span>小红书</span>
+                            <i class="fas fa-check text-green-400"></i>
+                        </span>
+                        <span class="platform-badge opacity-60">
+                            <i class="fab fa-instagram text-purple-400"></i>
+                            <span>Instagram</span>
+                            <i class="fas fa-clock text-yellow-400"></i>
+                        </span>
+                        <span class="platform-badge opacity-60">
+                            <i class="fab fa-github text-gray-400"></i>
+                            <span>GitHub</span>
+                            <i class="fas fa-clock text-yellow-400"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 向下滚动提示 -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate__animated animate__bounce animate__infinite">
+            <i class="fas fa-chevron-down text-gray-400 text-2xl"></i>
+        </div>
+    </header>
+    
+    <!-- Features Section -->
+    <section id="features" class="py-20 lg:py-32 bg-gray-800/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- 标题 -->
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-star text-yellow-400 mr-2"></i>
+                    核心特性
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-100">
+                    四大核心能力，让你轻松创建和管理博主人格 AI
+                </p>
+            </div>
+            
+            <!-- 特性网格 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- 特性 1: 增量更新 -->
+                <div class="glass-card rounded-2xl p-8 hover-lift animate__animated animate__fadeIn animate__delay-100">
+                    <div class="flex items-start gap-6">
+                        <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center text-2xl">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-3">增量更新</h3>
+                            <p class="text-gray-400 leading-relaxed mb-4">
+                                先从一个 URL 创建 persona，再给已有 persona attach 新平台账号，<span class="text-green-400 font-medium">旧语料不会被覆盖</span>，持续积累。
+                            </p>
+                            <div class="bg-gray-800/50 rounded-lg p-4 font-mono text-sm">
+                                <div class="text-gray-500"># 先创建基础 persona</div>
+                                <div class="text-green-400">persona create https://x.com/karpathy</div>
+                                <div class="text-gray-500 mt-2"># 再附加小红书账号</div>
+                                <div class="text-green-400">persona attach xiaohongshu @karpathy</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 特性 2: 统一 Persona 持久化 -->
+                <div class="glass-card rounded-2xl p-8 hover-lift animate__animated animate__fadeIn animate__delay-200">
+                    <div class="flex items-start gap-6">
+                        <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center text-2xl">
+                            <i class="fas fa-folder-tree"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-3">统一 Persona 持久化</h3>
+                            <p class="text-gray-400 leading-relaxed mb-4">
+                                每个 persona 都保存在<span class="text-blue-400 font-medium">标准目录结构</span>中，可追踪、可复用、便于管理。
+                            </p>
+                            <div class="bg-gray-800/50 rounded-lg p-4 font-mono text-sm space-y-1">
+                                <div class="text-blue-400">personas/&lt;person_id&gt;/</div>
+                                <div class="pl-4 text-gray-500">├── person.json</div>
+                                <div class="pl-4 text-gray-500">├── profile.md</div>
+                                <div class="pl-4 text-gray-500">├── sources.json</div>
+                                <div class="pl-4 text-gray-500">├── corpora/</div>
+                                <div class="pl-8 text-gray-500">├── x/</div>
+                                <div class="pl-8 text-gray-500">└── xiaohongshu/</div>
+                                <div class="pl-4 text-gray-500">└── skill/</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 特性 3: 单 Skill 三模式 -->
+                <div class="glass-card rounded-2xl p-8 hover-lift animate__animated animate__fadeIn animate__delay-300">
+                    <div class="flex items-start gap-6">
+                        <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center text-2xl">
+                            <i class="fas fa-masks-theater"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-3">单 Skill 三模式</h3>
+                            <p class="text-gray-400 leading-relaxed mb-4">
+                                不再依赖三个独立 slash commands，<span class="text-purple-400 font-medium">统一入口</span>，一个 Skill 全搞定。
+                            </p>
+                            <div class="bg-gray-800/50 rounded-lg p-4 font-mono text-sm space-y-2">
+                                <div class="text-purple-400">/persona-&lt;slug&gt;</div>
+                                <div class="pl-4 text-gray-400">
+                                    <span class="text-yellow-400">roleplay:</span> 你好，用你的风格回答...
+                                </div>
+                                <div class="pl-4 text-gray-400">
+                                    <span class="text-blue-400">ask:</span> 他公开表达里最明显的特征？
+                                </div>
+                                <div class="pl-4 text-gray-400">
+                                    <span class="text-green-400">rewrite:</span> 用你的风格改写这段话...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 特性 4: Claude Skill 编译 -->
+                <div class="glass-card rounded-2xl p-8 hover-lift animate__animated animate__fadeIn animate__delay-400">
+                    <div class="flex items-start gap-6">
+                        <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl flex items-center justify-center text-2xl">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-3">Claude Skill 编译</h3>
+                            <p class="text-gray-400 leading-relaxed mb-4">
+                                <code class="bg-gray-800 px-2 py-1 rounded text-orange-400">skill build</code> 自动生成两层文件，<span class="text-orange-400 font-medium">Claude Code 直接加载</span>。
+                            </p>
+                            <div class="bg-gray-800/50 rounded-lg p-4 font-mono text-sm">
+                                <div class="text-gray-500"># 产出两层文件：</div>
+                                <div class="text-orange-400 mt-2">├── personas/&lt;id&gt;/skill/</div>
+                                <div class="text-gray-500 pl-8">└── 人可读的源产物</div>
+                                <div class="text-orange-400">└── .claude/skills/</div>
+                                <div class="text-gray-500 pl-8">└── Claude Code 实际加载</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- How It Works Section -->
+    <section class="py-20 lg:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-play-circle text-blue-400 mr-2"></i>
+                    如何工作
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-100">
+                    三步走，轻松创建你的第一个博主人格 AI
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Step 1 -->
+                <div class="relative animate__animated animate__fadeIn animate__delay-100">
+                    <div class="glass-card rounded-2xl p-8 h-full hover-lift">
+                        <div class="absolute -top-4 -left-4 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-xl font-bold shadow-lg">
+                            1
+                        </div>
+                        <div class="text-center pt-8">
+                            <div class="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
+                                <i class="fas fa-link"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">提供博主链接</h3>
+                            <p class="text-gray-400 leading-relaxed mb-6">
+                                输入任意博主的社交媒体链接（Twitter/X、小红书等）
+                            </p>
+                            <div class="bg-gray-800/50 rounded-lg p-4 font-mono text-sm text-blue-400">
+                                persona create https://x.com/karpathy
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 连接箭头 -->
+                    <div class="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                        <div class="bg-blue-500/20 rounded-full p-2">
+                            <i class="fas fa-arrow-right text-blue-400 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="relative animate__animated animate__fadeIn animate__delay-200">
+                    <div class="glass-card rounded-2xl p-8 h-full hover-lift">
+                        <div class="absolute -top-4 -left-4 w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-xl font-bold shadow-lg">
+                            2
+                        </div>
+                        <div class="text-center pt-8">
+                            <div class="w-20 h-20 bg-purple-500/20 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">AI 分析风格</h3>
+                            <p class="text-gray-400 leading-relaxed mb-6">
+                                自动抓取内容，分析语气、风格、观点，生成 persona
+                            </p>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2 text-sm text-gray-400">
+                                    <i class="fas fa-check-circle text-green-400"></i>
+                                    <span>提取 bio 和 timeline</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-400">
+                                    <i class="fas fa-check-circle text-green-400"></i>
+                                    <span>分析说话风格</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-gray-400">
+                                    <i class="fas fa-check-circle text-green-400"></i>
+                                    <span>生成人格定义</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 连接箭头 -->
+                    <div class="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                        <div class="bg-purple-500/20 rounded-full p-2">
+                            <i class="fas fa-arrow-right text-purple-400 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="animate__animated animate__fadeIn animate__delay-300">
+                    <div class="glass-card rounded-2xl p-8 h-full hover-lift">
+                        <div class="absolute -top-4 -left-4 w-12 h-12 bg-pink-600 rounded-full flex items-center justify-center text-xl font-bold shadow-lg">
+                            3
+                        </div>
+                        <div class="text-center pt-8">
+                            <div class="w-20 h-20 bg-pink-500/20 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">对话体验</h3>
+                            <p class="text-gray-400 leading-relaxed mb-6">
+                                编译成 Claude Skill，用他的方式和你聊天！
+                            </p>
+                            <div class="bg-gray-800/50 rounded-lg p-4 font-mono text-sm space-y-2">
+                                <div class="text-pink-400">/persona-andrej-karpathy</div>
+                                <div class="text-gray-500">roleplay: How should I learn LLM?</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Quick Start Section -->
+    <section class="py-20 lg:py-32 bg-gray-800/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-rocket text-green-400 mr-2"></i>
+                    快速开始
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-100">
+                    5 分钟快速搭建环境，开始创建你的第一个 persona
+                </p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto space-y-8">
+                
+                <!-- 安装 -->
+                <div class="glass-card rounded-2xl overflow-hidden animate__animated animate__fadeIn animate__delay-100">
+                    <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
+                        <h3 class="text-xl font-bold flex items-center gap-2">
+                            <i class="fas fa-download"></i>
+                            第一步：安装
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="code-block">
+                            <code><span class="comment"># 克隆仓库</span></code><br>
+                            <code>git clone https://github.com/YourongZhou/chat_with_me</code><br>
+                            <code>cd chat_with_me</code><br><br>
+                            <code><span class="comment"># 创建 conda 环境并安装</span></code><br>
+                            <code>conda create -y -n chat python=3.11</code><br>
+                            <code>conda run -n chat python -m pip install -e .<span class="string">[dev]</span></code>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 初始化后端 -->
+                <div class="glass-card rounded-2xl overflow-hidden animate__animated animate__fadeIn animate__delay-200">
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                        <h3 class="text-xl font-bold flex items-center gap-2">
+                            <i class="fas fa-server"></i>
+                            第二步：初始化后端
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="code-block">
+                            <code><span class="comment"># Twitter / X</span></code><br>
+                            <code>conda run -n chat python -m social_persona_skill.cli \</code><br>
+                            <code>&nbsp;&nbsp;--runtime-root .runtime backend bootstrap x</code><br>
+                            <code>conda run -n chat python -m social_persona_skill.cli \</code><br>
+                            <code>&nbsp;&nbsp;--runtime-root .runtime backend login x</code><br><br>
+                            <code><span class="comment"># 小红书</span></code><br>
+                            <code>conda run -n chat python -m social_persona_skill.cli \</code><br>
+                            <code>&nbsp;&nbsp;--runtime-root .runtime backend bootstrap xiaohongshu</code>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 创建 Persona -->
+                <div class="glass-card rounded-2xl overflow-hidden animate__animated animate__fadeIn animate__delay-300">
+                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+                        <h3 class="text-xl font-bold flex items-center gap-2">
+                            <i class="fas fa-user-plus"></i>
+                            第三步：创建 Persona
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="code-block">
+                            <code><span class="comment"># 创建 persona</span></code><br>
+                            <code>conda run -n chat python -m social_persona_skill.cli \</code><br>
+                            <code>&nbsp;&nbsp;--runtime-root .runtime \</code><br>
+                            <code>&nbsp;&nbsp;persona create https://x.com/karpathy</code><br><br>
+                            <code><span class="comment"># 编译成 Claude Skill</span></code><br>
+                            <code>conda run -n chat python -m social_persona_skill.cli \</code><br>
+                            <code>&nbsp;&nbsp;--runtime-root .runtime \</code><br>
+                            <code>&nbsp;&nbsp;--storage-dir personas \</code><br>
+                            <code>&nbsp;&nbsp;skill build --person-id &lt;id&gt;</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Use Cases Section -->
+    <section class="py-20 lg:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-lightbulb text-yellow-400 mr-2"></i>
+                    应用场景
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-100">
+                    无限可能，让 AI 人格为你服务
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- 场景 1 -->
+                <div class="glass-card rounded-2xl p-6 hover-lift animate__animated animate__fadeIn animate__delay-100">
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center text-2xl mb-4">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">粉丝福利</h3>
+                    <p class="text-gray-400 leading-relaxed">
+                        博主任天堂断更？自己做一个<span class="text-blue-400 font-medium">继续对话</span>！
+                    </p>
+                </div>
+                
+                <!-- 场景 2 -->
+                <div class="glass-card rounded-2xl p-6 hover-lift animate__animated animate__fadeIn animate__delay-200">
+                    <div class="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center text-2xl mb-4">
+                        <i class="fas fa-pen-fancy"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">学习模仿</h3>
+                    <p class="text-gray-400 leading-relaxed">
+                        想学某个博主的写作风格？让 AI 帮你<span class="text-green-400 font-medium">分析并模仿</span>！
+                    </p>
+                </div>
+                
+                <!-- 场景 3 -->
+                <div class="glass-card rounded-2xl p-6 hover-lift animate__animated animate__fadeIn animate__delay-300">
+                    <div class="w-14 h-14 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center text-2xl mb-4">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">品牌监测</h3>
+                    <p class="text-gray-400 leading-relaxed">
+                        用竞品博主的风格<span class="text-orange-400 font-medium">生成内容参考</span>？
+                    </p>
+                </div>
+                
+                <!-- 场景 4 -->
+                <div class="glass-card rounded-2xl p-6 hover-lift animate__animated animate__fadeIn animate__delay-400">
+                    <div class="w-14 h-14 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center text-2xl mb-4">
+                        <i class="fas fa-ghost"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">情感陪伴</h3>
+                    <p class="text-gray-400 leading-relaxed">
+                        和已故名人、虚拟角色<span class="text-purple-400 font-medium">"对话"</span>？
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Gallery Section -->
+    <section class="py-20 lg:py-32 bg-gray-800/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-images text-pink-400 mr-2"></i>
+                    项目展示
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-100">
+                    点击图片查看详情，支持缩放、旋转、幻灯片播放
+                </p>
+            </div>
+            
+            <!-- 封面图 -->
+            <div class="mb-12 animate__animated animate__fadeIn animate__delay-100">
+                <div class="gallery-item rounded-2xl shadow-2xl" onclick="openImageViewer(0)">
+                    <img src="assets/cover.png" alt="博主.skill 项目封面">
+                    <div class="overlay">
+                        <h3 class="text-xl font-bold text-white">项目封面</h3>
+                        <p class="text-gray-300 text-sm mt-1">点击查看大图</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 插图网格 -->
+            <div class="gallery-grid animate__animated animate__fadeIn animate__delay-200">
+                <div class="gallery-item" onclick="openImageViewer(1)">
+                    <img src="assets/illustration-1.png" alt="功能展示图 1">
+                    <div class="overlay">
+                        <h3 class="text-lg font-bold text-white">功能展示 1</h3>
+                        <p class="text-gray-300 text-sm mt-1">点击查看大图</p>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" onclick="openImageViewer(2)">
+                    <img src="assets/illustration-2.png" alt="功能展示图 2">
+                    <div class="overlay">
+                        <h3 class="text-lg font-bold text-white">功能展示 2</h3>
+                        <p class="text-gray-300 text-sm mt-1">点击查看大图</p>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" onclick="openImageViewer(3)">
+                    <img src="assets/illustration-3.png" alt="功能展示图 3">
+                    <div class="overlay">
+                        <h3 class="text-lg font-bold text-white">功能展示 3</h3>
+                        <p class="text-gray-300 text-sm mt-1">点击查看大图</p>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" onclick="openImageViewer(4)">
+                    <img src="assets/illustration-4.png" alt="功能展示图 4">
+                    <div class="overlay">
+                        <h3 class="text-lg font-bold text-white">功能展示 4</h3>
+                        <p class="text-gray-300 text-sm mt-1">点击查看大图</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Documents Section -->
+    <section class="py-20 lg:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-book text-blue-400 mr-2"></i>
+                    相关文档
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-100">
+                    查看完整项目文档、视频脚本和公众号文章
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- 公众号文章 -->
+                <a href="wechat.md" class="block animate__animated animate__fadeIn animate__delay-100">
+                    <div class="glass-card rounded-2xl p-8 h-full hover-lift group">
+                        <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">
+                            <i class="fab fa-weixin"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">公众号文章</h3>
+                        <p class="text-gray-400 leading-relaxed mb-6">
+                            详细的项目介绍和使用教程，适合想要深入了解项目的读者。
+                        </p>
+                        <div class="flex items-center gap-2 text-green-400 font-medium">
+                            <span>查看文章</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </a>
+                
+                <!-- 视频脚本 -->
+                <a href="video-script.md" class="block animate__animated animate__fadeIn animate__delay-200">
+                    <div class="glass-card rounded-2xl p-8 h-full hover-lift group">
+                        <div class="w-16 h-16 bg-gradient-to-br from-red-400 to-orange-500 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">视频脚本</h3>
+                        <p class="text-gray-400 leading-relaxed mb-6">
+                            45秒推广视频的完整脚本，包含场景拆分和旁白文本。
+                        </p>
+                        <div class="flex items-center gap-2 text-red-400 font-medium">
+                            <span>查看脚本</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </a>
+                
+                <!-- 技术文章 -->
+                <a href="article.md" class="block animate__animated animate__fadeIn animate__delay-300">
+                    <div class="glass-card rounded-2xl p-8 h-full hover-lift group">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">技术文章</h3>
+                        <p class="text-gray-400 leading-relaxed mb-6">
+                            完整的技术文档，包含安装、使用流程、技术原理等。
+                        </p>
+                        <div class="flex items-center gap-2 text-blue-400 font-medium">
+                            <span>查看文章</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="py-20 lg:py-32 bg-gradient-to-br from-blue-900/50 via-purple-900/50 to-gray-900 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+        
+        <div class="relative max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-4xl lg:text-5xl font-bold mb-6 animate__animated animate__fadeIn">
+                欢迎加入数字人格时代
+            </h2>
+            <p class="text-xl text-gray-300 mb-10 animate__animated animate__fadeIn animate__delay-100">
+                与其追逐具体的人，不如拥有他的风格
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate__animated animate__fadeIn animate__delay-200">
+                <a href="https://github.com/YourongZhou/chat_with_me" target="_blank"
+                   class="inline-flex items-center gap-3 px-10 py-5 bg-white text-gray-900 font-bold rounded-full hover:bg-gray-100 transition-all transform hover:scale-105 shadow-2xl">
+                    <i class="fab fa-github text-2xl"></i>
+                    <span class="text-lg">GitHub Star ⭐</span>
+                </a>
+            </div>
+            
+            <div class="mt-12 flex flex-wrap justify-center gap-3 animate__animated animate__fadeIn animate__delay-300">
+                <span class="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300">#AI人格</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300">#PersonaSkill</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300">#ClaudeCode</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300">#数字克隆</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300">#社交媒体</span>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="py-12 bg-gray-900 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <p class="text-gray-400 mb-4">
+                    <i class="fas fa-code mr-2"></i>
+                    Made with ❤️ by <a href="https://github.com/YourongZhou" target="_blank" class="text-blue-400 hover:underline">YourongZhou</a>
+                </p>
+                <p class="text-gray-500 text-sm">
+                    © 2024 <a href="https://github.com/YourongZhou/chat_with_me" target="_blank" class="hover:text-gray-300">博主.skill</a>. Open Source under MIT License.
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Image Viewer Modal -->
+    <div id="imageViewer" class="image-viewer">
+        <div class="viewer-toolbar">
+            <div class="viewer-toolbar-left">
+                <button class="viewer-toolbar-btn" onclick="closeImageViewer()" title="关闭 (ESC)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="viewer-toolbar-divider"></div>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(-90)" title="向左旋转">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(90)" title="向右旋转">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="flipHorizontal()" title="水平翻转">
+                    <i class="fas fa-arrows-alt-h"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="flipVertical()" title="垂直翻转">
+                    <i class="fas fa-arrows-alt-v"></i>
+                </button>
+            </div>
+            
+            <div class="viewer-toolbar-center">
+                <button class="viewer-toolbar-btn" onclick="zoomOut()" title="缩小 (-)">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <div class="viewer-zoom-slider-container">
+                    <input type="range" id="zoomSlider" class="viewer-zoom-slider" min="10" max="500" value="100">
+                    <span id="zoomDisplay" class="viewer-zoom-display">100%</span>
+                </div>
+                <button class="viewer-toolbar-btn" onclick="zoomIn()" title="放大 (+)">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="fitToScreen()" title="适应屏幕 (0)">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="toggleFullscreen()" title="全屏 (F)">
+                    <i class="fas fa-expand" id="fullscreenIcon"></i>
+                </button>
+            </div>
+            
+            <div class="viewer-toolbar-right">
+                <button class="viewer-toolbar-btn" onclick="toggleSlideShow()" title="幻灯片播放" id="slideShowBtn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <div class="viewer-toolbar-divider"></div>
+                <button class="viewer-toolbar-btn" onclick="downloadImage()" title="下载图片">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="openInNewTab()" title="新窗口打开">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="viewer-main" id="viewerMain">
+            <div class="viewer-canvas" id="viewerCanvas">
+                <div class="viewer-image-container" id="imageContainer">
+                    <img id="viewerImage" class="viewer-image" src="" alt="">
+                </div>
+            </div>
+            
+            <button class="viewer-nav prev" id="prevBtn" onclick="prevImage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <button class="viewer-nav next" id="nextBtn" onclick="nextImage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <div class="viewer-bottom-bar">
+                <div class="viewer-info">
+                    <span id="imageTitle">图片</span>
+                    <span class="viewer-divider">|</span>
+                    <span id="imageCounter">1 / 1</span>
+                    <span class="viewer-divider">|</span>
+                    <span id="imageDimensions">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="viewer-thumbnail-strip" id="thumbnailStrip"></div>
+        
+        <div class="viewer-toast" id="viewerToast"></div>
+        
+        <div class="viewer-loading" id="viewerLoading">
+            <div class="viewer-loading-spinner"></div>
+            <span>加载中...</span>
+        </div>
+    </div>
+    
+    <!-- Image Viewer Styles -->
+    <style>
+        /* Image Viewer Modal - Professional Style */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+            background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(20,20,30,0.98) 100%);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+
+        .image-viewer.active {
+            display: flex;
+            flex-direction: column;
+            animation: viewerFadeIn 0.3s ease;
+        }
+
+        @keyframes viewerFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .viewer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .viewer-toolbar-left,
+        .viewer-toolbar-center,
+        .viewer-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .viewer-toolbar-divider {
+            width: 1px;
+            height: 1.5rem;
+            background: rgba(255,255,255,0.2);
+            margin: 0 0.5rem;
+        }
+
+        .viewer-toolbar-btn {
+            width: 2.75rem;
+            height: 2.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9rem;
+        }
+
+        .viewer-toolbar-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .viewer-toolbar-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        .viewer-toolbar-btn.active {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            border-color: #3B82F6;
+            color: white;
+        }
+
+        .viewer-zoom-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 0.25rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-zoom-slider {
+            width: 120px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        .viewer-zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #3B82F6;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
+        }
+
+        .viewer-zoom-display {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            min-width: 3.5rem;
+            text-align: center;
+        }
+
+        .viewer-main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            min-height: 0;
+        }
+
+        .viewer-main:active {
+            cursor: grabbing;
+        }
+
+        .viewer-canvas {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+        }
+
+        .viewer-image-container {
+            position: absolute;
+            transform-origin: center center;
+            user-select: none;
+            transition: transform 0.1s ease-out;
+        }
+
+        .viewer-image {
+            display: block;
+            max-width: 92vw;
+            max-height: 75vh;
+            object-fit: contain;
+            pointer-events: none;
+            user-select: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .viewer-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4rem;
+            height: 4rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 1.5rem;
+            z-index: 10;
+        }
+
+        .viewer-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .viewer-nav.prev {
+            left: 1.5rem;
+        }
+
+        .viewer-nav.next {
+            right: 1.5rem;
+        }
+
+        .viewer-nav:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .viewer-bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .viewer-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.85);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1.25rem;
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-divider {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .viewer-thumbnail-strip {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            overflow-x: auto;
+            max-height: 120px;
+            min-height: 100px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
+        }
+
+        .viewer-thumbnail {
+            width: 80px;
+            height: 60px;
+            border-radius: 0.5rem;
+            object-fit: cover;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            flex-shrink: 0;
+        }
+
+        .viewer-thumbnail:hover {
+            opacity: 0.7;
+            transform: scale(1.05);
+        }
+
+        .viewer-thumbnail.active {
+            opacity: 1;
+            border-color: #3B82F6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .viewer-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 10002;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-toast.show {
+            opacity: 1;
+        }
+
+        .viewer-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            gap: 1rem;
+            color: white;
+            font-size: 1rem;
+            z-index: 100;
+        }
+
+        .viewer-loading.active {
+            display: flex;
+        }
+
+        .viewer-loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #3B82F6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    
+    <!-- Image Viewer JavaScript -->
+    <script>
+        // 图片数组（延迟初始化，等待 DOM 完全就绪）
+        let images = [];
+
+        // 状态变量
+        let currentIndex = 0;
+        let scale = 1;
+        let rotation = 0;
+        let flipX = 1;
+        let flipY = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let initialScale = 1;
+        let slideShowInterval = null;
+        let slideShowPlaying = false;
+        let currentImageDimensions = { width: 0, height: 0 };
+
+        // 自动收集图片（优先收集 gallery-item 中的图片）
+        function collectImages() {
+            const images = [];
+            const seenSrc = new Set();
+            
+            // 只收集 gallery-item 中的图片（用于预览）
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                const img = item.querySelector('img');
+                if (img && img.src && !img.src.includes('data:')) {
+                    if (!seenSrc.has(img.src)) {
+                        seenSrc.add(img.src);
+                        images.push({
+                            src: img.src,
+                            title: img.alt || '图片 ' + (images.length + 1),
+                            thumbnail: img.src
+                        });
+                    }
+                }
+            });
+            
+            // 如果没有 gallery-item，则收集所有有意义的图片
+            if (images.length === 0) {
+                document.querySelectorAll('img').forEach(img => {
+                    if (!seenSrc.has(img.src) && img.src && !img.src.includes('data:')) {
+                        // 排除 viewerImage（预览器的图片）
+                        if (img.id !== 'viewerImage') {
+                            seenSrc.add(img.src);
+                            images.push({
+                                src: img.src,
+                                title: img.alt || '图片 ' + (images.length + 1),
+                                thumbnail: img.src
+                            });
+                        }
+                    }
+                });
+            }
+            
+            return images;
+        }
+
+        // 打开查看器
+        function openImageViewer(index) {
+            // 如果图片数组为空，先收集图片
+            if (images.length === 0) {
+                images = collectImages();
+            }
+            
+            if (images.length === 0) return;
+            
+            currentIndex = Math.max(0, Math.min(index, images.length - 1));
+            resetViewState();
+            loadImage(currentIndex);
+            buildThumbnailStrip();
+            updateUI();
+            
+            document.getElementById('imageViewer').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            preloadAdjacentImages();
+        }
+
+        // 关闭查看器
+        function closeImageViewer() {
+            stopSlideShow();
+            document.getElementById('imageViewer').classList.remove('active');
+            document.body.style.overflow = '';
+            
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        }
+
+        // 重置视图
+        function resetViewState() {
+            scale = 1;
+            rotation = 0;
+            flipX = 1;
+            flipY = 1;
+            translateX = 0;
+            translateY = 0;
+            updateSliderValue();
+        }
+
+        // 加载图片
+        function loadImage(index) {
+            const loading = document.getElementById('viewerLoading');
+            const img = document.getElementById('viewerImage');
+            
+            if (loading) loading.classList.add('active');
+            
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                img.src = images[index].src;
+                currentImageDimensions = {
+                    width: tempImg.naturalWidth,
+                    height: tempImg.naturalHeight
+                };
+                if (loading) loading.classList.remove('active');
+                updateImageInfo();
+                updateTransform();
+            };
+            tempImg.onerror = () => {
+                if (loading) loading.classList.remove('active');
+                showToast('图片加载失败');
+            };
+            tempImg.src = images[index].src;
+        }
+
+        // 上一张（循环）
+        function prevImage() {
+            if (images.length <= 1) return;
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            resetViewState();
+            loadImage(currentIndex);
+            updateUI();
+            preloadAdjacentImages();
+        }
+
+        // 下一张（循环）
+        function nextImage() {
+            if (images.length <= 1) return;
+            currentIndex = (currentIndex + 1) % images.length;
+            resetViewState();
+            loadImage(currentIndex);
+            updateUI();
+            preloadAdjacentImages();
+        }
+
+        // 缩放
+        function zoom(delta) {
+            const newScale = Math.max(0.1, Math.min(5, scale + delta));
+            if (newScale !== scale) {
+                scale = newScale;
+                updateTransform();
+                updateZoomDisplay();
+                updateSliderValue();
+            }
+        }
+
+        function zoomIn() { zoom(0.25); }
+        function zoomOut() { zoom(-0.25); }
+
+        function fitToScreen() {
+            resetViewState();
+            updateTransform();
+            updateZoomDisplay();
+            updateSliderValue();
+            showToast('已适应屏幕');
+        }
+
+        // 旋转
+        function rotateImage(deg) {
+            rotation = (rotation + deg) % 360;
+            updateTransform();
+            showToast('旋转 ' + rotation + '°');
+        }
+
+        // 翻转
+        function flipHorizontal() {
+            flipX *= -1;
+            updateTransform();
+            showToast(flipX === -1 ? '已水平翻转' : '已取消水平翻转');
+        }
+
+        function flipVertical() {
+            flipY *= -1;
+            updateTransform();
+            showToast(flipY === -1 ? '已垂直翻转' : '已取消垂直翻转');
+        }
+
+        // 全屏
+        function toggleFullscreen() {
+            const viewer = document.getElementById('imageViewer');
+            const icon = document.getElementById('fullscreenIcon');
+            
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+                if (icon) icon.className = 'fas fa-expand';
+                showToast('已退出全屏');
+            } else {
+                viewer.requestFullscreen();
+                if (icon) icon.className = 'fas fa-compress-alt';
+                showToast('已进入全屏');
+            }
+        }
+
+        // 幻灯片
+        function toggleSlideShow() {
+            if (slideShowPlaying) {
+                stopSlideShow();
+            } else {
+                startSlideShow();
+            }
+        }
+
+        function startSlideShow() {
+            if (images.length <= 1) {
+                showToast('只有一张图片，无法播放幻灯片');
+                return;
+            }
+            
+            slideShowPlaying = true;
+            updateSlideShowButton();
+            showToast('幻灯片播放中...');
+            
+            slideShowInterval = setInterval(() => {
+                nextImage();
+            }, 3000);
+        }
+
+        function stopSlideShow() {
+            slideShowPlaying = false;
+            updateSlideShowButton();
+            
+            if (slideShowInterval) {
+                clearInterval(slideShowInterval);
+                slideShowInterval = null;
+            }
+        }
+
+        // 下载
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.href = images[currentIndex].src;
+            link.download = images[currentIndex].title || 'image';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('开始下载...');
+        }
+
+        // 新窗口打开
+        function openInNewTab() {
+            window.open(images[currentIndex].src, '_blank');
+        }
+
+        // Toast 提示
+        function showToast(text) {
+            const toast = document.getElementById('viewerToast');
+            if (!toast) return;
+            
+            toast.textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // 更新变换
+        function updateTransform() {
+            const container = document.getElementById('imageContainer');
+            if (container) {
+                container.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scaleX(${flipX}) scaleY(${flipY}) scale(${scale})`;
+            }
+        }
+
+        // 构建缩略图条
+        function buildThumbnailStrip() {
+            const strip = document.getElementById('thumbnailStrip');
+            if (!strip) return;
+            
+            strip.innerHTML = '';
+            
+            images.forEach((img, index) => {
+                const thumb = document.createElement('img');
+                thumb.className = 'viewer-thumbnail' + (index === currentIndex ? ' active' : '');
+                thumb.src = img.thumbnail;
+                thumb.alt = img.title;
+                thumb.onclick = () => {
+                    currentIndex = index;
+                    resetViewState();
+                    loadImage(currentIndex);
+                    updateUI();
+                };
+                strip.appendChild(thumb);
+            });
+        }
+
+        // 更新 UI 状态
+        function updateUI() {
+            // 更新缩略图激活状态
+            document.querySelectorAll('.viewer-thumbnail').forEach((thumb, index) => {
+                thumb.classList.toggle('active', index === currentIndex);
+            });
+            
+            // 更新图片信息
+            updateImageInfo();
+        }
+
+        // 更新图片信息
+        function updateImageInfo() {
+            const titleEl = document.getElementById('imageTitle');
+            const counterEl = document.getElementById('imageCounter');
+            const dimensionsEl = document.getElementById('imageDimensions');
+            
+            if (titleEl) titleEl.textContent = images[currentIndex]?.title || '图片';
+            if (counterEl) counterEl.textContent = (currentIndex + 1) + ' / ' + images.length;
+            if (dimensionsEl) dimensionsEl.textContent = currentImageDimensions.width + ' × ' + currentImageDimensions.height;
+        }
+
+        // 更新缩放显示
+        function updateZoomDisplay() {
+            const display = document.getElementById('zoomDisplay');
+            if (display) display.textContent = Math.round(scale * 100) + '%';
+        }
+
+        // 更新滑块值
+        function updateSliderValue() {
+            const slider = document.getElementById('zoomSlider');
+            if (slider) slider.value = scale * 100;
+        }
+
+        // 更新幻灯片按钮
+        function updateSlideShowButton() {
+            const btn = document.getElementById('slideShowBtn');
+            if (btn) {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = slideShowPlaying ? 'fas fa-pause' : 'fas fa-play';
+                }
+            }
+        }
+
+        // 预加载相邻图片
+        function preloadAdjacentImages() {
+            const preloadIndices = [
+                (currentIndex - 1 + images.length) % images.length,
+                (currentIndex + 1) % images.length
+            ];
+            
+            preloadIndices.forEach(index => {
+                if (images[index]) {
+                    const img = new Image();
+                    img.src = images[index].src;
+                }
+            });
+        }
+
+        // 绑定事件（需要在 DOM 加载后调用）
+        function bindViewerEvents() {
+            const canvas = document.getElementById('viewerMain');
+            const zoomSlider = document.getElementById('zoomSlider');
+            
+            if (!canvas) return;
+
+            // 鼠标拖拽
+            canvas.addEventListener('mousedown', (e) => {
+                if (e.button === 0) {
+                    isDragging = true;
+                    startX = e.clientX - translateX;
+                    startY = e.clientY - translateY;
+                    canvas.style.cursor = 'grabbing';
+                }
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    translateX = e.clientX - startX;
+                    translateY = e.clientY - startY;
+                    updateTransform();
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                canvas.style.cursor = 'grab';
+            });
+
+            // 滚轮缩放
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                zoom(e.deltaY > 0 ? -0.15 : 0.15);
+            }, { passive: false });
+
+            // 双击适应屏幕
+            canvas.addEventListener('dblclick', (e) => {
+                if (scale !== 1) {
+                    fitToScreen();
+                } else {
+                    scale = 2;
+                    updateTransform();
+                    updateZoomDisplay();
+                    updateSliderValue();
+                }
+            });
+
+            // 缩放滑块
+            if (zoomSlider) {
+                zoomSlider.addEventListener('input', (e) => {
+                    scale = e.target.value / 100;
+                    updateTransform();
+                    updateZoomDisplay();
+                });
+            }
+
+            // 键盘快捷键
+            document.addEventListener('keydown', (e) => {
+                if (!document.getElementById('imageViewer').classList.contains('active')) return;
+                
+                switch(e.key) {
+                    case 'Escape': closeImageViewer(); break;
+                    case 'ArrowLeft': prevImage(); break;
+                    case 'ArrowRight': nextImage(); break;
+                    case '+': case '=': zoomIn(); break;
+                    case '-': zoomOut(); break;
+                    case '0': fitToScreen(); break;
+                    case ' ': e.preventDefault(); toggleSlideShow(); break;
+                    case 'f': case 'F': toggleFullscreen(); break;
+                    case 'd': case 'D': downloadImage(); break;
+                }
+            });
+
+            // 触摸手势
+            let lastTouchDistance = 0;
+            let touchStartTime = 0;
+
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    startX = e.touches[0].clientX - translateX;
+                    startY = e.touches[0].clientY - translateY;
+                    touchStartTime = Date.now();
+                } else if (e.touches.length === 2) {
+                    lastTouchDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    initialScale = scale;
+                }
+            }, { passive: true });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1) {
+                    translateX = e.touches[0].clientX - startX;
+                    translateY = e.touches[0].clientY - startY;
+                    updateTransform();
+                } else if (e.touches.length === 2) {
+                    e.preventDefault();
+                    const currentDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    scale = Math.max(0.1, Math.min(5, initialScale * (currentDistance / lastTouchDistance)));
+                    updateTransform();
+                    updateZoomDisplay();
+                    updateSliderValue();
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', (e) => {
+                if (e.touches.length === 0) {
+                    const touchDuration = Date.now() - touchStartTime;
+                    const diff = Math.abs(translateX) + Math.abs(translateY);
+                    
+                    if (diff > 50 && touchDuration < 300) {
+                        translateX > 0 ? prevImage() : nextImage();
+                    }
+                }
+            });
+
+            // 点击背景关闭
+            canvas.addEventListener('click', (e) => {
+                if (e.target === canvas) {
+                    closeImageViewer();
+                }
+            });
+
+            // 全屏变化
+            document.addEventListener('fullscreenchange', () => {
+                const icon = document.getElementById('fullscreenIcon');
+                if (icon) {
+                    icon.className = document.fullscreenElement ? 'fas fa-compress-alt' : 'fas fa-expand';
+                }
+            });
+        }
+
+        // 页面加载完成后初始化（重要！）
+        document.addEventListener('DOMContentLoaded', () => {
+            // 延迟初始化图片查看器，确保 DOM 完全就绪
+            setTimeout(() => {
+                // 先收集图片
+                images = collectImages();
+                
+                if (images.length === 0) {
+                    console.warn('没有找到图片');
+                    return;
+                }
+                buildThumbnailStrip();
+                bindViewerEvents();
+            }, 100);
+        });
+
+        // 如果 DOM 已加载则立即初始化
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(() => {
+                // 先收集图片
+                images = collectImages();
+                
+                if (images.length > 0) {
+                    buildThumbnailStrip();
+                    bindViewerEvents();
+                }
+            }, 200);
+        }
+    </script>
+</body>
+</html>

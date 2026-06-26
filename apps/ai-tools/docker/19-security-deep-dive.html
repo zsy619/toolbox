@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>
+      Docker 安全深入:seccomp/AppArmor/capability | Docker 实战教程
+    </title>
+    <meta name="description" content="详解 Linux 安全机制:seccomp 系统调用过滤、AppArmor/SELinux MAC、Linux capabilities 精细权限;Rootless 模式;镜像签名验证。">
+    <meta name="keywords" content="Docker, Docker 安全深入:seccomp/AppArmor/capability, 容器化教程, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/19-security-deep-dive.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker 安全深入:seccomp/AppArmor/capability">
+    <meta property="og:description" content="详解 Linux 安全机制:seccomp 系统调用过滤、AppArmor/SELinux MAC、Linux capabilities 精细权限;Rootless 模式;镜像签名验证。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/19-security-deep-dive.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Docker 安全深入:seccomp/AppArmor/capability">
+    <meta name="twitter:description" content="详解 Linux 安全机制:seccomp 系统调用过滤、AppArmor/SELinux MAC、Linux capabilities 精细权限;Rootless 模式;镜像签名验证。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Docker 安全深入:seccomp/AppArmor/capability","description":"详解 Linux 安全机制:seccomp 系统调用过滤、AppArmor/SELinux MAC、Linux capabilities 精细权限;Rootless 模式;镜像签名验证。","author":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 教程","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"Docker 安全深入:seccomp/AppArmor/capability","item":"https://tools.yy24365.com/ai-tools/docker/19-security-deep-dive.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            D
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 教程
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Docker 安全深入:seccomp/AppArmor/capability
+            </span>
+          </nav>
+          <h1 id="hero-title">
+            Docker 安全深入:seccomp/AppArmor/capability
+          </h1>
+          <p class="hero-sub">
+            Rootless + 默认隔离 + 镜像签名
+          </p>
+          <p class="hero-desc">
+            详解 Linux 安全机制:seccomp 系统调用过滤、AppArmor/SELinux MAC、Linux capabilities 精细权限;Rootless 模式;镜像签名验证。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                课程编号
+              </strong>
+              第 19 课
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                分类
+              </strong>
+              安全
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              高级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                字数
+              </strong>
+              ~ 4000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <nav class="toc" id="toc">
+          <h2 class="toc-title">
+            本文目录
+          </h2>
+          <ul class="toc-grid">
+            <li>
+              <a href="#s1">
+                <span class="toc-num">
+                  01
+                </span>
+                Linux capabilities 37 项
+              </a>
+            </li>
+            <li>
+              <a href="#s2">
+                <span class="toc-num">
+                  02
+                </span>
+                seccomp 系统调用过滤
+              </a>
+            </li>
+            <li>
+              <a href="#s3">
+                <span class="toc-num">
+                  03
+                </span>
+                AppArmor vs SELinux
+              </a>
+            </li>
+            <li>
+              <a href="#s4">
+                <span class="toc-num">
+                  04
+                </span>
+                Rootless 模式 5 优势
+              </a>
+            </li>
+            <li>
+              <a href="#s5">
+                <span class="toc-num">
+                  05
+                </span>
+                镜像签名与验证
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">
+            Chapter 01
+          </span>
+          <h2 id="s1-title">
+            Linux capabilities 37 项
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  默认:CHOWN/DAC_OVERRIDE/FOWNER/SETUID/SETGID/SETPCAP/NET_BIND_SERVICE 等
+                </li>
+                <li>
+                  默认禁用:SYS_ADMIN/SYS_PTRACE/SYS_MODULE/MAC_ADMIN
+                </li>
+                <li>
+                  全禁用:--cap-drop ALL + 显式 --cap-add 必要项
+                </li>
+                <li>
+                  生产示例:web 服务仅需 NET_BIND_SERVICE,DB 需 IPC_LOCK
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">
+            Chapter 02
+          </span>
+          <h2 id="s2-title">
+            seccomp 系统调用过滤
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  默认配置:Docker 自带 300+ 允许的 syscall 白名单
+                </li>
+                <li>
+                  自定义:seccomp_profile.json + --security-opt seccomp=xxx
+                </li>
+                <li>
+                  危险 syscall:reboot/swapon/umount/kexec_load 全部禁用
+                </li>
+                <li>
+                  审计:strace -f -p <pid> 跟踪容器进程系统调用
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">
+            Chapter 03
+          </span>
+          <h2 id="s3-title">
+            AppArmor vs SELinux
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  AppArmor:Ubuntu 主流,基于路径的 MAC
+                </li>
+                <li>
+                  SELinux:CentOS/RHEL 主流,基于标签的 MAC
+                </li>
+                <li>
+                  Docker 默认:app-armor=docker-default / selinux 启用
+                </li>
+                <li>
+                  自定义策略:aa-genprof / audit2allow 工具
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">
+            Chapter 04
+          </span>
+          <h2 id="s4-title">
+            Rootless 模式 5 优势
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  1) Docker daemon 以非 root 用户运行
+                </li>
+                <li>
+                  2) 容器进程命名空间无 root 权限
+                </li>
+                <li>
+                  3) 攻击面更小(无特权升级路径)
+                </li>
+                <li>
+                  4) 适合 CI/CD + 多用户共享宿主机
+                </li>
+                <li>
+                  5) slirp4netns / pasta 用户态网络
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s5" aria-labelledby="s5-title">
+          <span class="section-num">
+            Chapter 05
+          </span>
+          <h2 id="s5-title">
+            镜像签名与验证
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  Docker Content Trust:DCT_NOTARY 签名验证
+                </li>
+                <li>
+                  Docker Content Trust 启用:export DOCKER_CONTENT_TRUST=1
+                </li>
+                <li>
+                  Cosign + Sigstore:新一代签名,简化工作流
+                </li>
+                <li>
+                  Admission Controller(K8s):校验镜像签名后才准入
+                </li>
+                <li>
+                  镜像扫描:Trivy / Snyk / Anchore 三选一
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <div class="alert alert-tip">
+          <span class="alert-icon">
+            💡 安全清单
+          </span>
+          <div class="alert-body">
+            <p>
+              USER 非 root + --read-only + --cap-drop ALL + seccomp + 镜像签名
+            </p>
+          </div>
+        </div>
+        <div class="alert alert-warn">
+          <span class="alert-icon">
+            ⚠️ 性能影响
+          </span>
+          <div class="alert-body">
+            <p>
+              默认 seccomp/AppArmor 性能影响 < 1%,基本可忽略
+            </p>
+          </div>
+        </div>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">
+            FAQ
+          </span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Linux capabilities 37 项
+              </h3>
+              <p class="faq-a">
+                默认:CHOWN/DAC_OVERRIDE/FOWNER/SETUID/SETGID/SETPCAP/NET_BIND_SERVICE 等
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                seccomp 系统调用过滤
+              </h3>
+              <p class="faq-a">
+                默认配置:Docker 自带 300+ 允许的 syscall 白名单
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                AppArmor vs SELinux
+              </h3>
+              <p class="faq-a">
+                AppArmor:Ubuntu 主流,基于路径的 MAC
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Rootless 模式 5 优势
+              </h3>
+              <p class="faq-a">
+                1) Docker daemon 以非 root 用户运行
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                镜像签名与验证
+              </h3>
+              <p class="faq-a">
+                Docker Content Trust:DCT_NOTARY 签名验证
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本课程
+        </h3>
+        <p class="footer-meta">
+          Docker 安全深入:seccomp/AppArmor/capability · Docker 24 节系统化教程。所有代码均经过实测,可运行于 Docker 20+ / K8s 1.24+ 环境。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            完整 24 节课
+          </strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            回到索引
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 完整指南 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-lesson-19';
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

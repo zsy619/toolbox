@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>P-05 Remotion 性能 Profiling 与调试 | Chrome DevTools 实战</title>
+<meta name="description" content="Remotion 高级性能分析:Chrome DevTools 远程调试、React Profiler 火焰图、Puppeteer Trace、Chrome Tracing 帧时间、内存快照、Bundle 分析、Cold Start 调优。">
+<meta name="keywords" content="Remotion 性能分析, Chrome DevTools, React Profiler, Puppeteer Trace, 火焰图">
+<link rel="canonical" href="https://example.com/remotion/P-05-profiling-debugging.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 性能 Profiling">
+<meta property="og:description" content="Chrome DevTools 远程调试 + 火焰图 + 内存分析。">
+<meta property="og:url" content="https://example.com/remotion/P-05-profiling-debugging.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"P-05 Remotion 性能 Profiling","description":"Chrome DevTools、React Profiler、Puppeteer Trace、内存快照实战。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 性能 Profiling"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="P-01-internal-architecture.html" class="active">高级</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-pro">高级层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">P-05 性能 Profiling</span>
+    </nav>
+    <h1 id="hero-title">P-05 性能 Profiling <span class="level-badge level-P">P 高级</span></h1>
+    <p class="hero-sub">Chrome DevTools 远程调试 + React Profiler + 内存快照实战。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 12 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> P-01 内部架构</div>
+      <div class="hero-meta-item"><strong>类型</strong> 高级</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>Chrome DevTools 远程调试</h2>
+<p>Remotion 在 Puppeteer 启动的 Chrome 中渲染,可通过 CDP 远程调试:</p>
+<pre class="line-numbers"><code class="language-bash"># 1. 启动 Studio 时开启调试端口
+remotion_config_set_browser_executable /usr/bin/google-chrome
+
+# 2. 在 chrome 启动参数加 --remote-debugging-port=9222
+# 3. 浏览器打开 chrome://inspect,连接 target
+
+# 或更简单:Studio 中按 F12 自动弹 DevTools</code></pre>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>React Profiler 火焰图</h2>
+<p>定位组件渲染瓶颈:</p>
+<pre class="line-numbers"><code class="language-tsx">import { Profiler } from 'react';
+
+const onRender = (id, phase, actualDuration) =&gt; {
+  if (actualDuration &gt; 16) {  // 超过 1 帧
+    console.warn('Slow:', id, actualDuration);
+  }
+};
+
+&lt;Profiler id="MyVideo" onRender={onRender}&gt;
+  &lt;MyVideo /&gt;
+&lt;/Profiler&gt;</code></pre>
+<p>在 DevTools 的 React 面板录制一段,即可看到组件树渲染时间分布。</p>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>Chrome Tracing 帧时间</h2>
+<p>更底层的 Performance 录制:</p>
+<pre class="line-numbers"><code class="language-bash"># 1. DevTools → Performance 面板 → 点录制
+# 2. Studio 中播放视频 5-10 秒
+# 3. 停止录制,查看 Main 线程火焰图
+# 4. 关注长任务(>50ms 的黄色/红色块)</code></pre>
+<p>导出 <code>.json</code> trace 文件可在 <code>ui.perfetto.dev</code> 在线分析。</p>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>内存快照:Heap Snapshot</h2>
+<p>查找内存泄漏:</p>
+<pre class="line-numbers"><code class="language-bash"># DevTools → Memory 面板
+# 1. 拍 baseline 快照
+# 2. 拖动时间轴 50 帧
+# 3. 再拍快照
+# 4. 对比两快照,查看 Object 数量增长
+
+# Lambda 模式加 --max-old-space-size=4096 可缓解 OOM</code></pre>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>Bundle 体积分析</h2>
+<p>用 webpack-bundle-analyzer 可视化:</p>
+<pre class="line-numbers"><code class="language-bash">npm i -D webpack-bundle-analyzer
+
+# remotion.config.ts
+Config.setWebpackOverride((config) =&gt; {
+  if (process.env.ANALYZE) {
+    const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+    config.plugins.push(new BundleAnalyzerPlugin());
+  }
+  return config;
+});
+
+ANALYZE=1 npx remotion render Video out.mp4</code></pre>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>Cold Start 调优</h2>
+<p>Lambda 模式首次启动 5-10 秒,需:</p>
+<ol>
+  <li><strong>预热并发</strong>:在流量低峰保持 1-2 个 Lambda 活跃</li>
+  <li><strong>减少 bundle 体积</strong>:tree-shaking + 删除未用 npm 包</li>
+  <li><strong>静态资源外置</strong>:字体/图片放 S3,bundle 仅含 JS</li>
+  <li><strong>Lambda SnapStart</strong>(2026 GA):快照加速,启动 < 1s</li>
+</ol>
+</section>
+
+<div class="source-note">Chrome DevTools 文档、React Profiler API、Perfetto Trace Viewer</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>性能测量 API</h2>
+<p>用浏览器原生 <code>performance.mark</code> / <code>measure</code> 在重计算点埋点:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">performance.mark('render-start');
+// 复杂动画计算
+performance.mark('render-end');
+performance.measure('render', 'render-start', 'render-end');
+console.table(performance.getEntriesByType('measure'));</code></pre></div>
+<p>Studio 自带 <strong>Chrome DevTools Profiler</strong>:按 F12 → Performance 面板录制,定位卡顿帧。</p>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="P-04-secure-rendering.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">P-04 安全渲染</span></a>
+  <a href="S-01-code-walkthrough.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">S-01 代码讲解视频</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 23 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

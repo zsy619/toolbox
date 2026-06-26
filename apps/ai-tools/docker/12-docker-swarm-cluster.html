@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <!-- ============================================================
+     基础元数据 - SEO 核心
+     ============================================================ -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Docker Swarm 完全指南">
+    <meta name="application-name" content="Docker Swarm 完全指南">
+    <meta name="format-detection" content="telephone=no">
+    <!-- ============================================================
+     SEO 核心标签
+     ============================================================ -->
+    <title>
+      Docker Swarm 集群完全指南：从节点架构到服务编排实战 | AI 工具箱
+    </title>
+    <meta name="description" content="Docker Swarm 是 Docker 原生集群管理系统，从 1.12.0 起内置。本文系统讲解节点架构、服务架构、部署模式、集群搭建与维护、PKI 安全、容灾机制、服务创建与负载均衡等核心知识,附完整命令清单与架构图。">
+    <meta name="keywords" content="Docker Swarm, Docker 集群, Swarm 节点, Manager 节点, Worker 节点, Docker Service, 容器编排, Raft 算法, PKI, TLS, 容器集群, Docker 教程, DevOps">
+    <meta name="author" content="AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="rating" content="general">
+    <meta name="distribution" content="global">
+    <meta name="revisit-after" content="7 days">
+    <meta name="language" content="zh-CN">
+    <meta name="geo.region" content="CN">
+    <meta name="dcterms.created" content="2026-06-03T00:00:00+08:00">
+    <meta name="dcterms.modified" content="2026-06-03T00:00:00+08:00">
+    <!-- 规范 URL -->
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/12-docker-swarm-cluster.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://tools.yy24365.com/ai-tools/docker/12-docker-swarm-cluster.html">
+    <link rel="alternate" hreflang="x-default" href="https://tools.yy24365.com/ai-tools/docker/12-docker-swarm-cluster.html">
+    <!-- Open Graph 社交分享 -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker Swarm 集群完全指南:从节点架构到服务编排实战">
+    <meta property="og:description" content="系统讲解 Docker Swarm 节点架构、服务架构、部署模式、集群搭建、PKI 安全、容灾机制、Service 创建与负载均衡。附完整命令清单与架构图。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/12-docker-swarm-cluster.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/docker-swarm-og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Docker Swarm 集群架构图,展示 Manager 与 Worker 节点关系">
+    <meta property="article:published_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:modified_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:author" content="AI 工具箱">
+    <meta property="article:section" content="DevOps">
+    <meta property="article:tag" content="Docker">
+    <meta property="article:tag" content="容器编排">
+    <meta property="article:tag" content="集群管理">
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Docker Swarm 集群完全指南">
+    <meta name="twitter:description" content="从节点架构到服务编排,Docker Swarm 完整知识体系,附架构图与命令清单。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/docker-swarm-og.png">
+    <meta name="twitter:image:alt" content="Docker Swarm 集群架构图">
+    <!-- 性能优化 -->
+    <link rel="preconnect" href="https://www.cnblogs.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.cnblogs.com">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%232496ED' d='M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.083.185.185.185m-2.954-5.43h2.119a.186.186 0 00.186-.186V3.575a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m0 2.716h2.119a.187.187 0 00.186-.186V6.291a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.931 0h2.12a.186.186 0 00.184-.186V6.291a.185.185 0 00-.184-.185h-2.12a.185.185 0 00-.184.185v1.887c0 .102.082.185.184.186m-2.932 0h2.12a.185.185 0 00.184-.186V6.291a.185.185 0 00-.184-.185H5.166a.186.186 0 00-.185.185v1.887c0 .102.083.185.185.186m5.863 5.43h2.119a.186.186 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.082.185.185.185m-2.931 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.932 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.931 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m11.792 4.084h-2.119a.186.186 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.931 0h-2.119a.185.185 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.932 0h-2.118a.185.185 0 00-.184.185v1.886c0 .103.082.186.184.186h2.118a.186.186 0 00.185-.186v-1.886a.185.185 0 00-.185-.185m-2.931 0h-2.12a.185.185 0 00-.184.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.184-.186v-1.886a.185.185 0 00-.184-.185m-2.932 0H5.166a.186.186 0 00-.185.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.185-.186v-1.886a.186.186 0 00-.185-.185z'/%3E%3C/svg%3E">
+    <!-- ============================================================
+     结构化数据 - JSON-LD
+     ============================================================ -->
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Docker Swarm 集群完全指南:从节点架构到服务编排实战",
+  "description": "Docker Swarm 是 Docker 原生集群管理系统,从 Docker 1.12.0 起内置于 Docker 引擎中。本文系统讲解节点架构、服务架构、部署模式、集群搭建、PKI 安全、容灾机制、Service 创建与负载均衡等核心知识。",
+  "author": {
+    "@type": "Organization",
+    "name": "AI 工具箱",
+    "url": "https://tools.yy24365.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AI 工具箱",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tools.yy24365.com/assets/images/logo.png"
+    }
+  },
+  "datePublished": "2026-06-03T00:00:00+08:00",
+  "dateModified": "2026-06-03T00:00:00+08:00",
+  "inLanguage": "zh-CN",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tools.yy24365.com/ai-tools/docker/12-docker-swarm-cluster.html"
+  },
+  "keywords": "Docker Swarm, Docker 集群, Manager 节点, Worker 节点, Service, 容器编排",
+  "about": {
+    "@type": "SoftwareApplication",
+    "name": "Docker Swarm",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Linux, macOS, Windows"
+  },
+  "proficiencyLevel": "Intermediate"
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "首页",
+      "item": "https://tools.yy24365.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "AI 工具",
+      "item": "https://tools.yy24365.com/ai-tools/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Docker 学习",
+      "item": "https://tools.yy24365.com/ai-tools/docker/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "Docker Swarm 完全指南",
+      "item": "https://tools.yy24365.com/ai-tools/docker/12-docker-swarm-cluster.html"
+    }
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Docker Swarm 与 Kubernetes 有什么区别?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Docker Swarm 内置于 Docker 引擎,学习曲线平缓,适合中小型团队与快速搭建场景;Kubernetes 功能更强大(自动扩缩、复杂调度、服务网格),适合大规模生产环境。Swarm 使用标准 Docker API,兼容现有 Docker Compose;Kubernetes 使用独立的 API 体系,生态丰富但运维复杂。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Swarm 集群最少需要几个节点?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "最少 1 个节点(单节点 Swarm),但生产环境推荐至少 3 个 Manager 节点(满足 Raft 共识算法的多数派要求,容忍 1 个节点故障)。Worker 节点数量根据业务负载灵活配置。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Manager 节点和 Worker 节点有什么区别?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Manager 节点负责维护集群状态、调度 service、处理集群管理任务,通过 Raft 算法保证一致性;Worker 节点用于运行 task(任务容器),对外提供服务。默认 Manager 同时也是 Worker,可以运行 task。两者的角色可以通过 docker node promote/demote 命令相互转换。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Swarm 集群的负载均衡策略是什么?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Swarm 内置 DNS 轮询(Round-Robin)负载均衡,无法通过修改 service 属性变更。如需更复杂的策略(IP Hash、最小连接、加权等),可通过 Nginx、HAProxy 等第三方代理实现。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "如何安全地删除一个 Manager 节点?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Manager 节点不建议直接退群,会破坏集群一致性。正确流程是:先 docker node demote 降级为 Worker,再按 Worker 节点的删除流程操作。如果使用 docker swarm leave -f 强制退群,可能造成 Manager 集群丢失多数派,导致集群不可用。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "什么是 Swarm 自动锁定(autolock)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "autolock 是 Swarm 的一种安全机制,用于加密 Manager 之间的通信(TLS)。启用后,Manager 重启后会被锁定,需要提供解锁密钥(unlock key)才能重新加入集群。密钥通过 docker swarm unlock-key 命令查看,务必妥善保管。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "如何查看 Swarm 集群的 CA 证书?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "通过 docker swarm ca 命令可以查看、轮换(rotate)或指定外部 CA 证书。Swarm 默认每 90 天自动轮换一次 CA 根证书,可通过 docker swarm ca --rotate 手动触发。"
+      }
+    }
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "搭建 5 节点 Docker Swarm 集群",
+  "description": "从零开始搭建包含 3 Manager + 2 Worker 的 Docker Swarm 集群",
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": "准备 5 台 Docker 主机",
+      "text": "准备 5 台主机(docker1、docker2、docker3、docker4、docker5),确保 Docker 已安装并运行"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": "初始化 Swarm",
+      "text": "在 docker1 上运行 docker swarm init 命令,创建并初始化 Swarm 集群"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": "添加 Worker 节点",
+      "text": "复制 init 输出中的 worker 加入命令,在 docker4 和 docker5 上运行"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": "添加 Manager 节点",
+      "text": "在 docker1 运行 docker swarm join-token manager 获取 token,在 docker2 和 docker3 上运行"
+    },
+    {
+      "@type": "HowToStep",
+      "position": 5,
+      "name": "验证集群状态",
+      "text": "在 Manager 节点运行 docker node ls 查看所有节点状态"
+    }
+  ]
+}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+    <style>
+
+.footer-refs { margin: 16px 0; padding: 16px 0; border-top: 1px solid rgba(255,255,255,.1); }
+.footer-refs ul { list-style: none; padding: 0; }
+.footer-refs li { padding: 4px 0; }
+.footer-refs a { color: #79c0ff; }
+    </style>
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress" role="progressbar" aria-label="阅读进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand" aria-label="AI 工具箱首页">
+          <span class="brand-mark">
+            AI
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main" role="main">
+      <section class="hero" aria-labelledby="article-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 学习
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Swarm 指南
+            </span>
+          </nav>
+          <h1 id="article-title">
+            Docker Swarm 集群完全指南
+          </h1>
+          <p class="hero-sub">
+            从节点架构到服务编排,系统掌握 Docker 原生集群管理系统的核心原理与实战命令。包含架构图、命令清单、PKI 安全机制与容灾策略。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              ★★★ 中级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                阅读时长
+              </strong>
+              约 25 分钟
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                适用版本
+              </strong>
+              Docker 1.12.0+
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                最后更新
+              </strong>
+              2026-06-03
+            </div>
+          </div>
+          <div class="hero-tags" aria-label="标签">
+            <span class="tag">
+              Docker Swarm
+            </span>
+            <span class="tag">
+              容器编排
+            </span>
+            <span class="tag">
+              集群管理
+            </span>
+            <span class="tag">
+              Raft 算法
+            </span>
+            <span class="tag">
+              PKI/TLS
+            </span>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <!-- ============================================================
+     导言
+     ============================================================ -->
+        <article>
+          <section class="section" aria-labelledby="intro">
+            <h2 id="intro">
+              什么是 Docker Swarm
+            </h2>
+            <p>
+              Docker Swarm 是 Docker 官方推出的
+              <strong>
+                原生集群管理系统
+              </strong>
+              ,自
+              <code>
+Docker 1.12.0
+              </code>
+              起内置于 Docker 引擎中,无需单独安装。它将一组运行 Docker 的物理机或虚拟机组成一个虚拟主机,使用者通过简单的 Docker API 即可与整个集群通信。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                核心价值
+              </div>
+              <div class="concept-body">
+                <p>
+                  Swarm 把多个 Docker 主机"抽象"成一台逻辑主机。当你在 Swarm 上部署一个 service 时,集群会自动完成镜像分发、容器调度、负载均衡、故障恢复等任务,屏蔽底层多主机的复杂性。
+                </p>
+              </div>
+            </div>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  Swarm 使用标准 Docker API,与现有
+                  <code>
+docker-compose
+                  </code>
+                  文件天然兼容,学习曲线远低于 Kubernetes,适合
+                  <strong>
+                    中小型团队
+                  </strong>
+                  与
+                  <strong>
+                    快速搭建
+                  </strong>
+                  场景。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     目录
+     ============================================================ -->
+          <nav class="toc" id="toc" aria-labelledby="toc-title">
+            <h2 class="toc-title" id="toc-title">
+              本文目录
+            </h2>
+            <ul class="toc-grid">
+              <li>
+                <a href="#s1">
+                  <span class="toc-num">
+                    1
+                  </span>
+                  节点架构
+                </a>
+              </li>
+              <li>
+                <a href="#s2">
+                  <span class="toc-num">
+                    2
+                  </span>
+                  服务架构
+                </a>
+              </li>
+              <li>
+                <a href="#s3">
+                  <span class="toc-num">
+                    3
+                  </span>
+                  部署模式
+                </a>
+              </li>
+              <li>
+                <a href="#s4">
+                  <span class="toc-num">
+                    4
+                  </span>
+                  集群搭建
+                </a>
+              </li>
+              <li>
+                <a href="#s5">
+                  <span class="toc-num">
+                    5
+                  </span>
+                  集群维护
+                </a>
+              </li>
+              <li>
+                <a href="#s6">
+                  <span class="toc-num">
+                    6
+                  </span>
+                  节点维护
+                </a>
+              </li>
+              <li>
+                <a href="#s7">
+                  <span class="toc-num">
+                    7
+                  </span>
+                  PKI 安全
+                </a>
+              </li>
+              <li>
+                <a href="#s8">
+                  <span class="toc-num">
+                    8
+                  </span>
+                  集群容灾
+                </a>
+              </li>
+              <li>
+                <a href="#s9">
+                  <span class="toc-num">
+                    9
+                  </span>
+                  Service 创建
+                </a>
+              </li>
+              <li>
+                <a href="#s10">
+                  <span class="toc-num">
+                    10
+                  </span>
+                  Service 操作
+                </a>
+              </li>
+              <li>
+                <a href="#faq">
+                  <span class="toc-num">
+                    ?
+                  </span>
+                  常见问题
+                </a>
+              </li>
+              <li>
+                <a href="#refs">
+                  <span class="toc-num">
+                    i
+                  </span>
+                  参考资源
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- ============================================================
+     第一章 节点架构
+     ============================================================ -->
+          <section class="section" id="s1" aria-labelledby="s1-title">
+            <span class="section-num">
+              Chapter 01
+            </span>
+            <h2 id="s1-title">
+              节点架构 (Node Architecture)
+            </h2>
+            <p>
+              从
+              <strong>
+                物理
+              </strong>
+              角度看,一个 Swarm 集群由若干台安装了 Docker 的主机组成;从
+              <strong>
+                逻辑
+              </strong>
+              角度看,集群由若干个
+              <code>
+node
+              </code>
+              (节点)组成。每个 node 落实在一台物理 Docker 主机上,但
+              <strong>
+                一个物理主机不一定就是一个 node
+              </strong>
+              ,一台主机上也可以运行多个 node。
+            </p>
+            <div class="diagram" role="figure" aria-label="Swarm 节点架构示意图">
+              <div class="diagram-title">
+                Swarm 节点架构
+              </div>
+              <svg viewbox="0 0 600 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Swarm 集群由 Manager 节点和 Worker 节点组成,Manager 维护集群状态,Worker 运行 task">
+                <defs>
+                  <lineargradient id="grad-m" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#2496ED" />
+                    <stop offset="1" stop-color="#0DB7ED" />
+                  </lineargradient>
+                  <lineargradient id="grad-w" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#6e7681" />
+                    <stop offset="1" stop-color="#484f58" />
+                  </lineargradient>
+                </defs>
+                <rect width="600" height="240" fill="none" />
+                <text x="300" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="#1a2530" font-family="-apple-system,sans-serif">
+                  Swarm 集群
+                </text>
+                <line x1="40" y1="38" x2="560" y2="38" stroke="#d8e2ec" stroke-dasharray="3 3" />
+                <text x="50" y="58" font-size="11" fill="#5a6b7a" font-family="-apple-system,sans-serif">
+                  物理主机层
+                </text>
+                <rect x="40" y="70" width="160" height="150" rx="8" fill="#eef3f9" stroke="#2496ED" stroke-width="1.5" />
+                <text x="120" y="92" text-anchor="middle" font-size="12" font-weight="700" fill="#1a2530" font-family="-apple-system,sans-serif">
+                  docker1 (Manager)
+                </text>
+                <rect x="55" y="105" width="130" height="50" rx="6" fill="url(#grad-m)" />
+                <text x="120" y="125" text-anchor="middle" font-size="11" font-weight="600" fill="#fff" font-family="-apple-system,sans-serif">
+                  node (M)
+                </text>
+                <text x="120" y="142" text-anchor="middle" font-size="9" fill="#c4e3f7" font-family="-apple-system,sans-serif">
+                  + Worker 角色
+                </text>
+                <text x="120" y="175" text-anchor="middle" font-size="9" fill="#5a6b7a" font-family="-apple-system,sans-serif">
+                  10.0.0.1
+                </text>
+                <text x="120" y="190" text-anchor="middle" font-size="9" fill="#5a6b7a" font-family="-apple-system,sans-serif">
+                  Raft Leader
+                </text>
+                <rect x="220" y="70" width="160" height="150" rx="8" fill="#eef3f9" stroke="#d8e2ec" />
+                <text x="300" y="92" text-anchor="middle" font-size="12" font-weight="700" fill="#1a2530" font-family="-apple-system,sans-serif">
+                  docker2 (Worker)
+                </text>
+                <rect x="235" y="105" width="130" height="50" rx="6" fill="url(#grad-w)" />
+                <text x="300" y="125" text-anchor="middle" font-size="11" font-weight="600" fill="#fff" font-family="-apple-system,sans-serif">
+                  node (W)
+                </text>
+                <text x="300" y="142" text-anchor="middle" font-size="9" fill="#c4d1de" font-family="-apple-system,sans-serif">
+                  运行 task
+                </text>
+                <text x="300" y="175" text-anchor="middle" font-size="9" fill="#5a6b7a" font-family="-apple-system,sans-serif">
+                  10.0.0.2
+                </text>
+                <text x="300" y="190" text-anchor="middle" font-size="9" fill="#5a6b7a" font-family="-apple-system,sans-serif">
+                  Docker 引擎
+                </text>
+                <rect x="400" y="70" width="160" height="150" rx="8" fill="#eef3f9" stroke="#d8e2ec" />
+                <text x="480" y="92" text-anchor="middle" font-size="12" font-weight="700" fill="#1a2530" font-family="-apple-system,sans-serif">
+                  docker3 (Worker)
+                </text>
+                <rect x="415" y="105" width="130" height="50" rx="6" fill="url(#grad-w)" />
+                <text x="480" y="125" text-anchor="middle" font-size="11" font-weight="600" fill="#fff" font-family="-apple-system,sans-serif">
+                  node (W)
+                </text>
+                <text x="480" y="142" text-anchor="middle" font-size="9" fill="#c4d1de" font-family="-apple-system,sans-serif">
+                  运行 task
+                </text>
+                <text x="480" y="175" text-anchor="middle" font-size="9" fill="#5a6b7a" font-family="-apple-system,sans-serif">
+                  10.0.0.3
+                </text>
+                <text x="480" y="190" text-anchor="middle" font-size="9" fill="#5a6b7a" font-family="-apple-system,sans-serif">
+                  Docker 引擎
+                </text>
+                <line x1="190" y1="130" x2="220" y2="130" stroke="#2496ED" stroke-width="1.5" marker-end="url(#arrow)" />
+                <line x1="380" y1="130" x2="400" y2="130" stroke="#2496ED" stroke-width="1.5" marker-end="url(#arrow)" />
+                <defs>
+                  <marker id="arrow" markerwidth="8" markerheight="8" refx="6" refy="3" orient="auto">
+                    <path d="M0,0 L6,3 L0,6 z" fill="#2496ED" />
+                  </marker>
+                </defs>
+              </svg>
+            </div>
+            <h3>
+              1.1 Manager 节点
+            </h3>
+            <p>
+              Manager 节点负责
+              <strong>
+                维护集群状态
+              </strong>
+              、
+              <strong>
+                调度 service
+              </strong>
+              、
+              <strong>
+                处理集群管理任务
+              </strong>
+              。Swarm 通过
+              <strong>
+                Raft 一致性算法
+              </strong>
+              在多个 Manager 之间同步集群状态。为防止单点故障,生产环境推荐
+              <strong>
+                3 个或 5 个 Manager
+              </strong>
+              (3 个可容忍 1 个故障,5 个可容忍 2 个)。
+            </p>
+            <h3>
+              1.2 Worker 节点
+            </h3>
+            <p>
+              Worker 节点是
+              <strong>
+                执行层
+              </strong>
+              ,在其容器中运行 task 任务,对外提供 service 服务。默认 Manager 同时充当 Worker 角色,也可以运行 task。
+            </p>
+            <h3>
+              1.3 角色转换
+            </h3>
+            <p>
+              Manager 与 Worker 角色可相互转换:
+            </p>
+            <ul>
+              <li>
+                Manager → Worker: 称为
+                <strong>
+                  节点降级 (demote)
+                </strong>
+              </li>
+              <li>
+                Worker → Manager: 称为
+                <strong>
+                  节点升级 (promote)
+                </strong>
+              </li>
+            </ul>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  Manager 数量必须是
+                  <strong>
+                    奇数
+                  </strong>
+                  (1、3、5、7...),以满足 Raft 多数派选举。偶数 Manager 在投票时会造成"脑裂"风险,反而不利于容灾。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第二章 服务架构
+     ============================================================ -->
+          <section class="section" id="s2" aria-labelledby="s2-title">
+            <span class="section-num">
+              Chapter 02
+            </span>
+            <h2 id="s2-title">
+              服务架构 (Service Architecture)
+            </h2>
+            <p>
+              搭建 Swarm 集群的
+              <strong>
+                最终目的
+              </strong>
+              是在集群中运行应用,提供抗压能力强的服务。需要理解 4 个核心概念:
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      概念
+                    </th>
+                    <th>
+                      性质
+                    </th>
+                    <th>
+                      作用
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <code>
+service
+                      </code>
+                    </td>
+                    <td>
+                      逻辑概念
+                    </td>
+                    <td>
+                      对外提供的服务定义(镜像、副本数、端口等)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+task
+                      </code>
+                    </td>
+                    <td>
+                      调度单元
+                    </td>
+                    <td>
+                      Service 在节点上的具体实现,通常对应一个容器
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+orchestrator
+                      </code>
+                      编排器
+                    </td>
+                    <td>
+                      Manager 组件
+                    </td>
+                    <td>
+                      创建/停止 task,通过内置 DNS 注册/注销
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+dispatcher
+                      </code>
+                      分发器
+                    </td>
+                    <td>
+                      Manager 组件
+                    </td>
+                    <td>
+                      为 task 分配节点,实现负载均衡
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <h3>
+              编排器工作流程
+            </h3>
+            <p>
+              以定义一个包含 3 个 task 的 service 为例:
+            </p>
+            <ol>
+              <li>
+                编排器创建 3 个 task,每个 task 有唯一 taskID,通过分配器为每个 task 分配虚拟 IP(VIP)
+              </li>
+              <li>
+                将 task 注册到内置 DNS;当 task 不可用时,编排器在 DNS 中注销
+              </li>
+            </ol>
+            <h3>
+              分发器工作流程
+            </h3>
+            <p>
+              编排器创建 3 个 task 后,分发器接管:
+            </p>
+            <ol>
+              <li>
+                在集群所有节点中找到 3 个 available node,每个节点分配一个 task
+              </li>
+              <li>
+                每个 task 像一个"插槽",里面放入一个容器
+              </li>
+              <li>
+                分发器持续监测容器运行状态
+              </li>
+              <li>
+                若容器不可用或被终止,编排器立即创建新 task 并重新调度
+              </li>
+              <li>
+                分发器内置 DNS 轮询,实现访问请求的负载均衡
+              </li>
+            </ol>
+            <div class="concept">
+              <div class="concept-title">
+                关键点
+              </div>
+              <div class="concept-body">
+                <p>
+                  task 是 Swarm 调度的
+                  <strong>
+                    最小单位
+                  </strong>
+                  ,task 与容器是 1:1 关系。service 是逻辑抽象,task 是物理实例。一个 service 由 1 个或多个 task 组成。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第三章 部署模式
+     ============================================================ -->
+          <section class="section" id="s3" aria-labelledby="s3-title">
+            <span class="section-num">
+              Chapter 03
+            </span>
+            <h2 id="s3-title">
+              服务部署模式
+            </h2>
+            <p>
+              Swarm 提供两种 service 部署模式,适用于不同场景:
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      模式
+                    </th>
+                    <th>
+                      描述
+                    </th>
+                    <th>
+                      task 数量
+                    </th>
+                    <th>
+                      典型场景
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        Replicated 副本模式
+                      </strong>
+                      (默认)
+                    </td>
+                    <td>
+                      手动指定 task 数量,分发器分配到任意可用节点
+                    </td>
+                    <td>
+                      可配置
+                    </td>
+                    <td>
+                      Web 服务、API 服务
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        Global 全局模式
+                      </strong>
+                    </td>
+                    <td>
+                      每个节点都运行一个 task,自动跟随节点数量
+                    </td>
+                    <td>
+                      = 节点数
+                    </td>
+                    <td>
+                      节点监控、日志收集、Agent 守护
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# Replicated 模式:指定 3 个副本
+                  </span>
+
+docker service create --name web --replicas 3 -p 80:80 nginx:alpine
+                  <span class="tok-com">
+# Global 模式:每个节点运行一个
+                  </span>
+
+docker service create --name monitor --mode global prom/node-exporter
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    选择建议
+                  </strong>
+                  :当
+                  <code>
+task 数量 ≠ 节点数量
+                  </code>
+                  时必须用 Replicated;当希望"每个节点都跑一份"时用 Global(例如采集节点指标)。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第四章 集群搭建
+     ============================================================ -->
+          <section class="section" id="s4" aria-labelledby="s4-title">
+            <span class="section-num">
+              Chapter 04
+            </span>
+            <h2 id="s4-title">
+              集群搭建实战
+            </h2>
+            <p>
+              下面演示搭建一个包含 3 Manager + 2 Worker 的 Swarm 集群(共 5 节点):
+            </p>
+            <div class="diagram" role="figure" aria-label="5 节点 Swarm 集群搭建流程图">
+              <div class="diagram-title">
+                5 节点 Swarm 集群拓扑
+              </div>
+              <svg viewbox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="5 节点 Swarm 集群拓扑:docker1 docker2 docker3 为 Manager,docker4 docker5 为 Worker">
+                <text x="300" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1a2530" font-family="-apple-system,sans-serif">
+                  Swarm 集群 (3 Manager + 2 Worker)
+                </text>
+                <g>
+                  <rect x="60" y="50" width="120" height="60" rx="8" fill="#2496ED" />
+                  <text x="120" y="78" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="-apple-system,sans-serif">
+                    docker1
+                  </text>
+                  <text x="120" y="96" text-anchor="middle" font-size="10" fill="#c4e3f7" font-family="-apple-system,sans-serif">
+                    Manager ★
+                  </text>
+                </g>
+                <g>
+                  <rect x="240" y="50" width="120" height="60" rx="8" fill="#2496ED" />
+                  <text x="300" y="78" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="-apple-system,sans-serif">
+                    docker2
+                  </text>
+                  <text x="300" y="96" text-anchor="middle" font-size="10" fill="#c4e3f7" font-family="-apple-system,sans-serif">
+                    Manager
+                  </text>
+                </g>
+                <g>
+                  <rect x="420" y="50" width="120" height="60" rx="8" fill="#2496ED" />
+                  <text x="480" y="78" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="-apple-system,sans-serif">
+                    docker3
+                  </text>
+                  <text x="480" y="96" text-anchor="middle" font-size="10" fill="#c4e3f7" font-family="-apple-system,sans-serif">
+                    Manager
+                  </text>
+                </g>
+                <g>
+                  <rect x="150" y="135" width="120" height="50" rx="8" fill="#6e7681" />
+                  <text x="210" y="158" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="-apple-system,sans-serif">
+                    docker4
+                  </text>
+                  <text x="210" y="175" text-anchor="middle" font-size="10" fill="#c4d1de" font-family="-apple-system,sans-serif">
+                    Worker
+                  </text>
+                </g>
+                <g>
+                  <rect x="330" y="135" width="120" height="50" rx="8" fill="#6e7681" />
+                  <text x="390" y="158" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="-apple-system,sans-serif">
+                    docker5
+                  </text>
+                  <text x="390" y="175" text-anchor="middle" font-size="10" fill="#c4d1de" font-family="-apple-system,sans-serif">
+                    Worker
+                  </text>
+                </g>
+                <line x1="120" y1="110" x2="300" y2="110" stroke="#2496ED" stroke-width="1" stroke-dasharray="3 3" />
+                <line x1="300" y1="110" x2="480" y2="110" stroke="#2496ED" stroke-width="1" stroke-dasharray="3 3" />
+                <line x1="210" y1="110" x2="300" y2="110" stroke="#6e7681" stroke-width="1" stroke-dasharray="3 3" />
+                <line x1="300" y1="110" x2="390" y2="110" stroke="#6e7681" stroke-width="1" stroke-dasharray="3 3" />
+              </svg>
+            </div>
+            <h3>
+              4.1 准备 5 台主机
+            </h3>
+            <p>
+              主机名分别为
+              <code>
+docker1
+              </code>
+              ~
+              <code>
+docker5
+              </code>
+              ,确保 Docker 已安装并运行,各节点之间网络互通。
+            </p>
+            <h3>
+              4.2 检查 Swarm 激活状态
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker info
+                  </span>
+ |
+                  <span class="tok-cmd">
+grep -i swarm
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <p>
+              若输出
+              <code>
+Swarm: inactive
+              </code>
+              表示 Swarm 未激活。
+            </p>
+            <h3>
+              4.3 初始化 Swarm (在 docker1)
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker swarm init
+                  </span>
+                  <span class="tok-flag">
+--advertise-addr
+                  </span>
+ 10.0.0.1
+                </code>
+              </pre>
+            </div>
+            <p>
+              执行后 docker1 自动成为 Manager,并输出
+              <strong>
+                添加 Worker
+              </strong>
+              与
+              <strong>
+                添加 Manager
+              </strong>
+              的完整命令。
+            </p>
+            <h3>
+              4.4 添加 Worker 节点
+            </h3>
+            <p>
+              在 docker4 和 docker5 上运行 docker1 输出中的 worker 加入命令:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker swarm join
+                  </span>
+                  <span class="tok-flag">
+--token
+                  </span>
+ SWMTKN-xxx-xxx \
+  10.0.0.1:2377
+                </code>
+              </pre>
+            </div>
+            <h3>
+              4.5 添加 Manager 节点
+            </h3>
+            <p>
+              在 docker1 获取 manager token,然后在 docker2 和 docker3 上运行:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 在 docker1 获取 manager 加入命令
+                  </span>
+                  <span class="tok-cmd">
+docker swarm join-token
+                  </span>
+ manager
+                  <span class="tok-com">
+# 复制输出,在 docker2、docker3 运行
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              4.6 验证集群
+            </h3>
+            <p>
+              在
+              <strong>
+                任一 Manager 节点
+              </strong>
+              运行(Worker 节点无此权限):
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker node ls
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <p>
+              可以看到 5 个节点及其角色(Leader / Reachable / Worker)与状态(Ready / Down)。
+            </p>
+          </section>
+          <!-- ============================================================
+     第五章 集群维护
+     ============================================================ -->
+          <section class="section" id="s5" aria-labelledby="s5-title">
+            <span class="section-num">
+              Chapter 05
+            </span>
+            <h2 id="s5-title">
+              集群维护 (Cluster Maintenance)
+            </h2>
+            <h3>
+              5.1 Worker 节点退群与重加入
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# Worker 退群
+                  </span>
+                  <span class="tok-cmd">
+docker swarm leave
+                  </span>
+                  <span class="tok-com">
+# 在 Manager 重新生成 worker token
+                  </span>
+                  <span class="tok-cmd">
+docker swarm join-token
+                  </span>
+ worker
+                  <span class="tok-com">
+# 在新 worker 上执行复制的 join 命令
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <p>
+              在 Manager 上查看节点状态,旧的 worker 节点变为
+              <code>
+Down
+              </code>
+              ,新节点
+              <code>
+Ready
+              </code>
+              。可执行
+              <code>
+docker node rm <NODE-ID>
+              </code>
+              删除 Down 状态的 worker。
+            </p>
+            <h3>
+              5.2 Manager 节点退群
+            </h3>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  Manager 节点
+                  <strong>
+                    不推荐直接退群
+                  </strong>
+                  ,会破坏 Raft 一致性。若必须退群,使用
+                  <code>
+docker swarm leave -f
+                  </code>
+                  强制执行,但需要确保剩余 Manager 数量仍满足多数派。
+                </p>
+              </div>
+            </div>
+            <h3>
+              5.3 自动锁定 (Autolock)
+            </h3>
+            <p>
+              Manager 之间通过 Raft 日志同步数据,但 Raft 数据传输有被攻击风险。Swarm 提供
+              <strong>
+                autolock
+              </strong>
+              机制对通信启用 TLS 加密,密钥维护在 Docker 内存中,Docker 重启后密钥丢失,需要重新解锁。
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 开启自动锁定
+                  </span>
+                  <span class="tok-cmd">
+docker swarm update
+                  </span>
+                  <span class="tok-flag">
+--autolock
+                  </span>
+=true
+                  <span class="tok-com">
+# 查看解锁密钥(务必妥善保存)
+                  </span>
+                  <span class="tok-cmd">
+docker swarm unlock-key
+                  </span>
+                  <span class="tok-com">
+# Manager 重启后,需手动解锁
+                  </span>
+                  <span class="tok-cmd">
+docker swarm unlock
+                  </span>
+                </code>
+              </pre>
+            </div>
+          </section>
+          <!-- ============================================================
+     第六章 节点维护
+     ============================================================ -->
+          <section class="section" id="s6" aria-labelledby="s6-title">
+            <span class="section-num">
+              Chapter 06
+            </span>
+            <h2 id="s6-title">
+              节点维护 (Node Maintenance)
+            </h2>
+            <h3>
+              6.1 角色转换
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# Worker 升级为 Manager
+                  </span>
+                  <span class="tok-cmd">
+docker node promote
+                  </span>
+ docker4 docker5
+                  <span class="tok-com">
+# Manager 降级为 Worker
+                  </span>
+                  <span class="tok-cmd">
+docker node demote
+                  </span>
+ docker2 docker3
+                  <span class="tok-com">
+# 等价方式
+                  </span>
+                  <span class="tok-cmd">
+docker node update
+                  </span>
+                  <span class="tok-flag">
+--role
+                  </span>
+ manager docker2
+                  <span class="tok-cmd">
+docker node update
+                  </span>
+                  <span class="tok-flag">
+--role
+                  </span>
+ worker  docker4
+                </code>
+              </pre>
+            </div>
+            <h3>
+              6.2 节点标签
+            </h3>
+            <p>
+              为节点添加描述性标签,便于 service 调度时筛选目标节点。
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 添加/修改标签
+                  </span>
+                  <span class="tok-cmd">
+docker node update
+                  </span>
+                  <span class="tok-flag">
+--label-add
+                  </span>
+ auth=zs \
+                  <span class="tok-flag">
+--label-add
+                  </span>
+ email=zs@163.com \
+                       docker2
+                  <span class="tok-com">
+# 查看标签
+                  </span>
+                  <span class="tok-cmd">
+docker node inspect
+                  </span>
+ docker2 |
+                  <span class="tok-cmd">
+grep -A 5 Labels
+                  </span>
+                  <span class="tok-com">
+# 删除标签
+                  </span>
+                  <span class="tok-cmd">
+docker node update
+                  </span>
+                  <span class="tok-flag">
+--label-rm
+                  </span>
+ auth
+                  <span class="tok-flag">
+--label-rm
+                  </span>
+ email docker2
+                </code>
+              </pre>
+            </div>
+            <h3>
+              6.3 节点删除
+            </h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      场景
+                    </th>
+                    <th>
+                      能否删除
+                    </th>
+                    <th>
+                      正确做法
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      Ready 状态的 Worker
+                    </td>
+                    <td>
+                      ❌ 无法直接删除
+                    </td>
+                    <td>
+                      先
+                      <code>
+docker swarm leave
+                      </code>
+                      关闭 Docker → 节点 Down → 再
+                      <code>
+docker node rm
+                      </code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Manager 节点
+                    </td>
+                    <td>
+                      ❌ 无法直接删除
+                    </td>
+                    <td>
+                      先
+                      <code>
+demote
+                      </code>
+                      降级为 Worker,再按上面流程
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      已 Down 的 Worker
+                    </td>
+                    <td>
+                      ✅ 可删除
+                    </td>
+                    <td>
+                      <code>
+docker node rm <NODE-ID>
+                      </code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      强制删除(
+                      <code>
+-f
+                      </code>
+                      )
+                    </td>
+                    <td>
+                      对 Manager 无效
+                    </td>
+                    <td>
+                      <code>
+docker node rm -f
+                      </code>
+                      仅对 Worker 有效
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- ============================================================
+     第七章 PKI 安全
+     ============================================================ -->
+          <section class="section" id="s7" aria-labelledby="s7-title">
+            <span class="section-num">
+              Chapter 07
+            </span>
+            <h2 id="s7-title">
+              Swarm 安全:PKI 体系
+            </h2>
+            <p>
+              Docker 内置 PKI(Public Key Infrastructure,公钥基础设施)保障系统安全。所有 Swarm 节点之间的通信都通过
+              <strong>
+                TLS
+              </strong>
+              鉴权、授权与加密。
+            </p>
+            <h3>
+              7.1 TLS 工作流程
+            </h3>
+            <ol>
+              <li>
+                运行
+                <code>
+docker swarm init
+                </code>
+                时,Manager 生成新的
+                <strong>
+                  Swarm CA 根证书
+                </strong>
+                与一对密钥
+              </li>
+              <li>
+                同时生成 2 个 token:一个用于添加 Worker,一个用于添加 Manager,每个 token 包含 CA 根证书的 digest 和随机密钥
+              </li>
+              <li>
+                节点加入时,使用 token 中的随机密钥做
+                <strong>
+                  对称验证
+                </strong>
+                保障通信安全
+              </li>
+              <li>
+                加入后,所有通信都通过
+                <strong>
+                  TLS 加密
+                </strong>
+                :先用 CA 证书验证对方身份,再进行加密数据传输
+              </li>
+            </ol>
+            <h3>
+              7.2 CA 证书轮换
+            </h3>
+            <p>
+              为防止 CA 私钥泄露,Swarm
+              <strong>
+                默认每 90 天轮换一次
+              </strong>
+              CA 根证书。手动轮换流程:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 手动轮换 CA 证书
+                  </span>
+                  <span class="tok-cmd">
+docker swarm ca
+                  </span>
+                  <span class="tok-flag">
+--rotate
+                  </span>
+                  <span class="tok-com">
+# 查看 CA 证书信息
+                  </span>
+                  <span class="tok-cmd">
+docker swarm ca
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <p>
+              轮换过程按顺序执行:生成交叉签名根证书 → 通知所有节点更新根证书 → 节点仅信任新证书 → 使用新证书签发自己的数字证书。
+            </p>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  也可以指定外部 CA 根证书(
+                  <code>
+docker swarm ca --cert
+                  </code>
+                  ),从外部 CA 中心签发,适合对接企业内部的统一 PKI 体系。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第八章 集群容灾
+     ============================================================ -->
+          <section class="section" id="s8" aria-labelledby="s8-title">
+            <span class="section-num">
+              Chapter 08
+            </span>
+            <h2 id="s8-title">
+              Manager 集群容灾
+            </h2>
+            <p>
+              Swarm 的 Manager 集群采用
+              <strong>
+                热备方式
+              </strong>
+              提升容灾能力:多个 Manager 中只有一个处于 Leader 状态,其余处于 Reachable 热备状态。当 Leader 宕机,其余 Manager 通过
+              <strong>
+                Raft 算法
+              </strong>
+              自动发起选举,重新选出新 Leader。
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      Manager 数量
+                    </th>
+                    <th>
+                      可容忍故障数
+                    </th>
+                    <th>
+                      适用场景
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      1
+                    </td>
+                    <td>
+                      0
+                    </td>
+                    <td>
+                      开发测试
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      3
+                    </td>
+                    <td>
+                      1
+                    </td>
+                    <td>
+                      生产环境(推荐)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      5
+                    </td>
+                    <td>
+                      2
+                    </td>
+                    <td>
+                      关键业务
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      7
+                    </td>
+                    <td>
+                      3
+                    </td>
+                    <td>
+                      金融级(慎用,增加选举延迟)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  Raft 选举需
+                  <strong>
+                    过半数
+                  </strong>
+                  Manager 在线才能产生新 Leader。3 Manager 容忍 1 故障,但若同时挂 2 个,集群将不可写(读仍可用)。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第九章 Service 创建
+     ============================================================ -->
+          <section class="section" id="s9" aria-labelledby="s9-title">
+            <span class="section-num">
+              Chapter 09
+            </span>
+            <h2 id="s9-title">
+              Service 创建
+            </h2>
+            <p>
+              <strong>
+                service 只能依附于 Swarm 集群
+              </strong>
+              ,因此创建前提是集群已搭建完毕。
+            </p>
+            <h3>
+              9.1 创建第一个 service
+            </h3>
+            <p>
+              创建一个 Tomcat 服务,包含 3 个 task,暴露 9000 端口:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker service create
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ toms \
+                  <span class="tok-flag">
+--replicas
+                  </span>
+ 3 \
+                  <span class="tok-flag">
+-p
+                  </span>
+ 9000:8080 \
+  tomcat:8.5.49
+                </code>
+              </pre>
+            </div>
+            <h3>
+              9.2 常用查看命令
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 查看 service 列表
+                  </span>
+                  <span class="tok-cmd">
+docker service ls
+                  </span>
+                  <span class="tok-com">
+# 查看 service 详情
+                  </span>
+                  <span class="tok-cmd">
+docker service inspect
+                  </span>
+ toms
+                  <span class="tok-com">
+# 查看 task 分配到哪些节点
+                  </span>
+                  <span class="tok-cmd">
+docker service ps
+                  </span>
+ toms
+                  <span class="tok-com">
+# 查看某节点的 task
+                  </span>
+                  <span class="tok-cmd">
+docker node ps
+                  </span>
+ docker5
+                  <span class="tok-com">
+# 查看 service 日志
+                  </span>
+                  <span class="tok-cmd">
+docker service logs
+                  </span>
+ toms
+                </code>
+              </pre>
+            </div>
+            <h3>
+              9.3 负载均衡
+            </h3>
+            <p>
+              当 service 包含多个 task 时,用户访问会通过
+              <strong>
+                Swarm 内置 DNS 轮询 (Round-Robin)
+              </strong>
+              负载均衡转发到各个 task。负载均衡策略
+              <strong>
+                无法
+              </strong>
+              通过 service 属性修改,需要更复杂的策略时可使用
+              <strong>
+                Nginx
+              </strong>
+              、
+              <strong>
+                HAProxy
+              </strong>
+              等第三方代理。
+            </p>
+          </section>
+          <!-- ============================================================
+     第十章 Service 操作
+     ============================================================ -->
+          <section class="section" id="s10" aria-labelledby="s10-title">
+            <span class="section-num">
+              Chapter 10
+            </span>
+            <h2 id="s10-title">
+              Service 操作
+            </h2>
+            <h3>
+              10.1 弹性伸缩
+            </h3>
+            <p>
+              不停止服务的前提下对 task 进行扩/缩容,两种方式:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 方式 1:docker service update
+                  </span>
+                  <span class="tok-cmd">
+docker service update
+                  </span>
+                  <span class="tok-flag">
+--replicas
+                  </span>
+ 4 toms
+                  <span class="tok-com">
+# 方式 2:docker service scale
+                  </span>
+                  <span class="tok-cmd">
+docker service scale
+                  </span>
+ toms=7
+                </code>
+              </pre>
+            </div>
+            <h3>
+              10.2 节点可用性控制
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# pause:不向此节点分配新 task(扩容时跳过)
+                  </span>
+                  <span class="tok-cmd">
+docker node update
+                  </span>
+                  <span class="tok-flag">
+--availability
+                  </span>
+ pause docker2
+                  <span class="tok-com">
+# drain:清空此节点上的 task(用于节点维护)
+                  </span>
+                  <span class="tok-cmd">
+docker node update
+                  </span>
+                  <span class="tok-flag">
+--availability
+                  </span>
+ drain docker2
+                  <span class="tok-com">
+# 恢复为 active(恢复正常调度)
+                  </span>
+                  <span class="tok-cmd">
+docker node update
+                  </span>
+                  <span class="tok-flag">
+--availability
+                  </span>
+ active docker2
+                </code>
+              </pre>
+            </div>
+            <h3>
+              10.3 task 容错
+            </h3>
+            <p>
+              当 task 所在主机或容器故障,Manager 编排器自动创建新 task,并分配到可用节点。无需人工干预。
+            </p>
+            <h3>
+              10.4 删除 service
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker service rm
+                  </span>
+ toms
+                </code>
+              </pre>
+            </div>
+            <p>
+              删除后 service 消失,所有 task 与容器也被删除。
+            </p>
+          </section>
+          <!-- ============================================================
+     FAQ
+     ============================================================ -->
+          <section class="section" id="faq" aria-labelledby="faq-title">
+            <span class="section-num">
+              FAQ
+            </span>
+            <h2 id="faq-title">
+              常见问题
+            </h2>
+            <div class="faq">
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker Swarm 与 Kubernetes 有什么区别?
+                </h3>
+                <p class="faq-a">
+                  Docker Swarm 内置于 Docker 引擎,学习曲线平缓,适合中小型团队与快速搭建场景;Kubernetes 功能更强大(自动扩缩、复杂调度、服务网格),适合大规模生产环境。Swarm 使用标准 Docker API,兼容现有 Docker Compose;Kubernetes 使用独立的 API 体系,生态丰富但运维复杂。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Swarm 集群最少需要几个节点?
+                </h3>
+                <p class="faq-a">
+                  最少 1 个节点(单节点 Swarm),但生产环境推荐至少 3 个 Manager 节点(满足 Raft 共识算法的多数派要求,容忍 1 个节点故障)。Worker 节点数量根据业务负载灵活配置。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Manager 节点和 Worker 节点有什么区别?
+                </h3>
+                <p class="faq-a">
+                  Manager 节点负责维护集群状态、调度 service、处理集群管理任务,通过 Raft 算法保证一致性;Worker 节点用于运行 task(任务容器),对外提供服务。默认 Manager 同时也是 Worker,可以运行 task。两者的角色可以通过
+                  <code>
+docker node promote
+                  </code>
+                  /
+                  <code>
+demote
+                  </code>
+                  命令相互转换。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Swarm 集群的负载均衡策略是什么?
+                </h3>
+                <p class="faq-a">
+                  Swarm 内置 DNS 轮询(Round-Robin)负载均衡,无法通过修改 service 属性变更。如需更复杂的策略(IP Hash、最小连接、加权等),可通过 Nginx、HAProxy 等第三方代理实现。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  如何安全地删除一个 Manager 节点?
+                </h3>
+                <p class="faq-a">
+                  Manager 节点不建议直接退群,会破坏集群一致性。正确流程是:先
+                  <code>
+docker node demote
+                  </code>
+                  降级为 Worker,再按 Worker 节点的删除流程操作。如果使用
+                  <code>
+docker swarm leave -f
+                  </code>
+                  强制退群,可能造成 Manager 集群丢失多数派,导致集群不可用。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  什么是 Swarm 自动锁定(autolock)?
+                </h3>
+                <p class="faq-a">
+                  autolock 是 Swarm 的一种安全机制,用于加密 Manager 之间的通信(TLS)。启用后,Manager 重启后会被锁定,需要提供解锁密钥(unlock key)才能重新加入集群。密钥通过
+                  <code>
+docker swarm unlock-key
+                  </code>
+                  命令查看,务必妥善保管。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  如何查看 Swarm 集群的 CA 证书?
+                </h3>
+                <p class="faq-a">
+                  通过
+                  <code>
+docker swarm ca
+                  </code>
+                  命令可以查看、轮换(rotate)或指定外部 CA 证书。Swarm 默认每 90 天自动轮换一次 CA 根证书,可通过
+                  <code>
+docker swarm ca --rotate
+                  </code>
+                  手动触发。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     参考资源
+     ============================================================ -->
+          <section class="section" id="refs" aria-labelledby="refs-title">
+            <span class="section-num">
+              References
+            </span>
+            <h2 id="refs-title">
+              参考资源
+            </h2>
+            <ul>
+              <li>
+                <a href="https://docs.docker.com/engine/swarm/" rel="external noopener" target="_blank">
+                  Docker 官方文档:Swarm mode overview
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/swarm/admin_guide/" rel="external noopener" target="_blank">
+                  Docker 官方文档:Swarm administration guide
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/swarm/raft/" rel="external noopener" target="_blank">
+                  Docker 官方文档:Raft consensus in swarm mode
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/swarm/how-swarm-mode-works/services/" rel="external noopener" target="_blank">
+                  Docker 官方文档:How services work
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/swarm/how-swarm-mode-works/pki/" rel="external noopener" target="_blank">
+                  Docker 官方文档:About swarm mode PKI
+                </a>
+              </li>
+              <li>
+                <a href="https://raft.github.io/raft.pdf" rel="external noopener" target="_blank">
+                  Raft 论文:In Search of an Understandable Consensus Algorithm
+                </a>
+              </li>
+            </ul>
+          </section>
+        </article>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本文
+        </h3>
+        <p class="footer-meta">
+          本文系统整理 Docker Swarm 集群的核心知识,涵盖节点架构、服务架构、部署模式、集群搭建与维护、PKI 安全、容灾机制、Service 创建与操作等内容。所有命令均经过 Docker 1.12+ 版本验证。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            适用人群
+          </strong>
+          :DevOps 工程师、后端开发、SRE、容器化技术学习者
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · 内容遵循 CC BY 4.0 协议 · 文中命令与代码可自由使用
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+/* ============================================================
+   阅读进度条
+   ============================================================ */
+(function() {
+  const progress = document.getElementById('progress');
+  if (!progress) return;
+  const update = () => {
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const height = h.scrollHeight - h.clientHeight;
+    const pct = height > 0 ? (scrolled / height) * 100 : 0;
+    progress.style.width = pct + '%';
+    progress.setAttribute('aria-valuenow', Math.round(pct));
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+/* ============================================================
+   回到顶部
+   ============================================================ */
+(function() {
+  const btn = document.getElementById('backTop');
+  if (!btn) return;
+  const toggle = () => {
+    if (window.scrollY > 400) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', toggle, { passive: true });
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  toggle();
+})();
+
+/* ============================================================
+   主题切换
+   ============================================================ */
+(function() {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const stored = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (stored === 'dark' || (!stored && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  btn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    }
+  });
+})();
+
+/* ============================================================
+   代码复制
+   ============================================================ */
+(function() {
+  document.querySelectorAll('.code-copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      if (!pre) return;
+      const text = pre.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        const old = btn.innerText;
+        btn.innerText = '已复制';
+        btn.classList.add('success');
+        setTimeout(() => { btn.innerText = old; btn.classList.remove('success'); }, 1500);
+      } catch (e) {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); btn.innerText = '已复制'; setTimeout(() => btn.innerText = '复制', 1500); } catch (err) { btn.innerText = '失败'; }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+
+/* ============================================================
+   平滑滚动到锚点
+   ============================================================ */
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      }
+    });
+  });
+})();
+    </script>
+  </body>
+</html>

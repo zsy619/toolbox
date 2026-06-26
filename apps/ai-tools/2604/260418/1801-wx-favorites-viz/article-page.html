@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>微信收藏可视化 Claude Code Skill</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0F172A; color: #F8FAFC; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; min-height: 100vh; }
+    .container { max-width: 680px; margin: 0 auto; padding: 48px 24px; }
+    h1 { font-size: 28px; font-weight: 700; line-height: 1.4; margin-bottom: 24px; color: #F8FAFC; }
+    h2 { font-size: 22px; font-weight: 600; margin: 40px 0 16px; color: #3B82F6; }
+    p { font-size: 17px; line-height: 1.8; color: #CBD5E1; margin-bottom: 16px; }
+    .highlight { background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3B82F6; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 24px 0; }
+    code { background: #1E293B; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #22D3EE; }
+    pre { background: #1E293B; padding: 20px; border-radius: 12px; margin: 20px 0; overflow-x: auto; }
+    pre code { background: none; padding: 0; display: block; color: #E2E8F0; }
+    .tag { display: inline-block; background: rgba(59, 130, 246, 0.15); color: #60A5FA; padding: 4px 12px; border-radius: 20px; font-size: 13px; margin: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>对 Claude Code 说一句，微信收藏自动变可视化报告</h1>
+    
+    <p>微信收藏了 1000+ 篇文章，从来没再看过。今天分享一个 Claude Code Skill，叫"微信收藏可视化"，能让 Claude Code 自动把微信收藏变成交互式可视化报告。</p>
+    
+    <h2>一句话搞定</h2>
+    <div class="highlight">
+      <p style="color: #22D3EE; font-size: 18px;">在 Claude Code 里输入：微信收藏可视化</p>
+      <p class="mt-2">Claude 就会自动执行完整管线：密钥提取 → 数据库解密 → 数据解析 → 报告生成。全程不需要手动操作。</p>
+    </div>
+    
+    <h2>技术管线</h2>
+    <p><strong>第一步：frida 提取加密密钥</strong></p>
+    <p>微信 Mac 4.x 版的收藏数据存在 favorite.db 里，是 SQLCipher 4 加密的。用 frida hook CCKeyDerivationPBKDF 函数捕获密钥派生调用。</p>
+    
+    <p><strong>第二步：AES-256-CBC 解密数据库</strong></p>
+    <p>拿到密钥后，用 PyCryptodome 解密。参数：AES-256-CBC、HMAC-SHA512、PBKDF2 256000 轮。</p>
+    
+    <p><strong>第三步：ECharts 生成交互报告</strong></p>
+    <p>用 Python 解析数据库，生成单文件 HTML，内联 ECharts 5.x CDN 和 echarts-wordcloud 2.x。</p>
+    
+    <h2>报告功能</h2>
+    <p>统计卡片、月度趋势图、内容类型分布、来源排行榜、星期×小时活跃热力图、词云、标签云、可筛选可搜索的收藏浏览区。</p>
+    
+    <h2>踩坑记录</h2>
+    <p>实现过程踩了 8 个坑，迭代 6 轮才跑通。特别注意微信 4.x 表结构变化，收藏密钥只在打开收藏页面时才加载。</p>
+    
+    <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #1E293B;">
+      <p style="color: #64748B; font-size: 14px;">GitHub: zhuyansen/wx-favorites-report</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>A-03 Remotion 音视频合成 | OffthreadVideo/Audio/字幕/音轨</title>
+<meta name="description" content="Remotion 音视频进阶:OffthreadVideo 异步视频抽帧、Audio 多音轨混合、字幕组件封装、ffmpeg 自定义滤镜、volume 音量包络、媒体资源 waitForReady 同步机制。">
+<meta name="keywords" content="Remotion OffthreadVideo, Audio, 字幕, ffmpeg, 音视频合成">
+<link rel="canonical" href="https://example.com/remotion/A-03-audio-video.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 音视频合成">
+<meta property="og:description" content="视频抽帧、多音轨混合、字幕集成。">
+<meta property="og:url" content="https://example.com/remotion/A-03-audio-video.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"A-03 Remotion 音视频合成","description":"OffthreadVideo、Audio 组件、字幕与 ffmpeg 集成。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 音视频"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html" class="active">进阶</a>
+      <a href="S-01-code-walkthrough.html">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-advanced">进阶层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">A-03 音视频合成</span>
+    </nav>
+    <h1 id="hero-title">A-03 音视频合成 <span class="level-badge level-A">A 进阶</span></h1>
+    <p class="hero-sub">OffthreadVideo / Audio / 字幕 / ffmpeg 滤镜——视频与音频的高级处理。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 10 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> B-04 基础 Hooks</div>
+      <div class="hero-meta-item"><strong>类型</strong> 进阶</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>OffthreadVideo:抽帧视频</h2>
+<p>原生 <code>&lt;video&gt;</code> 在渲染时存在性能问题(<code>requestVideoFrameCallback</code> 缺失),用 OffthreadVideo 替代:</p>
+<pre class="line-numbers"><code class="language-tsx">import { OffthreadVideo, staticFile } from 'remotion';
+
+&lt;OffthreadVideo
+  src={staticFile('bg.mp4')}
+  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+  startFrom={30}        // 从第 30 帧开始
+  endAt={150}           // 到第 150 帧结束
+  muted={false}
+  volume={(f) =&gt; Math.max(0, 1 - f / 60)}  // 音量包络
+/&gt;</code></pre>
+<div class="alert alert-tip"><span class="alert-icon">⚡</span><div class="alert-body"><p>OffthreadVideo 在 ffmpeg 阶段抽帧(而非浏览器),避免视频卡顿或音画不同步。</p></div></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>Audio:多音轨合成</h2>
+<p>支持 BGM、配音、音效多层混音:</p>
+<pre class="line-numbers"><code class="language-tsx">import { Audio, Sequence, staticFile } from 'remotion';
+
+&lt;Sequence from={0} durationInFrames={300}&gt;
+  &lt;Audio src={staticFile('bgm.mp3')} volume={0.4} /&gt;
+&lt;/Sequence&gt;
+&lt;Sequence from={60} durationInFrames={180}&gt;
+  &lt;Audio src={staticFile('voiceover.mp3')} volume={1.0} /&gt;
+&lt;/Sequence&gt;
+&lt;Sequence from={150} durationInFrames={30}&gt;
+  &lt;Audio src={staticFile('whoosh.mp3')} /&gt;
+&lt;/Sequence&gt;</code></pre>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>字幕组件</h2>
+<p>基于 Sequence + 文本数组渲染逐句字幕:</p>
+<pre class="line-numbers"><code class="language-tsx">type Subtitle = { text: string; from: number; durationInFrames: number };
+
+const SubtitleTrack: React.FC&lt;{ subs: Subtitle[] }&gt; = ({ subs }) =&gt; (
+  &lt;&gt;
+    {subs.map((s, i) =&gt; (
+      &lt;Sequence key={i} from={s.from} durationInFrames={s.durationInFrames}&gt;
+        &lt;div style={{
+          position: 'absolute', bottom: 80, left: 0, right: 0,
+          textAlign: 'center', color: '#fff',
+          fontSize: 48, textShadow: '0 2px 8px #000',
+        }}&gt;{s.text}&lt;/div&gt;
+      &lt;/Sequence&gt;
+    ))}
+  &lt;/&gt;
+);</code></pre>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>视频裁剪与变换</h2>
+<p>用 CSS transform 配合 useCurrentFrame 实现推拉摇移:</p>
+<pre class="line-numbers"><code class="language-tsx">const frame = useCurrentFrame();
+const { fps } = useVideoConfig();
+
+const scale = interpolate(frame, [0, 90], [1, 1.2], { extrapolateRight: 'clamp' });
+const x = interpolate(frame, [0, 90], [0, -100]);
+
+&lt;div style={{ transform: `scale(${scale}) translateX(${x}px)` }}&gt;
+  &lt;OffthreadVideo src={staticFile('hero.mp4')} /&gt;
+&lt;/div&gt;</code></pre>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>ffmpeg 自定义滤镜</h2>
+<p>在 <code>remotion.config.ts</code> 中可自定义合流参数:</p>
+<pre class="line-numbers"><code class="language-ts">Config.setFfmpegOverrideFunction(({ args }) =&gt; {
+  return [...args, '-vf', 'eq=brightness=0.05:saturation=1.2', '-c:a', 'aac', '-b:a', '192k'];
+});</code></pre>
+<p>高级场景:多视频拼接、水印、转场滤镜。</p>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>实战:产品介绍视频</h2>
+<p>综合运用:背景视频 + 文字动画 + BGM + 配音 + 字幕:</p>
+<pre class="line-numbers"><code class="language-tsx">&lt;AbsoluteFill&gt;
+  &lt;OffthreadVideo src={staticFile('bg.mp4')} style={{ width: '100%' }} /&gt;
+  &lt;Sequence from={30} durationInFrames={120}&gt;
+    &lt;ProductTitle /&gt;
+  &lt;/Sequence&gt;
+  &lt;Sequence from={180} durationInFrames={240}&gt;
+    &lt;SubtitleTrack subs={voiceoverSubs} /&gt;
+  &lt;/Sequence&gt;
+  &lt;Sequence from={0} durationInFrames={600}&gt;
+    &lt;Audio src={staticFile('bgm.mp3')} volume={0.3} /&gt;
+  &lt;/Sequence&gt;
+&lt;/AbsoluteFill&gt;</code></pre>
+</section>
+
+<div class="source-note">Remotion 音视频 API(2025)、HTML5 Audio/Video、FFmpeg 滤镜文档</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>@remotion/media 新一代 &lt;Video&gt;</h2>
+<p>v4.0.445+ 引入 WebCodecs 版的 <code>&lt;Video&gt;</code>,底层用 Mediabunny 抽帧,支持 HLS 流媒体与原生缓冲:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { Video } from '@remotion/media';
+
+// 本地视频
+&lt;Video src={staticFile('hero.webm')} /&gt;
+
+// HLS 流
+&lt;Video src="https://stream.example.com/video.m3u8" /&gt;
+
+// 远端 URL
+&lt;Video src="https://remotion.media/BigBuckBunny.mp4" /&gt;</code></pre></div>
+<div class="alert alert-tip"><span class="alert-icon">⚡</span><div class="alert-body"><p>新版 &lt;Video&gt; 在 Player 中自动暂停缓冲、缓冲完后自动恢复,大幅改善播放体验。</p></div></div>
+</section>
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>Mediabunny 替代 Media Parser</h2>
+<p>2025-09 起,Remotion 与 Vanilagy 的 Mediabunny 合作,逐步替代 <code>@remotion/media-parser</code>:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>维度</th><th>Media Parser(旧)</th><th>Mediabunny(新)</th></tr></thead>
+<tbody>
+<tr><td>状态</td><td>2026-02-01 弃用</td><td>推荐使用</td></tr>
+<tr><td>性能</td><td>一般</td><td>更快</td></tr>
+<tr><td>License</td><td>Remotion 私有</td><td>MPL-2.0 宽松</td></tr>
+<tr><td>浏览器解码</td><td>支持</td><td>更优</td></tr>
+</tbody>
+</table></div>
+</section>
+
+
+<section class="section" id="s9">
+<span class="section-num">Chapter 09</span>
+<h2>音频频谱可视化</h2>
+<p>使用 <code>@remotion/media-utils</code> 的 <code>visualizeAudio()</code> 实时分析音频频谱,做音乐可视化、播客片头声波图:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { useAudioData, visualizeAudio } from '@remotion/media-utils';
+
+export const Bars: React.FC = () =&gt; {
+  const frame = useCurrentFrame();
+  const { fps, width } = useVideoConfig();
+  const audio = useAudioData(staticFile('music.mp3'));
+  if (!audio) return null;
+
+  const bars = visualizeAudio({
+    fps, frame, audioData: audio,
+    numberOfSamples: 32,
+    optimizeFor: 'speed',  // 4.0.83+ 加速 FFT
+  });
+
+  return (
+    &lt;AbsoluteFill style={{ display: 'flex', alignItems: 'end' }}&gt;
+      {bars.map((v, i) =&gt; (
+        &lt;div key={i} style={{ width: width/32, height: 1000 * v, background: 'cyan' }} /&gt;
+      ))}
+    &lt;/AbsoluteFill&gt;
+  );
+};</code></pre></div>
+<p>对于波形图用 <code>visualizeAudioWaveform()</code>。大文件改用 <code>useWindowedAudioData()</code> 窗口化加载(仅 .wav 格式)。</p>
+</section>
+
+
+<section class="section" id="s10">
+<span class="section-num">Chapter 10</span>
+<h2>Mediabunny 完整指南</h2>
+<p>2026-02 起 <code>@remotion/media-parser</code> 已弃用,官方推荐 <strong>Mediabunny</strong>(Vanilagy 出品,MPL-2.0 许可):</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npm i mediabunny</code></pre></div>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">import { Input, ALL_FORMATS, UrlSource } from 'mediabunny';
+
+export const getMediaMetadata = async (src: string) =&gt; {
+  const input = new Input({
+    formats: ALL_FORMATS,
+    source: new UrlSource(src, { getRetryDelay: () =&gt; null }),
+  });
+  const durationInSeconds = await input.computeDuration();
+  const track = await input.getPrimaryVideoTrack();
+  const dimensions = track
+    ? { width: await track.getDisplayWidth(),
+        height: await track.getDisplayHeight() }
+    : null;
+  const stats = await track?.computePacketStats(50);
+  return { durationInSeconds, dimensions, fps: stats?.averagePacketRate ?? null };
+};</code></pre></div>
+<p>优势:零依赖、跨浏览器/Node/Bun,无需 video 标签即可读取 codec/帧率等元数据。</p>
+</section>
+
+
+<section class="section" id="s11">
+<span class="section-num">Chapter 11</span>
+<h2>视频组件 3 选 1 对比</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>维度</th><th>OffthreadVideo</th><th>Html5Video</th><th>Video (@remotion/media)</th></tr></thead>
+<tbody>
+<tr><td>底层</td><td>Rust + FFmpeg</td><td>HTML5 video</td><td>WebCodecs + Mediabunny</td></tr>
+<tr><td>帧精度</td><td>✅</td><td>❌</td><td>✅</td></tr>
+<tr><td>部分下载</td><td>❌</td><td>仅 muted 时</td><td>✅</td></tr>
+<tr><td>渲染速度</td><td>快</td><td>中</td><td><strong>最快</strong></td></tr>
+<tr><td>HLS 支持</td><td>Chrome 142+ 仅预览</td><td>仅预览</td><td>✅ 全场景</td></tr>
+<tr><td>可循环</td><td>❌</td><td>✅</td><td>✅</td></tr>
+<tr><td>3D 纹理</td><td>useOffthreadVideoTexture</td><td>useVideoTexture</td><td>官方推荐</td></tr>
+</tbody>
+</table></div>
+<p>建议:<strong>新项目用 @remotion/media 的 Video</strong>。复杂合成用 OffthreadVideo(可设置 <code>cacheSizeInBytes</code> 和 <code>threads</code>)。</p>
+</section>
+
+<section class="section" id="s12">
+<span class="section-num">Chapter 12</span>
+<h2>音频高级:速度 / 音调 / 音效</h2>
+<p>除了 volume 之外,音频组件还支持:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">&lt;Html5Audio
+  src={staticFile('speech.mp3')}
+  playbackRate={1.5}        // 1.5x 速度(变 2/3 时长)
+  toneFrequency={1.2}       // 升调 20%(只渲染时生效)
+  preservePitch={false}     // 速度变时不保持音调
+  muted={frame < 30}        // 动态静音
+  name="vo-track-1"         // Studio 时间轴显示名
+  loop                       // 循环
+/&gt;</code></pre></div>
+<p>音效与导出:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>API</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td>从视频抽音轨</td><td><code>getAudioData(videoUrl)</code></td></tr>
+<tr><td>音效(SFX)</td><td>多 Audio 标签叠加</td></tr>
+<tr><td>导出单独音频</td><td>用 <code>renderMedia</code> + 隐藏视频层</td></tr>
+<tr><td>操作顺序</td><td>trim → delay → volume → sfx</td></tr>
+</tbody>
+</table></div>
+</section>
+
+
+<section class="section" id="s13">
+<span class="section-num">Chapter 13</span>
+<h2>透明视频(alpha 通道)</h2>
+<p>两种编码支持 alpha:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>格式</th><th>codec</th><th>profile</th><th>pixel-format</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td>WebM (浏览器)</td><td>vp8 / vp9</td><td>—</td><td><code>yuva420p</code></td><td>Chrome/Firefox 网页</td></tr>
+<tr><td>ProRes (剪辑)</td><td>prores</td><td>4444 / 4444-xq</td><td><code>yuva444p10le</code></td><td>Final Cut/Premiere/DaVinci</td></tr>
+</tbody>
+</table></div>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash"># WebM 透明
+npx remotion render MyComp out.webm \
+  --image-format=png --pixel-format=yuva420p --codec=vp8
+
+# ProRes 4444
+npx remotion render MyComp out.mov \
+  --image-format=png --pixel-format=yuva444p10le \
+  --codec=prores --prores-profile=4444</code></pre></div>
+<p>OffthreadVideo 加 <code>transparent</code> 属性(略微降低性能)。</p>
+</section>
+
+<section class="section" id="s14">
+<span class="section-num">Chapter 14</span>
+<h2>媒体片段语法</h2>
+<p>用 URL hash 控制时间偏移,无需截取物理文件:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">// 从第 30 秒起播
+&lt;OffthreadVideo src="video.mp4#t=30" /&gt;
+
+// 30s 到 60s
+&lt;OffthreadVideo src="video.mp4#t=30,60" /&gt;
+
+// 多个片段拼接
+&lt;Sequence from={0} durationInFrames={90}&gt;
+  &lt;OffthreadVideo src="clip.mp4#t=0,3" /&gt;
+&lt;/Sequence&gt;</code></pre></div>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="A-02-animation.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">A-02 动画 API</span></a>
+  <a href="A-04-assets.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">A-04 静态资源</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微软语音 AI 迎来 "Stable Diffusion 时刻" | VibeVoice 工具评测</title>
+    <meta name="description" content="微软语音 AI 迎来 Stable Diffusion 时刻！VibeVoice 300ms 实时 TTS，90 分钟多说话人对话，支持长音频自动标注说话人，1.3MB 安装包免费替代 ElevenLabs。">
+    <meta name="keywords" content="微软, 语音AI, VibeVoice, Vibing, TTS, 语音合成, ElevenLabs替代, 实时语音, AI工具">
+    <meta name="author" content="AI工具评测">
+    
+    <link rel="canonical" href="./index.html">
+    
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="微软语音 AI 迎来 Stable Diffusion 时刻">
+    <meta property="og:description" content="300ms 实时 TTS，90 分钟多说话人对话，免费替代 ElevenLabs">
+    <meta property="og:image" content="./assets/cover.png">
+    <meta property="og:locale" content="zh_CN">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="微软语音 AI 迎来 Stable Diffusion 时刻">
+    <meta name="twitter:description" content="VibeVoice 工具评测：300ms 实时 TTS，90 分钟多说话人">
+    <meta name="twitter:image" content="./assets/cover.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563EB',
+                        secondary: '#1D4ED8',
+                        accent: '#3B82F6',
+                        purple: '#7C3AED',
+                        green: '#10B981',
+                        dark: '#0F172A'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #60A5FA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gradient-text-green {
+            background: linear-gradient(135deg, #10B981 0%, #34D399 50%, #6EE7B7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-base {
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card-base:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
+            border-color: rgba(37, 99, 235, 0.3);
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.05));
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(37, 99, 235, 0.4);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.2);
+        }
+
+        .feature-card.green {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .feature-card.green:hover {
+            border-color: rgba(16, 185, 129, 0.4);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(124, 58, 237, 0.1));
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .tag-blue {
+            background-color: rgba(37, 99, 235, 0.2);
+            color: #60A5FA;
+        }
+
+        .tag-green {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #34D399;
+        }
+
+        .tag-purple {
+            background-color: rgba(124, 58, 237, 0.2);
+            color: #A855F7;
+        }
+
+        .tag-orange {
+            background-color: rgba(249, 115, 22, 0.2);
+            color: #FB923C;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+
+        th {
+            background-color: rgba(37, 99, 235, 0.2);
+            color: #60A5FA;
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #CBD5E1;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #2563EB, rgba(37, 99, 235, 0.3));
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            background: #2563EB;
+            border-radius: 50%;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, #2563EB, #1D4ED8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            z-index: 100;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-2px);
+        }
+
+        .toc-card {
+            position: sticky;
+            top: 5rem;
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.25rem;
+        }
+
+        .toc-link {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #94A3B8;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .toc-link:hover {
+            background-color: rgba(37, 99, 235, 0.2);
+            color: #60A5FA;
+        }
+
+        .toc-link.active {
+            background-color: rgba(37, 99, 235, 0.3);
+            color: #60A5FA;
+        }
+
+        @media (max-width: 1024px) {
+            .toc-card {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 1.75rem !important;
+            }
+            
+            .section-title {
+                font-size: 1.5rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav-fixed">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-purple flex items-center justify-center">
+                        <i class="fas fa-microphone text-white text-sm"></i>
+                    </div>
+                    <span class="font-bold text-lg">微软语音 AI</span>
+                </div>
+                
+                <div class="hidden md:flex items-center gap-6 text-sm">
+                    <a href="#features" class="text-gray-400 hover:text-white transition-colors">核心功能</a>
+                    <a href="#scenes" class="text-gray-400 hover:text-white transition-colors">使用场景</a>
+                    <a href="#publishing" class="text-gray-400 hover:text-white transition-colors">发布指南</a>
+                    <a href="#timeline" class="text-gray-400 hover:text-white transition-colors">视频时间轴</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Cover -->
+    <section class="pt-20" style="background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);">
+        <div class="max-w-5xl mx-auto px-4 py-8">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-500/30 rounded-full px-4 py-1.5 mb-4">
+                    <i class="fas fa-bolt text-blue-400 text-xs"></i>
+                    <span class="text-xs font-medium">工具评测</span>
+                </div>
+                
+                <h1 class="hero-title text-3xl sm:text-4xl lg:text-5xl font-black mb-4 gradient-text">
+                    微软语音 AI 迎来 "Stable Diffusion 时刻"
+                </h1>
+                
+                <p class="text-base sm:text-lg text-gray-400 mb-6 max-w-2xl mx-auto">
+                    VibeVoice 工具评测 · 300ms 实时 TTS · 90 分钟多说话人对话
+                </p>
+                
+                <div class="flex flex-wrap justify-center gap-3 text-sm">
+                    <span class="bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                        <i class="fas fa-bolt text-green-400 mr-1"></i>300ms 延迟
+                    </span>
+                    <span class="bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                        <i class="fas fa-clock text-blue-400 mr-1"></i>90 分钟对话
+                    </span>
+                    <span class="bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                        <i class="fas fa-microphone text-purple-400 mr-1"></i>自动标注
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Cover Image -->
+            <div class="rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+                <img src="./assets/cover.png" alt="微软语音 AI 封面" class="w-full h-auto">
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            <!-- Table of Contents -->
+            <aside class="lg:col-span-1">
+                <div class="toc-card">
+                    <h3 class="text-sm font-bold mb-3 flex items-center gap-2">
+                        <i class="fas fa-list text-blue-400"></i>
+                        目录导航
+                    </h3>
+                    <nav class="space-y-1">
+                        <a href="#overview" class="toc-link active">
+                            <i class="fas fa-info-circle mr-2"></i>项目概述
+                        </a>
+                        <a href="#features" class="toc-link">
+                            <i class="fas fa-star mr-2"></i>核心功能
+                        </a>
+                        <a href="#scenes" class="toc-link">
+                            <i class="fas fa-layer-group mr-2"></i>使用场景
+                        </a>
+                        <a href="#publishing" class="toc-link">
+                            <i class="fas fa-share-alt mr-2"></i>发布指南
+                        </a>
+                        <a href="#timeline" class="toc-link">
+                            <i class="fas fa-film mr-2"></i>视频时间轴
+                        </a>
+                        <a href="#copy" class="toc-link">
+                            <i class="fas fa-copy mr-2"></i>营销文案
+                        </a>
+                    </nav>
+                </div>
+            </aside>
+            
+            <!-- Article Content -->
+            <article class="lg:col-span-3">
+                
+                <!-- Overview Section -->
+                <section id="overview" class="mb-12 scroll-mt-16">
+                    <div class="card-base mb-6">
+                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                            <i class="fas fa-info-circle text-blue-400"></i>
+                            项目概述
+                        </h2>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            <div class="stat-card">
+                                <div class="text-3xl font-black text-blue-400 mb-1">60s</div>
+                                <div class="text-gray-400 text-sm">视频时长</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="text-3xl font-black text-purple-400 mb-1">1080×1920</div>
+                                <div class="text-gray-400 text-sm">分辨率</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="text-3xl font-black text-green-400 mb-1">60fps</div>
+                                <div class="text-gray-400 text-sm">帧率</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="text-3xl font-black text-orange-400 mb-1">4.6MB</div>
+                                <div class="text-gray-400 text-sm">文件大小</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag tag-blue">微信视频号</span>
+                            <span class="tag tag-purple">小红书</span>
+                            <span class="tag tag-green">抖音/快手</span>
+                            <span class="tag tag-orange">B站</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Features Section -->
+                <section id="features" class="mb-12 scroll-mt-16">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                        <i class="fas fa-star text-blue-400"></i>
+                        核心功能
+                    </h2>
+                    
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div class="feature-card green">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-14 h-14 rounded-xl bg-green-500/20 flex items-center justify-center">
+                                    <i class="fas fa-bolt text-green-400 text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-green-400">300ms 实时 TTS</h3>
+                                    <p class="text-gray-400 text-sm">几乎无延迟的语音合成</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-14 h-14 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                                    <i class="fas fa-users text-blue-400 text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-blue-400">90 分钟多说话人</h3>
+                                    <p class="text-gray-400 text-sm">支持长对话生成</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-14 h-14 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                                    <i class="fas fa-microphone-alt text-purple-400 text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-purple-400">说话人自动标注</h3>
+                                    <p class="text-gray-400 text-sm">长音频转录智能识别</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card green">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-14 h-14 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                                    <i class="fas fa-download text-orange-400 text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-orange-400">1.3MB 安装包</h3>
+                                    <p class="text-gray-400 text-sm">轻量级本地运行</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-base">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-balance-scale text-green-400"></i>
+                            替代方案对比
+                        </h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>功能</th>
+                                        <th class="text-red-400">传统方案</th>
+                                        <th class="text-green-400">VibeVoice</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="font-semibold">安装</td>
+                                        <td class="text-red-400">需要本地模型</td>
+                                        <td class="text-green-400">无需本地模型</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold">费用</td>
+                                        <td class="text-red-400">高昂订阅费</td>
+                                        <td class="text-green-400">免费本地运行</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold">延迟</td>
+                                        <td class="text-red-400">秒级延迟</td>
+                                        <td class="text-green-400">300ms 实时</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold">容量</td>
+                                        <td class="text-red-400">短音频限制</td>
+                                        <td class="text-green-400">90 分钟长对话</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Scenes Section -->
+                <section id="scenes" class="mb-12 scroll-mt-16">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                        <i class="fas fa-layer-group text-purple-400"></i>
+                        使用场景
+                    </h2>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="card-base text-center">
+                            <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-microphone text-blue-400 text-xl"></i>
+                            </div>
+                            <h3 class="font-bold mb-1">内容创作配音</h3>
+                            <p class="text-gray-400 text-sm">视频配音解说</p>
+                        </div>
+                        
+                        <div class="card-base text-center">
+                            <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-headphones text-purple-400 text-xl"></i>
+                            </div>
+                            <h3 class="font-bold mb-1">有声书制作</h3>
+                            <p class="text-gray-400 text-sm">长篇音频生成</p>
+                        </div>
+                        
+                        <div class="card-base text-center">
+                            <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-language text-green-400 text-xl"></i>
+                            </div>
+                            <h3 class="font-bold mb-1">多语言翻译</h3>
+                            <p class="text-gray-400 text-sm">语音翻译合成</p>
+                        </div>
+                        
+                        <div class="card-base text-center">
+                            <div class="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-piggy-bank text-orange-400 text-xl"></i>
+                            </div>
+                            <h3 class="font-bold mb-1">节省费用</h3>
+                            <p class="text-gray-400 text-sm">替代 ElevenLabs</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Illustrations -->
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="rounded-lg overflow-hidden border border-white/10">
+                            <img src="./assets/illustrations/scene-300ms.png" alt="300ms 实时 TTS" class="w-full">
+                        </div>
+                        <div class="rounded-lg overflow-hidden border border-white/10">
+                            <img src="./assets/illustrations/scene-90min.png" alt="90 分钟对话" class="w-full">
+                        </div>
+                        <div class="rounded-lg overflow-hidden border border-white/10">
+                            <img src="./assets/illustrations/scene-speaker.png" alt="说话人标注" class="w-full">
+                        </div>
+                        <div class="rounded-lg overflow-hidden border border-white/10">
+                            <img src="./assets/illustrations/scene-compare.png" alt="功能对比" class="w-full">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Publishing Guide Section -->
+                <section id="publishing" class="mb-12 scroll-mt-16">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                        <i class="fas fa-share-alt text-blue-400"></i>
+                        多平台发布指南
+                    </h2>
+                    
+                    <div class="card-base mb-6">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>平台</th>
+                                        <th>封面尺寸</th>
+                                        <th>最佳发布时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="font-semibold">微信视频号</td>
+                                        <td>1080 x 1920 px</td>
+                                        <td>7:00-9:00 / 12:00-13:30 / 20:00-22:00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold">小红书</td>
+                                        <td>1080 x 1920 px</td>
+                                        <td>6:00-8:00 / 20:00-24:00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold">抖音/快手</td>
+                                        <td>1080 x 1920 px</td>
+                                        <td>7:00-9:00 / 18:00-20:00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-semibold">B站</td>
+                                        <td>1920 x 1080 px 或 1080 x 1920 px</td>
+                                        <td>根据内容类型选择</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="card-base">
+                            <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-video text-red-400"></i>
+                                视频号标题
+                            </h3>
+                            <p class="text-gray-300 text-lg mb-3">微软语音 AI 爆火！300ms 出声，90 分钟对话生成！</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="tag tag-blue">#微软</span>
+                                <span class="tag tag-blue">#语音AI</span>
+                                <span class="tag tag-blue">#TTS</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-base">
+                            <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                                <i class="fas fa-images text-pink-400"></i>
+                                小红书标题
+                            </h3>
+                            <p class="text-gray-300 text-lg mb-3">微软把语音 AI 玩出"Stable Diffusion 时刻"了！😋💰</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="tag tag-purple">#VibeVoice</span>
+                                <span class="tag tag-green">#ElevenLabs替代</span>
+                                <span class="tag tag-orange">#语音合成</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Timeline Section -->
+                <section id="timeline" class="mb-12 scroll-mt-16">
+                    <div class="card-base mb-6">
+                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                            <i class="fas fa-film text-blue-400"></i>
+                            视频时间轴（60秒）
+                        </h2>
+                        <div class="text-sm text-gray-400 mb-6">
+                            场景数量：10+ 帧 | 帧率：60fps | 总帧数：3600帧
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item pb-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-blue-400">场景 1: 封面</span>
+                            <span class="text-gray-500 text-xs">0s - 3s</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">深色科技背景 + 动态粒子效果，标题弹入</p>
+                    </div>
+                    
+                    <div class="timeline-item pb-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-blue-400">场景 2: 痛点引入</span>
+                            <span class="text-gray-500 text-xs">3s - 8s</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">对话气泡 + 时钟图标，展示"等待"焦虑</p>
+                    </div>
+                    
+                    <div class="timeline-item pb-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-green-400">场景 3: 核心数据 1</span>
+                            <span class="text-gray-500 text-xs">8s - 14s</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">300ms 实时 TTS 数字滚动动画</p>
+                    </div>
+                    
+                    <div class="timeline-item pb-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-purple-400">场景 4: 核心数据 2</span>
+                            <span class="text-gray-500 text-xs">14s - 20s</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">90 分钟多说话人对话时间轴动画</p>
+                    </div>
+                    
+                    <div class="timeline-item pb-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-orange-400">场景 5-10</span>
+                            <span class="text-gray-500 text-xs">20s - 60s</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">功能对比、使用场景、实时演示、总结 CTA</p>
+                    </div>
+                </section>
+
+                <!-- Copy Section -->
+                <section id="copy" class="mb-12 scroll-mt-16">
+                    <div class="card-base mb-6">
+                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                            <i class="fas fa-copy text-purple-400"></i>
+                            营销文案
+                        </h2>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 rounded-xl p-6 border border-blue-500/20 mb-6">
+                        <h3 class="text-lg font-bold mb-4 text-blue-400">小红书正文</h3>
+                        <div class="space-y-3 text-gray-300">
+                            <p>微软又来炸场了！这次是语音 AI！</p>
+                            <p>试了 Vibing 语音输入法，转录+翻译速度超快，安装包才 1.3MB，完全不需要本地模型！</p>
+                            <p>更狠的是 VibeVoice：</p>
+                            <p>✅ 实时 TTS，300ms 出声</p>
+                            <p>✅ 90 分钟多说话人对话生成</p>
+                            <p>✅ 长音频转录自动标注说话人</p>
+                            <p>用它替代 ElevenLabs，省下一大笔！</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card-base">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-hashtag text-orange-400"></i>
+                            推荐标签
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag tag-blue">#AI语音</span>
+                            <span class="tag tag-purple">#微软黑科技</span>
+                            <span class="tag tag-green">#Vibing</span>
+                            <span class="tag tag-orange">#VibeVoice</span>
+                            <span class="tag tag-blue">#TTS</span>
+                            <span class="tag tag-purple">#ElevenLabs替代</span>
+                            <span class="tag tag-green">#语音合成</span>
+                            <span class="tag tag-orange">#科技前沿</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CTA Section -->
+                <section class="mb-12">
+                    <div class="bg-gradient-to-r from-green-500/20 via-blue-500/20 to-purple-500/20 rounded-2xl p-8 border border-green-500/30 text-center">
+                        <h3 class="text-2xl font-bold mb-4 gradient-text-green">语音合成进入免费时代</h3>
+                        <p class="text-gray-400 mb-6">
+                            用 VibeVoice 替代 ElevenLabs，省钱又高效！
+                        </p>
+                        <div class="flex flex-wrap justify-center gap-4">
+                            <a href="https://github.com" target="_blank" class="bg-white/10 border border-white/20 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/20 transition-all inline-flex items-center gap-2">
+                                <i class="fab fa-github"></i>
+                                查看项目
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+            </article>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 px-4 border-t border-white/10 text-center">
+        <div class="flex items-center justify-center gap-3 mb-4">
+            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-purple flex items-center justify-center">
+                <i class="fas fa-microphone text-white text-sm"></i>
+            </div>
+            <span class="font-bold text-lg">微软语音 AI 评测</span>
+        </div>
+        <p class="text-gray-500 text-sm mb-2">VibeVoice 工具评测视频项目</p>
+        <div class="flex justify-center gap-4 text-xs text-gray-500">
+            <span>VibeVoice</span>
+            <span>•</span>
+            <span>300ms TTS</span>
+            <span>•</span>
+            <span>90 分钟对话</span>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Back to Top
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('backToTop');
+            if (window.scrollY > 300) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        });
+
+        // TOC Active State
+        const sections = document.querySelectorAll('section[id]');
+        const tocLinks = document.querySelectorAll('.toc-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

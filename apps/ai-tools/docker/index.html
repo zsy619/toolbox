@@ -1,0 +1,2671 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Docker 完整指南 · 24 课 + 24 规则 + 24 实战 = 72 篇 | AI 工具箱</title>
+    <meta name="description" content="完整的 Docker 学习路径:24 节精品课 + 24 条规则速查 + 24 节实战课程,共 72 个内容卡片。">
+    <meta name="keywords" content="Docker, Docker 教程, 容器化, Dockerfile, Compose, Swarm, Harbor, K8s, CI/CD, 安全扫描, 镜像 GC">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Docker 72 篇完整指南">
+    <meta property="og:description" content="24 课 + 24 规则 + 24 实战 · 一站式学习">
+    <meta property="og:locale" content="zh_CN">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Course","name":"Docker 完整学习系列","description":"73 篇精选内容","provider":{"@type":"Organization","name":"AI 工具箱"},"inLanguage":"zh-CN"}
+</script>
+    <style>
+        :root {
+            --docker-blue: #2496ED;
+            --docker-blue-dark: #0DB7ED;
+            --docker-navy: #0a1a2a;
+            --ink: #1a2530;
+            --ink-2: #2c3e50;
+            --ink-3: #5a6b7a;
+            --paper: #f7f9fc;
+            --paper-card: #fff;
+            --paper-2: #eef3f9;
+            --paper-3: #e2ebf3;
+            --border: #d8e2ec;
+            --ok: #00b894;
+            --tip: #f0a020;
+            --warn: #d63031;
+            --shadow-sm: 0 1px 2px rgba(10, 26, 42, .06), 0 1px 3px rgba(10, 26, 42, .05);
+            --shadow-md: 0 4px 6px rgba(10, 26, 42, .07), 0 2px 4px rgba(10, 26, 42, .05);
+            --shadow-lg: 0 10px 15px rgba(10, 26, 42, .08), 0 4px 6px rgba(10, 26, 42, .05);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --max-w: 1200px;
+            --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif
+        }
+
+        [data-theme="dark"] {
+            --ink: #e6edf3;
+            --ink-2: #c4d1de;
+            --ink-3: #8898a8;
+            --paper: #0a1a2a;
+            --paper-card: #11212f;
+            --paper-2: #1a2a3a;
+            --paper-3: #243a4a;
+            --border: #1f3346
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-sans);
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--ink);
+            background: var(--paper);
+            -webkit-font-smoothing: antialiased;
+            transition: background .3s, color .3s
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--ink);
+            margin: 0 0 .5em;
+            letter-spacing: -.01em
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3rem)
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 3vw, 2rem)
+        }
+
+        h3 {
+            font-size: 1.1rem
+        }
+
+        a {
+            color: var(--docker-blue);
+            text-decoration: none;
+            transition: color .15s
+        }
+
+        a:hover {
+            color: var(--docker-blue-dark)
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--docker-blue);
+            color: #fff;
+            padding: 8px 16px;
+            z-index: 1000
+        }
+
+        .skip-link:focus {
+            top: 0
+        }
+
+        .progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--docker-blue), var(--docker-blue-dark));
+            width: 0;
+            z-index: 100;
+            transition: width .1s linear
+        }
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(247, 249, 252, .92);
+            backdrop-filter: saturate(180%) blur(16px);
+            -webkit-backdrop-filter: saturate(180%) blur(16px);
+            border-bottom: 1px solid var(--border);
+            transition: background .3s
+        }
+
+        [data-theme="dark"] .site-header {
+            background: rgba(10, 26, 42, .92)
+        }
+
+        .nav-wrap {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: var(--ink);
+            font-size: 16px;
+            text-decoration: none
+        }
+
+        .brand:hover {
+            color: var(--ink);
+            text-decoration: none
+        }
+
+        .brand-mark {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--docker-blue), var(--docker-blue-dark));
+            border-radius: 9px;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-weight: 800;
+            font-size: 18px;
+            box-shadow: 0 3px 8px rgba(36, 150, 237, .3)
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2
+        }
+
+        .brand-text strong {
+            font-size: 16px;
+            color: var(--ink)
+        }
+
+        .brand-text small {
+            font-size: 12px;
+            color: var(--ink-3);
+            font-weight: 400
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 6px;
+            margin-left: auto;
+            flex-wrap: wrap;
+            font-size: 14px
+        }
+
+        .nav-links a {
+            color: var(--ink-2);
+            padding: 6px 12px;
+            border-radius: 99px;
+            transition: all .15s;
+            text-decoration: none
+        }
+
+        .nav-links a:hover {
+            color: var(--docker-blue);
+            background: rgba(36, 150, 237, .08);
+            text-decoration: none
+        }
+
+        .theme-toggle {
+            background: var(--paper-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 7px 12px;
+            cursor: pointer;
+            color: var(--ink-2);
+            font-size: 14px
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--paper-2), var(--paper-3), #e6f3ff);
+            border-bottom: 1px solid var(--border);
+            padding: 70px 24px 56px;
+            position: relative;
+            overflow: hidden
+        }
+
+        [data-theme="dark"] .hero {
+            background: linear-gradient(135deg, var(--paper-2), var(--paper), var(--paper-2))
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(36, 150, 237, .12), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none
+        }
+
+        .hero-inner {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            position: relative;
+            z-index: 1
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: var(--ink-3);
+            margin-bottom: 24px
+        }
+
+        .breadcrumb a {
+            color: var(--ink-3)
+        }
+
+        .breadcrumb a:hover {
+            color: var(--docker-blue)
+        }
+
+        .breadcrumb-sep {
+            margin: 0 6px;
+            opacity: .5
+        }
+
+        .hero h1 {
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            margin: 0 0 16px;
+            line-height: 1.15
+        }
+
+        .hero h1 .accent {
+            color: var(--docker-blue)
+        }
+
+        .hero h1 .accent2 {
+            color: var(--tip)
+        }
+
+        .hero h1 .accent3 {
+            color: var(--ok)
+        }
+
+        .hero-sub {
+            font-size: clamp(1.05rem, 2vw, 1.2rem);
+            color: var(--ink-2);
+            max-width: 780px;
+            line-height: 1.6;
+            margin: 0 0 32px
+        }
+
+        .hero-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 36px;
+            padding: 24px 0 0;
+            border-top: 1px solid var(--border)
+        }
+
+        .hero-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 4px
+        }
+
+        .hero-stat-num {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--docker-blue);
+            line-height: 1
+        }
+
+        .hero-stat:nth-child(2) .hero-stat-num {
+            color: var(--tip)
+        }
+
+        .hero-stat:nth-child(3) .hero-stat-num {
+            color: var(--ok)
+        }
+
+        .hero-stat-label {
+            font-size: 13px;
+            color: var(--ink-3)
+        }
+
+        .container {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 50px 24px 80px;
+            scroll-margin-top: 80px
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin: 0 0 32px;
+            padding: 16px 20px;
+            background: var(--paper-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1 1 280px;
+            min-width: 200px
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--paper-2);
+            color: var(--ink);
+            font-size: 14px;
+            font-family: inherit
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--docker-blue);
+            background: var(--paper-card);
+            box-shadow: 0 0 0 3px rgba(36, 150, 237, .12)
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--ink-3);
+            pointer-events: none
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: var(--paper-2);
+            border-radius: 99px;
+            border: 1px solid var(--border)
+        }
+
+        .filter-tab {
+            padding: 6px 14px;
+            border: 0;
+            border-radius: 99px;
+            background: transparent;
+            color: var(--ink-2);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap
+        }
+
+        .filter-tab:hover {
+            color: var(--ink)
+        }
+
+        .filter-tab.active {
+            background: var(--docker-blue);
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(36, 150, 237, .3)
+        }
+
+        .filter-tab[data-kind="rule"].active {
+            background: var(--tip);
+            box-shadow: 0 2px 6px rgba(240, 160, 32, .3)
+        }
+
+        .filter-tab[data-kind="course"].active {
+            background: var(--ok);
+            box-shadow: 0 2px 6px rgba(0, 184, 148, .3)
+        }
+
+        .filter-btns {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            background: transparent;
+            color: var(--ink-2);
+            font-size: 12.5px;
+            cursor: pointer;
+            font-family: inherit
+        }
+
+        .filter-btn:hover {
+            background: var(--paper-2)
+        }
+
+        .filter-btn.active {
+            background: var(--docker-blue);
+            color: #fff;
+            border-color: var(--docker-blue)
+        }
+
+        .progress-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+            font-size: 13px;
+            color: var(--ink-3)
+        }
+
+        .progress-stat-bar {
+            width: 80px;
+            height: 6px;
+            background: var(--paper-3);
+            border-radius: 99px;
+            overflow: hidden
+        }
+
+        .progress-stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--docker-blue), var(--docker-blue-dark));
+            border-radius: 99px;
+            transition: width .3s
+        }
+
+        .section-title {
+            display: grid;
+            grid-template-columns: minmax(260px, max-content) 1fr auto;
+            align-items: center;
+            gap: 16px;
+            column-gap: 20px;
+            margin: 48px 0 24px;
+            padding: 0 0 14px 0;
+            border-bottom: 1px solid var(--border);
+            scroll-margin-top: 80px;
+            position: relative
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 4px;
+            bottom: 14px;
+            width: 4px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, var(--docker-blue), var(--docker-blue-dark))
+        }
+
+        .section-title h2 {
+            margin: 0;
+            border: 0;
+            padding: 0;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            min-width: 240px
+        }
+
+        .section-title .emoji {
+            font-size: 1.5rem;
+            line-height: 1;
+            display: inline-block
+        }
+
+        .section-title .count {
+            font-size: 13.5px;
+            color: var(--ink-3);
+            font-weight: 500;
+            padding-left: 20px;
+            border-left: 1px solid var(--border);
+            flex-shrink: 0;
+            white-space: nowrap;
+            justify-self: end
+        }
+
+        .section-title::after {
+            content: ''
+        }
+
+        .lessons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px
+        }
+
+        #concepts .lessons {
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            max-width: 680px;
+            margin: 0 auto;
+            justify-content: center
+        }
+
+        #concepts .lesson-card {
+            background: linear-gradient(135deg, var(--paper-card) 0%, rgba(36, 150, 237, .04) 100%)
+        }
+
+        #concepts .lesson-card:hover {
+            border-color: var(--docker-blue);
+            box-shadow: 0 10px 30px rgba(36, 150, 237, .12)
+        }
+
+        .lesson-card {
+            display: flex;
+            flex-direction: column;
+            background: var(--paper-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 22px;
+            box-shadow: var(--shadow-sm);
+            transition: all .25s;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+            min-height: 220px
+        }
+
+        .lesson-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--docker-blue), var(--docker-blue-dark));
+            opacity: 0;
+            transition: opacity .25s
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--docker-blue)
+        }
+
+        .lesson-card:hover::before {
+            opacity: 1
+        }
+
+        .lesson-card.read {
+            border-color: var(--ok)
+        }
+
+        .lesson-card.read::before {
+            background: var(--ok);
+            opacity: 1
+        }
+
+        .lesson-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px
+        }
+
+        .lesson-num {
+            font-family: "SF Mono", Consolas, monospace;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--docker-blue);
+            background: rgba(36, 150, 237, .08);
+            padding: 4px 10px;
+            border-radius: 99px;
+            flex-shrink: 0
+        }
+
+        [data-theme="dark"] .lesson-num {
+            background: rgba(36, 150, 237, .18)
+        }
+
+        .lesson-difficulty {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 99px;
+            flex-shrink: 0
+        }
+
+        .diff-beginner {
+            background: rgba(0, 184, 148, .12);
+            color: var(--ok)
+        }
+
+        .diff-intermediate {
+            background: rgba(240, 160, 32, .12);
+            color: var(--tip)
+        }
+
+        .diff-advanced {
+            background: rgba(214, 48, 49, .12);
+            color: var(--warn)
+        }
+
+        .kind-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px
+        }
+
+        .kind-lesson {
+            background: rgba(36, 150, 237, .12);
+            color: var(--docker-blue)
+        }
+
+        .kind-rule {
+            background: rgba(240, 160, 32, .12);
+            color: var(--tip)
+        }
+
+        .kind-course {
+            background: rgba(0, 184, 148, .12);
+            color: var(--ok)
+        }
+
+        [data-theme="dark"] .kind-lesson {
+            background: rgba(36, 150, 237, .2)
+        }
+
+        [data-theme="dark"] .kind-rule {
+            background: rgba(240, 160, 32, .2)
+        }
+
+        [data-theme="dark"] .kind-course {
+            background: rgba(0, 184, 148, .2)
+        }
+
+        .lesson-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--ink);
+            margin: 0 0 10px;
+            line-height: 1.4;
+            padding-right: 60px
+        }
+
+        .lesson-desc {
+            font-size: 13.5px;
+            color: var(--ink-2);
+            line-height: 1.6;
+            margin: 0 0 16px;
+            flex: 1
+        }
+
+        .lesson-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+            font-size: 12.5px;
+            color: var(--ink-3);
+            flex-wrap: wrap
+        }
+
+        .lesson-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .lesson-arrow {
+            position: absolute;
+            bottom: 22px;
+            right: 22px;
+            color: var(--docker-blue);
+            opacity: 0;
+            transform: translateX(-6px);
+            transition: all .25s;
+            font-size: 18px
+        }
+
+        .lesson-card:hover .lesson-arrow {
+            opacity: 1;
+            transform: translateX(0)
+        }
+
+        .read-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--ok);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: none
+        }
+
+        .lesson-card.read .read-badge {
+            display: inline-block
+        }
+
+        .lesson-card.read .kind-badge {
+            display: none
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--ink-3);
+            display: none
+        }
+
+        .empty-state.show {
+            display: block
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: .3
+        }
+
+        .site-footer {
+            background: var(--docker-navy);
+            color: #c4d1de;
+            padding: 50px 24px 30px;
+            font-size: 14px;
+            line-height: 1.7
+        }
+
+        .footer-inner {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 40px
+        }
+
+        .footer-title {
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            margin: 0 0 14px
+        }
+
+        .footer-meta {
+            margin: 0 0 10px;
+            opacity: .85
+        }
+
+        .footer-copyright {
+            margin-top: 30px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, .1);
+            font-size: 13px;
+            opacity: .7;
+            grid-column: 1 / -1
+        }
+
+        .back-top {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--docker-blue);
+            color: #fff;
+            border: 0;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            box-shadow: 0 20px 25px rgba(10, 26, 42, .1), 0 10px 10px rgba(10, 26, 42, .04);
+            opacity: 0;
+            visibility: hidden;
+            transition: all .25s;
+            z-index: 40;
+            font-size: 18px
+        }
+
+        .back-top.visible {
+            opacity: 1;
+            visibility: visible
+        }
+
+        @media (max-width:1024px) {
+            .nav-links {
+                gap: 4px;
+                font-size: 13px
+            }
+
+            .hero-stats {
+                gap: 24px
+            }
+
+            .footer-inner {
+                grid-template-columns: 1fr 1fr
+            }
+        }
+
+        @media (max-width:768px) {
+            .nav-wrap {
+                padding: 12px 16px
+            }
+
+            .hero {
+                padding: 50px 16px 40px
+            }
+
+            .container {
+                padding: 32px 16px 60px
+            }
+
+            .toolbar {
+                padding: 12px 14px;
+                gap: 8px
+            }
+
+            .search-wrap {
+                flex: 1 1 100%
+            }
+
+            .filter-tabs {
+                width: 100%;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                padding-bottom: 4px
+            }
+
+            .filter-tab {
+                flex-shrink: 0
+            }
+
+            .filter-btns {
+                width: 100%;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                padding-bottom: 4px
+            }
+
+            .filter-btn {
+                white-space: nowrap;
+                flex-shrink: 0
+            }
+
+            .progress-stat {
+                width: 100%;
+                justify-content: space-between
+            }
+
+            .lessons {
+                grid-template-columns: 1fr
+            }
+
+            .footer-inner {
+                grid-template-columns: 1fr;
+                gap: 24px
+            }
+        }
+
+        @media (max-width:480px) {
+            .nav-links a {
+                padding: 4px 8px;
+                font-size: 12px
+            }
+
+            .brand-text small {
+                display: none
+            }
+
+            .hero h1 {
+                font-size: 1.8rem
+            }
+
+            .hero-sub {
+                font-size: 1rem
+            }
+
+            .hero-stats {
+                gap: 16px
+            }
+
+            .hero-stat-num {
+                font-size: 24px
+            }
+
+            .lesson-card {
+                padding: 20px 18px;
+                min-height: 200px
+            }
+        }
+
+        @media (prefers-reduced-motion:reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important
+            }
+        }
+
+        @media print {
+
+            .site-header,
+            .back-top,
+            .progress,
+            .theme-toggle,
+            .toolbar,
+            .lesson-arrow {
+                display: none
+            }
+
+            body {
+                background: #fff;
+                color: #000
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0
+            }
+
+            .lesson-card {
+                break-inside: avoid
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a href="#container" class="skip-link">跳到主内容</a>
+    <div class="progress" id="progress"></div>
+    <header class="site-header" role="banner">
+        <nav class="nav-wrap" aria-label="主导航">
+            <a href="/" class="brand" aria-label="AI 工具箱">
+                <span class="brand-mark">D</span>
+                <span class="brand-text"><strong>Docker 学习系列</strong><small>73 篇精选 · 24 课 + 24 规则 + 24 实战</small></span>
+            </a>
+            <div class="nav-links">
+                <a href="#lessons">课程</a>
+                <a href="#rules">规则</a>
+                <a href="#courses">实战</a>
+                <a href="#about">关于</a>
+            </div>
+            <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+        </nav>
+    </header>
+    <main role="main">
+        <section class="hero" aria-labelledby="hero-title">
+            <div class="hero-inner">
+                <nav class="breadcrumb" aria-label="面包屑">
+                    <a href="/">首页</a><span class="breadcrumb-sep">/</span>
+                    <a href="../index.html">AI 工具</a><span class="breadcrumb-sep">/</span>
+                    <span aria-current="page">Docker 完整指南</span>
+                </nav>
+                <h1 id="hero-title">从入门到 <span class="accent">高级</span> · 72 篇内容一站掌握</h1>
+                <p class="hero-sub">系统化学习 Docker 容器技术:<span class="accent">24 节课</span>(入门到 K8s 协同)+ <span class="accent2">24 规则</span>(速查与规范)+ <span class="accent3">24 实战课程</span>(应用/中间件/数据库/架构/DevOps)。</p>
+                <div class="hero-stats">
+                    <div class="hero-stat"><span class="hero-stat-num">72</span><span class="hero-stat-label">个内容</span></div>
+                    <div class="hero-stat"><span class="hero-stat-num">48+24+24+1</span><span class="hero-stat-label">课+规+实+速查</span></div>
+                    <div class="hero-stat"><span class="hero-stat-num">~ 28h</span><span class="hero-stat-label">总阅读</span></div>
+                    <div class="hero-stat"><span class="hero-stat-num" id="statRead">0%</span><span class="hero-stat-label">已读</span></div>
+                    <div class="hero-stat"><span class="hero-stat-num">100%</span><span class="hero-stat-label">实战可运行</span></div>
+                </div>
+            </div>
+        </section>
+        <div class="container" id="container">
+            <div class="toolbar" role="search">
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="search" class="search-input" id="searchInput" placeholder="搜索内容名称或关键词..." aria-label="搜索">
+                </div>
+                <div class="filter-tabs" role="tablist" aria-label="类型筛选">
+                    <button class="filter-tab active" data-kind="all" role="tab">全部 105</button>
+                    <button class="filter-tab" data-kind="lesson" role="tab">课程 48</button>
+                    <button class="filter-tab" data-kind="rule" role="tab">规则 24</button>
+                    <button class="filter-tab" data-kind="course" role="tab">实战 24</button>
+                </div>
+                <div class="filter-btns" role="group" aria-label="难度筛选">
+                    <button class="filter-btn active" data-level="all">全部</button>
+                    <button class="filter-btn" data-level="beginner">入门</button>
+                    <button class="filter-btn" data-level="intermediate">中级</button>
+                    <button class="filter-btn" data-level="advanced">高级</button>
+                </div>
+                <div class="progress-stat">
+                    <span>已读 <strong id="readCount">0</strong> / 73</span>
+                    <div class="progress-stat-bar">
+                        <div class="progress-stat-fill" id="readFill" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+            <section class="section" id="lessons" aria-labelledby="lessons-title">
+                <div class="section-title">
+                    <h2 id="lessons-title"><span class="emoji">📘</span> 24 节课</h2>
+                    <span class="count">从入门到高级 · 系统化学习路径</span>
+                </div>
+                <div class="lessons">
+                    <a href="01-docker-introduction-architecture.html" class="lesson-card" data-title="Docker 简介与系统架构完全指南" data-keywords="Docker 简介与系统架构完全指南 课程 通用 入门" data-level="beginner" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">01</span>
+                            <span class="lesson-difficulty diff-beginner">入门</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 简介与系统架构完全指南</h3>
+                        <p class="lesson-desc">Docker 是开源的应用容器引擎。本文系统讲解 Docker 4 大用途(统一环境/应用迁移/超快启动/轻松维护)、容器与虚拟机的 5 维对比、普通系统/传统虚拟/容器虚拟 3 种程序运行原理,以及 Docker 系统架构 6 要素(Daemon/Image/Container/Repository/Tag/镜像中心)。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 通用</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="02-docker-engine-image-commands.html" class="lesson-card" data-title="Docker 引擎与镜像相关命令完全指南" data-keywords="Docker 引擎与镜像相关命令完全指南 课程 通用 入门" data-level="beginner" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">02</span>
+                            <span class="lesson-difficulty diff-beginner">入门</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 引擎与镜像相关命令完全指南</h3>
+                        <p class="lesson-desc">Docker 引擎由 Client/Dockerd/Containerd/Runc/Shim 5 大组件组成。本文系统讲解 Docker 引擎架构、CE/EE/Moby 三类、CentOS 7 安装 11 步、阿里云镜像加速器、卸载方法、镜像概念、4 类镜像仓库(Official/Verified Publisher/Sponsored OSS/无认证)、8 大镜像命令(pull/images/search/rmi/save/load 等)。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 通用</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="03-docker-image-layers-digest.html" class="lesson-card" data-title="Docker 镜像分层与镜像摘要完全指南" data-keywords="Docker 镜像分层与镜像摘要完全指南 课程 通用 中级" data-level="intermediate" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">03</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 镜像分层与镜像摘要完全指南</h3>
+                        <p class="lesson-desc">Docker 镜像由松耦合的只读镜像层组成,本文系统讲解分层的 3 大优势、镜像层构成、基础镜像层 vs 扩展镜像层、UnionFS 联合文件系统、Linux OS 启动过程、镜像摘要 digest 的 64 位 sha256 作用、多架构镜像原理。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 通用</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="04-docker-container-commands.html" class="lesson-card" data-title="Docker 容器常用命令完全指南" data-keywords="Docker 容器常用命令完全指南 课程 通用 入门" data-level="beginner" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">04</span>
+                            <span class="lesson-difficulty diff-beginner">入门</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 容器常用命令完全指南</h3>
+                        <p class="lesson-desc">Docker 容器是为了运行应用,应用结束容器终止。本文系统讲解容器启动流程、交互/分离 2 种运行模式、docker ps 6 种参数、exec vs attach 6 维度对比、docker logs 7 种选项、文件传递、悬虚镜像、export/import vs save/load、docker system 命令集。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 通用</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="05-docker-dockerfile-introduction.html" class="lesson-card" data-title="Dockerfile 入门完全指南" data-keywords="Dockerfile 入门完全指南 课程 通用 入门" data-level="beginner" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">05</span>
+                            <span class="lesson-difficulty diff-beginner">入门</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Dockerfile 入门完全指南</h3>
+                        <p class="lesson-desc">Dockerfile 是构建 Docker 镜像的脚本文件。本文系统讲解 15+ 核心指令(FROM/LABEL/ENV/WORKDIR/RUN/CMD/ENTRYPOINT/ADD/COPY/ARG/ONBUILD/VOLUME 等)、scratch 镜像与 HelloWorld、CMD vs ENTRYPOINT 核心区别、构建新镜像的 5 种方式,以及 Spring Boot 项目完整部署实战。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 通用</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="06-docker-build-cache-persistence.html" class="lesson-card" data-title="Docker Build Cache 机制与数据持久化完全指南" data-keywords="Docker Build Cache 机制与数据持久化完全指南 课程 通用 中级" data-level="intermediate" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">06</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker Build Cache 机制与数据持久化完全指南</h3>
+                        <p class="lesson-desc">理解 Docker 镜像构建的 build cache 机制、父子镜像关系、4 种 cache 失效情况;掌握数据持久化的 3 种方式(数据卷/Bind mounts/tmpfs),以及 docker run -v 与 Dockerfile VOLUME 的区别。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 通用</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="07-docker-networking-fundamentals.html" class="lesson-card" data-title="Docker 网络完全指南" data-keywords="Docker 网络完全指南 课程 通用 高级" data-level="advanced" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">07</span>
+                            <span class="lesson-difficulty diff-advanced">高级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 网络完全指南</h3>
+                        <p class="lesson-desc">Docker 网络是容器通信的基石。本文系统讲解 Linux Network Namespace 基础、CNM 容器网络模型、Libnetwork 实现、5 种 Driver,以及 bridge/none/host 三种网络模式的工作原理与实战。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 通用</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="08-docker-mysql-redis-installation.html" class="lesson-card" data-title="Docker 安装 MySQL 与 Redis 完全指南" data-keywords="Docker 安装 MySQL 与 Redis 完全指南 课程 通用 中级" data-level="intermediate" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">08</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 安装 MySQL 与 Redis 完全指南</h3>
+                        <p class="lesson-desc">MySQL 与 Redis 是最常用的两大数据库/缓存中间件。本文系统讲解 Docker 部署 MySQL 单机/主从复制、Redis 单机/一主两从/Sentinel 高可用/Cluster 分布式集群,所有命令可直接复用。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 通用</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="09-docker-compose-orchestration.html" class="lesson-card" data-title="Docker Compose 容器编排完全指南" data-keywords="Docker Compose 容器编排完全指南 课程 通用 中级" data-level="intermediate" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">09</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker Compose 容器编排完全指南</h3>
+                        <p class="lesson-desc">Docker Compose 是 Docker 官方的容器编排工具,通过声明式 yml 文件一键部署多容器应用。本文详解 compose.yml 6 大顶级属性、常用命令、安装、Spring Boot+MySQL+Redis 完整编排实战、自定义组件名称等。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 通用</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="10-docker-monitoring-platforms.html" class="lesson-card" data-title="Docker 管理监控平台完全指南" data-keywords="Docker 管理监控平台完全指南 课程 通用 中级" data-level="intermediate" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">10</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 管理监控平台完全指南</h3>
+                        <p class="lesson-desc">当 Docker 中管理的镜像、容器、网络等变得很多时,命令行管理就力不从心。本文系统讲解 4 款主流 Docker 可视化管理平台:Docker UI、Portainer、Shipyard、CIG(CAdvisor+InfluxDB+Grafana)三剑客监控系统的安装配置。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 通用</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="11-docker-harbor-registry.html" class="lesson-card" data-title="Harbor 私有镜像中心搭建完全指南" data-keywords="Harbor 私有镜像中心搭建完全指南 课程 通用 中级" data-level="intermediate" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">11</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Harbor 私有镜像中心搭建完全指南</h3>
+                        <p class="lesson-desc">Harbor 是企业级 Docker 私有镜像中心,提供 Web 管理界面、用户认证、镜像复制等高级功能。本文系统讲解公网/私有镜像中心、htpasswd 用户认证、容器退出状态码、重启策略、Harbor 安装与运维、客户端操作等核心知识。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 通用</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="12-docker-swarm-cluster.html" class="lesson-card" data-title="Docker Swarm 集群完全指南" data-keywords="Docker Swarm 集群完全指南 课程 通用 中级" data-level="intermediate" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">12</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker Swarm 集群完全指南</h3>
+                        <p class="lesson-desc">Docker Swarm 是 Docker 原生集群管理系统，从 1.12.0 起内置。本文系统讲解节点架构、服务架构、部署模式、集群搭建与维护、PKI 安全、容灾机制、服务创建与负载均衡等核心知识,附完整命令清单与架构图。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 通用</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="13-docker-multi-platform-installation.html" class="lesson-card" data-title="Docker 多平台安装与配置实战" data-keywords="Docker 多平台安装与配置实战 课程 环境部署 入门" data-level="beginner" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">13</span>
+                            <span class="lesson-difficulty diff-beginner">入门</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 多平台安装与配置实战</h3>
+                        <p class="lesson-desc">详解 CentOS 7/8、Ubuntu 20/22、Debian、macOS、WSL2、Windows 全平台 Docker 安装;docker-ce-cli-containerd.io 三件套;镜像加速器配置;离线安装;版本升级;完全卸载。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 环境部署</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="14-dockerfile-advanced-multistage.html" class="lesson-card" data-title="Dockerfile 进阶与多阶段构建实战" data-keywords="Dockerfile 进阶与多阶段构建实战 课程 镜像构建 高级" data-level="advanced" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">14</span>
+                            <span class="lesson-difficulty diff-advanced">高级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Dockerfile 进阶与多阶段构建实战</h3>
+                        <p class="lesson-desc">详解 Dockerfile 进阶技巧:Java/Maven/Gradle、Node.js、Python、Go、Rust 多语言实战;Builder 模式、Distroless 模式、外部缓存挂载。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 镜像构建</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="15-registry-distribution-internals.html" class="lesson-card" data-title="Docker 镜像仓库 Registry 深入" data-keywords="Docker 镜像仓库 Registry 深入 课程 镜像仓库 高级" data-level="advanced" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">15</span>
+                            <span class="lesson-difficulty diff-advanced">高级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 镜像仓库 Registry 深入</h3>
+                        <p class="lesson-desc">详解 Registry v2 协议、Distribution 项目、manifest/sha256/标签机制;Harbor / Quay / ECR / GCR 核心原理;镜像复制与签名验证。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 镜像仓库</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="16-cgroup-namespace-isolation.html" class="lesson-card" data-title="容器资源限制与 cgroup 深入" data-keywords="容器资源限制与 cgroup 深入 课程 内核原理 高级" data-level="advanced" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">16</span>
+                            <span class="lesson-difficulty diff-advanced">高级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">容器资源限制与 cgroup 深入</h3>
+                        <p class="lesson-desc">详解 Linux cgroup v1/v2 资源控制、namespace 6 种隔离、ulimit 系统资源限制;CPU shares/quotas、内存 limit/reservation、磁盘 IO blkio 完整配置。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 内核原理</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="17-logging-elk-integration.html" class="lesson-card" data-title="容器日志系统 ELK/Loki 完整集成" data-keywords="容器日志系统 ELK/Loki 完整集成 课程 可观测性 中级" data-level="intermediate" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">17</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">容器日志系统 ELK/Loki 完整集成</h3>
+                        <p class="lesson-desc">详解 Docker 日志驱动(fluentd/gelf/awslogs)+ ELK/Loki 完整日志聚合方案;JSON 结构化日志;日志轮转;日志保留策略。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 可观测性</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="18-network-deep-dive.html" class="lesson-card" data-title="Docker 网络深入:veth/iptables/overlay" data-keywords="Docker 网络深入:veth/iptables/overlay 课程 网络核心 高级" data-level="advanced" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">18</span>
+                            <span class="lesson-difficulty diff-advanced">高级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 网络深入:veth/iptables/overlay</h3>
+                        <p class="lesson-desc">详解 Linux 网络栈:veth pair/bridge/iptables/路由;Docker bridge 模式实现;overlay 网络 VXLAN 隧道;host/network 模式对比。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 网络核心</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="19-security-deep-dive.html" class="lesson-card" data-title="Docker 安全深入:seccomp/AppArmor/capability" data-keywords="Docker 安全深入:seccomp/AppArmor/capability 课程 安全 高级" data-level="advanced" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">19</span>
+                            <span class="lesson-difficulty diff-advanced">高级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 安全深入:seccomp/AppArmor/capability</h3>
+                        <p class="lesson-desc">详解 Linux 安全机制:seccomp 系统调用过滤、AppArmor/SELinux MAC、Linux capabilities 精细权限;Rootless 模式;镜像签名验证。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 安全</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="20-docker-api-sdk-automation.html" class="lesson-card" data-title="Docker API 与 SDK 自动化" data-keywords="Docker API 与 SDK 自动化 课程 自动化 高级" data-level="advanced" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">20</span>
+                            <span class="lesson-difficulty diff-advanced">高级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker API 与 SDK 自动化</h3>
+                        <p class="lesson-desc">详解 Docker Engine REST API、Go SDK (moby/moby)、Python SDK (docker-py);通过 HTTP 远程管理 Docker;自动化容器编排脚本。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 自动化</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="21-cicd-with-docker.html" class="lesson-card" data-title="Docker 与 CI/CD 集成完整实战" data-keywords="Docker 与 CI/CD 集成完整实战 课程 DevOps 中级" data-level="intermediate" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">21</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 与 CI/CD 集成完整实战</h3>
+                        <p class="lesson-desc">详解 GitHub Actions/GitLab CI/Jenkins 三大 CI/CD 平台与 Docker 集成;镜像构建、安全扫描、多环境部署;Argo CD GitOps 实践。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ DevOps</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="22-microservices-with-docker.html" class="lesson-card" data-title="Docker 微服务架构完整实践" data-keywords="Docker 微服务架构完整实践 课程 微服务 高级" data-level="advanced" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">22</span>
+                            <span class="lesson-difficulty diff-advanced">高级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Docker 微服务架构完整实践</h3>
+                        <p class="lesson-desc">详解微服务 8 大基础设施(注册发现/API 网关/配置中心/熔断限流/消息队列/分布式事务/链路追踪/日志聚合)的 Docker 容器化方案。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 微服务</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="23-kubernetes-intro-for-docker.html" class="lesson-card" data-title="Kubernetes 入门与 Docker 协同演进" data-keywords="Kubernetes 入门与 Docker 协同演进 课程 K8s 中级" data-level="intermediate" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">23</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">Kubernetes 入门与 Docker 协同演进</h3>
+                        <p class="lesson-desc">详解 Kubernetes 核心概念(Pod/Deployment/Service/Ingress/ConfigMap);从 Docker Compose 迁移到 K8s 完整路径;kubectl 命令实战。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ K8s</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="24-12-factor-app-containerization.html" class="lesson-card" data-title="12-Factor App 与容器化原则" data-keywords="12-Factor App 与容器化原则 课程 方法论 中级" data-level="intermediate" data-kind="lesson">
+                        <div class="lesson-head">
+                            <span class="lesson-num">24</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-lesson">课程</span>
+                        <h3 class="lesson-title">12-Factor App 与容器化原则</h3>
+                        <p class="lesson-desc">详解 Heroku 12-Factor App 12 要素在容器化时代的实践:代码/依赖/配置/后端服务/构建发布运行/进程/端口绑定/并发/可处置/环境等价/日志/管理进程。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 方法论</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                <a href="82-data-persistence.html" class="lesson-card" data-title="Docker 数据持久化深入" data-keywords="Docker 数据持久化深入 存储 中级" data-level="intermediate" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">82</span><span class="lesson-difficulty diff-intermediate">中级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 数据持久化深入</h3>
+<p class="lesson-desc">深入讲解 Docker 数据持久化深入 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 存储</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="83-resource-limits.html" class="lesson-card" data-title="容器资源限制与 cgroup 深入" data-keywords="容器资源限制与 cgroup 深入 内核 中级" data-level="intermediate" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">83</span><span class="lesson-difficulty diff-intermediate">中级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">容器资源限制与 cgroup 深入</h3>
+<p class="lesson-desc">深入讲解 容器资源限制与 cgroup 深入 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 内核</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="84-multi-arch.html" class="lesson-card" data-title="Docker 多架构镜像构建" data-keywords="Docker 多架构镜像构建 镜像 中级" data-level="intermediate" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">84</span><span class="lesson-difficulty diff-intermediate">中级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 多架构镜像构建</h3>
+<p class="lesson-desc">深入讲解 Docker 多架构镜像构建 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 镜像</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="85-healthcheck-selfheal.html" class="lesson-card" data-title="Docker 健康检查与自愈" data-keywords="Docker 健康检查与自愈 运维 中级" data-level="intermediate" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">85</span><span class="lesson-difficulty diff-intermediate">中级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 健康检查与自愈</h3>
+<p class="lesson-desc">深入讲解 Docker 健康检查与自愈 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 运维</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="86-logging-monitoring.html" class="lesson-card" data-title="Docker 日志与监控全栈" data-keywords="Docker 日志与监控全栈 监控 中级" data-level="intermediate" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">86</span><span class="lesson-difficulty diff-intermediate">中级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 日志与监控全栈</h3>
+<p class="lesson-desc">深入讲解 Docker 日志与监控全栈 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 监控</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="87-security-scanning.html" class="lesson-card" data-title="Docker 安全扫描与加固" data-keywords="Docker 安全扫描与加固 安全 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">87</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 安全扫描与加固</h3>
+<p class="lesson-desc">深入讲解 Docker 安全扫描与加固 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 安全</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="88-performance-tuning.html" class="lesson-card" data-title="Docker 性能调优" data-keywords="Docker 性能调优 性能 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">88</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 性能调优</h3>
+<p class="lesson-desc">深入讲解 Docker 性能调优 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 性能</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="89-compose-advanced.html" class="lesson-card" data-title="Docker Compose 进阶实战" data-keywords="Docker Compose 进阶实战 编排 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">89</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker Compose 进阶实战</h3>
+<p class="lesson-desc">深入讲解 Docker Compose 进阶实战 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 编排</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="90-swarm-advanced.html" class="lesson-card" data-title="Docker Swarm 进阶实战" data-keywords="Docker Swarm 进阶实战 集群 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">90</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker Swarm 进阶实战</h3>
+<p class="lesson-desc">深入讲解 Docker Swarm 进阶实战 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 集群</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="91-k8s-integration.html" class="lesson-card" data-title="Docker 与 Kubernetes 协同" data-keywords="Docker 与 Kubernetes 协同 K8s 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">91</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 与 Kubernetes 协同</h3>
+<p class="lesson-desc">深入讲解 Docker 与 Kubernetes 协同 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ K8s</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="92-cicd-deep.html" class="lesson-card" data-title="CI/CD 流水线深度实战" data-keywords="CI/CD 流水线深度实战 DevOps 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">92</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">CI/CD 流水线深度实战</h3>
+<p class="lesson-desc">深入讲解 CI/CD 流水线深度实战 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ DevOps</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="93-gitops-argo.html" class="lesson-card" data-title="GitOps 实战:Argo CD" data-keywords="GitOps 实战:Argo CD DevOps 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">93</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">GitOps 实战:Argo CD</h3>
+<p class="lesson-desc">深入讲解 GitOps 实战:Argo CD 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ DevOps</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="94-bluegreen-canary.html" class="lesson-card" data-title="蓝绿发布与金丝雀部署" data-keywords="蓝绿发布与金丝雀部署 DevOps 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">94</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">蓝绿发布与金丝雀部署</h3>
+<p class="lesson-desc">深入讲解 蓝绿发布与金丝雀部署 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ DevOps</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="95-istio-mesh.html" class="lesson-card" data-title="服务网格 Istio 实战" data-keywords="服务网格 Istio 实战 架构 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">95</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">服务网格 Istio 实战</h3>
+<p class="lesson-desc">深入讲解 服务网格 Istio 实战 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 架构</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="96-p2p-distribution.html" class="lesson-card" data-title="镜像分发与 P2P 加速" data-keywords="镜像分发与 P2P 加速 镜像 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">96</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">镜像分发与 P2P 加速</h3>
+<p class="lesson-desc">深入讲解 镜像分发与 P2P 加速 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 镜像</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="97-large-scale-cluster.html" class="lesson-card" data-title="大规模 Docker 集群管理" data-keywords="大规模 Docker 集群管理 集群 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">97</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">大规模 Docker 集群管理</h3>
+<p class="lesson-desc">深入讲解 大规模 Docker 集群管理 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 集群</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="98-troubleshooting.html" class="lesson-card" data-title="Docker 故障排查全攻略" data-keywords="Docker 故障排查全攻略 排错 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">98</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 故障排查全攻略</h3>
+<p class="lesson-desc">深入讲解 Docker 故障排查全攻略 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 排错</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="99-migrate-to-k8s.html" class="lesson-card" data-title="Docker 迁移到 Kubernetes" data-keywords="Docker 迁移到 Kubernetes 迁移 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">99</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 迁移到 Kubernetes</h3>
+<p class="lesson-desc">深入讲解 Docker 迁移到 Kubernetes 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 迁移</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="100-ai-ml.html" class="lesson-card" data-title="Docker 与 AI/ML 工作流" data-keywords="Docker 与 AI/ML 工作流 AI/ML 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">100</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 与 AI/ML 工作流</h3>
+<p class="lesson-desc">深入讲解 Docker 与 AI/ML 工作流 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ AI/ML</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="101-serverless.html" class="lesson-card" data-title="Serverless 容器化实战" data-keywords="Serverless 容器化实战 Serverless 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">101</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Serverless 容器化实战</h3>
+<p class="lesson-desc">深入讲解 Serverless 容器化实战 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ Serverless</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="102-edge-computing.html" class="lesson-card" data-title="Docker 与边缘计算" data-keywords="Docker 与边缘计算 边缘 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">102</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 与边缘计算</h3>
+<p class="lesson-desc">深入讲解 Docker 与边缘计算 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 边缘</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="103-monitoring-alerting.html" class="lesson-card" data-title="Docker 监控告警全栈" data-keywords="Docker 监控告警全栈 监控 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">103</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 监控告警全栈</h3>
+<p class="lesson-desc">深入讲解 Docker 监控告警全栈 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 监控</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="104-dockerfile-rules.html" class="lesson-card" data-title="Dockerfile 20 条铁律" data-keywords="Dockerfile 20 条铁律 镜像 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">104</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Dockerfile 20 条铁律</h3>
+<p class="lesson-desc">深入讲解 Dockerfile 20 条铁律 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 镜像</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+<a href="105-best-practices.html" class="lesson-card" data-title="Docker 48 条最佳实践汇总" data-keywords="Docker 48 条最佳实践汇总 方法论 高级" data-level="advanced" data-kind="lesson">
+<div class="lesson-head"><span class="lesson-num">105</span><span class="lesson-difficulty diff-advanced">高级</span></div>
+<span class="read-badge">已读</span><span class="kind-badge kind-lesson">课程</span>
+<h3 class="lesson-title">Docker 48 条最佳实践汇总</h3>
+<p class="lesson-desc">深入讲解 Docker 48 条最佳实践汇总 主题;涵盖核心概念、关键技术、生产级实战,与可复制完整代码。</p>
+<div class="lesson-meta">
+<span class="lesson-meta-item">⏱ 25 分钟</span>
+<span class="lesson-meta-item">📖 5 章节</span>
+<span class="lesson-meta-item">🏷️ 方法论</span>
+</div>
+<span class="lesson-arrow">→</span>
+</a>
+</div>
+</section>
+            <section class="section" id="rules" aria-labelledby="rules-title">
+                <div class="section-title">
+                    <h2 id="rules-title"><span class="emoji">📋</span> 24 规则</h2>
+                    <span class="count">速查与规范 · 生产实战参考</span>
+                </div>
+                <div class="lessons">
+                    <a href="25-logging-monitoring-rules.html" class="lesson-card" data-title="Docker 日志与监控规范" data-keywords="Docker 日志与监控规范 规则 监控 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">25</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 日志与监控规范</h3>
+                        <p class="lesson-desc">详解 json-file/journald/syslog 等 5 种日志驱动,Prometheus + cAdvisor + Grafana 监控方案,以及健康检查 + 告警集成。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 监控</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="26-network-troubleshooting.html" class="lesson-card" data-title="Docker 网络故障排查指南" data-keywords="Docker 网络故障排查指南 规则 排查 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">26</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 网络故障排查指南</h3>
+                        <p class="lesson-desc">覆盖容器无法通信、DNS 解析失败、端口冲突、跨主机网络等 10 大经典网络问题的系统化排查步骤与解决方案。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 排查</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="27-storage-driver-rules.html" class="lesson-card" data-title="Docker 存储驱动选择规范" data-keywords="Docker 存储驱动选择规范 规则 存储 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">27</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 存储驱动选择规范</h3>
+                        <p class="lesson-desc">对比 overlay2/devicemapper/btrfs/zfs/vfs 5 种存储驱动的特性、性能、稳定性,以及根据 Linux 发行版和场景的选型建议。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 存储</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="28-container-lifecycle-rules.html" class="lesson-card" data-title="Docker 容器生命周期管理规范" data-keywords="Docker 容器生命周期管理规范 规则 生命周期 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">28</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 容器生命周期管理规范</h3>
+                        <p class="lesson-desc">定义容器从创建到销毁的完整生命周期管理规范,涵盖命名约定、健康检查、退出码处理、资源限制、自动重启策略。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 生命周期</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="29-network-planning-rules.html" class="lesson-card" data-title="Docker 网络规划与配置规范" data-keywords="Docker 网络规划与配置规范 规则 规划 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">29</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 网络规划与配置规范</h3>
+                        <p class="lesson-desc">详解 Docker 5 种内置网络驱动选择策略、自定义网络优势、DNS 服务发现机制,以及跨主机通信 4 种主流方案对比。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 规划</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="30-volume-management-rules.html" class="lesson-card" data-title="Docker 数据卷管理规范" data-keywords="Docker 数据卷管理规范 规则 管理 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">30</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 数据卷管理规范</h3>
+                        <p class="lesson-desc">对比 Volume / Bind mounts / tmpfs 三种数据持久化方式,规范数据卷命名、备份恢复、跨主机共享、敏感数据处理等场景的最佳实践。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 管理</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="31-healthcheck-rules.html" class="lesson-card" data-title="Docker 容器健康检查规范" data-keywords="Docker 容器健康检查规范 规则 健康检查 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">31</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 容器健康检查规范</h3>
+                        <p class="lesson-desc">详解 HEALTHCHECK 指令、3 种探针、Compose 与 K8s 健康检查配置,以及健康检查失败的自愈机制。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 健康检查</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="32-performance-tuning.html" class="lesson-card" data-title="Docker 性能调优规范" data-keywords="Docker 性能调优规范 规则 性能 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">32</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 性能调优规范</h3>
+                        <p class="lesson-desc">覆盖启动速度、镜像体积、资源分配、网络性能、存储 IO 5 个层面的性能调优规则,提供 20+ 可执行的优化项。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 性能</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="33-java-springboot-containerization.html" class="lesson-card" data-title="Java Spring Boot 应用容器化实战" data-keywords="Java Spring Boot 应用容器化实战 规则 应用容器化 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">33</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Java Spring Boot 应用容器化实战</h3>
+                        <p class="lesson-desc">从 Maven 多模块项目到多阶段构建 Docker 镜像,详解 Spring Boot 应用容器化的 pom.xml 配置、jlink 定制 JRE、健康检查、生产级 K8s 部署。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 应用容器化</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="34-nodejs-containerization.html" class="lesson-card" data-title="Node.js + Express 应用容器化实战" data-keywords="Node.js + Express 应用容器化实战 规则 应用容器化 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">34</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Node.js + Express 应用容器化实战</h3>
+                        <p class="lesson-desc">详解 Node.js 应用的 npm ci 缓存优化、distroless 多阶段构建、npm ci --omit=dev 生产依赖、Express 健康检查、Node 性能调优。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 应用容器化</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="35-image-slimming-cleanup.html" class="lesson-card" data-title="Docker 镜像瘦身与清理规则" data-keywords="Docker 镜像瘦身与清理规则 规则 瘦身 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">35</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 镜像瘦身与清理规则</h3>
+                        <p class="lesson-desc">详解 docker-slim、dive、crane 三大工具链,通过多阶段构建、合并 RUN、清理包管理器缓存等 8 步实战步骤,实现镜像 10 倍瘦身。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 瘦身</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="36-multi-stage-build-rules.html" class="lesson-card" data-title="Docker 多阶段构建规范" data-keywords="Docker 多阶段构建规范 规则 构建 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">36</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 多阶段构建规范</h3>
+                        <p class="lesson-desc">详解多阶段构建的 8 种命名模式、典型语言实践(Node.js/Java/Go/Python/Rust)、BuildKit 高级特性(--mount / --ssh / --secret)。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 构建</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="37-docker-commands-cheatsheet.html" class="lesson-card" data-title="Docker 常用命令速查手册" data-keywords="Docker 常用命令速查手册 规则 速查 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">37</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 常用命令速查手册</h3>
+                        <p class="lesson-desc">汇总日常 Docker 操作最常用的 50+ 命令,按镜像管理、容器管理、网络管理、数据卷管理、系统管理 5 大类组织,支持 Ctrl+F 快速查找。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 速查</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="38-dockerfile-best-practices.html" class="lesson-card" data-title="Dockerfile 编写规范与最佳实践" data-keywords="Dockerfile 编写规范与最佳实践 规则 最佳实践 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">38</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Dockerfile 编写规范与最佳实践</h3>
+                        <p class="lesson-desc">从基础镜像选择、层缓存利用、安全加固、可维护性 4 大维度总结 Dockerfile 编写 20 条最佳实践,涵盖 Docker 官方推荐和一线生产经验。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 最佳实践</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="39-static-site-containerization.html" class="lesson-card" data-title="静态站点容器化部署实战" data-keywords="静态站点容器化部署实战 规则 应用容器化 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">39</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">静态站点容器化部署实战</h3>
+                        <p class="lesson-desc">详解 Hugo / Jekyll 静态站点的多阶段构建、Caddy/Nginx 服务、Cloudflare 缓存、GitOps 自动化部署。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 应用容器化</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="40-cicd-integration-rules.html" class="lesson-card" data-title="Docker 与 CI/CD 集成规范" data-keywords="Docker 与 CI/CD 集成规范 规则 CI/CD 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">40</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 与 CI/CD 集成规范</h3>
+                        <p class="lesson-desc">详解 GitHub Actions、GitLab CI、Jenkins 三大 CI/CD 平台的 Docker 集成模板,涵盖镜像构建、安全扫描、多环境部署、缓存优化。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ CI/CD</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="41-cross-host-network.html" class="lesson-card" data-title="Docker 跨主机通信方案对比" data-keywords="Docker 跨主机通信方案对比 规则 网络 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">41</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 跨主机通信方案对比</h3>
+                        <p class="lesson-desc">对比 Docker 原生 Overlay、Macvlan、Flannel、Calico 4 种跨主机容器通信方案,涵盖原理、配置、性能、适用场景。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 网络</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="42-registry-management.html" class="lesson-card" data-title="Docker 镜像仓库管理规范" data-keywords="Docker 镜像仓库管理规范 规则 管理 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">42</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 镜像仓库管理规范</h3>
+                        <p class="lesson-desc">详解 Harbor 私有镜像仓库的安装、配置、镜像同步策略、镜像保留规则、Webhook 集成、漏洞扫描集成等管理规范。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 管理</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="43-compose-writing-rules.html" class="lesson-card" data-title="Docker Compose 编写规范" data-keywords="Docker Compose 编写规范 规则 Compose 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">43</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker Compose 编写规范</h3>
+                        <p class="lesson-desc">从 compose 文件结构、6 大顶级属性、12 条编写铁律 3 维度规范化 docker-compose.yml,提升多容器应用的可读性、可维护性、可移植性。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ Compose</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="44-mongodb-containerization.html" class="lesson-card" data-title="MongoDB 容器化高可用部署实战" data-keywords="MongoDB 容器化高可用部署实战 规则 中间件 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">44</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">MongoDB 容器化高可用部署实战</h3>
+                        <p class="lesson-desc">详解 MongoDB 6.x 容器化:副本集(Replica Set)3 节点部署、KeyFile 认证、读写分离、故障自动转移、数据持久化、备份恢复。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 中间件</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="45-image-gc-cleanup.html" class="lesson-card" data-title="Docker 镜像 GC 与磁盘清理规则" data-keywords="Docker 镜像 GC 与磁盘清理规则 规则 镜像管理 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">45</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 镜像 GC 与磁盘清理规则</h3>
+                        <p class="lesson-desc">详解 Docker 镜像垃圾回收机制;悬虚镜像识别;docker image prune 5 种用法;磁盘配额管理;registry 镜像批量清理脚本;自动化 GC 任务设计。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 镜像管理</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="46-container-security-audit.html" class="lesson-card" data-title="容器安全审计规则" data-keywords="容器安全审计规则 规则 安全 高级" data-level="advanced" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">46</span>
+                            <span class="lesson-difficulty diff-advanced">高级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">容器安全审计规则</h3>
+                        <p class="lesson-desc">详解 CIS Docker Benchmark 安全审计;Trivy/Snyk 漏洞扫描;Falco 运行时入侵检测;审计日志收集;合规性报告生成。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 安全</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="47-log-management-rules.html" class="lesson-card" data-title="Docker 日志驱动与轮转规则" data-keywords="Docker 日志驱动与轮转规则 规则 监控 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">47</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">Docker 日志驱动与轮转规则</h3>
+                        <p class="lesson-desc">详解 Docker 5 种日志驱动(json-file/journald/fluentd/gelf/awslogs);日志轮转配置;结构化 JSON 日志;日志采集与聚合;磁盘爆满预防。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 监控</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="48-vulnerability-scanning.html" class="lesson-card" data-title="镜像漏洞扫描规则" data-keywords="镜像漏洞扫描规则 规则 安全 中级" data-level="intermediate" data-kind="rule">
+                        <div class="lesson-head">
+                            <span class="lesson-num">48</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-rule">规则</span>
+                        <h3 class="lesson-title">镜像漏洞扫描规则</h3>
+                        <p class="lesson-desc">详解 Docker 镜像漏洞扫描工具链:Trivy(免费开源)/ Snyk(企业)/ Grype(快速)/ Clair(红帽);CI/CD 集成;基线镜像策略;漏洞修复流程。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 安全</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                </div>
+            </section>
+            <section class="section" id="courses" aria-labelledby="courses-title">
+                <div class="section-title">
+                    <h2 id="courses-title"><span class="emoji">🎯</span> 24 实战课程</h2>
+                    <span class="count">应用/中间件/数据库/架构/DevOps 五大类</span>
+                </div>
+                <div class="lessons">
+                    <a href="57-resource-limit-rules.html" class="lesson-card" data-title="Docker 容器资源限制规范" data-keywords="Docker 容器资源限制规范 实战 资源 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">57</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Docker 容器资源限制规范</h3>
+                        <p class="lesson-desc">详解 CPU shares/quota、内存 limit/reservation、磁盘 IO blkio、网络带宽 4 维资源限制配置,避免容器间资源争抢,保障 SLO。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 资源</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="58-mysql-master-slave.html" class="lesson-card" data-title="MySQL 8.0 容器化主从复制实战" data-keywords="MySQL 8.0 容器化主从复制实战 实战 数据库 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">58</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">MySQL 8.0 容器化主从复制实战</h3>
+                        <p class="lesson-desc">详解 MySQL 8.0 容器化:基于 GTID 的主从复制、读写分离、binlog 模式、慢查询优化、字符集 utf8mb4、Percona XtraBackup 备份。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 数据库</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="59-python-containerization.html" class="lesson-card" data-title="Python Flask/Django 应用容器化实战" data-keywords="Python Flask/Django 应用容器化实战 实战 应用容器化 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">59</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Python Flask/Django 应用容器化实战</h3>
+                        <p class="lesson-desc">详解 Python Web 应用的 poetry/pipenv 依赖管理、多阶段构建、wheel 预编译优化、gunicorn + uvicorn ASGI 部署、虚拟环境最佳实践。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 应用容器化</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="60-clickhouse-containerization.html" class="lesson-card" data-title="ClickHouse 容器化分析数据库实战" data-keywords="ClickHouse 容器化分析数据库实战 实战 数据库 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">60</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">ClickHouse 容器化分析数据库实战</h3>
+                        <p class="lesson-desc">详解 ClickHouse 23.x 容器化部署:Zookeeper 集群、ReplicatedMergeTree、Distributed 分布式表、MaterializedView 物化视图、亿级数据查询优化。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 数据库</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="61-vue-react-frontend-containerization.html" class="lesson-card" data-title="Vue/React 前端应用容器化实战" data-keywords="Vue/React 前端应用容器化实战 实战 应用容器化 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">61</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Vue/React 前端应用容器化实战</h3>
+                        <p class="lesson-desc">详解 Vue 3 / React 18 前端的 Node 20 构建 + Nginx 镜像、Vite 多阶段构建、history 路由 fallback、gzip/brotli 压缩、CDN 缓存策略。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 应用容器化</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="62-websocket-containerization.html" class="lesson-card" data-title="WebSocket 长连接服务容器化实战" data-keywords="WebSocket 长连接服务容器化实战 实战 应用容器化 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">62</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">WebSocket 长连接服务容器化实战</h3>
+                        <p class="lesson-desc">详解 WebSocket 服务的粘性 Session 路由、Redis 适配器共享、wss 加密、容器自动重启、Nginx 反向代理 Upgrade 头。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 应用容器化</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="63-image-management-rules.html" class="lesson-card" data-title="Docker 镜像管理规范" data-keywords="Docker 镜像管理规范 实战 管理 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">63</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Docker 镜像管理规范</h3>
+                        <p class="lesson-desc">从镜像标签规范、推拉流程、清理策略、安全扫描 4 维度,定义团队级 Docker 镜像管理规范,避免悬虚镜像、tag 覆盖、漏洞传播。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 管理</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="64-spring-cloud-microservice.html" class="lesson-card" data-title="Spring Cloud 微服务架构容器化实战" data-keywords="Spring Cloud 微服务架构容器化实战 实战 应用容器化 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">64</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Spring Cloud 微服务架构容器化实战</h3>
+                        <p class="lesson-desc">详解 Spring Cloud 微服务体系的容器化部署:服务发现 Eureka、API 网关 Gateway、配置中心 Config、链路追踪 Sleuth、熔断 Hystrix、K8s 集成。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 应用容器化</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="65-kafka-containerization.html" class="lesson-card" data-title="Kafka 消息队列容器化实战" data-keywords="Kafka 消息队列容器化实战 实战 中间件 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">65</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Kafka 消息队列容器化实战</h3>
+                        <p class="lesson-desc">详解 Kafka 3.x KRaft 模式(去 ZK)容器化、3 节点集群部署、持久化数据卷、Topic 自动创建、生产消费性能调优、监控。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 中间件</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="66-cicd-pipeline-design.html" class="lesson-card" data-title="CI/CD 流水线完整设计实战" data-keywords="CI/CD 流水线完整设计实战 实战 DevOps 生产化 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">66</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">CI/CD 流水线完整设计实战</h3>
+                        <p class="lesson-desc">详解 CI/CD 流水线完整设计:代码构建、单元测试、镜像构建、安全扫描、镜像推送、自动化部署、Argo CD GitOps 实践。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ DevOps 生产化</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="67-zero-downtime-deployment.html" class="lesson-card" data-title="零停机部署 3 大策略实战" data-keywords="零停机部署 3 大策略实战 实战 DevOps 生产化 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">67</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">零停机部署 3 大策略实战</h3>
+                        <p class="lesson-desc">详解零停机部署的 3 大核心策略(RollingUpdate / Blue-Green / Canary)及具体实现,涵盖 K8s 滚动升级、Nginx 流量切换、灰度发布。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ DevOps 生产化</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="68-image-build-optimization.html" class="lesson-card" data-title="Docker 镜像构建优化规则" data-keywords="Docker 镜像构建优化规则 实战 构建 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">68</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Docker 镜像构建优化规则</h3>
+                        <p class="lesson-desc">从基础镜像选择、多阶段构建、层缓存、构建参数、构建工具 5 维度,总结镜像构建优化的 10 条实战规则,可将镜像体积减小 10 倍、构建速度提升 10 倍。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 构建</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="69-redis-production-deployment.html" class="lesson-card" data-title="Redis 容器化生产部署实战" data-keywords="Redis 容器化生产部署实战 实战 中间件 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">69</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Redis 容器化生产部署实战</h3>
+                        <p class="lesson-desc">详解 Redis 7.x 容器化:Sentinel 哨兵、Cluster 集群、持久化(RDB+AOF)、主从复制、内存淘汰、慢查询分析、bigkey 处理。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 中间件</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="70-container-design-patterns.html" class="lesson-card" data-title="容器设计模式 4 大经典实战" data-keywords="容器设计模式 4 大经典实战 实战 架构设计 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">70</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">容器设计模式 4 大经典实战</h3>
+                        <p class="lesson-desc">详解 K8s 容器设计模式 4 大经典(Sidecar / Ambassador / Adapter / Init Container)及其在 Docker Compose 中的实现,涵盖服务网格、配置注入等场景。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 架构设计</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="71-microservice-architecture.html" class="lesson-card" data-title="微服务架构容器化完整实践" data-keywords="微服务架构容器化完整实践 实战 架构设计 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">71</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">微服务架构容器化完整实践</h3>
+                        <p class="lesson-desc">详解微服务架构容器化完整方案:服务注册发现、API 网关、配置中心、熔断限流、分布式追踪、日志聚合、可观测性三件套。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 架构设计</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="72-docker-to-kubernetes.html" class="lesson-card" data-title="Docker 到 Kubernetes 迁移实战" data-keywords="Docker 到 Kubernetes 迁移实战 实战 DevOps 生产化 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">72</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Docker 到 Kubernetes 迁移实战</h3>
+                        <p class="lesson-desc">详解从 Docker Compose 到 K8s 的完整迁移路径:kubectl 基础、Helm 包管理、Operator 模式、Service Mesh、Knative Serverless。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ DevOps 生产化</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="73-serverless-containerization.html" class="lesson-card" data-title="Serverless 容器化实战" data-keywords="Serverless 容器化实战 实战 架构设计 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">73</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Serverless 容器化实战</h3>
+                        <p class="lesson-desc">详解 Serverless 容器化部署:OpenFaaS / Knative / AWS Lambda 容器镜像、Function as a Service 模式、冷启动优化、计费模型。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 架构设计</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="74-tidb-containerization.html" class="lesson-card" data-title="TiDB 容器化分布式数据库实战" data-keywords="TiDB 容器化分布式数据库实战 实战 数据库 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">74</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">TiDB 容器化分布式数据库实战</h3>
+                        <p class="lesson-desc">详解 TiDB 7.x 容器化:PD/TiKV/TiDB 三层架构、MySQL 协议兼容、水平扩缩容、HTAP 行列混存、TiFlash 列存副本、BR 备份恢复。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 数据库</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="75-elasticsearch-containerization.html" class="lesson-card" data-title="Elasticsearch 容器化部署实战" data-keywords="Elasticsearch 容器化部署实战 实战 中间件 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">75</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Elasticsearch 容器化部署实战</h3>
+                        <p class="lesson-desc">详解 Elasticsearch 8.x 容器化:JVM 堆设置、内存锁、bootstrap.memory_lock、vm.max_map_count、ulimit、集群发现、ILM 生命周期。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 中间件</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="76-security-hardening-rules.html" class="lesson-card" data-title="Docker 安全加固规范" data-keywords="Docker 安全加固规范 实战 安全 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">76</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Docker 安全加固规范</h3>
+                        <p class="lesson-desc">覆盖镜像、容器、网络、运行时 4 层面 15 条安全加固规则,包括 rootless、seccomp、apparmor、capability、镜像扫描等实战方案。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 安全</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="77-nginx-reverse-proxy.html" class="lesson-card" data-title="Nginx 反向代理容器化实战" data-keywords="Nginx 反向代理容器化实战 实战 中间件 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">77</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Nginx 反向代理容器化实战</h3>
+                        <p class="lesson-desc">详解 Nginx 反向代理的 docker 化部署:多域名虚拟主机、Let&amp;#x27;s Encrypt 自动证书、upstream 负载均衡、gzip 压缩、HTTP/2、限流。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 中间件</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="78-postgresql-containerization.html" class="lesson-card" data-title="PostgreSQL 容器化实战" data-keywords="PostgreSQL 容器化实战 实战 数据库 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">78</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">PostgreSQL 容器化实战</h3>
+                        <p class="lesson-desc">详解 PostgreSQL 15 容器化:流复制、逻辑复制、TimescaleDB / PostGIS 扩展、WAL 归档、Point-in-Time 恢复、连接池 PgBouncer。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 数据库</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="79-go-microservice-containerization.html" class="lesson-card" data-title="Go 微服务容器化实战" data-keywords="Go 微服务容器化实战 实战 应用容器化 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">79</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">Go 微服务容器化实战</h3>
+                        <p class="lesson-desc">详解 Go 微服务的 scratch 极小镜像、CGO 禁用、UPX 压缩、Kratos/Gin 框架集成、Go pprof 性能分析、生产部署。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 应用容器化</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                    <a href="80-monolith-to-microservices.html" class="lesson-card" data-title="单体应用容器化拆分实战" data-keywords="单体应用容器化拆分实战 实战 架构设计 中级" data-level="intermediate" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">80</span>
+                            <span class="lesson-difficulty diff-intermediate">中级</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">实战</span>
+                        <h3 class="lesson-title">单体应用容器化拆分实战</h3>
+                        <p class="lesson-desc">详解单体应用容器化拆分的 5 大策略(绞杀者/抽象分支/数据拆分/UI 拆分/微前端),从 Docker 化到微服务化的完整迁移路径。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 20 分钟</span>
+                            <span class="lesson-meta-item">📖 5 章节</span>
+                            <span class="lesson-meta-item">🏷️ 架构设计</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                </div>
+            </section>
+            <div class="empty-state" id="emptyState">
+                <div class="empty-state-icon">🔍</div>
+                <p>没有找到匹配的内容</p>
+                <p style="font-size:13px">试试调整关键词或筛选条件</p>
+            </div>
+            <section class="section" id="concepts" aria-labelledby="concepts-title">
+                <div class="section-title">
+                    <h2 id="concepts-title"><span class="emoji">📚</span> 1 速查索引</h2>
+                    <span class="count">外部教程汇总 · 概念速览</span>
+                </div>
+                <div class="lessons">
+                    <a href="81-docker-concepts-quickref.html" class="lesson-card" data-title="Docker 概念速览与外部教程索引" data-keywords="Docker 概念速览 速查 索引 runoob w3schools docker-practice 镜像 容器" data-level="beginner" data-kind="course">
+                        <div class="lesson-head">
+                            <span class="lesson-num">81</span>
+                            <span class="lesson-difficulty diff-beginner">入门</span>
+                        </div>
+                        <span class="read-badge">已读</span>
+                        <span class="kind-badge kind-course">速查</span>
+                        <h3 class="lesson-title">Docker 概念速览与外部教程索引</h3>
+                        <p class="lesson-desc">基于 docker-practice、runoob、w3schools 三大权威教程整理的 Docker 概念速览;涵盖 4 大应用场景、4 大核心优势、4 大核心概念、基本命令速查,以及 10+ 外部教程导航。</p>
+                        <div class="lesson-meta">
+                            <span class="lesson-meta-item">⏱ 10 分钟</span>
+                            <span class="lesson-meta-item">📖 8 章节</span>
+                            <span class="lesson-meta-item">🏷️ 速查 · 索引</span>
+                        </div>
+                        <span class="lesson-arrow">→</span>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </main>
+    <section class="site-footer" role="contentinfo" id="about">
+        <div class="footer-inner">
+            <div>
+                <h3 class="footer-title">关于本系列</h3>
+                <p class="footer-meta">系统化讲解 Docker 容器技术,24 节课 + 24 规则 + 24 实战课程,共 72 个内容。所有内容经过 Docker 20+ 实战验证,可在生产环境直接应用。</p>
+            </div>
+            <div>
+                <h3 class="footer-title">学习路径</h3>
+                <p class="footer-meta">• 入门课(01-08)→ 容器基础<br>• 中级课(09-16)→ 镜像/网络/日志/安全<br>• 高级课(17-24)→ K8s/12-Factor/微服务<br>• 进阶课(25-32)→ 多平台/cgroup/多架构<br>• 实战课(33-44)→ 监控/排错/CI/AI<br>• 深度课(45-56)→ 高级应用/中间件<br>• 扩展课(57-68)→ 性能/K8s/DevOps<br>• 体系课(82-105)→ 24 节进阶全栈<br>• 规则(25-48)→ 日常速查<br>• 课程(49-80)→ 应用/中间件/DevOps<br>• 速查(81)→ 外部教程索引</p>
+            </div>
+            <div>
+                <h3 class="footer-title">相关资源</h3>
+                <p class="footer-meta"><a href="https://docs.docker.com" style="color:#c4d1de">Docker 官方</a><br><a href="https://hub.docker.com" style="color:#c4d1de">Docker Hub</a><br><a href="https://goharbor.io" style="color:#c4d1de">Harbor</a><br><a href="/" style="color:#c4d1de">AI 工具箱</a><br><a href="https://docker-practice.github.io/zh-cn/" target="_blank" style="color:#c4d1de">docker-practice</a><br><a href="https://www.runoob.com/docker/docker-tutorial.html" target="_blank" style="color:#c4d1de">runoob</a><br><a href="https://www.w3schools.cn/docker/docker-tutorial.html" target="_blank" style="color:#c4d1de">w3schools</a></p>
+            </div>
+            <p class="footer-copyright">© 2026 AI 工具箱 · Docker 完整指南 · 24 课 + 24 规则 + 24 实战课程 · 内容遵循 CC BY 4.0 协议</p>
+        </div>
+    </section>
+    <button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+    <script>
+        (function () {
+            const progress = document.getElementById('progress');
+            const updateProgress = () => {
+                const h = document.documentElement;
+                const scrolled = h.scrollTop || document.body.scrollTop;
+                const height = h.scrollHeight - h.clientHeight;
+                const pct = height > 0 ? (scrolled / height) * 100 : 0;
+                if (progress) progress.style.width = pct + '%';
+            };
+            window.addEventListener('scroll', updateProgress, { passive: true });
+            updateProgress();
+            const btn = document.getElementById('backTop');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 400) btn.classList.add('visible');
+                else btn.classList.remove('visible');
+            }, { passive: true });
+            if (btn) btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+            const themeBtn = document.getElementById('themeToggle');
+            const stored = localStorage.getItem('theme-docker-index-v6');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (stored === 'dark' || (!stored && prefersDark)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+            if (themeBtn) themeBtn.addEventListener('click', () => {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                if (isDark) {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme-docker-index-v6', 'light');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme-docker-index-v6', 'dark');
+                }
+            });
+            const STORAGE_KEY = 'docker-series-read-v6';
+            const cards = document.querySelectorAll('.lesson-card');
+            const readCount = document.getElementById('readCount');
+            const readFill = document.getElementById('readFill');
+            const statRead = document.getElementById('statRead');
+            let readSet = new Set();
+            try { const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); readSet = new Set(saved); } catch (e) { }
+            const applyReadState = () => {
+                let count = 0;
+                cards.forEach(card => {
+                    const href = card.getAttribute('href');
+                    if (readSet.has(href)) { card.classList.add('read'); count++; } else { card.classList.remove('read'); }
+                });
+                if (readCount) readCount.textContent = count;
+                const pct = cards.length > 0 ? Math.round((count / cards.length) * 100) : 0;
+                if (readFill) readFill.style.width = pct + '%';
+                if (statRead) statRead.textContent = pct + '%';
+            };
+            applyReadState();
+            cards.forEach(card => card.addEventListener('click', () => {
+                const href = card.getAttribute('href');
+                readSet.add(href);
+                try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...readSet])); } catch (e) { }
+                applyReadState();
+            }));
+            const searchInput = document.getElementById('searchInput');
+            const kindTabs = document.querySelectorAll('.filter-tab');
+            const levelBtns = document.querySelectorAll('.filter-btn');
+            const emptyState = document.getElementById('emptyState');
+            let currentKind = 'all', currentLevel = 'all';
+            const applyFilter = () => {
+                const q = (searchInput ? searchInput.value : '').trim().toLowerCase();
+                let visible = 0;
+                cards.forEach(card => {
+                    const title = (card.dataset.title || '').toLowerCase();
+                    const keywords = (card.dataset.keywords || '').toLowerCase();
+                    const level = card.dataset.level || '';
+                    const kind = card.dataset.kind || '';
+                    const matchSearch = !q || title.includes(q) || keywords.includes(q);
+                    const matchKind = currentKind === 'all' || kind === currentKind;
+                    const matchLevel = currentLevel === 'all' || level === currentLevel;
+                    if (matchSearch && matchKind && matchLevel) { card.style.display = ''; visible++; } else { card.style.display = 'none'; }
+                });
+                if (emptyState) emptyState.classList.toggle('show', visible === 0);
+            };
+            if (searchInput) searchInput.addEventListener('input', applyFilter);
+            kindTabs.forEach(btn => btn.addEventListener('click', () => {
+                kindTabs.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentKind = btn.dataset.kind;
+                applyFilter();
+            }));
+            levelBtns.forEach(btn => btn.addEventListener('click', () => {
+                levelBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLevel = btn.dataset.level;
+                applyFilter();
+            }));
+        })();
+    </script>
+</body>
+
+</html>

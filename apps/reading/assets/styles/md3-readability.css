@@ -1,0 +1,462 @@
+/* =================================================================
+ * Google Material Design 3 — 阅读可读性增强层
+ * 适用于 apps/reading/ 目录下所有 HTML 页面
+ * 版本: v1.0.0 · 2026-06-22
+ *
+ * 设计目标（WCAG 2.2 AA + MD3 Type Scale）:
+ *   1. 行宽约束：正文段落 max 60-75ch
+ *   2. 行高 1.5+：中文字符需要更大行高（1.7+）补偿笔画密度
+ *   3. 字距：body 微正字距，display 微负字距
+ *   4. 对比度：所有正文文字 ≥ 4.5:1
+ *   5. 阅读节奏：段落间距 1em，章节间距 2em
+ *   6. 长内容聚焦：超长段落弱化 + 关键句高亮
+ *
+ * 用法:
+ *   <link href="assets/styles/design-system.css" rel="stylesheet">
+ *   <link href="assets/styles/md3-enhance.css" rel="stylesheet">
+ *   <link href="assets/styles/md3-readability.css" rel="stylesheet">
+ * ================================================================= */
+
+/* ===== M3 Type Scale Tokens (Roboto / Noto Sans SC 适配) ===== */
+:root {
+    /* Display - 用于 Hero 大标题 */
+    --md3-dl-size: 57px;   --md3-dl-lh: 64px;  --md3-dl-ls: -0.25px;
+    --md3-dm-size: 45px;   --md3-dm-lh: 52px;  --md3-dm-ls: 0px;
+    --md3-ds-size: 36px;   --md3-ds-lh: 44px;  --md3-ds-ls: 0px;
+
+    /* Headline - 用于章节大标题 */
+    --md3-hl-size: 32px;   --md3-hl-lh: 40px;  --md3-hl-ls: 0px;
+    --md3-hm-size: 28px;   --md3-hm-lh: 36px;  --md3-hm-ls: 0px;
+    --md3-hs-size: 24px;   --md3-hs-lh: 32px;  --md3-hs-ls: 0px;
+
+    /* Title - 用于卡片标题 */
+    --md3-tl-size: 22px;   --md3-tl-lh: 28px;  --md3-tl-ls: 0px;
+    --md3-tm-size: 16px;   --md3-tm-lh: 24px;  --md3-tm-ls: 0.15px;
+    --md3-ts-size: 14px;   --md3-ts-lh: 20px;  --md3-ts-ls: 0.1px;
+
+    /* Body - 正文（中文加宽容忍）*/
+    --md3-bl-size: 16px;   --md3-bl-lh: 26px;  --md3-bl-ls: 0.5px;
+    --md3-bm-size: 14px;   --md3-bm-lh: 22px;  --md3-bm-ls: 0.25px;
+    --md3-bs-size: 12px;   --md3-bs-lh: 18px;  --md3-bs-ls: 0.4px;
+
+    /* Label - 按钮 / 标签 */
+    --md3-ll-size: 14px;   --md3-ll-lh: 20px;  --md3-ll-ls: 0.1px;
+    --md3-lm-size: 12px;   --md3-lm-lh: 16px;  --md3-lm-ls: 0.5px;
+    --md3-ls-size: 11px;   --md3-ls-lh: 16px;  --md3-ls-ls: 0.5px;
+
+    /* 阅读宽度（WCAG 推荐 60-75 字符）*/
+    --md3-read-width: 68ch;
+    --md3-read-width-narrow: 56ch;
+    --md3-read-width-wide: 80ch;
+
+    /* 阅读节奏 */
+    --md3-paragraph-gap: 1em;
+    --md3-section-gap: 2.5em;
+    --md3-heading-gap: 1.5em;
+
+    /* MD3 State Layer Opacities */
+    --md3-hover-opacity: 0.08;
+    --md3-focus-opacity: 0.12;
+    --md3-press-opacity: 0.16;
+}
+
+/* ===== 全局可读性基线 ===== */
+html {
+    /* MD3 推荐基础字号 16sp */
+    font-size: 100%;
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    /* M3 Body L 默认：16 / 26 / 0.5 */
+    font-size: var(--md3-bl-size);
+    line-height: var(--md3-bl-lh);
+    letter-spacing: var(--md3-bl-ls);
+    font-weight: 400;
+    color: var(--ink, #141413);
+    text-rendering: optimizeLegibility;
+}
+
+/* ===== M3 Display ===== */
+.display-large {
+    font-size: var(--md3-dl-size);
+    line-height: var(--md3-dl-lh);
+    letter-spacing: var(--md3-dl-ls);
+    font-weight: 400;
+    font-family: var(--font-display, 'Cormorant Garamond', Georgia, serif);
+}
+.display-medium {
+    font-size: var(--md3-dm-size);
+    line-height: var(--md3-dm-lh);
+    font-weight: 400;
+    font-family: var(--font-display, 'Cormorant Garamond', Georgia, serif);
+}
+.display-small {
+    font-size: var(--md3-ds-size);
+    line-height: var(--md3-ds-lh);
+    font-weight: 400;
+    font-family: var(--font-display, 'Cormorant Garamond', Georgia, serif);
+}
+
+/* ===== M3 Headline (章节标题) ===== */
+.headline-large {
+    font-size: var(--md3-hl-size);
+    line-height: var(--md3-hl-lh);
+    letter-spacing: var(--md3-hl-ls);
+    font-weight: 500;
+}
+.headline-medium {
+    font-size: var(--md3-hm-size);
+    line-height: var(--md3-hm-lh);
+    font-weight: 500;
+}
+.headline-small {
+    font-size: var(--md3-hs-size);
+    line-height: var(--md3-hs-lh);
+    font-weight: 500;
+}
+
+/* ===== M3 Title (卡片标题) ===== */
+.title-large {
+    font-size: var(--md3-tl-size);
+    line-height: var(--md3-tl-lh);
+    letter-spacing: var(--md3-tl-ls);
+    font-weight: 500;
+}
+.title-medium {
+    font-size: var(--md3-tm-size);
+    line-height: var(--md3-tm-lh);
+    letter-spacing: var(--md3-tm-ls);
+    font-weight: 500;
+}
+.title-small {
+    font-size: var(--md3-ts-size);
+    line-height: var(--md3-ts-lh);
+    letter-spacing: var(--md3-ts-ls);
+    font-weight: 500;
+}
+
+/* ===== M3 Body 体系 ===== */
+.body-large {
+    font-size: var(--md3-bl-size);
+    line-height: var(--md3-bl-lh);
+    letter-spacing: var(--md3-bl-ls);
+    font-weight: 400;
+}
+.body-medium {
+    font-size: var(--md3-bm-size);
+    line-height: var(--md3-bm-lh);
+    letter-spacing: var(--md3-bm-ls);
+    font-weight: 400;
+}
+.body-small {
+    font-size: var(--md3-bs-size);
+    line-height: var(--md3-bs-lh);
+    letter-spacing: var(--md3-bs-ls);
+    font-weight: 400;
+}
+
+/* ===== M3 Label ===== */
+.label-large {
+    font-size: var(--md3-ll-size);
+    line-height: var(--md3-ll-lh);
+    letter-spacing: var(--md3-ll-ls);
+    font-weight: 500;
+}
+.label-medium {
+    font-size: var(--md3-lm-size);
+    line-height: var(--md3-lm-lh);
+    letter-spacing: var(--md3-lm-ls);
+    font-weight: 500;
+}
+.label-small {
+    font-size: var(--md3-ls-size);
+    line-height: var(--md3-ls-lh);
+    letter-spacing: var(--md3-ls-ls);
+    font-weight: 500;
+}
+
+/* ===== 阅读宽度约束 ===== */
+.read-narrow { max-width: var(--md3-read-width-narrow); margin-left: auto; margin-right: auto; }
+.read-default { max-width: var(--md3-read-width); margin-left: auto; margin-right: auto; }
+.read-wide { max-width: var(--md3-read-width-wide); margin-left: auto; margin-right: auto; }
+
+/* 内容区自动应用阅读宽度（仅文章正文，不影响首页全宽布局）*/
+.prose,
+article,
+.content-section {
+    max-width: var(--md3-read-width);
+}
+
+/* main > section 需用 .read-default 显式声明才限制阅读宽度 */
+main > section.read-default {
+    max-width: var(--md3-read-width);
+}
+
+/* ===== 阅读节奏（章节与段落间距）===== */
+.prose > * + *,
+.content-section > * + * {
+    margin-top: var(--md3-paragraph-gap);
+}
+
+.prose h1 + *,
+.prose h2 + *,
+.prose h3 + *,
+.prose h4 + * {
+    margin-top: 0.5em;
+}
+
+/* 章节之间加大呼吸 */
+.prose section + section,
+.content-section section + section,
+main > section + section {
+    margin-top: var(--md3-section-gap);
+}
+
+/* ===== 中文阅读优化（行高补偿）===== */
+:lang(zh),
+:lang(zh-CN) {
+    line-height: 1.75;  /* 中文字符密度高，需要更大行高 */
+    hanging-punctuation: allow-end;
+}
+
+/* 中文段落首行缩进（可选）*/
+.prose p.indent,
+article p.indent {
+    text-indent: 2em;
+}
+
+/* ===== 长内容优化（连续阅读疲劳度降低）===== */
+.content-section p {
+    color: var(--body, #3d3d3a);
+    /* 字距微正，提升可分辨性 */
+    letter-spacing: 0.01em;
+}
+
+/* 关键句高亮（用于强调但不打断阅读）*/
+.content-section p strong,
+.content-section p b {
+    color: var(--ink, #141413);
+    font-weight: 600;
+}
+
+/* 弱化引用块（次要信息降噪）*/
+.content-section blockquote {
+    opacity: 0.92;
+}
+
+/* ===== 表格可读性 ===== */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-variant-numeric: tabular-nums;
+}
+table th,
+table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--hairline, #e6dfd8);
+}
+table th {
+    font-weight: 600;
+    color: var(--ink, #141413);
+    background-color: var(--surface-soft, #f5f0e8);
+}
+table tbody tr:hover {
+    background-color: var(--surface-soft, #f5f0e8);
+}
+
+/* ===== 代码块可读性 ===== */
+code, pre, kbd, samp {
+    font-family: var(--font-mono, 'JetBrains Mono', Consolas, monospace);
+    font-size: 0.9em;
+}
+pre {
+    line-height: 1.6;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    background-color: var(--surface-dark-soft, #1f1e1b);
+    color: var(--on-dark, #faf9f5);
+    border-radius: 12px;
+}
+:not(pre) > code {
+    padding: 0.1em 0.4em;
+    background-color: var(--surface-soft, #f5f0e8);
+    color: var(--ink, #141413);
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* ===== 链接可读性（区分已访问/未访问）===== */
+a:link {
+    color: var(--brand-primary, #cc785c);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
+}
+a:visited {
+    color: var(--brand-primary-active, #a9583e);
+}
+a:hover {
+    color: var(--brand-primary-active, #a9583e);
+    text-decoration-thickness: 2px;
+}
+
+/* ===== M3 状态层（按钮 / 链接 hover/focus/press）===== */
+.btn-filled,
+.btn-tonal,
+.btn-outlined,
+.btn-text {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+.btn-filled::before,
+.btn-tonal::before,
+.btn-outlined::before,
+.btn-text::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 200ms cubic-bezier(0.2, 0, 0, 1);
+    pointer-events: none;
+    z-index: -1;
+    border-radius: inherit;
+}
+.btn-filled:hover::before { opacity: var(--md3-hover-opacity); }
+.btn-filled:focus-visible::before { opacity: var(--md3-focus-opacity); }
+.btn-filled:active::before { opacity: var(--md3-press-opacity); }
+
+/* ===== 焦点态（WCAG 2.4.7）===== */
+:focus-visible {
+    outline: 3px solid var(--brand-primary, #cc785c);
+    outline-offset: 2px;
+    border-radius: 4px;
+    transition: outline-offset 150ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ===== 选中态（M3 Selection）===== */
+::selection {
+    background-color: rgba(204, 120, 92, 0.25);
+    color: var(--ink, #141413);
+}
+
+/* ===== 减少动效（无障碍偏好）===== */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ===== 高对比模式（WCAG 2.2）===== */
+@media (prefers-contrast: more) {
+    body {
+        color: #000;
+    }
+    :link, :visited {
+        text-decoration: underline;
+    }
+    .card,
+    .feature-card,
+    .book-card,
+    .section-card {
+        border: 1px solid currentColor;
+    }
+}
+
+/* ===== 暗色模式偏好（自动适配）===== */
+@media (prefers-color-scheme: dark) {
+    /* 当用户系统偏好暗色时，叠加暗色 token */
+    body {
+        background-color: var(--surface-dark, #181715);
+        color: var(--on-dark, #faf9f5);
+    }
+    .content-section p {
+        color: var(--on-dark, #faf9f5);
+    }
+}
+
+/* ===== 阅读器优化（OLED 深色省电 + 弱化装饰）===== */
+@media (prefers-reduced-transparency: reduce) {
+    .glass-card,
+    .magic-card,
+    [style*="backdrop-filter"] {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
+
+/* ===== 响应式字号（移动端防拥挤）===== */
+@media (max-width: 768px) {
+    :root {
+        --md3-dl-size: 36px; --md3-dl-lh: 44px;
+        --md3-dm-size: 32px; --md3-dm-lh: 40px;
+        --md3-ds-size: 28px; --md3-ds-lh: 36px;
+        --md3-hl-size: 28px; --md3-hl-lh: 36px;
+        --md3-hm-size: 24px; --md3-hm-lh: 32px;
+        --md3-hs-size: 20px; --md3-hs-lh: 28px;
+        --md3-tl-size: 20px; --md3-tl-lh: 28px;
+    }
+
+    body {
+        font-size: 16px;
+        line-height: 1.7;
+    }
+
+    .content-section,
+    .prose,
+    main > section {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        font-size: 15px;
+        line-height: 1.7;
+    }
+    :root {
+        --md3-dl-size: 30px; --md3-dl-lh: 38px;
+        --md3-dm-size: 26px; --md3-dm-lh: 34px;
+    }
+}
+
+/* ===== 长文本截断（防溢出）===== */
+.truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===== 段落末尾空段抑制 ===== */
+.content-section p:last-child {
+    margin-bottom: 0;
+}
+
+/* ===== 首字下沉（杂志感可选）===== */
+.prose p.lead::first-letter,
+article p.lead::first-letter {
+    font-family: var(--font-display, serif);
+    font-size: 3em;
+    line-height: 0.9;
+    float: left;
+    margin: 0.05em 0.1em 0 0;
+    color: var(--brand-primary, #cc785c);
+    font-weight: 400;
+}

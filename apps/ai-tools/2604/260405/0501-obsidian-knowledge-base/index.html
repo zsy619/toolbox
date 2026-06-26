@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obsidian 知识库重建指南 | Karpathy 方法构建第二大脑</title>
+    <meta name="description" content="用 Karpathy 方法重建 Obsidian 知识库，构建 AI 驱动的第二大脑。三层架构 + 5步流程 + 必装插件完整指南。">
+    <meta name="keywords" content="Obsidian, 知识库, Karpathy 方法, 双链笔记, Markdown, PKM, 知识管理, AI 编译">
+    <meta name="author" content="AI Tools">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Obsidian 知识库重建指南 | Karpathy 方法构建第二大脑">
+    <meta property="og:description" content="用 Karpathy 方法重建 Obsidian 知识库，三层架构 + 5步流程 + 必装插件">
+    <meta property="og:image" content="./assets/img-001-654d8f268f8944f192423bf7af9ce770-tplv-tt-origin-.jpg">
+    <meta property="og:locale" content="zh_CN">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Obsidian 知识库重建指南">
+    <meta name="twitter:description" content="Karpathy 方法构建第二大脑">
+    <meta name="twitter:image" content="./assets/img-001-654d8f268f8944f192423bf7af9ce770-tplv-tt-origin-.jpg">
+    
+    <link rel="canonical" href="./index.html">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#7C3AED',
+                        secondary: '#6D28D9',
+                        accent: '#8B5CF6',
+                        dark: '#0F172A',
+                        darker: '#1E293B'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+            line-height: 1.6;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #A78BFA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-base {
+            background-color: #1E293B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card-base:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(124, 58, 237, 0.2);
+            border-color: rgba(124, 58, 237, 0.3);
+        }
+
+        .card-base img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            background-color: #1E293B;
+        }
+
+        .card-base img.loaded {
+            opacity: 1;
+        }
+
+        .card-base:hover img {
+            transform: scale(1.05);
+        }
+
+        .nav-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7C3AED, #6D28D9);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+        }
+
+        .hero-bg {
+            background: linear-gradient(180deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+        }
+
+        .section-bg-alt {
+            background-color: #1E293B;
+        }
+
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.3), transparent);
+        }
+
+        /* Image Viewer Modal */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background-color: rgba(0, 0, 0, 0.98);
+        }
+
+        .image-viewer.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viewer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-toolbar-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            color: white;
+            font-size: 0.875rem;
+        }
+
+        .viewer-toolbar-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .viewer-toolbar-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .viewer-main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .viewer-canvas {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+        }
+
+        .viewer-canvas:active {
+            cursor: grabbing;
+        }
+
+        .viewer-image-wrapper {
+            position: absolute;
+            transform-origin: center center;
+            transition: none;
+            user-select: none;
+        }
+
+        .viewer-image {
+            display: block;
+            max-width: 95%;
+            max-height: 85vh;
+            object-fit: contain;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .viewer-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3.5rem;
+            height: 3.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .viewer-nav:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .viewer-nav.prev {
+            left: 1rem;
+        }
+
+        .viewer-nav.next {
+            right: 1rem;
+        }
+
+        .viewer-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .viewer-nav:disabled:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-50%);
+        }
+
+        .viewer-info {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .viewer-zoom-display {
+            font-family: monospace;
+            min-width: 4rem;
+            text-align: center;
+        }
+
+        .viewer-thumbnail-strip {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+
+        .viewer-thumbnail-strip::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .viewer-thumbnail-strip::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .viewer-thumbnail-strip::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .viewer-thumbnail {
+            width: 4rem;
+            height: 3rem;
+            border-radius: 0.375rem;
+            object-fit: cover;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            flex-shrink: 0;
+        }
+
+        .viewer-thumbnail:hover {
+            opacity: 0.8;
+        }
+
+        .viewer-thumbnail.active {
+            opacity: 1;
+            border-color: rgba(124, 58, 237, 0.8);
+        }
+
+        .zoom-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 10001;
+        }
+
+        .zoom-toast.show {
+            opacity: 1;
+        }
+
+        /* Step indicator */
+        .step-number {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, #7C3AED, #6D28D9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.125rem;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem !important;
+            }
+            
+            .section-title {
+                font-size: 2rem !important;
+            }
+            
+            .viewer-nav {
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+            
+            .viewer-nav.prev {
+                left: 0.5rem;
+            }
+            
+            .viewer-nav.next {
+                right: 0.5rem;
+            }
+            
+            .viewer-image {
+                max-width: 98%;
+                max-height: 75vh;
+            }
+            
+            .viewer-toolbar {
+                padding: 0.75rem 1rem;
+            }
+            
+            .viewer-toolbar-btn {
+                width: 2rem;
+                height: 2rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav-fixed">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-lg"></i>
+                    </div>
+                    <span class="font-bold text-xl">Obsidian 知识重建</span>
+                </div>
+                
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#overview" class="text-gray-400 hover:text-white transition-colors">项目概述</a>
+                    <a href="#pain-points" class="text-gray-400 hover:text-white transition-colors">痛点问题</a>
+                    <a href="#architecture" class="text-gray-400 hover:text-white transition-colors">三层架构</a>
+                    <a href="#benefits" class="text-gray-400 hover:text-white transition-colors">真实收益</a>
+                    <a href="#process" class="text-gray-400 hover:text-white transition-colors">5步流程</a>
+                    <a href="#plugins" class="text-gray-400 hover:text-white transition-colors">必装插件</a>
+                    <a href="#faq" class="text-gray-400 hover:text-white transition-colors">FAQ</a>
+                    <a href="#gallery" class="text-gray-400 hover:text-white transition-colors">图库</a>
+                </div>
+                
+                <button class="md:hidden text-white" onclick="toggleMenu()">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-dark/95 border-t border-white/10">
+            <div class="px-4 py-4 space-y-3">
+                <a href="#overview" class="block text-gray-400 hover:text-white py-2">项目概述</a>
+                <a href="#pain-points" class="block text-gray-400 hover:text-white py-2">痛点问题</a>
+                <a href="#architecture" class="block text-gray-400 hover:text-white py-2">三层架构</a>
+                <a href="#benefits" class="block text-gray-400 hover:text-white py-2">真实收益</a>
+                <a href="#process" class="block text-gray-400 hover:text-white py-2">5步流程</a>
+                <a href="#plugins" class="block text-gray-400 hover:text-white py-2">必装插件</a>
+                <a href="#faq" class="block text-gray-400 hover:text-white py-2">FAQ</a>
+                <a href="#gallery" class="block text-gray-400 hover:text-white py-2">图库</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center pt-20 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center gap-2 bg-primary/20 border border-primary/30 rounded-full px-4 py-2 mb-6">
+                    <i class="fas fa-lightbulb text-primary"></i>
+                    <span class="text-sm font-medium">Karpathy 方法</span>
+                </div>
+                
+                <h1 class="hero-title text-5xl sm:text-6xl lg:text-7xl font-black mb-6 gradient-text">
+                    Obsidian 知识库重建指南
+                </h1>
+                
+                <p class="text-xl sm:text-2xl text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    用 AI 方法论重建你的知识体系<br>
+                    <span class="text-white font-semibold">三层架构 + 5步流程 + 必装插件</span>
+                </p>
+                
+                <div class="flex flex-wrap justify-center gap-4 mb-8">
+                    <span class="bg-white/5 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10 text-sm">
+                        <i class="fas fa-layer-group text-purple-400 mr-2"></i>三层架构
+                    </span>
+                    <span class="bg-white/5 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10 text-sm">
+                        <i class="fas fa-sync text-blue-400 mr-2"></i>5步流程
+                    </span>
+                    <span class="bg-white/5 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10 text-sm">
+                        <i class="fas fa-puzzle-piece text-green-400 mr-2"></i>必装插件
+                    </span>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+                    <a href="#architecture" class="btn-primary text-lg">
+                        <i class="fas fa-rocket"></i>
+                        开始探索
+                    </a>
+                    <a href="#overview" class="bg-white/10 border border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition-all inline-flex items-center gap-2">
+                        <i class="fas fa-book"></i>
+                        阅读详情
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-primary mb-2">3</div>
+                    <div class="text-gray-400 text-sm">三层架构</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-secondary mb-2">5</div>
+                    <div class="text-gray-400 text-sm">重建步骤</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-accent mb-2">4</div>
+                    <div class="text-gray-400 text-sm">必装插件</div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 text-center">
+                    <div class="text-4xl font-black text-green-400 mb-2">126s</div>
+                    <div class="text-gray-400 text-sm">视频时长</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Overview Section -->
+    <section id="overview" class="section-bg-alt py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-blue-500/20 text-blue-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-info-circle"></i>
+                    <span class="text-sm font-medium">Project Overview</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">项目概述</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    用 Karpathy 方法重建 Obsidian 知识库，构建 AI 驱动的第二大脑
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-dark rounded-2xl p-8 border border-white/10">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+                        <i class="fas fa-file-alt text-primary"></i>
+                        项目组成
+                    </h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-green-400"></i>
+                            <span>4个结构化文档文件</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-green-400"></i>
+                            <span>2张 AI 生成图片</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-green-400"></i>
+                            <span>126秒竖屏视频（8个场景）</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-green-400"></i>
+                            <span>完整音频文件</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-8 border border-white/10">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center gap-3">
+                        <i class="fas fa-film text-purple-400"></i>
+                        视频规格
+                    </h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-center gap-3">
+                            <span class="text-white font-semibold w-24">分辨率</span>
+                            <span>1080 x 1920 (9:16 竖屏)</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="text-white font-semibold w-24">时长</span>
+                            <span>126 秒 (~2 分钟)</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="text-white font-semibold w-24">帧率</span>
+                            <span>60 fps</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="text-white font-semibold w-24">场景</span>
+                            <span>8 个场景</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Video Timeline -->
+            <div class="bg-dark rounded-2xl p-8 border border-white/10">
+                <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                    <i class="fas fa-clock text-primary"></i>
+                    视频时间线
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center p-4 bg-white/5 rounded-xl">
+                        <div class="text-3xl font-black text-primary mb-2">9s</div>
+                        <div class="text-sm text-gray-400">封面</div>
+                    </div>
+                    <div class="text-center p-4 bg-white/5 rounded-xl">
+                        <div class="text-3xl font-black text-blue-400 mb-2">18s</div>
+                        <div class="text-sm text-gray-400">核心逻辑</div>
+                    </div>
+                    <div class="text-center p-4 bg-white/5 rounded-xl">
+                        <div class="text-3xl font-black text-purple-400 mb-2">21s</div>
+                        <div class="text-sm text-gray-400">文件夹结构</div>
+                    </div>
+                    <div class="text-center p-4 bg-white/5 rounded-xl">
+                        <div class="text-3xl font-black text-green-400 mb-2">24s</div>
+                        <div class="text-sm text-gray-400">5步重建流程</div>
+                    </div>
+                    <div class="text-center p-4 bg-white/5 rounded-xl">
+                        <div class="text-3xl font-black text-orange-400 mb-2">18s</div>
+                        <div class="text-sm text-gray-400">必装插件</div>
+                    </div>
+                    <div class="text-center p-4 bg-white/5 rounded-xl">
+                        <div class="text-3xl font-black text-pink-400 mb-2">21s</div>
+                        <div class="text-sm text-gray-400">论文场景</div>
+                    </div>
+                    <div class="text-center p-4 bg-white/5 rounded-xl">
+                        <div class="text-3xl font-black text-yellow-400 mb-2">18s</div>
+                        <div class="text-sm text-gray-400">真实收益</div>
+                    </div>
+                    <div class="text-center p-4 bg-white/5 rounded-xl">
+                        <div class="text-3xl font-black text-cyan-400 mb-2">9s</div>
+                        <div class="text-sm text-gray-400">结尾 CTA</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Architecture Section -->
+    <section id="architecture" class="py-20" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-purple-500/20 text-purple-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-layer-group"></i>
+                    <span class="text-sm font-medium">Architecture</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">三层架构</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    raw → LLM 编译 → wiki 结构化知识
+                </p>
+            </div>
+            
+            <!-- Architecture Diagram -->
+            <div class="max-w-4xl mx-auto mb-16">
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 text-center">
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+                        <div class="flex-1">
+                            <div class="w-full bg-primary/20 rounded-xl p-6 border border-primary/30">
+                                <div class="text-lg font-bold text-primary mb-2">raw/</div>
+                                <div class="text-gray-400 text-sm">原始素材</div>
+                            </div>
+                            <div class="text-4xl text-gray-600 my-4">→</div>
+                            <div class="text-sm text-gray-500">LLM 编译器</div>
+                        </div>
+                        <div class="text-4xl text-gray-600 hidden md:block">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="w-full bg-green-500/20 rounded-xl p-6 border border-green-500/30">
+                                <div class="text-lg font-bold text-green-400 mb-2">wiki/</div>
+                                <div class="text-gray-400 text-sm">结构化知识</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-dark rounded-xl p-6 border border-white/10">
+                    <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4">
+                        <i class="fas fa-inbox text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">inbox</h3>
+                    <p class="text-gray-400 text-sm">临时素材收集，灵感闪现随手记录</p>
+                </div>
+                
+                <div class="bg-dark rounded-xl p-6 border border-white/10">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-4">
+                        <i class="fas fa-file-alt text-blue-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">LLM 编译规则</h3>
+                    <p class="text-gray-400 text-sm">定义处理文档的编译规则</p>
+                </div>
+                
+                <div class="bg-dark rounded-xl p-6 border border-white/10">
+                    <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center mb-4">
+                        <i class="fas fa-project-diagram text-green-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">wiki 知识库</h3>
+                    <p class="text-gray-400 text-sm">结构化输出，双链连接</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Pain Points Section -->
+    <section id="pain-points" class="py-20" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-red-500/20 text-red-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span class="text-sm font-medium">Common Problems</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">你的知识库有这些问题吗？</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    不是工具不够好，而是方法不对
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="bg-dark rounded-2xl p-6 border border-white/10 text-center hover:border-red-500/30 transition-colors">
+                    <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-folder-open text-red-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">笔记越记越多</h3>
+                    <p class="text-gray-400 text-sm">找起来越来越难，文件夹越来越乱</p>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-6 border border-white/10 text-center hover:border-orange-500/30 transition-colors">
+                    <div class="w-16 h-16 rounded-full bg-orange-500/20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-bookmark text-orange-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">收藏从未再读</h3>
+                    <p class="text-gray-400 text-sm">收藏了无数文章，但从来没再看过</p>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-6 border border-white/10 text-center hover:border-yellow-500/30 transition-colors">
+                    <div class="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-brain text-yellow-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">学了很多却记不住</h3>
+                    <p class="text-gray-400 text-sm">感觉学了很多，但真正记住的很少</p>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-6 border border-white/10 text-center hover:border-purple-500/30 transition-colors">
+                    <div class="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-clock text-purple-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">80%时间在整理</h3>
+                    <p class="text-gray-400 text-sm">输入输出比严重失衡，效率低下</p>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 rounded-2xl p-8 border border-primary/30 text-center">
+                <div class="text-3xl font-black mb-4 gradient-text">Karpathy 方法帮你翻转这个比例</div>
+                <p class="text-gray-400 text-lg">用 AI 方法论重建知识体系，让整理时间变成使用时间</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Use Cases Section -->
+    <section id="use-cases" class="section-bg-alt py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-cyan-500/20 text-cyan-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-users"></i>
+                    <span class="text-sm font-medium">Use Cases</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">适用场景</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    这套方法特别适合以下人群
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-cyan-500/30 transition-colors">
+                    <div class="w-14 h-14 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-6">
+                        <i class="fas fa-microscope text-cyan-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">科研人员</h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check text-cyan-400 mt-1"></i>
+                            <span>论文阅读与批注管理</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check text-cyan-400 mt-1"></i>
+                            <span>实验数据与文献整理</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check text-cyan-400 mt-1"></i>
+                            <span>研究思路的积累与复用</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-purple-500/30 transition-colors">
+                    <div class="w-14 h-14 rounded-xl bg-purple-500/20 flex items-center justify-center mb-6">
+                        <i class="fas fa-graduation-cap text-purple-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">论文写作</h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check text-purple-400 mt-1"></i>
+                            <span>文献综述的结构化管理</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check text-purple-400 mt-1"></i>
+                            <span>引用与参考文献自动链接</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check text-purple-400 mt-1"></i>
+                            <span>论文逻辑链的可视化</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-green-500/30 transition-colors">
+                    <div class="w-14 h-14 rounded-xl bg-green-500/20 flex items-center justify-center mb-6">
+                        <i class="fas fa-briefcase text-green-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">知识工作者</h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span>项目文档的结构化整理</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span>跨领域知识的连接发现</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-check text-green-400 mt-1"></i>
+                            <span>个人知识库的长期积累</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Benefits Section -->
+    <section id="benefits" class="py-20" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-green-500/20 text-green-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="text-sm font-medium">Real Benefits</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">真实收益</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    使用后的实际效果提升
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-dark rounded-2xl p-8 border border-white/10">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+                            <i class="fas fa-robot text-primary text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold">AI 自动化处理</h3>
+                    </div>
+                    <p class="text-gray-400 leading-relaxed mb-4">
+                        不再需要手动整理笔记。丢素材 → AI编译 → 提问 → 结果写回wiki，整个流程自动化运行。
+                    </p>
+                    <div class="flex items-center gap-2 text-green-400">
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="font-semibold">节省 80% 整理时间</span>
+                    </div>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-8 border border-white/10">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                            <i class="fas fa-layer-group text-blue-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold">素材知识分离</h3>
+                    </div>
+                    <p class="text-gray-400 leading-relaxed mb-4">
+                        原始素材与结构化知识分离存储。raw/ 存放原始资料，wiki/ 存放编译后的结构化知识，检索速度提升 10 倍。
+                    </p>
+                    <div class="flex items-center gap-2 text-blue-400">
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="font-semibold">检索效率提升 10x</span>
+                    </div>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-8 border border-white/10">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                            <i class="fas fa-project-diagram text-purple-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold">双链知识网络</h3>
+                    </div>
+                    <p class="text-gray-400 leading-relaxed mb-4">
+                        双链 + 图谱功能让你看到知识点之间的连接。天然适合论文逻辑链的构建和跨领域知识的发现。
+                    </p>
+                    <div class="flex items-center gap-2 text-purple-400">
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="font-semibold">知识连接可视化</span>
+                    </div>
+                </div>
+                
+                <div class="bg-dark rounded-2xl p-8 border border-white/10">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                            <i class="fas fa-coins text-orange-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold">知识复利效应</h3>
+                    </div>
+                    <p class="text-gray-400 leading-relaxed mb-4">
+                        越用越准的知识库。每次问答都在增值知识库，不需要重复喂资料，知识积累呈指数级增长。
+                    </p>
+                    <div class="flex items-center gap-2 text-orange-400">
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="font-semibold">长期价值持续增长</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Process Section -->
+    <section id="process" class="section-bg-alt py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-green-500/20 text-green-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-sync-alt"></i>
+                    <span class="text-sm font-medium">5-Step Process</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">5步重建流程</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    完整的知识库重建方法论
+                </p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="space-y-6">
+                    <!-- Step 1 -->
+                    <div class="bg-dark rounded-2xl p-6 border border-white/10 flex items-start gap-6">
+                        <div class="step-number">1</div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold mb-2">拆分旧库 → raw/ + inbox/</h3>
+                            <p class="text-gray-400">将历史笔记迁移到 raw 目录，新建 inbox 收集零散灵感</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2 -->
+                    <div class="bg-dark rounded-2xl p-6 border border-white/10 flex items-start gap-6">
+                        <div class="step-number">2</div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold mb-2">AI 编译规则 → 定义处理文档的规则</h3>
+                            <p class="text-gray-400">用 AI 编写笔记编译规则，让 AI 理解你的知识结构</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3 -->
+                    <div class="bg-dark rounded-2xl p-6 border border-white/10 flex items-start gap-6">
+                        <div class="step-number">3</div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold mb-2">批量编译 → 先验证一份，再批量</h3>
+                            <p class="text-gray-400">先测试编译效果，确认无误后批量处理</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4 -->
+                    <div class="bg-dark rounded-2xl p-6 border border-white/10 flex items-start gap-6">
+                        <div class="step-number">4</div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold mb-2">双链与索引 → 反向链接 + MOC 入口</h3>
+                            <p class="text-gray-400">建立笔记间的双向链接，创建 MOC (Map of Content) 导航</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 5 -->
+                    <div class="bg-dark rounded-2xl p-6 border border-white/10 flex items-start gap-6">
+                        <div class="step-number">5</div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold mb-2">闭环使用 → 丢素材 → 编译 → 提问 → 写回</h3>
+                            <p class="text-gray-400">形成完整的知识输入输出闭环</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Plugins Section -->
+    <section id="plugins" class="py-20" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-orange-500/20 text-orange-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <span class="text-sm font-medium">Essential Plugins</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">必装插件</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    4 个核心插件构建高效工作流
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Plugin 1 -->
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-primary/30 transition-colors">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-14 h-14 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-pen text-blue-400 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Jot</h3>
+                            <div class="inline-flex items-center gap-2 bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
+                                追加式速记
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-400">快速记录灵感，支持追加模式，完美配合卡片盒笔记法</p>
+                </div>
+                
+                <!-- Plugin 2 -->
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-primary/30 transition-colors">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-14 h-14 rounded-xl bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-list-ul text-green-400 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Dataview</h3>
+                            <div class="inline-flex items-center gap-2 bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-medium">
+                                动态目录
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-400">强大的笔记索引和动态查询功能，自动生成目录和索引</p>
+                </div>
+                
+                <!-- Plugin 3 -->
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-primary/30 transition-colors">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-14 h-14 rounded-xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-file-pdf text-purple-400 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">PDF Marker</h3>
+                            <div class="inline-flex items-center gap-2 bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-sm font-medium">
+                                论文批注
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-400">专业 PDF 批注和标注，论文阅读利器</p>
+                </div>
+                
+                <!-- Plugin 4 -->
+                <div class="bg-dark rounded-2xl p-8 border border-white/10 hover:border-primary/30 transition-colors">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-14 h-14 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-project-diagram text-orange-400 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Graph Analysis</h3>
+                            <div class="inline-flex items-center gap-2 bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-sm font-medium">
+                                知识集群
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-400">可视化知识网络，发现隐藏的知识集群</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider" id="galleryDivider"></div>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="section-bg-alt py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-pink-500/20 text-pink-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-images"></i>
+                    <span class="text-sm font-medium">Gallery</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">知识库图库</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    探索 Obsidian 知识库的视觉呈现
+                </p>
+            </div>
+            
+            <div id="galleryGrid" class="grid md:grid-cols-2 gap-8">
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider" id="galleryEndDivider"></div>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="section-bg-alt py-20">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-yellow-500/20 text-yellow-400 px-4 py-2 rounded-full mb-4">
+                    <i class="fas fa-question-circle"></i>
+                    <span class="text-sm font-medium">FAQ</span>
+                </div>
+                <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">常见问题</h2>
+                <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                    关于知识库重建的疑问解答
+                </p>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <div class="faq-item bg-dark rounded-2xl border border-white/10 overflow-hidden">
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-white/5 transition-colors" onclick="toggleFaq(this)">
+                        <span class="text-lg font-semibold">我需要什么样的 AI 工具？</span>
+                        <i class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5">
+                        <p class="text-gray-400 leading-relaxed">
+                            任何支持 API 的 LLM 都可以，如 ChatGPT、Claude、通义千问等。Karpathy 方法的核心是用 LLM 作为"编译器"，自动处理和结构化你的笔记内容。
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 2 -->
+                <div class="faq-item bg-dark rounded-2xl border border-white/10 overflow-hidden">
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-white/5 transition-colors" onclick="toggleFaq(this)">
+                        <span class="text-lg font-semibold">这个方法适合新手吗？</span>
+                        <i class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5">
+                        <p class="text-gray-400 leading-relaxed">
+                            非常适合。虽然方法论稍复杂，但步骤清晰，先验证一份再批量处理的策略让新手也能轻松上手。配合视频教程，1小时内即可完成基础重建。
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 3 -->
+                <div class="faq-item bg-dark rounded-2xl border border-white/10 overflow-hidden">
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-white/5 transition-colors" onclick="toggleFaq(this)">
+                        <span class="text-lg font-semibold">需要多长时间能看到效果？</span>
+                        <i class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5">
+                        <p class="text-gray-400 leading-relaxed">
+                            首次重建需要 1-2 小时，之后每天使用只需要几分钟。随着知识库的积累，你会发现检索速度越来越快，知识之间的连接越来越清晰，2-3 周后效果会非常明显。
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 4 -->
+                <div class="faq-item bg-dark rounded-2xl border border-white/10 overflow-hidden">
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-white/5 transition-colors" onclick="toggleFaq(this)">
+                        <span class="text-lg font-semibold">旧笔记怎么处理？</span>
+                        <i class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5">
+                        <p class="text-gray-400 leading-relaxed">
+                            统一放到 <code class="bg-white/10 px-2 py-1 rounded">raw/</code> 目录，让 AI 批量编译处理。不用逐个手动整理，AI 会按照你定义的规则自动提取核心内容、生成结构化笔记。
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 5 -->
+                <div class="faq-item bg-dark rounded-2xl border border-white/10 overflow-hidden">
+                    <button class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-white/5 transition-colors" onclick="toggleFaq(this)">
+                        <span class="text-lg font-semibold">需要付费吗？</span>
+                        <i class="fas fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5">
+                        <p class="text-gray-400 leading-relaxed">
+                            Obsidian 基础版免费，社区插件免费。AI 编译需要消耗 LLM API 额度，但批量处理效率极高，平均每百条笔记仅需几分钱。长远来看，效率提升远超成本。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- CTA Section -->
+    <section class="py-20" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), #0F172A, rgba(109, 40, 217, 0.2));">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="section-title text-4xl sm:text-5xl font-bold mb-6">开始重建你的知识库</h2>
+            <p class="text-gray-400 text-2xl mb-10">用 Karpathy 方法论构建第二大脑</p>
+            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                <a href="#process" class="btn-primary text-xl px-12 py-5">
+                    <i class="fas fa-rocket"></i>
+                    开始5步流程
+                </a>
+                <a href="#plugins" class="bg-white/10 border border-white/20 text-white px-12 py-5 rounded-2xl font-bold text-xl hover:bg-white/20 transition-all inline-flex items-center gap-3">
+                    <i class="fas fa-download"></i>
+                    下载 Obsidian
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-16 border-t border-white/10" style="background-color: #0F172A;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-xl">Obsidian 知识重建</span>
+                        <p class="text-gray-500 text-sm">Karpathy 方法论 + AI 编译</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-8 text-sm text-gray-400">
+                    <a href="#overview" class="hover:text-white transition-colors">项目概述</a>
+                    <a href="#pain-points" class="hover:text-white transition-colors">痛点问题</a>
+                    <a href="#architecture" class="hover:text-white transition-colors">三层架构</a>
+                    <a href="#benefits" class="hover:text-white transition-colors">真实收益</a>
+                    <a href="#process" class="hover:text-white transition-colors">5步流程</a>
+                    <a href="#plugins" class="hover:text-white transition-colors">必装插件</a>
+                    <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
+                    <a href="#gallery" class="hover:text-white transition-colors">图库</a>
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-white/5 text-center">
+                <p class="text-gray-600">Obsidian 知识库重建指南 | 用 Karpathy 方法构建第二大脑</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="fixed bottom-8 right-8 bg-primary hover:bg-secondary text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition opacity-0 invisible cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Image Viewer Modal -->
+    <div id="imageViewer" class="image-viewer">
+        <div class="viewer-toolbar">
+            <div class="viewer-toolbar-group">
+                <button class="viewer-toolbar-btn" onclick="closeImageViewer()" title="关闭 (ESC)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(-90)" title="向左旋转">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(90)" title="向右旋转">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+            
+            <div class="viewer-toolbar-group">
+                <button class="viewer-toolbar-btn" onclick="zoomOut()" title="缩小">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="resetZoom()" title="重置">
+                    <i class="fas fa-compress-arrows-alt"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="zoomIn()" title="放大">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+            </div>
+            
+            <div class="viewer-toolbar-group">
+                <button class="viewer-toolbar-btn" onclick="fitToScreen()" title="适应屏幕">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="viewer-main">
+            <div class="viewer-canvas" id="viewerCanvas">
+                <div class="viewer-image-wrapper" id="imageWrapper">
+                    <img id="viewerImage" class="viewer-image" src="" alt="">
+                </div>
+            </div>
+            
+            <button class="viewer-nav prev" id="prevBtn" onclick="prevImage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <button class="viewer-nav next" id="nextBtn" onclick="nextImage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <div class="viewer-info">
+                <span id="imageCounter">1 / 2</span>
+                <span class="viewer-zoom-display" id="zoomDisplay">100%</span>
+            </div>
+        </div>
+        
+        <div class="viewer-thumbnail-strip" id="thumbnailStrip"></div>
+    </div>
+
+    <div id="zoomToast" class="zoom-toast">100%</div>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Obsidian 知识库重建指南 | Karpathy 方法构建第二大脑",
+        "description": "用 Karpathy 方法重建 Obsidian 知识库，三层架构 + 5步流程 + 必装插件完整指南。",
+        "author": {
+            "@type": "Organization",
+            "name": "AI Tools"
+        }
+    }
+    </script>
+
+    <script>
+        const imageConfigs = [
+            { filename: 'img-001-654d8f268f8944f192423bf7af9ce770-tplv-tt-origin-.jpg', title: '文件夹结构', icon: 'folder', color: 'primary' },
+            { filename: 'img-002-8b1e2ed4526a4a02a4b717ae452a5f58-tplv-tt-shrink-.jpg', title: '知识图谱', icon: 'project-diagram', color: 'purple' }
+        ];
+        
+        const images = [];
+
+        let currentIndex = 0;
+        let scale = 1;
+        let rotation = 0;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX, startY;
+        let lastTranslateX = 0, lastTranslateY = 0;
+        let initialDistance = 0;
+        let initialScale = 1;
+
+        function loadGalleryImages() {
+            const gallerySection = document.getElementById('gallery');
+            const galleryGrid = document.getElementById('galleryGrid');
+            const galleryDivider = document.getElementById('galleryDivider');
+            const galleryEndDivider = document.getElementById('galleryEndDivider');
+            
+            if (!gallerySection || !galleryGrid) return;
+            
+            imageConfigs.forEach((config, index) => {
+                const img = new Image();
+                img.src = './assets/' + config.filename;
+                
+                img.onload = function() {
+                    const imageData = {
+                        src: './assets/' + config.filename,
+                        title: config.title
+                    };
+                    images.push(imageData);
+                    
+                    const card = document.createElement('div');
+                    card.className = 'card-base';
+                    card.onclick = () => openImageViewer(images.length - 1);
+                    
+                    const iconClass = config.color === 'primary' ? 'fa-folder text-primary' : 'fa-project-diagram text-purple-400';
+                    
+                    card.innerHTML = `
+                        <img src="./assets/${config.filename}" alt="${config.title}" class="w-full h-64 object-cover" loading="lazy" onload="this.classList.add('loaded')">
+                        <div class="p-6">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fas ${iconClass} text-xl"></i>
+                                <h3 class="text-xl font-bold">${config.title}</h3>
+                            </div>
+                            <p class="text-gray-400 text-sm">点击查看大图</p>
+                        </div>
+                    `;
+                    
+                    galleryGrid.appendChild(card);
+                    
+                    if (images.length === imageConfigs.length) {
+                        gallerySection.style.display = 'block';
+                        galleryDivider.style.display = 'block';
+                        galleryEndDivider.style.display = 'block';
+                    }
+                };
+                
+                img.onerror = function() {
+                    if (index === imageConfigs.length - 1) {
+                        if (images.length === 0) {
+                            gallerySection.style.display = 'none';
+                            galleryDivider.style.display = 'none';
+                            galleryEndDivider.style.display = 'none';
+                        }
+                    }
+                };
+            });
+            
+            if (imageConfigs.length === 0) {
+                gallerySection.style.display = 'none';
+                galleryDivider.style.display = 'none';
+                galleryEndDivider.style.display = 'none';
+            }
+        }
+
+        function openImageViewer(index) {
+            currentIndex = index;
+            resetViewState();
+            updateImageViewer();
+            buildThumbnailStrip();
+            document.getElementById('imageViewer').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageViewer() {
+            document.getElementById('imageViewer').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function resetViewState() {
+            scale = 1;
+            rotation = 0;
+            translateX = 0;
+            translateY = 0;
+        }
+
+        function updateImageViewer() {
+            const wrapper = document.getElementById('imageWrapper');
+            const img = document.getElementById('viewerImage');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            wrapper.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scale(${scale})`;
+            img.src = images[currentIndex].src;
+            
+            document.getElementById('imageCounter').textContent = `${currentIndex + 1} / ${images.length}`;
+            updateZoomDisplay();
+            
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === images.length - 1;
+        }
+
+        function buildThumbnailStrip() {
+            const strip = document.getElementById('thumbnailStrip');
+            strip.innerHTML = '';
+            images.forEach((img, i) => {
+                const thumb = document.createElement('img');
+                thumb.src = img.src;
+                thumb.className = 'viewer-thumbnail' + (i === currentIndex ? ' active' : '');
+                thumb.onclick = () => {
+                    currentIndex = i;
+                    resetViewState();
+                    updateImageViewer();
+                };
+                strip.appendChild(thumb);
+            });
+        }
+
+        function prevImage() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                resetViewState();
+                updateImageViewer();
+            }
+        }
+
+        function nextImage() {
+            if (currentIndex < images.length - 1) {
+                currentIndex++;
+                resetViewState();
+                updateImageViewer();
+            }
+        }
+
+        function zoom(delta) {
+            const newScale = Math.max(0.1, Math.min(5, scale + delta));
+            if (newScale !== scale) {
+                scale = newScale;
+                updateTransform();
+                updateZoomDisplay();
+            }
+        }
+
+        function zoomIn() { zoom(0.25); }
+        function zoomOut() { zoom(-0.25); }
+        function fitToScreen() { resetViewState(); updateTransform(); updateZoomDisplay(); }
+        function resetZoom() { resetViewState(); updateTransform(); updateZoomDisplay(); showToast('视图已重置'); }
+
+        function updateTransform() {
+            const wrapper = document.getElementById('imageWrapper');
+            wrapper.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scale(${scale})`;
+        }
+
+        function updateZoomDisplay() {
+            document.getElementById('zoomDisplay').textContent = Math.round(scale * 100) + '%';
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('zoomToast');
+            toast.textContent = text;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1000);
+        }
+
+        function rotateImage(deg) {
+            rotation = (rotation + deg) % 360;
+            updateTransform();
+            showToast(rotation + '°');
+        }
+
+        const canvas = document.getElementById('viewerCanvas');
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.button === 0) {
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                canvas.style.cursor = 'grabbing';
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                updateTransform();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            canvas.style.cursor = 'grab';
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            zoom(e.deltaY > 0 ? -0.1 : 0.1);
+        });
+
+        canvas.addEventListener('dblclick', fitToScreen);
+
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('imageViewer').classList.contains('active')) return;
+            switch(e.key) {
+                case 'Escape': closeImageViewer(); break;
+                case 'ArrowLeft': prevImage(); break;
+                case 'ArrowRight': nextImage(); break;
+                case '+': case '=': zoomIn(); break;
+                case '-': zoomOut(); break;
+                case '0': fitToScreen(); break;
+            }
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                startX = e.touches[0].clientX - translateX;
+                startY = e.touches[0].clientY - translateY;
+            } else if (e.touches.length === 2) {
+                initialDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                initialScale = scale;
+            }
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (e.touches.length === 1) {
+                translateX = e.touches[0].clientX - startX;
+                translateY = e.touches[0].clientY - startY;
+                updateTransform();
+            } else if (e.touches.length === 2) {
+                const dist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                scale = Math.max(0.1, Math.min(5, initialScale * (dist / initialDistance)));
+                updateTransform();
+                updateZoomDisplay();
+            }
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            if (e.touches.length === 0) {
+                const diff = Math.abs(translateX) + Math.abs(translateY);
+                if (diff < 10) {
+                    const dir = startX - e.changedTouches[0].clientX;
+                    if (Math.abs(dir) > 50) {
+                        dir > 0 ? nextImage() : prevImage();
+                    }
+                }
+            }
+        });
+
+        function toggleFaq(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('i');
+            
+            content.classList.toggle('hidden');
+            icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+
+        function toggleMenu() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        }
+
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('backToTop');
+            btn.classList.toggle('opacity-0', window.scrollY < 500);
+            btn.classList.toggle('invisible', window.scrollY < 500);
+            btn.classList.toggle('opacity-100', window.scrollY > 500);
+            btn.classList.toggle('visible', window.scrollY > 500);
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+                    document.getElementById('mobileMenu').classList.add('hidden');
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGalleryImages();
+        });
+    </script>
+</body>
+</html>

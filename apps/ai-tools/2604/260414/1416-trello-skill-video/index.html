@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trello Skill - Claude AI Trello项目管理技能 | 任务看板管理</title>
+  <meta name="description" content="Trello Skill - Claude AI Trello项目管理技能。智能任务管理、看板操作、项目进度追踪，让项目管理更高效。">
+  <meta name="keywords" content="Trello Skill, Claude AI, Trello, 项目管理, 任务管理, 看板, AI工具">
+  <meta property="og:title" content="Trello Skill - Claude AI Trello项目管理技能">
+  <meta property="og:description" content="Claude AI Trello项目管理技能">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/cover.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Trello Skill","description":"Claude AI Trello项目管理技能","applicationCategory":"UtilityApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  <style>
+    .gradient-bg{background:linear-gradient(135deg,#0F172A 0%,#1E293B 50%,#0F172A 100%)}
+    .gradient-text{background:linear-gradient(135deg,#0EA5E9,#06B6D4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .card-hover{transition:all 0.3s cubic-bezier(0.4,0,0.2,1)}.card-hover:hover{transform:translateY(-8px);box-shadow:0 25px 50px -12px rgba(0,0,0,0.5)}
+    .tech-card{background:linear-gradient(135deg,rgba(14,165,233,0.15),rgba(14,165,233,0.05));border:1px solid rgba(14,165,233,0.3);backdrop-filter:blur(10px)}
+    @keyframes pulse-glow{0%,100%{box-shadow:0 0 20px rgba(14,165,233,0.3)}50%{box-shadow:0 0 40px rgba(14,165,233,0.6)}}.pulse-glow{animation:pulse-glow 2s ease-in-out infinite}
+    .image-viewer{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000;background:linear-gradient(180deg,rgba(0,0,0,0.95) 0%,rgba(20,20,30,0.98) 100%);backdrop-filter:blur(20px);overflow:hidden}
+    .image-viewer.active{display:flex;flex-direction:column;animation:viewerFadeIn 0.3s ease}
+    @keyframes viewerFadeIn{from{opacity:0}to{opacity:1}}
+    .viewer-toolbar{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1.5rem;background:linear-gradient(180deg,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.4) 100%);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.1);gap:1rem;flex-shrink:0}
+    .viewer-toolbar-left,.viewer-toolbar-center,.viewer-toolbar-right{display:flex;align-items:center;gap:0.5rem}
+    .viewer-toolbar-divider{width:1px;height:1.5rem;background:rgba(255,255,255,0.2);margin:0 0.5rem}
+    .viewer-toolbar-btn{width:2.75rem;height:2.75rem;background:rgba(255,255,255,0.08);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.85);font-size:0.9rem}
+    .viewer-toolbar-btn:hover{background:rgba(255,255,255,0.15);color:white;transform:translateY(-2px)}
+    .viewer-zoom-slider-container{display:flex;align-items:center;gap:0.75rem;background:rgba(255,255,255,0.08);border-radius:0.75rem;padding:0.25rem 1rem;border:1px solid rgba(255,255,255,0.1)}
+    .viewer-zoom-slider{width:120px;height:4px;-webkit-appearance:none;background:rgba(255,255,255,0.2);border-radius:2px;cursor:pointer}
+    .viewer-zoom-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:#0EA5E9;border-radius:50%;cursor:pointer}
+    .viewer-zoom-display{font-family:'SF Mono',monospace;font-size:0.85rem;color:rgba(255,255,255,0.9);min-width:3.5rem;text-align:center}
+    .viewer-main{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:grab;min-height:0}
+    .viewer-main:active{cursor:grabbing}
+    .viewer-canvas{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:visible}
+    .viewer-image-container{position:absolute;transform-origin:center center;user-select:none;transition:transform 0.1s ease-out}
+    .viewer-image{display:block;max-width:92vw;max-height:75vh;object-fit:contain;pointer-events:none;user-select:none;border-radius:0.5rem;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5)}
+    .viewer-nav{position:absolute;top:50%;transform:translateY(-50%);width:4rem;height:4rem;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s;border:1px solid rgba(255,255,255,0.15);color:white;font-size:1.5rem;z-index:10}
+    .viewer-nav:hover{background:rgba(255,255,255,0.2);transform:translateY(-50%) scale(1.1)}
+    .viewer-nav.prev{left:1.5rem}.viewer-nav.next{right:1.5rem}
+    .viewer-bottom-bar{position:absolute;bottom:0;left:0;right:0;padding:1rem 1.5rem;background:linear-gradient(0deg,rgba(0,0,0,0.8) 0%,transparent 100%);display:flex;justify-content:center;flex-shrink:0}
+    .viewer-info{display:flex;align-items:center;gap:1rem;font-size:0.9rem;color:rgba(255,255,255,0.85);background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);padding:0.5rem 1.25rem;border-radius:2rem;border:1px solid rgba(255,255,255,0.1)}
+    .viewer-divider{color:rgba(255,255,255,0.3)}
+    .viewer-thumbnail-strip{display:flex;gap:0.75rem;padding:1rem 1.5rem;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);overflow-x:auto;max-height:120px;min-height:100px;border-top:1px solid rgba(255,255,255,0.05);flex-shrink:0}
+    .viewer-thumbnail{width:80px;height:60px;border-radius:0.5rem;object-fit:cover;cursor:pointer;opacity:0.4;transition:all 0.3s;border:2px solid transparent;flex-shrink:0}
+    .viewer-thumbnail:hover{opacity:0.7;transform:scale(1.05)}
+    .viewer-thumbnail.active{opacity:1;border-color:#0EA5E9;box-shadow:0 0 20px rgba(14,165,233,0.4)}
+    .viewer-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);color:white;padding:1rem 2rem;border-radius:1rem;font-size:1.1rem;pointer-events:none;opacity:0;transition:all 0.3s ease;z-index:10002;border:1px solid rgba(255,255,255,0.1)}
+    .viewer-toast.show{opacity:1}
+    .viewer-loading{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);gap:1rem;color:white;font-size:1rem;z-index:100}
+    .viewer-loading.active{display:flex}
+    .viewer-loading-spinner{width:3rem;height:3rem;border:3px solid rgba(255,255,255,0.2);border-top-color:#0EA5E9;border-radius:50%;animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body class="gradient-bg text-white min-h-screen">
+  <div id="imageViewer" class="image-viewer"><div class="viewer-toolbar"><div class="viewer-toolbar-left"><button class="viewer-toolbar-btn" onclick="closeImageViewer()" title="关闭 (ESC)"><i class="fas fa-times"></i></button><div class="viewer-toolbar-divider"></div><button class="viewer-toolbar-btn" onclick="rotateImage(-90)" title="向左旋转"><i class="fas fa-undo"></i></button><button class="viewer-toolbar-btn" onclick="rotateImage(90)" title="向右旋转"><i class="fas fa-redo"></i></button><button class="viewer-toolbar-btn" onclick="flipHorizontal()" title="水平翻转"><i class="fas fa-arrows-alt-h"></i></button><button class="viewer-toolbar-btn" onclick="flipVertical()" title="垂直翻转"><i class="fas fa-arrows-alt-v"></i></button></div><div class="viewer-toolbar-center"><button class="viewer-toolbar-btn" onclick="zoomOut()" title="缩小 (-)"><i class="fas fa-search-minus"></i></button><div class="viewer-zoom-slider-container"><input type="range" id="zoomSlider" class="viewer-zoom-slider" min="10" max="500" value="100"><span id="zoomDisplay" class="viewer-zoom-display">100%</span></div><button class="viewer-toolbar-btn" onclick="zoomIn()" title="放大 (+)"><i class="fas fa-search-plus"></i></button><button class="viewer-toolbar-btn" onclick="fitToScreen()" title="适应屏幕 (0)"><i class="fas fa-expand-arrows-alt"></i></button><button class="viewer-toolbar-btn" onclick="toggleFullscreen()" title="全屏 (F)"><i class="fas fa-expand" id="fullscreenIcon"></i></button></div><div class="viewer-toolbar-right"><button class="viewer-toolbar-btn" onclick="toggleSlideShow()" title="幻灯片播放" id="slideShowBtn"><i class="fas fa-play"></i></button><div class="viewer-toolbar-divider"></div><button class="viewer-toolbar-btn" onclick="downloadImage()" title="下载图片"><i class="fas fa-download"></i></button><button class="viewer-toolbar-btn" onclick="openInNewTab()" title="新窗口打开"><i class="fas fa-external-link-alt"></i></button></div></div><div class="viewer-main" id="viewerMain"><div class="viewer-canvas" id="viewerCanvas"><div class="viewer-image-container" id="imageContainer"><img id="viewerImage" class="viewer-image" src="" alt=""></div></div><button class="viewer-nav prev" onclick="prevImage()"><i class="fas fa-chevron-left"></i></button><button class="viewer-nav next" onclick="nextImage()"><i class="fas fa-chevron-right"></i></button><div class="viewer-bottom-bar"><div class="viewer-info"><span id="imageTitle">图片</span><span class="viewer-divider">|</span><span id="imageCounter">1 / 1</span><span class="viewer-divider">|</span><span id="imageDimensions">-</span></div></div></div><div class="viewer-thumbnail-strip" id="thumbnailStrip"></div><div class="viewer-toast" id="viewerToast"></div><div class="viewer-loading" id="viewerLoading"><div class="viewer-loading-spinner"></div><span>加载中...</span></div></div>
+
+  <section class="min-h-screen flex flex-col justify-center items-center text-center px-6 py-20 relative overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none"><div class="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-600/10 rounded-full blur-3xl"></div><div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl"></div></div>
+    <div class="relative z-10">
+      <span class="inline-block bg-gradient-to-r from-sky-600 to-cyan-600 text-white text-lg px-6 py-3 rounded-full mb-8 animate__animated animate__fadeIn pulse-glow">📋 Claude AI 技能</span>
+      <h1 class="text-6xl md:text-8xl font-bold mb-6 animate__animated animate__fadeIn animate__delay-1s"><span class="gradient-text">Trello Skill</span></h1>
+      <p class="text-2xl md:text-3xl text-gray-300 mb-4 animate__animated animate__fadeIn animate__delay-2s">智能项目管理助手</p>
+      <p class="text-xl text-gray-400 mb-8 animate__animated animate__fadeIn animate__delay-3s">看板管理、任务追踪、项目协作</p>
+      <div class="flex flex-wrap justify-center gap-4 mb-12 animate__animated animate__fadeIn animate__delay-4s"><a href="#" class="bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white px-8 py-4 rounded-xl font-semibold transition-all hover:scale-105 inline-flex items-center gap-2 shadow-lg shadow-sky-600/30"><i class="fas fa-clipboard-list text-xl"></i><span>管理任务</span></a></div>
+    </div>
+  </section>
+
+  <section class="py-20 px-6 bg-gradient-to-br from-sky-900/20 via-cyan-900/10 to-teal-900/20">
+    <div class="max-w-5xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-6 animate__animated animate__fadeInUp">🎯 让项目管理更轻松</h2>
+      <p class="text-xl text-gray-400 mb-12 animate__animated animate__fadeIn animate__delay-1s">AI驱动的智能Trello管理</p>
+      <div class="mb-12 animate__animated animate__fadeIn animate__delay-2s cursor-pointer" onclick="openImageViewer(0)"><img src="assets/cover.png" alt="Trello Skill 封面" class="w-full max-w-3xl mx-auto rounded-2xl shadow-2xl border border-gray-700 hover:border-sky-500 transition-all"><p class="text-sm text-gray-500 mt-4"><i class="fas fa-search-plus mr-2"></i>点击图片查看大图</p></div>
+    </div>
+  </section>
+
+  <section class="py-20 px-6">
+    <div class="max-w-5xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-12 animate__animated animate__fadeInUp">✨ 核心功能</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="tech-card rounded-2xl p-6 text-left card-hover animate__animated animate__fadeIn animate__delay-1s"><div class="flex items-center mb-3"><span class="text-3xl mr-4">📝</span><div><h3 class="text-xl font-bold text-white mb-1">任务创建</h3><p class="text-gray-400 text-sm">快速创建和管理任务</p></div></div></div>
+        <div class="tech-card rounded-2xl p-6 text-left card-hover animate__animated animate__fadeIn animate__delay-2s"><div class="flex items-center mb-3"><span class="text-3xl mr-4">🔄</span><div><h3 class="text-xl font-bold text-white mb-1">看板操作</h3><p class="text-gray-400 text-sm">智能看板管理</p></div></div></div>
+        <div class="tech-card rounded-2xl p-6 text-left card-hover animate__animated animate__fadeIn animate__delay-3s"><div class="flex items-center mb-3"><span class="text-3xl mr-4">📊</span><div><h3 class="text-xl font-bold text-white mb-1">进度追踪</h3><p class="text-gray-400 text-sm">实时掌握项目状态</p></div></div></div>
+        <div class="tech-card rounded-2xl p-6 text-left card-hover animate__animated animate__fadeIn animate__delay-4s"><div class="flex items-center mb-3"><span class="text-3xl mr-4">🤝</span><div><h3 class="text-xl font-bold text-white mb-1">团队协作</h3><p class="text-gray-400 text-sm">高效团队配合</p></div></div></div>
+        <div class="tech-card rounded-2xl p-6 text-left card-hover animate__animated animate__fadeIn animate__delay-5s"><div class="flex items-center mb-3"><span class="text-3xl mr-4">🔔</span><div><h3 class="text-xl font-bold text-white mb-1">提醒通知</h3><p class="text-gray-400 text-sm">智能提醒不遗漏</p></div></div></div>
+        <div class="tech-card rounded-2xl p-6 text-left card-hover animate__animated animate__fadeIn animate__delay-6s"><div class="flex items-center mb-3"><span class="text-3xl mr-4">📈</span><div><h3 class="text-xl font-bold text-white mb-1">报表生成</h3><p class="text-gray-400 text-sm">自动生成项目报告</p></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 px-6 bg-gradient-to-br from-sky-900/20 via-cyan-900/20 to-teal-900/20">
+    <div class="max-w-5xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-12 animate__animated animate__fadeInUp">👥 适用场景</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-gradient-to-br from-green-900/40 to-green-800/20 border border-green-700/50 rounded-2xl p-6 card-hover animate__animated animate__fadeIn animate__delay-1s"><div class="text-4xl mb-4">🚀</div><h3 class="text-xl font-bold text-white mb-2">项目管理</h3><p class="text-gray-400 text-sm">敏捷开发流程管理</p></div>
+        <div class="bg-gradient-to-br from-sky-900/40 to-sky-800/20 border border-sky-700/50 rounded-2xl p-6 card-hover animate__animated animate__fadeIn animate__delay-2s"><div class="text-4xl mb-4">👥</div><h3 class="text-xl font-bold text-white mb-2">团队协作</h3><p class="text-gray-400 text-sm">跨部门任务协调</p></div>
+        <div class="bg-gradient-to-br from-cyan-900/40 to-cyan-800/20 border border-cyan-700/50 rounded-2xl p-6 card-hover animate__animated animate__fadeIn animate__delay-3s"><div class="text-4xl mb-4">📚</div><h3 class="text-xl font-bold text-white mb-2">个人规划</h3><p class="text-gray-400 text-sm">日常任务管理</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 px-6 bg-gradient-to-br from-sky-900/30 to-cyan-900/30">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-8 animate__animated animate__fadeInUp">🚀 快速开始</h2>
+      <div class="bg-gray-900 rounded-2xl p-8 mb-8 text-left max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-1s">
+        <div class="flex items-center justify-between mb-4"><div class="flex items-center"><i class="fas fa-terminal text-2xl text-gray-400 mr-3"></i><span class="text-gray-300 font-medium">使用示例</span></div><button onclick="copyToClipboard()" class="text-sky-400 hover:text-sky-300 transition-all"><i class="fas fa-copy"></i></button></div>
+        <code class="text-emerald-400 text-lg block select-all">帮我创建一个新任务并分配给团队成员</code>
+      </div>
+      <p class="text-lg text-gray-300 animate__animated animate__fadeIn animate__delay-2s">自然语言管理Trello看板</p>
+    </div>
+  </section>
+
+  <footer class="py-12 px-6 text-center border-t border-gray-800"><div class="max-w-4xl mx-auto"><p class="text-gray-500 mb-4">Trello Skill - Claude AI Trello项目管理技能</p><div class="flex justify-center gap-4 text-gray-600"><span class="text-sm">项目管理</span><span>•</span><span class="text-sm">Claude</span><span>•</span><span class="text-sm">AI技能</span></div></div></footer>
+
+  <script>
+    let images=[],currentIndex=0,scale=1,rotation=0,flipX=1,flipY=1,translateX=0,translateY=0,isDragging=false,startX=0,startY=0,initialScale=1,slideShowInterval=null,slideShowPlaying=false,currentImageDimensions={width:0,height:0};
+    function collectImages(){const imgs=[];const seen=new Set();document.querySelectorAll('img').forEach(img=>{if(!seen.has(img.src)&&img.src&&!img.src.includes('data:')&&img.id!=='viewerImage'){seen.add(img.src);imgs.push({src:img.src,title:img.alt||'图片',thumbnail:img.src})}});return imgs}
+    function openImageViewer(index){if(images.length===0)images=collectImages();if(images.length===0)return;currentIndex=Math.max(0,Math.min(index,images.length-1));resetViewState();loadImage(currentIndex);buildThumbnailStrip();updateUI();document.getElementById('imageViewer').classList.add('active');document.body.style.overflow='hidden';preloadAdjacentImages()}
+    function closeImageViewer(){stopSlideShow();document.getElementById('imageViewer').classList.remove('active');document.body.style.overflow='';if(document.fullscreenElement)document.exitFullscreen()}
+    function resetViewState(){scale=1;rotation=0;flipX=1;flipY=1;translateX=0;translateY=0;updateSliderValue()}
+    function loadImage(index){const loading=document.getElementById('viewerLoading'),img=document.getElementById('viewerImage');if(loading)loading.classList.add('active');const tempImg=new Image();tempImg.onload=()=>{img.src=images[index].src;currentImageDimensions={width:tempImg.naturalWidth,height:tempImg.naturalHeight};if(loading)loading.classList.remove('active');updateImageInfo();updateTransform()};tempImg.onerror=()=>{if(loading)loading.classList.remove('active');showToast('图片加载失败')};tempImg.src=images[index].src}
+    function prevImage(){if(images.length<=1)return;currentIndex=(currentIndex-1+images.length)%images.length;resetViewState();loadImage(currentIndex);updateUI();preloadAdjacentImages()}
+    function nextImage(){if(images.length<=1)return;currentIndex=(currentIndex+1)%images.length;resetViewState();loadImage(currentIndex);updateUI();preloadAdjacentImages()}
+    function zoom(delta){const newScale=Math.max(0.1,Math.min(5,scale+delta));if(newScale!==scale){scale=newScale;updateTransform();updateZoomDisplay();updateSliderValue()}}
+    function zoomIn(){zoom(0.25)}function zoomOut(){zoom(-0.25)}
+    function fitToScreen(){resetViewState();updateTransform();updateZoomDisplay();updateSliderValue();showToast('已适应屏幕')}
+    function rotateImage(deg){rotation=(rotation+deg)%360;updateTransform();showToast('旋转 '+rotation+'°')}
+    function flipHorizontal(){flipX*=-1;updateTransform();showToast(flipX===-1?'已水平翻转':'已取消水平翻转')}
+    function flipVertical(){flipY*=-1;updateTransform();showToast(flipY===-1?'已垂直翻转':'已取消垂直翻转')}
+    function toggleFullscreen(){const viewer=document.getElementById('imageViewer'),icon=document.getElementById('fullscreenIcon');if(document.fullscreenElement){document.exitFullscreen();if(icon)icon.className='fas fa-expand';showToast('已退出全屏')}else{viewer.requestFullscreen();if(icon)icon.className='fas fa-compress-alt';showToast('已进入全屏')}}
+    function toggleSlideShow(){if(slideShowPlaying)stopSlideShow();else startSlideShow()}
+    function startSlideShow(){if(images.length<=1){showToast('只有一张图片');return}slideShowPlaying=true;updateSlideShowButton();showToast('幻灯片播放中...');slideShowInterval=setInterval(()=>{nextImage()},3000)}
+    function stopSlideShow(){slideShowPlaying=false;updateSlideShowButton();if(slideShowInterval){clearInterval(slideShowInterval);slideShowInterval=null}}
+    function downloadImage(){const link=document.createElement('a');link.href=images[currentIndex].src;link.download=images[currentIndex].title||'image';link.target='_blank';document.body.appendChild(link);link.click();document.body.removeChild(link);showToast('开始下载...')}
+    function openInNewTab(){window.open(images[currentIndex].src,'_blank')}
+    function showToast(text){const toast=document.getElementById('viewerToast');if(!toast)return;toast.textContent=text;toast.classList.add('show');setTimeout(()=>{toast.classList.remove('show')},2000)}
+    function updateTransform(){const container=document.getElementById('imageContainer');if(container)container.style.transform=`translate(${translateX}px,${translateY}px) rotate(${rotation}deg) scaleX(${flipX}) scaleY(${flipY}) scale(${scale})`}
+    function buildThumbnailStrip(){const strip=document.getElementById('thumbnailStrip');if(!strip)return;strip.innerHTML='';images.forEach((img,index)=>{const thumb=document.createElement('img');thumb.className='viewer-thumbnail'+(index===currentIndex?' active':'');thumb.src=img.thumbnail;thumb.alt=img.title;thumb.onclick=()=>{currentIndex=index;resetViewState();loadImage(currentIndex);updateUI()};strip.appendChild(thumb)})}
+    function updateUI(){document.querySelectorAll('.viewer-thumbnail').forEach((thumb,index)=>{thumb.classList.toggle('active',index===currentIndex)});updateImageInfo()}
+    function updateImageInfo(){const titleEl=document.getElementById('imageTitle'),counterEl=document.getElementById('imageCounter'),dimensionsEl=document.getElementById('imageDimensions');if(titleEl)titleEl.textContent=images[currentIndex]?.title||'图片';if(counterEl)counterEl.textContent=(currentIndex+1)+' / '+images.length;if(dimensionsEl)dimensionsEl.textContent=currentImageDimensions.width+' × '+currentImageDimensions.height}
+    function updateZoomDisplay(){const display=document.getElementById('zoomDisplay');if(display)display.textContent=Math.round(scale*100)+'%'}
+    function updateSliderValue(){const slider=document.getElementById('zoomSlider');if(slider)slider.value=scale*100}
+    function updateSlideShowButton(){const btn=document.getElementById('slideShowBtn');if(btn){const icon=btn.querySelector('i');if(icon)icon.className=slideShowPlaying?'fas fa-pause':'fas fa-play'}}
+    function preloadAdjacentImages(){const preloadIndices=[(currentIndex-1+images.length)%images.length,(currentIndex+1)%images.length];preloadIndices.forEach(index=>{if(images[index]){const img=new Image();img.src=images[index].src}})}
+    function bindViewerEvents(){const canvas=document.getElementById('viewerMain'),zoomSlider=document.getElementById('zoomSlider');if(!canvas)return;canvas.addEventListener('mousedown',(e)=>{if(e.button===0){isDragging=true;startX=e.clientX-translateX;startY=e.clientY-translateY;canvas.style.cursor='grabbing'}});document.addEventListener('mousemove',(e)=>{if(isDragging){translateX=e.clientX-startX;translateY=e.clientY-startY;updateTransform()}});document.addEventListener('mouseup',()=>{isDragging=false;canvas.style.cursor='grab'});canvas.addEventListener('wheel',(e)=>{e.preventDefault();zoom(e.deltaY>0?-0.15:0.15)},{passive:false});canvas.addEventListener('dblclick',(e)=>{if(scale!==1)fitToScreen();else{scale=2;updateTransform();updateZoomDisplay();updateSliderValue()}});if(zoomSlider)zoomSlider.addEventListener('input',(e)=>{scale=e.target.value/100;updateTransform();updateZoomDisplay()});document.addEventListener('keydown',(e)=>{if(!document.getElementById('imageViewer').classList.contains('active'))return;switch(e.key){case'Escape':closeImageViewer();break;case'ArrowLeft':prevImage();break;case'ArrowRight':nextImage();break;case'+':case'=':zoomIn();break;case'-':zoomOut();break;case'0':fitToScreen();break;case' ':e.preventDefault();toggleSlideShow();break;case'f':case'F':toggleFullscreen();break;case'd':case'D':downloadImage();break}});let lastTouchDistance=0,touchStartTime=0;canvas.addEventListener('touchstart',(e)=>{if(e.touches.length===1){startX=e.touches[0].clientX-translateX;startY=e.touches[0].clientY-translateY;touchStartTime=Date.now()}else if(e.touches.length===2){lastTouchDistance=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);initialScale=scale}},{passive:true});canvas.addEventListener('touchmove',(e)=>{if(e.touches.length===1){translateX=e.touches[0].clientX-startX;translateY=e.touches[0].clientY-startY;updateTransform()}else if(e.touches.length===2){e.preventDefault();const currentDistance=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);scale=Math.max(0.1,Math.min(5,initialScale*(currentDistance/lastTouchDistance)));updateTransform();updateZoomDisplay();updateSliderValue()}},{passive:false});canvas.addEventListener('touchend',(e)=>{if(e.touches.length===0){const touchDuration=Date.now()-touchStartTime,diff=Math.abs(translateX)+Math.abs(translateY);if(diff>50&&touchDuration<300)translateX>0?prevImage():nextImage()}});canvas.addEventListener('click',(e)=>{if(e.target===canvas)closeImageViewer()});document.addEventListener('fullscreenchange',()=>{const icon=document.getElementById('fullscreenIcon');if(icon)icon.className=document.fullscreenElement?'fas fa-compress-alt':'fas fa-expand'})}
+    function copyToClipboard(){navigator.clipboard.writeText('帮我创建一个新任务并分配给团队成员').then(()=>{showToast('已复制')}).catch(()=>{showToast('复制失败')})}
+    document.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{images=collectImages();if(images.length===0)return;buildThumbnailStrip();bindViewerEvents()},100)});if(document.readyState==='complete'||document.readyState==='interactive'){setTimeout(()=>{images=collectImages();if(images.length>0){buildThumbnailStrip();bindViewerEvents()}},200)}
+  </script>
+</body>
+</html>

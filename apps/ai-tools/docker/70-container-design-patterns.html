@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>
+      容器设计模式 4 大经典实战 | Docker 实战课程
+    </title>
+    <meta name="description" content="详解 K8s 容器设计模式 4 大经典(Sidecar / Ambassador / Adapter / Init Container)及其在 Docker Compose 中的实现,涵盖服务网格、配置注入等场景。">
+    <meta name="keywords" content="Docker, 容器设计模式 4 大经典实战, 容器设计模式 4 大经典实战, 容器化实战, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/70-container-design-patterns.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="容器设计模式 4 大经典实战">
+    <meta property="og:description" content="详解 K8s 容器设计模式 4 大经典(Sidecar / Ambassador / Adapter / Init Container)及其在 Docker Compose 中的实现,涵盖服务网格、配置注入等场景。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/70-container-design-patterns.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="容器设计模式 4 大经典实战">
+    <meta name="twitter:description" content="详解 K8s 容器设计模式 4 大经典(Sidecar / Ambassador / Adapter / Init Container)及其在 Docker Compose 中的实现,涵盖服务网格、配置注入等场景。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"容器设计模式 4 大经典实战","description":"详解 K8s 容器设计模式 4 大经典(Sidecar / Ambassador / Adapter / Init Container)及其在 Docker Compose 中的实现,涵盖服务网格、配置注入等场景。","author":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN","keywords":"Docker, 容器设计模式 4 大经典实战"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 教程","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"容器设计模式 4 大经典实战","item":"https://tools.yy24365.com/ai-tools/docker/70-container-design-patterns.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            D
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 实战
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              容器设计模式 4 大经典实战
+            </span>
+          </nav>
+          <h1 id="hero-title">
+            容器设计模式 4 大经典实战
+          </h1>
+          <p class="hero-sub">
+            Sidecar / Ambassador / Adapter / Init Container
+          </p>
+          <p class="hero-desc">
+            详解 K8s 容器设计模式 4 大经典(Sidecar / Ambassador / Adapter / Init Container)及其在 Docker Compose 中的实现,涵盖服务网格、配置注入等场景。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                课程编号
+              </strong>
+              第 50 课
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                分类
+              </strong>
+              架构设计
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              advanced
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                字数
+              </strong>
+              ~ 4000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <nav class="toc" id="toc">
+          <h2 class="toc-title">
+            本文目录
+          </h2>
+          <ul class="toc-grid">
+            <li>
+              <a href="#s1">
+                <span class="toc-num">
+                  01
+                </span>
+                Sidecar 边车模式
+              </a>
+            </li>
+            <li>
+              <a href="#s2">
+                <span class="toc-num">
+                  02
+                </span>
+                Ambassador 大使模式
+              </a>
+            </li>
+            <li>
+              <a href="#s3">
+                <span class="toc-num">
+                  03
+                </span>
+                Adapter 适配器模式
+              </a>
+            </li>
+            <li>
+              <a href="#s4">
+                <span class="toc-num">
+                  04
+                </span>
+                Init Container 初始化容器
+              </a>
+            </li>
+            <li>
+              <a href="#s5">
+                <span class="toc-num">
+                  05
+                </span>
+                组合应用 5 大场景
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">
+            Chapter 01
+          </span>
+          <h2 id="s1-title">
+            Sidecar 边车模式
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  主容器 + 辅助容器共享网络/数据卷
+                </li>
+                <li>
+                  典型场景:日志收集(Filebeat)、监控(Exporter)、代理(Envoy)
+                </li>
+                <li>
+                  Docker Compose:两个 services 共享同一 network
+                </li>
+                <li>
+                  K8s 实现:Pod 内多容器,共享 namespace
+                </li>
+                <li>
+                  代表:Spring Cloud + Prometheus Operator
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">
+            Chapter 02
+          </span>
+          <h2 id="s2-title">
+            Ambassador 大使模式
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  代理外部调用,屏蔽后端服务发现复杂性
+                </li>
+                <li>
+                  典型场景:连接 Redis 集群、Sentinel、DB 代理
+                </li>
+                <li>
+                  Ambassador 容器代理 localhost:<port> 请求转发
+                </li>
+                <li>
+                  K8s 实现:同 Pod 中,Service 通过 ClusterIP 访问
+                </li>
+                <li>
+                  案例:数据访问代理(影子库 + 影子表)
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">
+            Chapter 03
+          </span>
+          <h2 id="s3-title">
+            Adapter 适配器模式
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  统一异构系统的输出格式
+                </li>
+                <li>
+                  典型场景:异构数据库 → 统一数据格式
+                </li>
+                <li>
+                  Adapter 容器将多种数据源归一化为标准协议
+                </li>
+                <li>
+                  应用:多语言微服务的统一日志格式
+                </li>
+                <li>
+                  案例:Prometheus exporter 适配 MySQL/Redis/MongoDB
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">
+            Chapter 04
+          </span>
+          <h2 id="s4-title">
+            Init Container 初始化容器
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  Pod 启动前运行的初始化容器,完成后消失
+                </li>
+                <li>
+                  典型场景:配置生成、依赖等待、权限设置
+                </li>
+                <li>
+                  K8s:initContainers 与 containers 字段分离
+                </li>
+                <li>
+                  Docker Compose:用 depends_on + healthcheck condition
+                </li>
+                <li>
+                  案例:Spring Cloud 应用等待 Nacos 启动后再启动
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s5" aria-labelledby="s5-title">
+          <span class="section-num">
+            Chapter 05
+          </span>
+          <h2 id="s5-title">
+            组合应用 5 大场景
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  1) Service Mesh:Envoy/Linkerd Sidecar 代理 + 主服务
+                </li>
+                <li>
+                  2) 日志收集:Filebeat/Fluentd Sidecar + 业务容器
+                </li>
+                <li>
+                  3) 监控:Prometheus exporter Sidecar + 业务容器
+                </li>
+                <li>
+                  4) 分布式追踪:Jaeger agent Sidecar + 业务容器
+                </li>
+                <li>
+                  5) 密钥注入:Init Container 从 Vault 拉取 secret
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <div class="alert alert-tip">
+          <span class="alert-icon">
+            💡 Service Mesh
+          </span>
+          <div class="alert-body">
+            <p>
+              Istio/Linkerd 是 Sidecar 模式的工业级实现
+            </p>
+          </div>
+        </div>
+        <div class="alert alert-info">
+          <span class="alert-icon">
+            🎯 模式选择
+          </span>
+          <div class="alert-body">
+            <p>
+              Sidecar 适合横切关注点(日志/监控/代理),Init 适合前置依赖
+            </p>
+          </div>
+        </div>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">
+            FAQ
+          </span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Sidecar 边车模式
+              </h3>
+              <p class="faq-a">
+                主容器 + 辅助容器共享网络/数据卷
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Ambassador 大使模式
+              </h3>
+              <p class="faq-a">
+                代理外部调用,屏蔽后端服务发现复杂性
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Adapter 适配器模式
+              </h3>
+              <p class="faq-a">
+                统一异构系统的输出格式
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Init Container 初始化容器
+              </h3>
+              <p class="faq-a">
+                Pod 启动前运行的初始化容器,完成后消失
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                组合应用 5 大场景
+              </h3>
+              <p class="faq-a">
+                1) Service Mesh:Envoy/Linkerd Sidecar 代理 + 主服务
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本课程
+        </h3>
+        <p class="footer-meta">
+          容器设计模式 4 大经典实战 · Docker 容器化实战系列课程。所有代码均经过实测,可直接运行于 Docker 20+ / Docker Desktop 4+ / K8s 1.24+ 环境。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            相关课程
+          </strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            完整 56 篇课程
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方
+          </a>
+          ·
+          <a href="https://kubernetes.io" style="color:#c4d1de">
+            Kubernetes 官方
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 实战系列 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-course-50';
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('.code-copy').forEach(function(a){
+    a.onclick=async function(){
+      var pre=a.closest('.code-block').querySelector('pre');if(!pre) return;
+      var text=pre.innerText;
+      try{await navigator.clipboard.writeText(text);var o=a.innerText;a.innerText='已复制';a.classList.add('success');setTimeout(function(){a.innerText=o;a.classList.remove('success')},1500)}catch(e){}
+    }
+  });
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

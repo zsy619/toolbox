@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Remotion 基础:设计视觉与排版工具 | Remotion 知识库</title>
+<meta name="description" content="Remotion 4.x 设计视觉完整参考:@remotion/paths 路径工具、@remotion/shapes 几何形状、@remotion/layout-utils 排版、@remotion/noise 噪声、@remotion/google-fonts 字体、@remotion/skia 2D 矢量、@remotion/three 3D、@remotion/rive 状态机、@remotion/animated-emoji Twemoji 表情等设计工具。">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Remotion 设计视觉与排版工具","description":"设计视觉完整参考。","inLanguage":"zh-CN"}</script>
+</head><body>
+<header class="site-header"><nav class="nav-wrap">
+<a href="index.html" class="brand"><span class="brand-mark">R</span><span>Remotion 知识库</span></a>
+<div class="nav-links"><a href="index.html">总目录</a><a href="B-08-core-api-reference.html">← 核心 API</a></div>
+</nav></header>
+<main class="container">
+<nav class="breadcrumb"><a href="index.html">首页</a> / <a href="index.html#basic">基础层</a> / 设计视觉</nav>
+<h1>设计视觉与排版工具</h1>
+<p class="hero-sub">路径/形状/字体/排版/噪声 8 大设计生态包完整参考</p>
+<div class="alert alert-info"><span class="alert-icon">📚</span><div class="alert-body"><p>来源:Remotion 官方设计生态包文档(2025-2026)。</p></div></div>
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>@remotion/paths SVG 路径工具</h2>
+<p>10+ 函数操作 SVG 路径:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>函数</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>getLength(path)</code></td><td>路径总长度</td></tr>
+<tr><td><code>getPointOnPath(progress, path)</code></td><td>沿路径某点 (x,y)</td></tr>
+<tr><td><code>getSubpaths(path)</code></td><td>拆分多段路径</td></tr>
+<tr><td><code>getBoundingBox(path)</code></td><td>包围盒</td></tr>
+<tr><td><code>evolvePath(progress, path)</code></td><td>笔画动画</td></tr>
+<tr><td><code>interpolatePath(progress, a, b)</code></td><td>形态插值(Morph)</td></tr>
+<tr><td><code>translatePath(path, x, y)</code></td><td>平移</td></tr>
+<tr><td><code>scalePath(path, factor)</code></td><td>缩放</td></tr>
+<tr><td><code>reversePath(path)</code></td><td>反向</td></tr>
+<tr><td><code>resetPath(path)</code></td><td>重置 M 命令</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>@remotion/shapes 几何形状</h2>
+<p>预生成 SVG Path 的常用形状:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { Rect, Circle, Triangle, Star, Polygon, Heart, Pie, Ellipse } from '@remotion/shapes';
+
+&lt;Rect width={200} height={100} fill="cyan" /&gt;
+&lt;Circle radius={50} fill="red" /&gt;
+&lt;Triangle length={100} fill="green" /&gt;
+&lt;Star points={5} innerRadius={30} outerRadius={100} fill="gold" /&gt;
+&lt;Polygon points={6} radius={80} fill="purple" /&gt;
+&lt;Heart height={100} fill="pink" /&gt;
+&lt;Pie radius={60} progress={0.3} fill="orange" /&gt;</code></pre></div>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>@remotion/layout-utils 排版工具</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>函数</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>fitText({...})</code></td><td>字体大小自适应容器宽度</td></tr>
+<tr><td><code>measureText({...})</code></td><td>测量文字尺寸</td></tr>
+<tr><td><code>fillTextBox({...})</code></td><td>多行自动排版</td></tr>
+<tr><td><code>fitTextOnNLines({...})</code></td><td>N 行内自适应字号</td></tr>
+</tbody>
+</table></div>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { fitText, measureText } from '@remotion/layout-utils';
+
+const { fontSize } = fitText({
+  text: 'Long Headline',
+  withinWidth: 800,
+  fontFamily: 'Inter',
+  fontWeight: 'bold',
+  textTransform: 'uppercase',
+});
+
+const { width, height } = measureText({ text, fontSize: 40 });</code></pre></div>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>@remotion/noise 程序化噪声</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { noise2D, noise3D } from '@remotion/noise';
+
+const v = noise2D('cloud', x / 500, y / 500);  // -1~1
+const w = noise3D('fog', x, y, frame / fps);   // 含时间维
+
+// 烟/雾/水/云/地形/有机运动</code></pre></div>
+<p>种子化随机,跨帧确定性。</p>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>@remotion/google-fonts 动态字体</h2>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">import { loadFont } from '@remotion/google-fonts/Inter';
+const { fontFamily, waitUntilDone } = loadFont();
+await waitUntilDone();
+// 或动态切换
+import { getAvailableFonts } from '@remotion/google-fonts';
+const fonts = getAvailableFonts();  // 1400+ 种</code></pre></div>
+<p>必须 ES 模块导入(CJS 报错)。</p>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>@remotion/three 3D 集成</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { ThreeCanvas, useVideoTexture } from '@remotion/three';
+import { useRef } from 'react';
+import { useCurrentFrame, useVideoConfig, staticFile } from 'remotion';
+
+const Cube: React.FC = () =&gt; {
+  const ref = useRef&lt;THREE.Mesh&gt;(null);
+  const frame = useCurrentFrame();
+  const texture = useVideoTexture(staticFile('clip.mp4'));
+
+  useEffect(() =&gt; { if (ref.current) ref.current.rotation.y = frame / 30; }, [frame]);
+  return &lt;mesh ref={ref}&gt;&lt;boxGeometry /&gt;&lt;meshBasicMaterial map={texture} /&gt;&lt;/mesh&gt;;
+};
+
+&lt;ThreeCanvas width={1920} height={1080}&gt;
+  &lt;ambientLight /&gt;
+  &lt;Cube /&gt;
+&lt;/ThreeCanvas&gt;</code></pre></div>
+</section>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>@remotion/rive 状态机动画</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { Rive } from '@remotion/rive';
+
+&lt;Rive
+  src={staticFile('character.riv')}
+  stateMachine="default"
+  input={true}     // 接受 input
+  autoplay={true}
+  artboard="Character"
+/&gt;</code></pre></div>
+</section>
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>@remotion/animated-emoji Twemoji</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { AnimatedEmoji } from '@remotion/animated-emoji';
+
+&lt;AnimatedEmoji emoji="🚀" size={200} /&gt;
+&lt;AnimatedEmoji emoji="🎉" size={128} /&gt;
+// 支持 Twemoji 全套 Lottie 动画</code></pre></div>
+</section>
+
+<section class="section" id="s9">
+<span class="section-num">Chapter 09</span>
+<h2>@remotion/skia 2D 矢量</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { Canvas, Rect, Circle, Path, Skia } from '@remotion/skia';
+
+&lt;Canvas width={1920} height={1080}&gt;
+  &lt;Rect x={100} y={100} width={200} height={200} color="cyan" /&gt;
+  &lt;Circle cx={960} cy={540} r={100} color="red" /&gt;
+&lt;/Canvas&gt;</code></pre></div>
+</section>
+
+<nav class="page-nav">
+<a href="B-08-core-api-reference.html" class="prev">← 上一页:核心 API 速查</a>
+<a href="index.html" class="next">回到总目录 →</a>
+</nav>
+</main>
+<footer class="site-footer"><p>© 2026 AI 工具箱 · Remotion 知识库 · 内容基于官方文档整理</p></footer>
+<script src="scripts.js"></script>
+</body></html>

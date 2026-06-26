@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>caveman - 节省75% tokens的AI代码助手</title>
+  <script src="https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: #0a0a0f;
+      color: #f0f0f5;
+      overflow-x: hidden;
+    }
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    #bg-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    .content { position: relative; z-index: 1; max-width: 800px; }
+    .badge {
+      display: inline-block;
+      background: rgba(251, 191, 36, 0.2);
+      border: 1px solid #fbbf24;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 14px;
+      color: #fbbf24;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 64px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .tagline {
+      font-size: 24px;
+      color: #a1a1aa;
+      margin-bottom: 32px;
+    }
+    .desc {
+      font-size: 18px;
+      color: #a1a1aa;
+      line-height: 1.8;
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+    .stats {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .stat {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 16px 24px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #fbbf24;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: #71717a;
+      margin-top: 4px;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      max-width: 700px;
+      margin: 0 auto 40px;
+    }
+    .feature {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: left;
+    }
+    .feature-icon { font-size: 28px; margin-bottom: 12px; }
+    .feature-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f0f0f5;
+      margin-bottom: 8px;
+    }
+    .feature-desc { font-size: 14px; color: #71717a; line-height: 1.6; }
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.15));
+      border: 1px solid rgba(251,191,36,0.3);
+      border-radius: 16px;
+      padding: 24px;
+      margin: 0 auto 40px;
+      max-width: 600px;
+    }
+    .highlight-box p {
+      font-size: 16px;
+      color: #a1a1aa;
+      margin: 0;
+      line-height: 1.8;
+    }
+    .cta {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #fbbf24;
+      color: #0a0a0f;
+      border: none;
+    }
+    .btn-primary:hover { background: #f59e0b; }
+    @media (max-width: 640px) {
+      h1 { font-size: 42px; }
+      .tagline { font-size: 18px; }
+      .stats { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <canvas id="bg-canvas"></canvas>
+    <div class="content">
+      <div class="badge">🪨 43684 Stars</div>
+      <h1>caveman</h1>
+      <p class="tagline">why use many token when few do trick</p>
+      <p class="desc">
+        让 AI 用穴居人说话方式回复<br>
+        节省约 75% tokens，保持 100% 技术准确性
+      </p>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">75%</div>
+          <div class="stat-label">Tokens 节省</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">技术准确性</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">3x</div>
+          <div class="stat-label">速度提升</div>
+        </div>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">🪶</div>
+          <div class="feature-title">Lite 模式</div>
+          <div class="feature-desc">轻度压缩</div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🪨</div>
+          <div class="feature-title">Full 模式</div>
+          <div class="feature-desc">完全穴居人</div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🔥</div>
+          <div class="feature-title">Ultra 模式</div>
+          <div class="feature-desc">极度精简</div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">📜</div>
+          <div class="feature-title">文言文模式</div>
+          <div class="feature-desc">古文风格</div>
+        </div>
+      </div>
+      <div class="highlight-box">
+        <p>💡 Claude Code: `claude plugin install caveman@caveman`<br>支持 Claude Code / Codex / Gemini CLI 等</p>
+      </div>
+      <div class="cta">
+        <a href="https://github.com/JuliusBrussee/caveman" class="btn btn-primary">GitHub</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    const canvas = document.getElementById('bg-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
+    const geometry = new THREE.BufferGeometry();
+    const count = 200;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count * 3; i++) positions[i] = (Math.random() - 0.5) * 10;
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({ color: 0xfbbf24, size: 0.02 });
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+    function animate() {
+      requestAnimationFrame(animate);
+      points.rotation.y += 0.0005;
+      renderer.render(scene, camera);
+    }
+    animate();
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

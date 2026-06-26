@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>A-02 Remotion 动画 API | spring/interpolate/Easing 进阶</title>
+<meta name="description" content="Remotion 四大动画 API 进阶详解:spring() 物理弹簧、interpolate() 线性插值、interpolateColors() 颜色渐变、Easing 缓动函数,以及 Sequence 编排的 4 种典型动画模式。">
+<meta name="keywords" content="Remotion spring, interpolate, Easing, 弹簧动画, 缓动函数">
+<link rel="canonical" href="https://example.com/remotion/A-02-animation.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 动画 API 进阶">
+<meta property="og:description" content="spring / interpolate / Easing 三大动画工具。">
+<meta property="og:url" content="https://example.com/remotion/A-02-animation.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"A-02 Remotion 动画 API","description":"spring、interpolate、Easing 三大动画 API 详解。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 动画"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html" class="active">进阶</a>
+      <a href="S-01-code-walkthrough.html">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-advanced">进阶层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">A-02 动画 API</span>
+    </nav>
+    <h1 id="hero-title">A-02 Remotion 动画 API <span class="level-badge level-A">A 进阶</span></h1>
+    <p class="hero-sub">spring() / interpolate() / Easing —— 视频动效的三大基石。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 11 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> B-04 基础 Hooks</div>
+      <div class="hero-meta-item"><strong>类型</strong> 进阶</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>spring():物理弹簧动画</h2>
+<p>Remotion 模拟真实弹簧物理,推荐用于入场/出场动画:</p>
+<pre class="line-numbers"><code class="language-tsx">import { spring, useCurrentFrame, useVideoConfig } from 'remotion';
+
+const frame = useCurrentFrame();
+const { fps } = useVideoConfig();
+
+// 基础:从 0 弹到 1
+const scale = spring({ frame, fps });
+
+// 自定义配置
+const bounce = spring({
+  frame,
+  fps,
+  config: { damping: 8, stiffness: 100, mass: 1 },
+});</code></pre>
+<p>常用 config 参数:</p>
+<ul>
+  <li><code>damping</code>:阻尼(默认 10),越小越弹</li>
+  <li><code>stiffness</code>:硬度(默认 100),越大越快</li>
+  <li><code>mass</code>:质量(默认 1),越大越慢</li>
+</ul>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>interpolate():线性插值</h2>
+<p>在两值之间根据帧号插值,适用所有线性场景:</p>
+<pre class="line-numbers"><code class="language-tsx">import { interpolate, useCurrentFrame } from 'remotion';
+
+const frame = useCurrentFrame();
+
+const opacity = interpolate(frame, [0, 30], [0, 1], {
+  extrapolateRight: 'clamp',  // 超出范围时钳制
+  extrapolateLeft: 'clamp',
+});
+
+const x = interpolate(frame, [0, 60, 90], [0, 500, 1000]);
+// 0-60 帧:0→500
+// 60-90 帧:500→1000</code></pre>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>interpolateColors():颜色渐变</h2>
+<p>专用于颜色插值,自动在 RGB / HSL 空间过渡:</p>
+<pre class="line-numbers"><code class="language-tsx">import { interpolateColors } from 'remotion';
+
+const color = interpolateColors(frame, [0, 30, 60], ['#2496ED', '#d63031', '#00b894']);</code></pre>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>Easing 缓动函数</h2>
+<p>interpolate 支持 18 种内置缓动:</p>
+<pre class="line-numbers"><code class="language-tsx">import { Easing } from 'remotion';
+
+const value = interpolate(frame, [0, 30], [0, 1], {
+  easing: Easing.bezier(0.25, 0.1, 0.25, 1),  // CSS ease
+});
+
+// 常用预设
+Easing.in(Easing.cubic)      // 缓入
+Easing.out(Easing.cubic)     // 缓出(最常用)
+Easing.inOut(Easing.cubic)   // 缓入缓出
+Easing.exp                  // 指数</code></pre>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>实战:弹跳小球</h2>
+<p>用 spring 实现一个落地弹跳的小球:</p>
+<pre class="line-numbers"><code class="language-tsx">const frame = useCurrentFrame();
+const { fps } = useVideoConfig();
+
+const drop = spring({ frame, fps, config: { damping: 6 } });
+const y = 500 - drop * 400;  // 从 y=500 弹到 y=100
+
+&lt;div style={{
+  position: 'absolute', left: 800,
+  top: y, width: 80, height: 80,
+  borderRadius: '50%', background: '#2496ED',
+}}/&gt;</code></pre>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>spring vs interpolate 选型</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>场景</th><th>推荐</th><th>原因</th></tr></thead>
+<tbody>
+<tr><td>入场动画(出现/淡入)</td><td>spring</td><td>自然弹性,更生动</td></tr>
+<tr><td>进度条/百分比</td><td>interpolate</td><td>需要精确线性映射</td></tr>
+<tr><td>鼠标跟随</td><td>spring</td><td>有惯性更自然</td></tr>
+<tr><td>色值变化</td><td>interpolateColors</td><td>色彩空间插值</td></tr>
+<tr><td>路径动画</td><td>interpolate + Easing</td><td>需控制曲线</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<div class="source-note">Remotion 动画 API(2025)、CSS Easing Functions、Apple Spring 物理</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>@remotion/motion-blur 运动模糊</h2>
+<p>为高速运动元素添加真实物理模糊,显著提升真实感。安装:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npx remotion add @remotion/motion-blur</code></pre></div>
+<p>使用示例:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { MotionBlur } from '@remotion/motion-blur';
+
+&lt;MotionBlur shutter={0.5}&gt;
+  &lt;FastBall /&gt;  // 高速移动的元素
+&lt;/MotionBlur&gt;</code></pre></div>
+<p>关键参数 <code>shutter</code> 是快门角度(0.1-1),值越大越模糊。</p>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="A-01-data-driven.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">A-01 数据驱动视频</span></a>
+  <a href="A-03-audio-video.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">A-03 音视频合成</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

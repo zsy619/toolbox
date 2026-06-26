@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>B-04 Remotion 基础 Hooks | useCurrentFrame/useVideoConfig/useDelayRender</title>
+<meta name="description" content="Remotion 三大基础 Hook 完整解析:useCurrentFrame 读取当前帧、useVideoConfig 访问视频元数据、useDelayRender 等待异步资源就绪,异步加载与渲染时机控制的入门必读。">
+<meta name="keywords" content="Remotion Hooks, useCurrentFrame, useVideoConfig, useDelayRender, 异步资源">
+<link rel="canonical" href="https://example.com/remotion/B-04-basic-hooks.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 基础 Hooks 详解">
+<meta property="og:description" content="三大基础 Hook 的使用场景与陷阱。">
+<meta property="og:url" content="https://example.com/remotion/B-04-basic-hooks.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"B-04 Remotion 基础 Hooks","description":"useCurrentFrame、useVideoConfig、useDelayRender 三大 Hook 详解。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion Hooks"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="S-01-code-walkthrough.html">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-basic">基础层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">B-04 基础 Hooks</span>
+    </nav>
+    <h1 id="hero-title">B-04 Remotion 基础 Hooks <span class="level-badge level-B">B 基础</span></h1>
+    <p class="hero-sub">useCurrentFrame / useVideoConfig / useDelayRender —— React 视频编程的三个基础钩子。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 9 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> B-02 核心概念</div>
+      <div class="hero-meta-item"><strong>类型</strong> 入门</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>useCurrentFrame:读取当前帧</h2>
+<p>最常用的 Hook,返回当前正在渲染的帧号(从 0 开始):</p>
+<pre class="line-numbers"><code class="language-tsx">import { useCurrentFrame } from 'remotion';
+
+const frame = useCurrentFrame();  // 0, 1, 2, 3, ...
+
+// 常见用法:基于帧号计算动画进度
+const progress = frame / totalFrames;  // 0.0 - 1.0
+const angle = frame * 2;               // 每帧转 2 度</code></pre>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p>Sequence 内部的 <code>useCurrentFrame</code> 返回的是<strong>相对于 Sequence 起始</strong>的帧号,不是全局帧号。这常让初学者困惑,务必注意。</p></div></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>useVideoConfig:访问视频元数据</h2>
+<p>返回当前 Composition 的所有元数据,无需在 Props 中传递:</p>
+<pre class="line-numbers"><code class="language-tsx">import { useVideoConfig } from 'remotion';
+
+const { fps, width, height, durationInFrames, id } = useVideoConfig();
+// 例: { fps: 30, width: 1920, height: 1080, durationInFrames: 150, id: "HelloWorld" }</code></pre>
+<p>典型用途:根据视频尺寸动态调整布局,或计算时间(秒)。</p>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>useDelayRender:等待异步资源</h2>
+<p>当组件需要先加载远程数据或字体才能渲染时,用此 Hook 阻止渲染直到就绪:</p>
+<pre class="line-numbers"><code class="language-tsx">import { useEffect, useState } from 'react';
+import { useDelayRender, continueRender, delayRender } from 'remotion';
+
+const [data, setData] = useState(null);
+const handle = useDelayRender();  // 返回一个 handle
+
+useEffect(() => {
+  fetch('/api/data').then(r => r.json()).then(d => {
+    setData(d);
+    continueRender(handle);  // 告诉 Remotion 资源就绪
+  });
+  return () => continueRender(handle);  // 清理
+}, []);</code></pre>
+<div class="alert alert-tip"><span class="alert-icon">💡</span><div class="alert-body"><p>超时默认 30 秒(可在 Composition 设置 <code>delayRenderTimeoutInMilliseconds</code> 调整)。超时未完成会渲染错误界面。</p></div></div>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>常见反模式</h2>
+<p>Hook 使用中的 3 大陷阱:</p>
+<ol>
+  <li><strong>不要在循环/条件中调用 Hook</strong>:违反 React 规则,会导致帧间状态错乱</li>
+  <li><strong>不要在 useEffect 中调用 <code>delayRender</code></strong>:在组件函数顶层调用,而不是 effect 里</li>
+  <li><strong>不要把异步数据直接传给 useState</strong>:必须用 <code>delayRender</code> 包装,否则首帧拿到 undefined</li>
+</ol>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>Hook 实战:旋转动画</h2>
+<p>结合 useCurrentFrame 与 useVideoConfig 实现每秒转一圈的旋转动画:</p>
+<pre class="line-numbers"><code class="language-tsx">const frame = useCurrentFrame();
+const { fps } = useVideoConfig();
+const angle = (frame / fps) * 360;  // 每秒 360 度
+
+&lt;div style={{ transform: `rotate(${angle}deg)` }}&gt;🔄&lt;/div&gt;</code></pre>
+</section>
+
+<div class="source-note">Remotion Hooks API(2025)、React 18 规则 Hooks 规范、Remotion 异步资源处理</div>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>getRemotionEnvironment()</h2>
+<p>运行时检测当前是预览还是渲染,根据环境走不同逻辑(如 Studio 显示调试信息、Lambda 渲染时跳过):</p>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-tsx">import { getRemotionEnvironment } from 'remotion';
+
+const env = getRemotionEnvironment();
+// { isStudio: boolean, isRendering: boolean, isPlayer: boolean, ... }
+
+if (env.isStudio) {
+  console.log('调试面板');
+}</code></pre></div>
+</section>
+
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>useDelayRender 异步加载</h2>
+<p>Remotion 渲染时默认同步执行,任何数据获取(API/字幕/远端图片)都必须先于渲染完成。<strong>useDelayRender</strong>(v4.0.342+) 是推荐的标准模式:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { useState, useEffect, useCallback } from 'react';
+import { useDelayRender, staticFile } from 'remotion';
+
+const { delayRender, continueRender, cancelRender } = useDelayRender();
+const [handle] = useState(() => delayRender());
+
+useEffect(() => {
+  fetch(staticFile('data.json'))
+    .then(r =&gt; r.json())
+    .then(data =&gt; { setData(data); continueRender(handle); })
+    .catch(e =&gt; cancelRender(e));
+}, [handle]);</code></pre></div>
+<div class="alert alert-info"><span class="alert-icon">💡</span><div class="alert-body"><p>useDelayRender 返回的 delayRender 绑定到当前渲染作用域,比全局 delayRender 更安全(避免组件卸载后继续渲染)。</p></div></div>
+</section>
+
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>useCurrentScale() 缩放感知</h2>
+<p>Player 与渲染分辨率不一致时,可用此 hook 获取当前实际显示比例,做 <strong>响应式布局</strong>:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { useCurrentScale } from 'remotion';
+
+const scale = useCurrentScale();  // 0.5 表示 Player 缩到 50% 显示
+const fontSize = 80 * scale;      // 字号同步缩放</code></pre></div>
+<p>常见用法:Studio 中拖动滑块改变显示大小时,UI 元素也跟着缩放而不溢出。</p>
+</section>
+
+<section class="section" id="s9">
+<span class="section-num">Chapter 09</span>
+<h2>useRemotionEnvironment() 完整版</h2>
+<p>除 isStudio/isRendering/isPlayer 外,还提供:</p>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">const env = useRemotionEnvironment();
+// {
+//   isStudio: boolean      Studio 内
+//   isRendering: boolean   正在 SSR/Lambda 渲染
+//   isPlayer: boolean      Player 组件内
+//   isReadOnlyStudio: boolean  只读模式
+//   isClientSideRendering: boolean  客户端渲染
+// }</code></pre></div>
+<p>在 Studio 实时显示 FPS、帧号等调试面板:用 <code>env.isStudio</code> 判断,渲染/Player 时跳过。</p>
+</section>
+
+
+<section class="section" id="s10">
+<span class="section-num">Chapter 10</span>
+<h2>useWindowedAudioData 大文件流式</h2>
+<p>传统 <code>useAudioData</code> 会全量加载 WAV 头,在处理几十分钟的播客/长录音时慢且占内存。<code>useWindowedAudioData</code> 按 5s 窗口流式加载:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { useWindowedAudioData } from '@remotion/media-utils';
+
+// 注意:只支持 .wav 格式
+const { audioData, durationInSeconds } = useWindowedAudioData({
+  src: staticFile('podcast.wav'),
+  windowInSeconds: 5,
+});
+
+// 渲染当前帧所在的 5s 窗口数据
+// 内存占用减少 95%</code></pre></div>
+<p>适用场景:播客可视化(几十分钟)、长录音分析、音频编辑器预览。</p>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="B-03-first-video.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">B-03 第一个视频</span></a>
+  <a href="B-05-rendering-basics.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">B-05 渲染基础</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body>
+</html>

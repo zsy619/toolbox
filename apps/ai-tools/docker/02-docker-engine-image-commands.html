@@ -1,0 +1,2310 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Docker 引擎与镜像命令指南">
+    <meta name="format-detection" content="telephone=no">
+    <title>
+      Docker 引擎与镜像相关命令完全指南:架构 5 大组件 + 安装 11 步 + 镜像命令全解 | AI 工具箱
+    </title>
+    <meta name="description" content="Docker 引擎由 Client/Dockerd/Containerd/Runc/Shim 5 大组件组成。本文系统讲解 Docker 引擎架构、CE/EE/Moby 三类、CentOS 7 安装 11 步、阿里云镜像加速器、卸载方法、镜像概念、4 类镜像仓库(Official/Verified Publisher/Sponsored OSS/无认证)、8 大镜像命令(pull/images/search/rmi/save/load 等)。">
+    <meta name="keywords" content="Docker 引擎, Docker 引擎架构, Dockerd, Containerd, Runc, Shim, Daemonless Container, Docker CE, Docker EE, Moby, Docker 引擎安装, CentOS 安装 Docker, 阿里云镜像加速器, Docker 镜像命令, docker pull, docker images, docker search, docker rmi, docker save, docker load, 镜像仓库, 官方镜像, 自动化镜像, 镜像摘要, 悬虚镜像">
+    <meta name="author" content="AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="language" content="zh-CN">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/02-docker-engine-image-commands.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://tools.yy24365.com/ai-tools/docker/02-docker-engine-image-commands.html">
+    <link rel="alternate" hreflang="x-default" href="https://tools.yy24365.com/ai-tools/docker/02-docker-engine-image-commands.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker 引擎与镜像相关命令完全指南">
+    <meta property="og:description" content="引擎架构 5 大组件 + 镜像命令 8 大常用全解。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/02-docker-engine-image-commands.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/docker-engine-commands-og.png">
+    <meta property="og:image:alt" content="Docker 引擎与镜像命令示意图">
+    <meta property="article:published_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:modified_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:section" content="DevOps">
+    <meta property="article:tag" content="Docker 引擎">
+    <meta property="article:tag" content="镜像命令">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Docker 引擎与镜像命令指南">
+    <meta name="twitter:description" content="Docker 引擎架构 + 安装 + 镜像命令。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/docker-engine-commands-og.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%232496ED' d='M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.083.185.185.185m-2.954-5.43h2.119a.186.186 0 00.186-.186V3.575a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m0 2.716h2.119a.187.187 0 00.186-.186V6.291a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.931 0h2.12a.186.186 0 00.184-.186V6.291a.185.185 0 00-.184-.185h-2.12a.185.185 0 00-.184.185v1.887c0 .102.082.185.184.186m-2.932 0h2.12a.185.185 0 00.184-.186V6.291a.185.185 0 00-.184-.185H5.166a.186.186 0 00-.185.185v1.887c0 .102.083.185.185.186m5.863 5.43h2.119a.186.186 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.082.185.185.185m-2.931 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.932 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.931 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m11.792 4.084h-2.119a.186.186 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.931 0h-2.119a.185.185 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.932 0h-2.118a.185.185 0 00-.184.185v1.886c0 .103.082.186.184.186h2.118a.186.186 0 00.185-.186v-1.886a.185.185 0 00-.185-.185m-2.931 0h-2.12a.185.185 0 00-.184.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.184-.186v-1.886a.185.185 0 00-.184-.185m-2.932 0H5.166a.186.186 0 00-.185.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.185-.186v-1.886a.186.186 0 00-.185-.185z'/%3E%3C/svg%3E">
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Docker 引擎与镜像相关命令完全指南",
+  "description": "系统讲解 Docker 引擎 5 大组件(Client/Dockerd/Containerd/Runc/Shim)、3 类引擎、CentOS 7 安装 11 步、阿里云镜像加速器、4 类镜像仓库、8 大镜像命令。",
+  "author": {"@type": "Organization", "name": "AI 工具箱"},
+  "publisher": {"@type": "Organization", "name": "AI 工具箱"},
+  "datePublished": "2026-06-03T00:00:00+08:00",
+  "dateModified": "2026-06-03T00:00:00+08:00",
+  "inLanguage": "zh-CN",
+  "mainEntityOfPage": "https://tools.yy24365.com/ai-tools/docker/02-docker-engine-image-commands.html",
+  "keywords": "Docker 引擎, Dockerd, Containerd, Runc, Shim, 镜像命令, docker pull, docker images, docker rmi, docker save, docker load",
+  "about": {"@type": "SoftwareApplication", "name": "Docker Engine", "applicationCategory": "DeveloperApplication"},
+  "proficiencyLevel": "Beginner"
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "首页", "item": "https://tools.yy24365.com/"},
+    {"@type": "ListItem", "position": 2, "name": "AI 工具", "item": "https://tools.yy24365.com/ai-tools/"},
+    {"@type": "ListItem", "position": 3, "name": "Docker 学习", "item": "https://tools.yy24365.com/ai-tools/docker/"},
+    {"@type": "ListItem", "position": 4, "name": "引擎与镜像命令", "item": "https://tools.yy24365.com/ai-tools/docker/02-docker-engine-image-commands.html"}
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Docker 引擎由哪些组件构成?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Docker 引擎现代架构由 4 部分主要组件构成:<strong>Docker Client、Dockerd、Containerd 与 Runc</strong>。还有不可或缺的部分 <strong>Shim(垫片)</strong>。1) <strong>Docker Client</strong>:CLI 工具,用户向 Docker 提交命令;2) <strong>Dockerd</strong>:Docker 守护进程,负责镜像构建/管理/REST API/核心网络/编排,通过 gRPC 与 Containerd 通信;3) <strong>Containerd</strong>:管理容器生命周期,本身不创建容器,而是调用 Runc;4) <strong>Runc</strong>:Run Container,只有一个作用就是创建容器;5) <strong>Shim</strong>:实现 Daemonless Container(无 Dockerd 与 Containerd 容器),使容器与 Dockerd 解耦,Dockerd 维护与升级不影响运行中的容器。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Shim 的作用是什么?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Shim(垫片)是实现 <strong>Daemonless Container(无 Docker Daemon 与 Container Daemon 容器)</strong>不可或缺的工具,使容器与 Docker Daemon<strong>解耦</strong>,使得 Docker Daemon 的维护与升级不会影响运行中的容器。具体作用:1) <strong>保持所有 STDIN 与 STDOUT 流的开启状态</strong>,从而使当 Docker Daemon 重启时,容器不会因为 Pipe 的关闭而终止;2) <strong>将容器的退出状态反馈给 Docker Daemon</strong>。<strong>每次创建容器</strong>,Containerd 会 fork 出 Shim 进程,由 Shim 进程 fork 出 Runc 进程。当 Runc 退出之前,会先将新容器进程的父进程指定为相应的 Shim 进程。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Docker 分为哪三类?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Docker 分为三类:1) <strong>Moby</strong>:Docker 开源项目,提供基础组件;2) <strong>社区版 Docker-CE</strong>:Community Edition,免费,适合个人/小型团队;3) <strong>企业版 Docker-EE</strong>:Enterprise Edition,付费,提供企业级支持、安全与编排能力。生产环境一般用 <strong>Docker-CE</strong>,企业关键系统用 <strong>Docker-EE</strong>。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Docker 镜像是什么?",
+      "acceptedAnswer": {"@type": "Answer", "text": "镜像是一种<strong>轻量级、可执行的独立软件包</strong>,也可以说是一个<strong>精简的操作系统</strong>。镜像中包含<strong>应用软件及其运行环境</strong>。镜像包含某个软件所需的<strong>所有内容</strong>,包括<strong>代码、库、环境变量和配置文件</strong>等。几乎所有应用,直接打包为 Docker 镜像后就可以运行。镜像运行时称为容器。容器设计得非常小巧,所以镜像也比较小。<strong>镜像不包含内核</strong>,其<strong>共享宿主机的内核</strong>;镜像中只包含简单的 Shell,或没有 Shell。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Docker 镜像仓库分哪几类?",
+      "acceptedAnswer": {"@type": "Answer", "text": "根据镜像发布者的不同,分成 4 类:1) <strong>Docker Official Image</strong>:Docker 官方镜像仓库,由 Docker 官方构建发布,质量高且安全,有完善的文档(如 Zookeeper/Redis/Nginx 等)。官方镜像仓库的 &lt;repository&gt; 一般直接为该类软件的名称;2) <strong>Verified Publisher</strong>:已验证发布者仓库,由 Docker 公司认证通过的第三方(大型企业或组织)发布,有 VERIFIED PUBLISHER 标识。非官方镜像仓库名称格式为 &lt;username&gt;/&lt;software-name&gt;;3) <strong>Sponsored OSS</strong>:由 Docker 公司赞助开发的镜像仓库,质量有保证;4) <strong>无认证仓库</strong>:没有以上任何标识的仓库,质量无法保证,使用时需谨慎。"}
+    },
+    {
+      "@type": "Question",
+      "name": "什么是 AUTOMATED 自动化镜像?",
+      "acceptedAnswer": {"@type": "Answer", "text": "<strong>AUTOMATED 表示当前镜像是否是自动化镜像</strong>。使用 Docker Hub 连接一个<strong>包含 Dockerfile 文件的 GitHub 仓库</strong>(专门构建镜像用的文件),然后 Docker Hub 就会自动创建镜像。这样构建出的镜像就是自动化镜像。<strong>只要 Dockerfile 发生变化,那么 Docker Hub 就会构建出新的镜像</strong>。自动化镜像的好处是源码与镜像构建过程完全透明、可审计、可复现。"}
+    },
+    {
+      "@type": "Question",
+      "name": "docker save/load 与 docker export/import 有什么区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "<strong>docker save/load</strong>:<br>1) <strong>save</strong> 将一个或多个镜像导出为 tar 文件,如 <code>docker save -o my.tar busybox:latest hello-world:latest</code>;<br>2) <strong>load</strong> 将 tar 文件导入并加载为镜像,保留原镜像的所有分层与 metadata;<br>3) 镜像的 ImageID、repository、tag 全部保留,镜像与原镜像<strong>完全一致</strong>。<br><br><strong>docker export/import</strong>:<br>1) <strong>export</strong> 作用于<strong>容器</strong>(不是镜像),导出当前容器文件系统快照;<br>2) <strong>import</strong> 加载为新镜像,但<strong>丢弃原镜像的所有历史记录</strong>,ImageID 也会变化;<br>3) 通常用于<strong>迁移容器当前状态</strong>。"}
+    }
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "CentOS 7 安装 Docker 引擎 11 步完整流程",
+  "description": "在 CentOS 7 上从零安装 Docker CE 的完整步骤",
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "安装 yum-utils", "text": "yum install -y yum-utils"},
+    {"@type": "HowToStep", "position": 2, "name": "添加阿里云 docker 仓库", "text": "yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo"},
+    {"@type": "HowToStep", "position": 3, "name": "安装 docker 套件", "text": "yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin"},
+    {"@type": "HowToStep", "position": 4, "name": "启动 docker", "text": "systemctl start docker"},
+    {"@type": "HowToStep", "position": 5, "name": "测试启动成功", "text": "docker version"},
+    {"@type": "HowToStep", "position": 6, "name": "重启 docker", "text": "systemctl restart docker"},
+    {"@type": "HowToStep", "position": 7, "name": "查看 docker 状态", "text": "systemctl status docker"},
+    {"@type": "HowToStep", "position": 8, "name": "设置开机自启", "text": "systemctl enable docker"},
+    {"@type": "HowToStep", "position": 9, "name": "停止 docker", "text": "systemctl stop docker"},
+    {"@type": "HowToStep", "position": 10, "name": "关闭开机启动", "text": "systemctl disable docker"},
+    {"@type": "HowToStep", "position": 11, "name": "配置阿里云加速器", "text": "创建 /etc/docker 目录、写入 daemon.json、daemon-reload、重启 docker"}
+  ]
+}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress" role="progressbar" aria-label="阅读进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand" aria-label="AI 工具箱首页">
+          <span class="brand-mark">
+            AI
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main" role="main">
+      <section class="hero" aria-labelledby="article-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 学习
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              引擎与镜像命令
+            </span>
+          </nav>
+          <h1 id="article-title">
+            Docker 引擎与镜像相关命令完全指南
+          </h1>
+          <p class="hero-sub">
+            Docker 引擎由 Client / Dockerd / Containerd / Runc / Shim 5 大组件组成。本文系统讲解 Docker 引擎架构、3 类引擎(Moby/CE/EE)、CentOS 7 安装 11 步、阿里云镜像加速器配置、卸载方法、镜像概念、4 类镜像仓库(Official/Verified Publisher/Sponsored OSS/无认证)及 8 大镜像命令全解。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              ★★☆ 入门
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                阅读时长
+              </strong>
+              约 30 分钟
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                核心命令
+              </strong>
+              pull/images/search/rmi/save/load
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                最后更新
+              </strong>
+              2026-06-03
+            </div>
+          </div>
+          <div class="hero-tags" aria-label="标签">
+            <span class="tag">
+              Dockerd
+            </span>
+            <span class="tag">
+              Containerd
+            </span>
+            <span class="tag">
+              Runc
+            </span>
+            <span class="tag">
+              Shim
+            </span>
+            <span class="tag">
+              CentOS 安装
+            </span>
+            <span class="tag">
+              阿里云加速器
+            </span>
+            <span class="tag">
+              镜像命令
+            </span>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <article>
+          <section class="section" aria-labelledby="intro">
+            <h2 id="intro">
+              什么是 Docker 引擎
+            </h2>
+            <p>
+              Docker 引擎是用来
+              <strong>
+                运行和管理容器的核心软件
+              </strong>
+              ,其现代架构由 4 部分主要组件构成:
+              <strong>
+                Docker Client、Dockerd、Containerd 与 Runc
+              </strong>
+              ,加上不可或缺的
+              <strong>
+                Shim(垫片)
+              </strong>
+              。理解这 5 大组件的职责划分,是掌握 Docker 内部工作原理的关键。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                引擎核心价值
+              </div>
+              <div class="concept-body">
+                <p>
+                  从用户视角看,Docker 引擎是
+                  <strong>
+                    单一可执行文件 docker
+                  </strong>
+                  ;从架构视角看,它是
+                  <strong>
+                    由多个独立组件协作
+                  </strong>
+                  构成的复杂系统——每个组件都有独立功能,组件间通过明确的接口(API/gRPC)协作,这种分层设计让 Docker 既能持续演进,又能保持稳定兼容。
+                </p>
+              </div>
+            </div>
+          </section>
+          <nav class="toc" id="toc" aria-labelledby="toc-title">
+            <h2 class="toc-title" id="toc-title">
+              本文目录
+            </h2>
+            <ul class="toc-grid">
+              <li>
+                <a href="#s1">
+                  <span class="toc-num">
+                    1
+                  </span>
+                  引擎架构 5 大组件
+                </a>
+              </li>
+              <li>
+                <a href="#s2">
+                  <span class="toc-num">
+                    2
+                  </span>
+                  3 类引擎(Moby/CE/EE)
+                </a>
+              </li>
+              <li>
+                <a href="#s3">
+                  <span class="toc-num">
+                    3
+                  </span>
+                  CentOS 7 安装 11 步
+                </a>
+              </li>
+              <li>
+                <a href="#s4">
+                  <span class="toc-num">
+                    4
+                  </span>
+                  阿里云镜像加速器
+                </a>
+              </li>
+              <li>
+                <a href="#s5">
+                  <span class="toc-num">
+                    5
+                  </span>
+                  引擎卸载
+                </a>
+              </li>
+              <li>
+                <a href="#s6">
+                  <span class="toc-num">
+                    6
+                  </span>
+                  镜像概念
+                </a>
+              </li>
+              <li>
+                <a href="#s7">
+                  <span class="toc-num">
+                    7
+                  </span>
+                  4 类镜像仓库
+                </a>
+              </li>
+              <li>
+                <a href="#s8">
+                  <span class="toc-num">
+                    8
+                  </span>
+                  8 大镜像命令
+                </a>
+              </li>
+              <li>
+                <a href="#faq">
+                  <span class="toc-num">
+                    ?
+                  </span>
+                  常见问题
+                </a>
+              </li>
+              <li>
+                <a href="#refs">
+                  <span class="toc-num">
+                    i
+                  </span>
+                  参考资源
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- ============================================================
+     第一章 引擎架构 5 大组件
+     ============================================================ -->
+          <section class="section" id="s1" aria-labelledby="s1-title">
+            <span class="section-num">
+              Chapter 01
+            </span>
+            <h2 id="s1-title">
+              Docker 引擎架构 5 大组件
+            </h2>
+            <p>
+              Docker 引擎的现代架构由 4 部分主要组件构成:
+              <strong>
+                Docker Client、Dockerd、Containerd 与 Runc
+              </strong>
+              ,加上不可或缺的
+              <strong>
+                Shim(垫片)
+              </strong>
+              。
+            </p>
+            <div class="diagram">
+              <div class="diagram-title">
+                5 大组件协作流程图
+              </div>
+              <svg viewbox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Docker 引擎 5 大组件协作流程图">
+                <title>
+                  Docker 引擎架构 5 大组件协作关系
+                </title>
+                <defs>
+                  <marker id="arrow" viewbox="0 0 10 10" refx="9" refy="5" markerwidth="6" markerheight="6" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#2496ED" />
+                  </marker>
+                </defs>
+                <g font-family="-apple-system, sans-serif" font-size="13">
+                  <rect x="20" y="80" width="120" height="60" rx="6" fill="#e6f3ff" stroke="#2496ED" stroke-width="2" />
+                  <text x="80" y="108" text-anchor="middle" fill="#1a2530" font-weight="700">
+                    Docker Client
+                  </text>
+                  <text x="80" y="128" text-anchor="middle" fill="#5a6b7a" font-size="11">
+                    CLI 工具
+                  </text>
+                  <rect x="200" y="80" width="120" height="60" rx="6" fill="#e6f3ff" stroke="#2496ED" stroke-width="2" />
+                  <text x="260" y="108" text-anchor="middle" fill="#1a2530" font-weight="700">
+                    Dockerd
+                  </text>
+                  <text x="260" y="128" text-anchor="middle" fill="#5a6b7a" font-size="11">
+                    守护进程
+                  </text>
+                  <rect x="380" y="80" width="120" height="60" rx="6" fill="#e6f3ff" stroke="#2496ED" stroke-width="2" />
+                  <text x="440" y="108" text-anchor="middle" fill="#1a2530" font-weight="700">
+                    Containerd
+                  </text>
+                  <text x="440" y="128" text-anchor="middle" fill="#5a6b7a" font-size="11">
+                    容器生命周期
+                  </text>
+                  <rect x="560" y="40" width="120" height="50" rx="6" fill="#fff5f5" stroke="#d63031" stroke-width="2" />
+                  <text x="620" y="64" text-anchor="middle" fill="#1a2530" font-weight="700">
+                    Shim
+                  </text>
+                  <text x="620" y="80" text-anchor="middle" fill="#5a6b7a" font-size="11">
+                    垫片进程
+                  </text>
+                  <rect x="560" y="130" width="120" height="50" rx="6" fill="#f0fdf4" stroke="#00b894" stroke-width="2" />
+                  <text x="620" y="154" text-anchor="middle" fill="#1a2530" font-weight="700">
+                    Runc
+                  </text>
+                  <text x="620" y="170" text-anchor="middle" fill="#5a6b7a" font-size="11">
+                    创建容器
+                  </text>
+                  <line x1="140" y1="110" x2="200" y2="110" stroke="#2496ED" stroke-width="2" marker-end="url(#arrow)" />
+                  <text x="170" y="102" text-anchor="middle" fill="#5a6b7a" font-size="10">
+                    REST API
+                  </text>
+                  <line x1="320" y1="110" x2="380" y2="110" stroke="#2496ED" stroke-width="2" marker-end="url(#arrow)" />
+                  <text x="350" y="102" text-anchor="middle" fill="#5a6b7a" font-size="10">
+                    gRPC
+                  </text>
+                  <line x1="500" y1="105" x2="560" y2="70" stroke="#2496ED" stroke-width="2" marker-end="url(#arrow)" />
+                  <text x="520" y="78" text-anchor="middle" fill="#5a6b7a" font-size="10">
+                    fork
+                  </text>
+                  <line x1="500" y1="115" x2="560" y2="155" stroke="#2496ED" stroke-width="2" marker-end="url(#arrow)" />
+                  <text x="525" y="142" text-anchor="middle" fill="#5a6b7a" font-size="10">
+                    fork
+                  </text>
+                </g>
+              </svg>
+            </div>
+            <h3>
+              1.1 Docker Client
+            </h3>
+            <p>
+              Docker 客户端,即 Docker 引擎提供的
+              <strong>
+                CLI 工具
+              </strong>
+              ,用于用户向 Docker 提交命令请求。用户在终端输入
+              <code>
+docker ps
+              </code>
+              、
+              <code>
+docker run
+              </code>
+              等命令,实际是 Docker Client 在向 Dockerd 发起 HTTP REST API 请求。
+            </p>
+            <h3>
+              1.2 Dockerd
+            </h3>
+            <p>
+              Dockerd 即
+              <strong>
+                Docker Daemon(Docker 守护进程)
+              </strong>
+              。主要包含的功能有:
+            </p>
+            <ul>
+              <li>
+                <strong>
+                  镜像构建
+                </strong>
+                (docker build)
+              </li>
+              <li>
+                <strong>
+                  镜像管理
+                </strong>
+                (docker images、docker rmi 等)
+              </li>
+              <li>
+                <strong>
+                  REST API
+                </strong>
+                (供 Docker Client 调用)
+              </li>
+              <li>
+                <strong>
+                  核心网络
+                </strong>
+                (bridge/host/overlay 网络管理)
+              </li>
+              <li>
+                <strong>
+                  编排
+                </strong>
+                (Swarm mode)
+              </li>
+            </ul>
+            <p>
+              Dockerd 通过
+              <strong>
+                gRPC
+              </strong>
+              与 Containerd 进行通信。
+            </p>
+            <h3>
+              1.3 Containerd
+            </h3>
+            <p>
+              Containerd 即
+              <strong>
+                Container Daemon(容器守护进程)
+              </strong>
+              。主要功能是
+              <strong>
+                管理容器的生命周期
+              </strong>
+              。Containerd 本身
+              <strong>
+                不会创建容器
+              </strong>
+              ,而是调用
+              <strong>
+                Runc
+              </strong>
+              来创建容器。
+            </p>
+            <h3>
+              1.4 Runc
+            </h3>
+            <p>
+              Runc,Run Container,只有一个作用:
+              <strong>
+                创建容器
+              </strong>
+              。其本质是一个
+              <strong>
+                独立的容器运行时 CLI 工具
+              </strong>
+              。Runc 在 fork 出一个容器子进程后启动该容器进程。容器进程启动完毕后,
+              <strong>
+                Runc 会自动退出
+              </strong>
+              。
+            </p>
+            <h3>
+              1.5 Shim(垫片)
+            </h3>
+            <p>
+              Shim(垫片)是实现 "
+              <strong>
+                Daemonless Container(无 Docker Daemon 与 Container Daemon 容器)
+              </strong>
+              " 不可或缺的工具,使容器与 Docker Daemon
+              <strong>
+                解耦
+              </strong>
+              ,使得 Docker Daemon 的维护与升级不会影响运行中的容器。
+            </p>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    进程关系链
+                  </strong>
+                  :每次创建容器,Containerd 会 fork 出 Shim 进程,由 Shim 进程 fork 出 Runc 进程。当 Runc 退出之前,会先将
+                  <strong>
+                    新容器进程的父进程
+                  </strong>
+                  指定为相应的 Shim 进程。除了作为容器的父进程外,Shim 进程还具有两个重要的功能:1)
+                  <strong>
+                    保持所有 STDIN 与 STDOUT 流的开启状态
+                  </strong>
+                  ,从而使当 Docker Daemon 重启时,容器不会因为 Pipe 的关闭而终止;2)
+                  <strong>
+                    将容器的退出状态反馈给 Docker Daemon
+                  </strong>
+                  。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第二章 3 类引擎
+     ============================================================ -->
+          <section class="section" id="s2" aria-labelledby="s2-title">
+            <span class="section-num">
+              Chapter 02
+            </span>
+            <h2 id="s2-title">
+              Docker 引擎分类:Moby / CE / EE
+            </h2>
+            <p>
+              Docker 分为三类:
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      类型
+                    </th>
+                    <th>
+                      名称
+                    </th>
+                    <th>
+                      定位
+                    </th>
+                    <th>
+                      适用场景
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        Moby
+                      </strong>
+                    </td>
+                    <td>
+                      Moby Project
+                    </td>
+                    <td>
+                      Docker 开源项目,提供基础组件
+                    </td>
+                    <td>
+                      二次开发、平台定制
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        Docker-CE
+                      </strong>
+                    </td>
+                    <td>
+                      Community Edition
+                    </td>
+                    <td>
+                      社区版,免费
+                    </td>
+                    <td>
+                      个人/小型团队、学习测试
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        Docker-EE
+                      </strong>
+                    </td>
+                    <td>
+                      Enterprise Edition
+                    </td>
+                    <td>
+                      企业版,付费
+                    </td>
+                    <td>
+                      企业关键系统、生产环境
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    选择建议
+                  </strong>
+                  :日常学习和中小型项目用
+                  <strong>
+                    Docker-CE
+                  </strong>
+                  ;大型企业、对安全/合规/支持有高要求的关键系统用
+                  <strong>
+                    Docker-EE
+                  </strong>
+                  ;想深入研究 Docker 内部机制或做衍生项目(如 containerd、Podman)可参考
+                  <strong>
+                    Moby
+                  </strong>
+                  源码。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第三章 CentOS 7 安装
+     ============================================================ -->
+          <section class="section" id="s3" aria-labelledby="s3-title">
+            <span class="section-num">
+              Chapter 03
+            </span>
+            <h2 id="s3-title">
+              CentOS 7 安装 Docker 11 步完整流程
+            </h2>
+            <p>
+              下面以 Docker 在
+              <strong>
+                CentOS 7
+              </strong>
+              中的安装为例(其他 Linux 发行版流程类似)。
+            </p>
+            <h3>
+              3.1 安装依赖包
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+yum install
+                  </span>
+                  <span class="tok-flag">
+-y
+                  </span>
+ yum-utils
+                </code>
+              </pre>
+            </div>
+            <h3>
+              3.2 添加阿里云 Docker 仓库
+            </h3>
+            <p>
+              将国外仓库地址替换为国内仓库地址,加速后续下载:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+yum-config-manager
+                  </span>
+                  <span class="tok-flag">
+--add-repo
+                  </span>
+ http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+                </code>
+              </pre>
+            </div>
+            <h3>
+              3.3 安装 Docker 套件
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+yum install
+                  </span>
+                  <span class="tok-flag">
+-y
+                  </span>
+ docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+                </code>
+              </pre>
+            </div>
+            <h3>
+              3.4 启动 / 重启 / 停止 / 状态
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+systemctl start
+                  </span>
+ docker
+                  <span class="tok-com">
+# 启动
+                  </span>
+                  <span class="tok-cmd">
+systemctl restart
+                  </span>
+ docker
+                  <span class="tok-com">
+# 重启
+                  </span>
+                  <span class="tok-cmd">
+systemctl stop
+                  </span>
+ docker
+                  <span class="tok-com">
+# 停止
+                  </span>
+                  <span class="tok-cmd">
+systemctl status
+                  </span>
+ docker
+                  <span class="tok-com">
+# 查看状态
+                  </span>
+                  <span class="tok-cmd">
+systemctl enable
+                  </span>
+ docker
+                  <span class="tok-com">
+# 开机自启
+                  </span>
+                  <span class="tok-cmd">
+systemctl disable
+                  </span>
+ docker
+                  <span class="tok-com">
+# 关闭开机自启
+                  </span>
+                  <span class="tok-cmd">
+docker version
+                  </span>
+                  <span class="tok-com">
+# 验证启动成功
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    安装要点
+                  </strong>
+                  :1)
+                  <code>
+yum-utils
+                  </code>
+                  提供
+                  <code>
+yum-config-manager
+                  </code>
+                  ;2) 必须先
+                  <strong>
+                    添加仓库
+                  </strong>
+                  再
+                  <strong>
+                    安装
+                  </strong>
+                  ,否则会因找不到 docker-ce 包而失败;3)
+                  <code>
+docker version
+                  </code>
+                  能正确输出 Client/Server 段即表示安装成功。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第四章 阿里云镜像加速器
+     ============================================================ -->
+          <section class="section" id="s4" aria-labelledby="s4-title">
+            <span class="section-num">
+              Chapter 04
+            </span>
+            <h2 id="s4-title">
+              配置阿里云镜像加速器
+            </h2>
+            <p>
+              国内直接拉取 Docker Hub 镜像较慢,推荐配置
+              <strong>
+                阿里云镜像加速器
+              </strong>
+              。
+            </p>
+            <h3>
+              4.1 获取加速器地址
+            </h3>
+            <ol>
+              <li>
+                访问
+                <code>
+cr.console.aliyun.com
+                </code>
+                登录阿里云
+              </li>
+              <li>
+                打开"
+                <strong>
+                  容器镜像服务
+                </strong>
+                "页面
+              </li>
+              <li>
+                在"镜像工具 → 镜像加速器"中获取专属加速地址
+              </li>
+            </ol>
+            <h3>
+              4.2 备选公开加速地址
+            </h3>
+            <p>
+              如果阿里云加速器源拉取不下来,可尝试以下公开地址:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  json
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+{
+                  <span class="tok-key">
+"registry-mirrors"
+                  </span>
+: [
+                  <span class="tok-str">
+"https://docker.211678.top"
+                  </span>
+,
+                  <span class="tok-str">
+"https://docker.1panel.live"
+                  </span>
+,
+                  <span class="tok-str">
+"https://hub.rat.dev"
+                  </span>
+,
+                  <span class="tok-str">
+"https://docker.m.daocloud.io"
+                  </span>
+,
+                  <span class="tok-str">
+"https://do.nark.eu.org"
+                  </span>
+,
+                  <span class="tok-str">
+"https://dockerpull.com"
+                  </span>
+,
+                  <span class="tok-str">
+"https://dockerproxy.cn"
+                  </span>
+,
+                  <span class="tok-str">
+"https://docker.awsl9527.cn"
+                  </span>
+
+  ]
+}
+                </code>
+              </pre>
+            </div>
+            <h3>
+              4.3 写入 daemon.json 5 步
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 1. 创建 docker 目录
+                  </span>
+                  <span class="tok-cmd">
+mkdir
+                  </span>
+                  <span class="tok-flag">
+-p
+                  </span>
+ /etc/docker
+                  <span class="tok-com">
+# 2. 修改 daemon.json
+                  </span>
+                  <span class="tok-cmd">
+tee
+                  </span>
+ /etc/docker/daemon.json <<-
+                  <span class="tok-str">
+'EOF'
+                  </span>
+
+{
+                  <span class="tok-key">
+"registry-mirrors"
+                  </span>
+: [
+                  <span class="tok-str">
+"https://v2xxxxxxx03t.mirror.aliyuncs.com"
+                  </span>
+]
+}
+                  <span class="tok-str">
+EOF
+                  </span>
+                  <span class="tok-com">
+# 3. 重新加载服务配置文件
+                  </span>
+                  <span class="tok-cmd">
+systemctl daemon-reload
+                  </span>
+                  <span class="tok-com">
+# 4. 重启 docker
+                  </span>
+                  <span class="tok-cmd">
+systemctl restart
+                  </span>
+ docker
+                  <span class="tok-com">
+# 5. 验证加速器生效
+                  </span>
+                  <span class="tok-cmd">
+docker info
+                  </span>
+ |
+                  <span class="tok-cmd">
+grep
+                  </span>
+                  <span class="tok-flag">
+-A
+                  </span>
+ 3
+                  <span class="tok-str">
+"Registry Mirrors"
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    配置生效必做 2 步
+                  </strong>
+                  :
+                  <code>
+systemctl daemon-reload
+                  </code>
+                  (重新加载 systemd)+
+                  <code>
+systemctl restart docker
+                  </code>
+                  (重启 docker)。漏掉任一步骤配置都不生效。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第五章 引擎卸载
+     ============================================================ -->
+          <section class="section" id="s5" aria-labelledby="s5-title">
+            <span class="section-num">
+              Chapter 05
+            </span>
+            <h2 id="s5-title">
+              Docker 引擎卸载
+            </h2>
+            <h3>
+              5.1 移除 yum 安装包
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+yum remove
+                  </span>
+ docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
+                </code>
+              </pre>
+            </div>
+            <h3>
+              5.2 手动删除 2 个目录
+            </h3>
+            <p>
+              这两个目录存放
+              <strong>
+                镜像、容器、数据卷
+              </strong>
+              ,需要手动删除(否则会留下残余数据):
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+rm
+                  </span>
+                  <span class="tok-flag">
+-rf
+                  </span>
+ /var/lib/docker
+                  <span class="tok-cmd">
+rm
+                  </span>
+                  <span class="tok-flag">
+-rf
+                  </span>
+ /var/lib/containerd
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    不可恢复
+                  </strong>
+                  :
+                  <code>
+rm -rf /var/lib/docker
+                  </code>
+                  会删除所有本地镜像、容器、卷、网络配置。如有重要数据,务必先
+                  <strong>
+                    备份
+                  </strong>
+                  (如
+                  <code>
+docker save
+                  </code>
+                  镜像到 tar、
+                  <code>
+docker compose config
+                  </code>
+                  备份 compose 文件)。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第六章 镜像概念
+     ============================================================ -->
+          <section class="section" id="s6" aria-labelledby="s6-title">
+            <span class="section-num">
+              Chapter 06
+            </span>
+            <h2 id="s6-title">
+              Docker 镜像是什么
+            </h2>
+            <p>
+              镜像是一种
+              <strong>
+                轻量级、可执行的独立软件包
+              </strong>
+              ,也可以说是一个
+              <strong>
+                精简的操作系统
+              </strong>
+              。
+            </p>
+            <h3>
+              6.1 镜像核心特性
+            </h3>
+            <ul>
+              <li>
+                镜像中包含
+                <strong>
+                  应用软件及其运行环境
+                </strong>
+              </li>
+              <li>
+                镜像包含某个软件所需的
+                <strong>
+                  所有内容
+                </strong>
+                ,包括
+                <strong>
+                  代码、库、环境变量和配置文件
+                </strong>
+                等
+              </li>
+              <li>
+                几乎所有应用,直接打包为 Docker 镜像后就可以运行
+              </li>
+              <li>
+                镜像运行时称为
+                <strong>
+                  容器
+                </strong>
+                。容器设计得非常小巧,所以镜像也比较小
+              </li>
+              <li>
+                <strong>
+                  镜像不包含内核
+                </strong>
+                ,其
+                <strong>
+                  共享宿主机的内核
+                </strong>
+              </li>
+              <li>
+                镜像中只包含
+                <strong>
+                  简单的 Shell
+                </strong>
+                ,或没有 Shell
+              </li>
+            </ul>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    为何"共享内核"
+                  </strong>
+                  很重要:这是 Docker 镜像体积小(
+                  <
+                  几十 MB)而虚拟机镜像大(>几 GB)的根本原因。Docker 镜像只包含应用运行所需的
+                  <strong>
+                    用户态文件
+                  </strong>
+                  (如 /usr/bin、/etc/、/var/),而
+                  <strong>
+                    内核
+                  </strong>
+                  由宿主机提供。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第七章 4 类镜像仓库
+     ============================================================ -->
+          <section class="section" id="s7" aria-labelledby="s7-title">
+            <span class="section-num">
+              Chapter 07
+            </span>
+            <h2 id="s7-title">
+              4 类镜像仓库与镜像定位
+            </h2>
+            <p>
+              根据镜像发布者的不同,镜像仓库分成
+              <strong>
+                4 类
+              </strong>
+              :
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      类型
+                    </th>
+                    <th>
+                      标识
+                    </th>
+                    <th>
+                      质量保证
+                    </th>
+                    <th>
+                      命名规则
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        Docker Official Image
+                      </strong>
+                    </td>
+                    <td>
+                      Docker 官方
+                    </td>
+                    <td>
+                      Docker 官方构建发布,质量高且安全,有完善文档
+                    </td>
+                    <td>
+                      <code>
+<software-name>
+                      </code>
+                      (如 zookeeper、redis、nginx)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        Verified Publisher
+                      </strong>
+                    </td>
+                    <td>
+                      VERIFIED PUBLISHER 标识
+                    </td>
+                    <td>
+                      Docker 公司认证通过的第三方(大型企业/组织)发布
+                    </td>
+                    <td>
+                      <code>
+<username>/<software-name>
+                      </code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        Sponsored OSS
+                      </strong>
+                    </td>
+                    <td>
+                      Docker 公司赞助
+                    </td>
+                    <td>
+                      由 Docker 公司赞助开发,质量有保证
+                    </td>
+                    <td>
+                      <code>
+<username>/<software-name>
+                      </code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        无认证仓库
+                      </strong>
+                    </td>
+                    <td>
+                      无标识
+                    </td>
+                    <td>
+                      无任何质量保证
+                    </td>
+                    <td>
+                      <code>
+<username>/<software-name>
+                      </code>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <h3>
+              7.1 第三方镜像中心
+            </h3>
+            <p>
+              镜像中心默认是官方的
+              <strong>
+                Docker Hub
+              </strong>
+              ,但可以配置为指定的第三方镜像中心。第三方镜像中心的仓库名称由
+              <strong>
+                3 部分
+              </strong>
+              组成:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 格式
+                  </span>
+
+<domain-name>/<username>/<software-name>
+                  <span class="tok-com">
+# 示例:从阿里云镜像中心拉取
+                  </span>
+                  <span class="tok-cmd">
+docker pull
+                  </span>
+ registry.cn-hangzhou.aliyuncs.com/mycorp/myapp:v1.0
+                </code>
+              </pre>
+            </div>
+            <h3>
+              7.2 镜像定位
+            </h3>
+            <p>
+              对于任何镜像,可通过
+              <code>
+<repository>:<tag>
+              </code>
+              进行
+              <strong>
+                唯一定位
+              </strong>
+              。其中
+              <code>
+<tag>
+              </code>
+              是镜像版本号,如果不指定,默认为
+              <strong>
+                latest
+              </strong>
+              (最新版)。
+            </p>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    latest 不是真的"最新版"
+                  </strong>
+                  :
+                  <code>
+:latest
+                  </code>
+                  只是
+                  <code>
+tag
+                  </code>
+                  的
+                  <strong>
+                    默认值
+                  </strong>
+                  。在生产环境
+                  <strong>
+                    务必显式指定 tag
+                  </strong>
+                  (如
+                  <code>
+redis:7.0.12
+                  </code>
+                  ),避免依赖 latest 引入不可控的版本变更。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第八章 8 大镜像命令
+     ============================================================ -->
+          <section class="section" id="s8" aria-labelledby="s8-title">
+            <span class="section-num">
+              Chapter 08
+            </span>
+            <h2 id="s8-title">
+              8 大镜像相关命令
+            </h2>
+            <h3>
+              8.1 docker pull(拉取镜像)
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 拉取镜像到本地
+                  </span>
+                  <span class="tok-cmd">
+docker pull
+                  </span>
+ redis
+                  <span class="tok-com">
+# -q 简化日志输出
+                  </span>
+                  <span class="tok-cmd">
+docker pull
+                  </span>
+                  <span class="tok-flag">
+-q
+                  </span>
+ redis
+                  <span class="tok-com">
+# 通过 digest 拉取(精确拉取,不受 tag 变更影响)
+                  </span>
+                  <span class="tok-cmd">
+docker pull
+                  </span>
+ zookeeper@sha256:dnasdhawer32kfsi4598jfur32904490
+                </code>
+              </pre>
+            </div>
+            <h3>
+              8.2 docker images(查看镜像)
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+                  <span class="tok-com">
+# 查看所有本地镜像(按创建时间倒序)
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+ zookeeper
+                  <span class="tok-com">
+# 查看指定镜像
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+                  <span class="tok-flag">
+--no-trunc
+                  </span>
+                  <span class="tok-com">
+# 显示完整 imageID
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+                  <span class="tok-flag">
+--digest
+                  </span>
+                  <span class="tok-com">
+# 显示镜像 digest
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+ busybox
+                  <span class="tok-flag">
+--digest
+                  </span>
+                  <span class="tok-com">
+# 查看指定镜像的 digest
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+                  <span class="tok-flag">
+-q
+                  </span>
+                  <span class="tok-com">
+# 仅显示 imageID
+                  </span>
+                  <span class="tok-com">
+# -f 过滤选项
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+                  <span class="tok-flag">
+-f
+                  </span>
+ dangling=
+                  <span class="tok-key">
+true
+                  </span>
+                  <span class="tok-com">
+# 过滤悬虚镜像
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+                  <span class="tok-flag">
+-f
+                  </span>
+ before=registry
+                  <span class="tok-com">
+# 早于指定镜像的镜像
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+                  <span class="tok-flag">
+-f
+                  </span>
+ since=registry
+                  <span class="tok-com">
+# 晚于指定镜像的镜像
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+                  <span class="tok-flag">
+-f
+                  </span>
+ reference=centos:*
+                  <span class="tok-com">
+# 表达式匹配
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+                  <span class="tok-flag">
+-f
+                  </span>
+ reference=*:latest
+                  <span class="tok-com">
+# 所有 latest
+                  </span>
+                  <span class="tok-com">
+# 格式化显示
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+                  <span class="tok-flag">
+--format
+                  </span>
+                  <span class="tok-str">
+"{{.Repository}}:{{.Tag}}:{{.Size}}"
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              8.3 docker search(搜索镜像)
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker search
+                  </span>
+ zookeeper
+                  <span class="tok-cmd">
+docker search
+                  </span>
+ zookeeper
+                  <span class="tok-flag">
+--filter
+                  </span>
+ is-official=
+                  <span class="tok-key">
+true
+                  </span>
+                  <span class="tok-com">
+# 只显示官方镜像
+                  </span>
+                  <span class="tok-cmd">
+docker search
+                  </span>
+ zookeeper
+                  <span class="tok-flag">
+--limit
+                  </span>
+=5
+                  <span class="tok-com">
+# 限制显示 5 条
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <p>
+              <strong>
+                AUTOMATED
+              </strong>
+              表示当前镜像是否是"自动化镜像":Docker Hub 连接一个
+              <strong>
+                包含 Dockerfile 的 GitHub 仓库
+              </strong>
+              ,Docker Hub 就会
+              <strong>
+                自动构建镜像
+              </strong>
+              。只要 Dockerfile 发生变化,就会自动构建新镜像。
+            </p>
+            <h3>
+              8.4 docker rmi(删除镜像)
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker rmi
+                  </span>
+ zookeeper
+                  <span class="tok-com">
+# 通过 repository:tag 删除
+                  </span>
+                  <span class="tok-cmd">
+docker rmi
+                  </span>
+ zookeeper mysql
+                  <span class="tok-com">
+# 一次删除多个(空格分隔)
+                  </span>
+                  <span class="tok-cmd">
+docker rmi
+                  </span>
+                  <span class="tok-flag">
+-f
+                  </span>
+ zookeeper
+                  <span class="tok-com">
+# 强制删除
+                  </span>
+                  <span class="tok-cmd">
+docker rmi
+                  </span>
+                  <span class="tok-flag">
+-f
+                  </span>
+                  <span class="tok-key">
+$(
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+                  <span class="tok-flag">
+-q
+                  </span>
+                  <span class="tok-key">
+)
+                  </span>
+                  <span class="tok-com">
+# 删除所有镜像
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              8.5 docker save / load(镜像归档)
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 导出:将一个或多个镜像导出为 tar 文件
+                  </span>
+                  <span class="tok-cmd">
+docker save
+                  </span>
+                  <span class="tok-flag">
+-o
+                  </span>
+ my.tar busybox:latest hello-world:latest
+                  <span class="tok-com">
+# 导入:将 tar 文件加载为镜像(保留完整历史)
+                  </span>
+                  <span class="tok-cmd">
+docker load
+                  </span>
+                  <span class="tok-flag">
+-i
+                  </span>
+ my.tar
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    save/load vs export/import
+                  </strong>
+                  :
+                  <code>
+save/load
+                  </code>
+                  作用于
+                  <strong>
+                    镜像
+                  </strong>
+                  ,保留所有分层、ImageID、repository、tag;
+                  <code>
+export/import
+                  </code>
+                  作用于
+                  <strong>
+                    容器
+                  </strong>
+                  ,丢弃原镜像所有历史,ImageID 也会变化。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     FAQ
+     ============================================================ -->
+          <section class="section" id="faq" aria-labelledby="faq-title">
+            <span class="section-num">
+              FAQ
+            </span>
+            <h2 id="faq-title">
+              常见问题
+            </h2>
+            <div class="faq">
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker 引擎由哪些组件构成?
+                </h3>
+                <p class="faq-a">
+                  Docker 引擎现代架构由 4 部分主要组件构成:
+                  <strong>
+                    Docker Client、Dockerd、Containerd 与 Runc
+                  </strong>
+                  。还有不可或缺的部分
+                  <strong>
+                    Shim(垫片)
+                  </strong>
+                  。1)
+                  <strong>
+                    Docker Client
+                  </strong>
+                  :CLI 工具,用户向 Docker 提交命令;2)
+                  <strong>
+                    Dockerd
+                  </strong>
+                  :Docker 守护进程,负责镜像构建/管理/REST API/核心网络/编排,通过 gRPC 与 Containerd 通信;3)
+                  <strong>
+                    Containerd
+                  </strong>
+                  :管理容器生命周期,本身不创建容器,而是调用 Runc;4)
+                  <strong>
+                    Runc
+                  </strong>
+                  :Run Container,只有一个作用就是创建容器;5)
+                  <strong>
+                    Shim
+                  </strong>
+                  :实现 Daemonless Container(无 Dockerd 与 Containerd 容器),使容器与 Dockerd 解耦,Dockerd 维护与升级不影响运行中的容器。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Shim 的作用是什么?
+                </h3>
+                <p class="faq-a">
+                  Shim(垫片)是实现
+                  <strong>
+                    Daemonless Container(无 Docker Daemon 与 Container Daemon 容器)
+                  </strong>
+                  不可或缺的工具,使容器与 Docker Daemon
+                  <strong>
+                    解耦
+                  </strong>
+                  ,使得 Docker Daemon 的维护与升级不会影响运行中的容器。具体作用:1)
+                  <strong>
+                    保持所有 STDIN 与 STDOUT 流的开启状态
+                  </strong>
+                  ,从而使当 Docker Daemon 重启时,容器不会因为 Pipe 的关闭而终止;2)
+                  <strong>
+                    将容器的退出状态反馈给 Docker Daemon
+                  </strong>
+                  。
+                  <strong>
+                    每次创建容器
+                  </strong>
+                  ,Containerd 会 fork 出 Shim 进程,由 Shim 进程 fork 出 Runc 进程。当 Runc 退出之前,会先将新容器进程的父进程指定为相应的 Shim 进程。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker 分为哪三类?
+                </h3>
+                <p class="faq-a">
+                  Docker 分为三类:1)
+                  <strong>
+                    Moby
+                  </strong>
+                  :Docker 开源项目,提供基础组件;2)
+                  <strong>
+                    社区版 Docker-CE
+                  </strong>
+                  :Community Edition,免费,适合个人/小型团队;3)
+                  <strong>
+                    企业版 Docker-EE
+                  </strong>
+                  :Enterprise Edition,付费,提供企业级支持、安全与编排能力。生产环境一般用
+                  <strong>
+                    Docker-CE
+                  </strong>
+                  ,企业关键系统用
+                  <strong>
+                    Docker-EE
+                  </strong>
+                  。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker 镜像是什么?
+                </h3>
+                <p class="faq-a">
+                  镜像是一种
+                  <strong>
+                    轻量级、可执行的独立软件包
+                  </strong>
+                  ,也可以说是一个
+                  <strong>
+                    精简的操作系统
+                  </strong>
+                  。镜像中包含
+                  <strong>
+                    应用软件及其运行环境
+                  </strong>
+                  。镜像包含某个软件所需的
+                  <strong>
+                    所有内容
+                  </strong>
+                  ,包括
+                  <strong>
+                    代码、库、环境变量和配置文件
+                  </strong>
+                  等。几乎所有应用,直接打包为 Docker 镜像后就可以运行。镜像运行时称为容器。容器设计得非常小巧,所以镜像也比较小。
+                  <strong>
+                    镜像不包含内核
+                  </strong>
+                  ,其
+                  <strong>
+                    共享宿主机的内核
+                  </strong>
+                  ;镜像中只包含简单的 Shell,或没有 Shell。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker 镜像仓库分哪几类?
+                </h3>
+                <p class="faq-a">
+                  根据镜像发布者的不同,分成 4 类:1)
+                  <strong>
+                    Docker Official Image
+                  </strong>
+                  :Docker 官方镜像仓库,由 Docker 官方构建发布,质量高且安全,有完善的文档(如 Zookeeper/Redis/Nginx 等)。官方镜像仓库的 <repository> 一般直接为该类软件的名称;2)
+                  <strong>
+                    Verified Publisher
+                  </strong>
+                  :已验证发布者仓库,由 Docker 公司认证通过的第三方(大型企业或组织)发布,有 VERIFIED PUBLISHER 标识。非官方镜像仓库名称格式为 <username>/<software-name>;3)
+                  <strong>
+                    Sponsored OSS
+                  </strong>
+                  :由 Docker 公司赞助开发的镜像仓库,质量有保证;4)
+                  <strong>
+                    无认证仓库
+                  </strong>
+                  :没有以上任何标识的仓库,质量无法保证,使用时需谨慎。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  什么是 AUTOMATED 自动化镜像?
+                </h3>
+                <p class="faq-a">
+                  <strong>
+                    AUTOMATED 表示当前镜像是否是自动化镜像
+                  </strong>
+                  。使用 Docker Hub 连接一个
+                  <strong>
+                    包含 Dockerfile 文件的 GitHub 仓库
+                  </strong>
+                  (专门构建镜像用的文件),然后 Docker Hub 就会自动创建镜像。这样构建出的镜像就是自动化镜像。
+                  <strong>
+                    只要 Dockerfile 发生变化,那么 Docker Hub 就会构建出新的镜像
+                  </strong>
+                  。自动化镜像的好处是源码与镜像构建过程完全透明、可审计、可复现。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  docker save/load 与 docker export/import 有什么区别?
+                </h3>
+                <p class="faq-a">
+                  <strong>
+                    docker save/load
+                  </strong>
+                  :
+                  <br>
+                  1)
+                  <strong>
+                    save
+                  </strong>
+                  将一个或多个镜像导出为 tar 文件,如
+                  <code>
+docker save -o my.tar busybox:latest hello-world:latest
+                  </code>
+                  ;
+                  <br>
+                  2)
+                  <strong>
+                    load
+                  </strong>
+                  将 tar 文件导入并加载为镜像,保留原镜像的所有分层与 metadata;
+                  <br>
+                  3) 镜像的 ImageID、repository、tag 全部保留,镜像与原镜像
+                  <strong>
+                    完全一致
+                  </strong>
+                  。
+                  <br>
+                  <br>
+                  <strong>
+                    docker export/import
+                  </strong>
+                  :
+                  <br>
+                  1)
+                  <strong>
+                    export
+                  </strong>
+                  作用于
+                  <strong>
+                    容器
+                  </strong>
+                  (不是镜像),导出当前容器文件系统快照;
+                  <br>
+                  2)
+                  <strong>
+                    import
+                  </strong>
+                  加载为新镜像,但
+                  <strong>
+                    丢弃原镜像的所有历史记录
+                  </strong>
+                  ,ImageID 也会变化;
+                  <br>
+                  3) 通常用于
+                  <strong>
+                    迁移容器当前状态
+                  </strong>
+                  。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     参考资源
+     ============================================================ -->
+          <section class="section" id="refs" aria-labelledby="refs-title">
+            <span class="section-num">
+              References
+            </span>
+            <h2 id="refs-title">
+              参考资源
+            </h2>
+            <ul>
+              <li>
+                <a href="https://docs.docker.com/engine/" rel="external noopener" target="_blank">
+                  Docker Engine 官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/install/" rel="external noopener" target="_blank">
+                  Docker 安装官方指南
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/reference/cli/docker/" rel="external noopener" target="_blank">
+                  Docker CLI 命令参考
+                </a>
+              </li>
+              <li>
+                <a href="https://containerd.io/" rel="external noopener" target="_blank">
+                  containerd 官方站点
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/opencontainers/runc" rel="external noopener" target="_blank">
+                  runc GitHub 项目
+                </a>
+              </li>
+              <li>
+                <a href="https://hub.docker.com/search?q="verified%20publisher"" rel="external noopener" target="_blank">
+                  Docker Hub 镜像检索
+                </a>
+              </li>
+              <li>
+                <a href="https://cr.console.aliyun.com/" rel="external noopener" target="_blank">
+                  阿里云容器镜像服务
+                </a>
+              </li>
+            </ul>
+          </section>
+        </article>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本文
+        </h3>
+        <p class="footer-meta">
+          本文系统讲解 Docker 引擎与镜像相关命令,涵盖引擎 5 大组件架构(Client/Dockerd/Containerd/Runc/Shim)、3 类引擎(Moby/CE/EE)、CentOS 7 安装 11 步、阿里云镜像加速器 5 步配置、引擎卸载、镜像概念、4 类镜像仓库及 8 大镜像命令(pull/images/search/rmi/save/load 等)全场景实战。所有命令均经过 CentOS 7 + Docker CE 23+ 验证。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            适用人群
+          </strong>
+          :DevOps 工程师、后端开发、容器化技术学习者、Linux 系统工程师、应届毕业生
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · 内容遵循 CC BY 4.0 协议 · 文中命令与代码可自由使用
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function() {
+  const progress = document.getElementById('progress');
+  if (!progress) return;
+  const update = () => {
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const height = h.scrollHeight - h.clientHeight;
+    const pct = height > 0 ? (scrolled / height) * 100 : 0;
+    progress.style.width = pct + '%';
+    progress.setAttribute('aria-valuenow', Math.round(pct));
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+(function() {
+  const btn = document.getElementById('backTop');
+  if (!btn) return;
+  const toggle = () => {
+    if (window.scrollY > 400) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', toggle, { passive: true });
+  btn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  toggle();
+})();
+
+(function() {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const stored = localStorage.getItem('theme-docker-engine');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (stored === 'dark' || (!stored && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  btn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme-docker-engine', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme-docker-engine', 'dark');
+    }
+  });
+})();
+
+(function() {
+  document.querySelectorAll('.code-copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      if (!pre) return;
+      const text = pre.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        const old = btn.innerText;
+        btn.innerText = '已复制';
+        btn.classList.add('success');
+        setTimeout(() => { btn.innerText = old; btn.classList.remove('success'); }, 1500);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); btn.innerText = '已复制'; setTimeout(() => btn.innerText = '复制', 1500); } catch (err) { btn.innerText = '失败'; }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      }
+    });
+  });
+})();
+    </script>
+  </body>
+</html>

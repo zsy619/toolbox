@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DeepSeek 实用集成 - 将大模型能力接入各类软件</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563EB;
+            --accent: #22D3EE;
+            --bg-dark: #0F172A;
+            --bg-card: #1E293B;
+            --text: #F8FAFC;
+            --text-muted: #94A3B8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'PingFang SC', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text);
+        }
+        
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .back-btn:hover {
+            color: var(--text);
+        }
+        
+        /* Article Content */
+        article {
+            padding: 48px 0 80px;
+        }
+        
+        .article-header {
+            margin-bottom: 48px;
+        }
+        
+        .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            background: rgba(37, 99, 235, 0.2);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            border-radius: 16px;
+            color: var(--accent);
+            font-size: 12px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .tag:hover {
+            background: rgba(37, 99, 235, 0.3);
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        
+        /* Content Sections */
+        .section {
+            margin-bottom: 48px;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+        
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(37, 99, 235, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        /* App Cards */
+        .app-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        
+        .app-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .app-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .app-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+        
+        .app-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .app-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .app-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+        
+        .app-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .app-tag {
+            font-size: 11px;
+            padding: 2px 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            color: var(--text-muted);
+        }
+        
+        .app-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        
+        /* List Styles */
+        .feature-list {
+            list-style: none;
+        }
+        
+        .feature-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(37, 99, 235, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+        
+        .feature-content h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .feature-content p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        /* CTA Box */
+        .cta-box {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(124, 58, 237, 0.2));
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+        }
+        
+        .cta-box h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        
+        .cta-box p {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+        
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--primary), #7C3AED);
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        .cta-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 32px rgba(37, 99, 235, 0.4);
+        }
+        
+        /* Footer */
+        footer {
+            padding: 32px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        
+        footer p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <a href="#" class="back-btn">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                返回
+            </a>
+            <a href="#" class="logo">
+                <div class="logo-icon">⚡</div>
+                <span class="logo-text">DeepSeek 集成</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Article -->
+    <article>
+        <div class="container">
+            <header class="article-header">
+                <div class="article-meta">
+                    <a href="#" class="tag">AI工具</a>
+                    <span>2026-04-26</span>
+                    <span>阅读约 8 分钟</span>
+                </div>
+                <h1>DeepSeek 实用集成：将大模型能力接入各类软件</h1>
+                <p class="subtitle">精选 60+ 将 DeepSeek 大模型能力接入各类软件的优秀项目，涵盖应用、AI Agent 框架、RAG 框架等多个类别。</p>
+            </header>
+
+            <!-- Section 1: Apps -->
+            <section class="section">
+                <h2 class="section-title">
+                    <span class="section-icon">📱</span>
+                    精选应用推荐
+                </h2>
+                
+                <div class="app-grid">
+                    <div class="app-card">
+                        <div class="app-header">
+                            <div class="app-icon" style="background: linear-gradient(135deg, #3B82F6, #06B6D4);">⌚</div>
+                            <div class="app-info">
+                                <div class="app-name">ETOS LLM Studio</div>
+                                <div class="app-tags">
+                                    <span class="app-tag">iOS</span>
+                                    <span class="app-tag">watchOS</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="app-desc">专为 watchOS 与 iOS 深度定制的旗舰级 AI 客户端，支持 DeepSeek 等多种模型，重塑手腕上的 AI 交互维度。</p>
+                    </div>
+                    
+                    <div class="app-card">
+                        <div class="app-header">
+                            <div class="app-icon" style="background: linear-gradient(135deg, #8B5CF6, #EC4899);">💬</div>
+                            <div class="app-info">
+                                <div class="app-name">Chatbox</div>
+                                <div class="app-tags">
+                                    <span class="app-tag">跨平台</span>
+                                    <span class="app-tag">桌面端</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="app-desc">支持多种流行 LLM 模型的桌面客户端，可在 Windows、Mac 和 Linux 上使用。</p>
+                    </div>
+                    
+                    <div class="app-card">
+                        <div class="app-header">
+                            <div class="app-icon" style="background: linear-gradient(135deg, #10B981, #06B6D4);">🚀</div>
+                            <div class="app-info">
+                                <div class="app-name">Dify</div>
+                                <div class="app-tags">
+                                    <span class="app-tag">开源</span>
+                                    <span class="app-tag">LLM平台</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="app-desc">LLM 应用开发平台，可用于创建 AI 助手、工作流、文本生成器等应用。</p>
+                    </div>
+                    
+                    <div class="app-card">
+                        <div class="app-header">
+                            <div class="app-icon" style="background: linear-gradient(135deg, #F97316, #EAB308);">🍒</div>
+                            <div class="app-info">
+                                <div class="app-name">Cherry Studio</div>
+                                <div class="app-tags">
+                                    <span class="app-tag">桌面端</span>
+                                    <span class="app-tag">AI助手</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="app-desc">一款为创造者而生的桌面版 AI 助手，内置丰富功能，开箱即用。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Frameworks -->
+            <section class="section">
+                <h2 class="section-title">
+                    <span class="section-icon">🧠</span>
+                    AI Agent 与 RAG 框架
+                </h2>
+                
+                <ul class="feature-list">
+                    <li>
+                        <span class="feature-icon">🔗</span>
+                        <div class="feature-content">
+                            <h4>FastGPT - AI 知识库构建平台</h4>
+                            <p>基于 LLM 大模型的开源 AI 知识库构建平台，支持 DeepSeek、OpenAI 等多种模型。</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">🧩</span>
+                        <div class="feature-content">
+                            <h4>LangChain - Agent 开发框架</h4>
+                            <p>流行的 AI Agent 开发框架，可轻松集成 DeepSeek，构建复杂 AI 应用。</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">📚</span>
+                        <div class="feature-content">
+                            <h4>Casibase - 开源知识库系统</h4>
+                            <p>开源 AI 知识库和对话系统，结合 RAG 技术、SSO 功能，支持各种主流 AI 模型。</p>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Section 3: Developer Tools -->
+            <section class="section">
+                <h2 class="section-title">
+                    <span class="section-icon">💻</span>
+                    开发工具集成
+                </h2>
+                
+                <ul class="feature-list">
+                    <li>
+                        <span class="feature-icon">📝</span>
+                        <div class="feature-content">
+                            <h4>VS Code / JetBrains 插件</h4>
+                            <p>IDE 内直接调用 DeepSeek，提升开发效率，代码补全与 AI 辅助。</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">📖</span>
+                        <div class="feature-content">
+                            <h4>Zotero 论文辅助</h4>
+                            <p>PapersGPT 是集成了 DeepSeek 的 Zotero 文献管理插件，助你高效阅读论文。</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="feature-icon">🌐</span>
+                        <div class="feature-content">
+                            <h4>浏览器插件</h4>
+                            <p>在浏览器中直接使用 DeepSeek 进行翻译、解释和 AI 辅助。</p>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- CTA -->
+            <section class="section">
+                <div class="cta-box">
+                    <h3>立即开始使用 DeepSeek</h3>
+                    <p>访问 DeepSeek 开放平台，获取 API Key，将大模型能力接入你的软件。</p>
+                    <a href="https://platform.deepseek.com/" target="_blank" class="cta-btn">
+                        获取 API Key
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>来源: <a href="https://github.com/deepseek-ai/awesome-deepseek-integration" target="_blank">GitHub</a> · <a href="https://platform.deepseek.com/" target="_blank">DeepSeek 开放平台</a></p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>
+      TiDB 容器化分布式数据库实战 | Docker 实战课程
+    </title>
+    <meta name="description" content="详解 TiDB 7.x 容器化:PD/TiKV/TiDB 三层架构、MySQL 协议兼容、水平扩缩容、HTAP 行列混存、TiFlash 列存副本、BR 备份恢复。">
+    <meta name="keywords" content="Docker, TiDB 容器化分布式数据库实战, TiDB 容器化分布式数据库实战, 容器化实战, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/74-tidb-containerization.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="TiDB 容器化分布式数据库实战">
+    <meta property="og:description" content="详解 TiDB 7.x 容器化:PD/TiKV/TiDB 三层架构、MySQL 协议兼容、水平扩缩容、HTAP 行列混存、TiFlash 列存副本、BR 备份恢复。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/74-tidb-containerization.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="TiDB 容器化分布式数据库实战">
+    <meta name="twitter:description" content="详解 TiDB 7.x 容器化:PD/TiKV/TiDB 三层架构、MySQL 协议兼容、水平扩缩容、HTAP 行列混存、TiFlash 列存副本、BR 备份恢复。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"TiDB 容器化分布式数据库实战","description":"详解 TiDB 7.x 容器化:PD/TiKV/TiDB 三层架构、MySQL 协议兼容、水平扩缩容、HTAP 行列混存、TiFlash 列存副本、BR 备份恢复。","author":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN","keywords":"Docker, TiDB 容器化分布式数据库实战"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 教程","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"TiDB 容器化分布式数据库实战","item":"https://tools.yy24365.com/ai-tools/docker/74-tidb-containerization.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            D
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 实战
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              TiDB 容器化分布式数据库实战
+            </span>
+          </nav>
+          <h1 id="hero-title">
+            TiDB 容器化分布式数据库实战
+          </h1>
+          <p class="hero-sub">
+            MySQL 兼容 + 水平扩展 + HTAP 实时分析
+          </p>
+          <p class="hero-desc">
+            详解 TiDB 7.x 容器化:PD/TiKV/TiDB 三层架构、MySQL 协议兼容、水平扩缩容、HTAP 行列混存、TiFlash 列存副本、BR 备份恢复。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                课程编号
+              </strong>
+              第 49 课
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                分类
+              </strong>
+              数据库
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              advanced
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                字数
+              </strong>
+              ~ 4000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <nav class="toc" id="toc">
+          <h2 class="toc-title">
+            本文目录
+          </h2>
+          <ul class="toc-grid">
+            <li>
+              <a href="#s1">
+                <span class="toc-num">
+                  01
+                </span>
+                TiDB 3 层架构
+              </a>
+            </li>
+            <li>
+              <a href="#s2">
+                <span class="toc-num">
+                  02
+                </span>
+                最小集群 5 节点
+              </a>
+            </li>
+            <li>
+              <a href="#s3">
+                <span class="toc-num">
+                  03
+                </span>
+                MySQL 兼容性
+              </a>
+            </li>
+            <li>
+              <a href="#s4">
+                <span class="toc-num">
+                  04
+                </span>
+                水平扩缩容 3 步
+              </a>
+            </li>
+            <li>
+              <a href="#s5">
+                <span class="toc-num">
+                  05
+                </span>
+                HTAP 实时分析
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">
+            Chapter 01
+          </span>
+          <h2 id="s1-title">
+            TiDB 3 层架构
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  PD(Placement Driver):集群元数据 + 调度 + TSO 时间戳
+                </li>
+                <li>
+                  TiKV:分布式 KV 存储,Raft 共识 + RocksDB 引擎
+                </li>
+                <li>
+                  TiDB Server:SQL 层,MySQL 协议兼容
+                </li>
+                <li>
+                  TiFlash:列存副本,HTAP 实时分析(可选)
+                </li>
+                <li>
+                  TiCDC:变更数据捕获,同步到下游 Kafka/MySQL
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">
+            Chapter 02
+          </span>
+          <h2 id="s2-title">
+            最小集群 5 节点
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  pd1/pd2/pd3 三个 PD 节点(需奇数)
+                </li>
+                <li>
+                  tikv1/tikv2/tikv3 三个 TiKV 节点(可扩展)
+                </li>
+                <li>
+                  tidb1/tidb2/tidb3 三个 SQL 层(可扩展)
+                </li>
+                <li>
+                  tiflash 节点按需部署,提供列存副本
+                </li>
+                <li>
+                  Compose 启动顺序:PD → TiKV → TiDB
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">
+            Chapter 03
+          </span>
+          <h2 id="s3-title">
+            MySQL 兼容性
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  协议兼容:MySQL 5.7 / 8.0 协议
+                </li>
+                <li>
+                  DDL/DML 大部分兼容 MySQL 语法
+                </li>
+                <li>
+                  不兼容:存储过程/触发器/外键/MyISAM
+                </li>
+                <li>
+                  TiDB-specific:Auto Random 主键、AUTO_INCREMENT 不连续
+                </li>
+                <li>
+                  迁移工具:TiDB DM (Data Migration) 全量 + 增量
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">
+            Chapter 04
+          </span>
+          <h2 id="s4-title">
+            水平扩缩容 3 步
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  1) 添加 TiKV 节点:扩容只需 docker run 新节点 + tiup scale-out
+                </li>
+                <li>
+                  2) PD 自动 rebalance:数据按 region 重新分布
+                </li>
+                <li>
+                  3) 在线扩缩容:无停机,业务零感知
+                </li>
+                <li>
+                  TiDB Server 也可独立扩容(应对连接数暴涨)
+                </li>
+                <li>
+                  缩容:先 drain 流量 → 节点 offline → 物理移除
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s5" aria-labelledby="s5-title">
+          <span class="section-num">
+            Chapter 05
+          </span>
+          <h2 id="s5-title">
+            HTAP 实时分析
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  TiFlash 是 TiKV 的列存副本,Raft Learner 角色
+                </li>
+                <li>
+                  主从复制:TiKV(行存)→ Raft → TiFlash(列存)
+                </li>
+                <li>
+                  查询智能路由:小结果 TiKV,大分析 TiFlash
+                </li>
+                <li>
+                  CREATE TABLE ... SET TIFLASH REPLICA = 2 启用
+                </li>
+                <li>
+                  适用场景:同一份数据,既支持 OLTP 又支持 OLAP
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <div class="alert alert-tip">
+          <span class="alert-icon">
+            💡 镜像选择
+          </span>
+          <div class="alert-body">
+            <p>
+              pingcap/tidb:v7.5 官方 + pingcap/pd + pingcap/tikv
+            </p>
+          </div>
+        </div>
+        <div class="alert alert-warn">
+          <span class="alert-icon">
+            ⚠️ 资源
+          </span>
+          <div class="alert-body">
+            <p>
+              单节点 4C/8GB 起步,生产 16C/32GB 起步
+            </p>
+          </div>
+        </div>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">
+            FAQ
+          </span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                TiDB 3 层架构
+              </h3>
+              <p class="faq-a">
+                PD(Placement Driver):集群元数据 + 调度 + TSO 时间戳
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                最小集群 5 节点
+              </h3>
+              <p class="faq-a">
+                pd1/pd2/pd3 三个 PD 节点(需奇数)
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                MySQL 兼容性
+              </h3>
+              <p class="faq-a">
+                协议兼容:MySQL 5.7 / 8.0 协议
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                水平扩缩容 3 步
+              </h3>
+              <p class="faq-a">
+                1) 添加 TiKV 节点:扩容只需 docker run 新节点 + tiup scale-out
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                HTAP 实时分析
+              </h3>
+              <p class="faq-a">
+                TiFlash 是 TiKV 的列存副本,Raft Learner 角色
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+      <section class="section" id="practice">
+        <span class="section-num">
+          实战代码
+        </span>
+        <h2 id="practice-title">
+          实战代码示例
+        </h2>
+        <div class="content-card">
+          <h3 class="content-card-title">
+            📝 TiDB 5 节点
+          </h3>
+          <p class="content-card-body">
+            完整可执行代码,直接复制即可在生产环境使用:
+          </p>
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">
+              TiDB 5 节点 · yaml
+            </span>
+            <button class="code-copy" aria-label="复制代码">
+              复制
+            </button>
+          </div>
+          <pre>
+            <code class="language-yaml">
+services:
+  pd1: { image: pingcap/pd:v7.5 }
+  tikv1: { image: pingcap/tikv:v7.5 }
+  tidb1: { image: pingcap/tidb:v7.5 }
+  tiflash1: { image: pingcap/tiflash:v7.5 }
+            </code>
+          </pre>
+        </div>
+      </section>
+      <section class="section" id="workflow">
+        <span class="section-num">
+          操作流程
+        </span>
+        <h2 id="workflow-title">
+          可视化操作流程
+        </h2>
+        <div class="content-card">
+          <h3 class="content-card-title">
+            🔄 5 步标准操作流程
+          </h3>
+          <ol class="content-card-body" style="font-size:15px;line-height:1.8">
+            <li>
+              <strong>
+                启动 PD(3)
+              </strong>
+              → 启动容器或检查环境
+            </li>
+            <li>
+              <strong>
+                启动 TiKV(3+)
+              </strong>
+              → 拉取依赖或配置
+            </li>
+            <li>
+              <strong>
+                启动 TiDB(2+)
+              </strong>
+              → 启动核心服务
+            </li>
+            <li>
+              <strong>
+                可选 TiFlash
+              </strong>
+              → 验证运行状态
+            </li>
+            <li>
+              <strong>
+                验证 MySQL 协议
+              </strong>
+              → 部署上线
+            </li>
+          </ol>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本课程
+        </h3>
+        <p class="footer-meta">
+          TiDB 容器化分布式数据库实战 · Docker 容器化实战系列课程。所有代码均经过实测,可直接运行于 Docker 20+ / Docker Desktop 4+ / K8s 1.24+ 环境。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            相关课程
+          </strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            完整 56 篇课程
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方
+          </a>
+          ·
+          <a href="https://kubernetes.io" style="color:#c4d1de">
+            Kubernetes 官方
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 实战系列 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-course-49';
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('.code-copy').forEach(function(a){
+    a.onclick=async function(){
+      var pre=a.closest('.code-block').querySelector('pre');if(!pre) return;
+      var text=pre.innerText;
+      try{await navigator.clipboard.writeText(text);var o=a.innerText;a.innerText='已复制';a.classList.add('success');setTimeout(function(){a.innerText=o;a.classList.remove('success')},1500)}catch(e){}
+    }
+  });
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

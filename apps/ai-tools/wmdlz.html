@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hertz外贸站三档方案 | 5000元独立站建设指南</title>
+    <meta name="description" content="基于 Hertz (Go) + HTML 模板渲染，5000元总预算下的单产品外贸独立站三档方案（基础版/标准版/高阶版），含页面框架、内容结构、设计思路、工作量拆解和费用构成。">
+    <meta name="keywords" content="Hertz, Go语言, 外贸独立站, 单页站, HTML模板, 5000元建站, B2B网站, WhatsApp对接">
+    
+    <link rel="canonical" href="https://example.com/hertz-trade-site-plan">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://example.com/hertz-trade-site-plan">
+    <meta property="og:title" content="Hertz外贸站三档方案 | 5000元独立站建设指南">
+    <meta property="og:description" content="基于 Hertz (Go) + HTML 模板渲染，5000元总预算下的单产品外贸独立站三档方案">
+    <meta property="og:site_name" content="外贸站方案库">
+    <meta property="og:locale" content="zh_CN">
+    
+    <!-- WeChat Sharing -->
+    <meta name="wechat-share-title" content="Hertz外贸站三档方案">
+    <meta name="wechat-share-desc" content="5000元总预算，基于 Hertz + HTML 模板的外贸独立站三档方案">
+    
+    <style>
+        /* ========== 基础样式 ========== */
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #2563EB;
+            --primary-light: #60A5FA;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --danger: #EF4444;
+            --bg-dark: #0F172A;
+            --bg-card: #1E293B;
+            --bg-card-hover: #334155;
+            --border: #334155;
+            --border-light: #475569;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+            --gradient-accent: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+            --google-blue: #4285F4;
+            --google-green: #34A853;
+            --google-grey: #5F6368;
+            --whatsapp-green: #25D366;
+            --whatsapp-dark-green: #128C7E;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        /* ========== 网格背景 ========== */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(16, 185, 129, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(16, 185, 129, 0.02) 1px, transparent 1px);
+            background-size: 100px 100px, 100px 100px, 50px 50px, 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* ========== 渐变文字 ========== */
+        .gradient-text {
+            background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* ========== 容器 ========== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* ========== 导航 ========== */
+        .nav {
+            position: sticky;
+            top: 0;
+            background: rgba(10, 10, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            z-index: 1000;
+            padding: 16px 0;
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .nav-logo {
+            font-size: 28px;
+        }
+        
+        .nav-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #F1F5F9;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+        
+        .nav-link {
+            color: #94A3B8;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: #10B981;
+        }
+        
+        /* ========== 英雄区 ========== */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+        
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 0, 128, 0.1);
+            border: 1px solid rgba(255, 0, 128, 0.3);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            color: #3B82F6;
+            margin-bottom: 24px;
+        }
+        
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.15;
+        }
+        
+        .hero-subtitle {
+            font-size: 24px;
+            color: #94A3B8;
+            margin-bottom: 32px;
+        }
+        
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        
+        .hero-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748B;
+            font-size: 14px;
+        }
+        
+        .hero-tags {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .hero-tag {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #10B981;
+        }
+        
+        /* ========== 核心信息卡片 ========== */
+        .core-info-section {
+            padding: 40px 0;
+        }
+        
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        
+        .core-info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        
+        .core-info-card {
+            background: rgba(20, 20, 40, 0.6);
+            border: 1px solid rgba(255, 0, 128, 0.2);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s;
+        }
+        
+        .core-info-card:hover {
+            border-color: #3B82F6;
+            transform: translateY(-4px);
+        }
+        
+        .core-info-card.highlight {
+            background: linear-gradient(135deg, rgba(255, 0, 128, 0.15) 0%, rgba(0, 255, 255, 0.1) 100%);
+            border-color: rgba(255, 0, 128, 0.5);
+        }
+        
+        .core-info-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+        
+        .core-info-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #F1F5F9;
+            margin-bottom: 12px;
+        }
+        
+        .core-info-desc {
+            font-size: 14px;
+            color: #94A3B8;
+            line-height: 1.7;
+        }
+        
+        /* ========== 方法论章节 ========== */
+        .methods-section {
+            padding: 60px 0;
+        }
+        
+        .methods-level {
+            margin-bottom: 60px;
+        }
+        
+        .level-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 0, 128, 0.2);
+        }
+        
+        .level-badge {
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .level-badge.shallow {
+            background: rgba(0, 255, 255, 0.15);
+            color: #10B981;
+        }
+        
+        .level-badge.middle {
+            background: rgba(255, 200, 0, 0.15);
+            color: #FFC800;
+        }
+        
+        .level-badge.deep {
+            background: rgba(255, 0, 128, 0.15);
+            color: #3B82F6;
+        }
+        
+        .level-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .level-desc {
+            color: #64748B;
+            font-size: 14px;
+        }
+        
+        /* ========== 方法卡片 ========== */
+        .method-card {
+            background: rgba(20, 20, 40, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+            transition: all 0.3s;
+        }
+        
+        .method-card:hover {
+            border-color: rgba(0, 255, 255, 0.3);
+        }
+        
+        .method-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .method-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: #0F172A;
+            flex-shrink: 0;
+        }
+        
+        .method-title-wrap {
+            flex: 1;
+        }
+        
+        .method-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #F1F5F9;
+            margin-bottom: 4px;
+        }
+        
+        .method-tag {
+            display: inline-block;
+            background: rgba(255, 0, 128, 0.1);
+            border: 1px solid rgba(255, 0, 128, 0.3);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            color: #3B82F6;
+        }
+        
+        .method-content {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .method-item {
+            background: rgba(10, 10, 20, 0.6);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .method-item-label {
+            font-size: 12px;
+            color: #10B981;
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .method-item-content {
+            font-size: 14px;
+            color: #CBD5E1;
+            line-height: 1.7;
+        }
+        
+        .method-item-content strong {
+            color: #3B82F6;
+        }
+        
+        .method-item-content em {
+            color: #FFC800;
+            font-style: normal;
+        }
+        
+        /* ========== 执行路线图 ========== */
+        .roadmap-section {
+            padding: 60px 0;
+        }
+        
+        .roadmap-table {
+            background: rgba(20, 20, 40, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .roadmap-header {
+            display: grid;
+            grid-template-columns: 80px 100px 1fr 1fr 1fr;
+            background: rgba(255, 0, 128, 0.1);
+            border-bottom: 1px solid rgba(255, 0, 128, 0.2);
+            padding: 16px 24px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #F1F5F9;
+        }
+        
+        .roadmap-row {
+            display: grid;
+            grid-template-columns: 80px 100px 1fr 1fr 1fr;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            align-items: start;
+            transition: background 0.3s;
+        }
+        
+        .roadmap-row:last-child {
+            border-bottom: none;
+        }
+        
+        .roadmap-row:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        .roadmap-phase {
+            font-weight: 700;
+            color: #3B82F6;
+            font-size: 18px;
+        }
+        
+        .roadmap-timing {
+            color: #10B981;
+            font-size: 13px;
+        }
+        
+        .roadmap-cell {
+            font-size: 14px;
+            color: #CBD5E1;
+            line-height: 1.6;
+        }
+        
+        .roadmap-timing-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        
+        .roadmap-timing-badge.first {
+            background: rgba(0, 255, 255, 0.15);
+            color: #10B981;
+        }
+        
+        .roadmap-timing-badge.sync {
+            background: rgba(255, 200, 0, 0.15);
+            color: #FFC800;
+        }
+        
+        .roadmap-timing-badge.then {
+            background: rgba(255, 0, 128, 0.15);
+            color: #3B82F6;
+        }
+        
+        .roadmap-timing-badge.next {
+            background: rgba(0, 255, 136, 0.15);
+            color: #10B981;
+        }
+        
+        .roadmap-timing-badge.final {
+            background: rgba(136, 132, 216, 0.15);
+            color: #8B5CF6;
+        }
+        
+        /* ========== 总结区域 ========== */
+        .conclusion-section {
+            padding: 60px 0;
+        }
+        
+        .conclusion-card {
+            background: linear-gradient(135deg, rgba(255, 0, 128, 0.1) 0%, rgba(0, 255, 255, 0.08) 100%);
+            border: 1px solid rgba(255, 0, 128, 0.3);
+            border-radius: 24px;
+            padding: 48px;
+            text-align: center;
+        }
+        
+        .conclusion-icon {
+            font-size: 48px;
+            margin-bottom: 24px;
+        }
+        
+        .conclusion-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        
+        .conclusion-text {
+            font-size: 18px;
+            color: #CBD5E1;
+            line-height: 1.8;
+            margin-bottom: 32px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .conclusion-text strong {
+            color: #3B82F6;
+        }
+        
+        .conclusion-highlight {
+            background: rgba(10, 10, 20, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 32px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .conclusion-highlight-title {
+            font-size: 16px;
+            color: #10B981;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .conclusion-highlight-text {
+            font-size: 15px;
+            color: #94A3B8;
+            line-height: 1.7;
+        }
+        
+        /* ========== 按钮 ========== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+            color: #0F172A;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 0, 128, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #F1F5F9;
+        }
+        
+        .btn-outline:hover {
+            border-color: #10B981;
+            color: #10B981;
+        }
+        
+        /* ========== 页脚 ========== */
+        .footer {
+            padding: 40px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .footer-text {
+            color: #475569;
+            font-size: 14px;
+        }
+        
+        /* ========== 回到顶部 ========== */
+        .back-to-top {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #0F172A;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-4px);
+        }
+        
+        /* ========== 响应式 ========== */
+        @media (max-width: 1024px) {
+            .core-info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .roadmap-header,
+            .roadmap-row {
+                grid-template-columns: 60px 80px 1fr 1fr 1fr;
+                padding: 16px;
+            }
+            
+            .roadmap-cell {
+                font-size: 13px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .hero-subtitle {
+                font-size: 18px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .core-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .method-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .roadmap-table {
+                overflow-x: auto;
+            }
+            
+            .roadmap-header,
+            .roadmap-row {
+                grid-template-columns: 60px 80px 1fr;
+                min-width: 600px;
+            }
+            
+            .roadmap-header > *:nth-child(4),
+            .roadmap-header > *:nth-child(5),
+            .roadmap-row > *:nth-child(4),
+            .roadmap-row > *:nth-child(5) {
+                display: none;
+            }
+            
+            .conclusion-card {
+                padding: 32px 24px;
+            }
+            
+            .section-title {
+                font-size: 24px;
+            }
+            
+            .level-title {
+                font-size: 20px;
+            }
+            
+            .method-title {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero {
+                padding: 60px 0 40px;
+            }
+            
+            .hero h1 {
+                font-size: 28px;
+            }
+            
+            .hero-meta {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .hero-tags {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .core-info-card {
+                padding: 20px;
+            }
+            
+            .method-card {
+                padding: 20px;
+            }
+            
+            .method-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .method-number {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+        }
+        
+        /* ========== 打印样式 ========== */
+        @media print {
+            .nav,
+            .back-to-top {
+                display: none;
+            }
+            
+            .grid-bg {
+                display: none;
+            }
+            
+            body {
+                background: white;
+                color: black;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="grid-bg"></div>
+    
+    <!-- 导航 -->
+    <nav class="nav">
+        <div class="container nav-content">
+            <div class="nav-brand">
+                <span class="nav-logo">🌐</span>
+                <span class="nav-title">外贸站方案库</span>
+            </div>
+            <div class="nav-links">
+                <a href="#overview" class="nav-link">调研目标</a>
+                <a href="#methods" class="nav-link">调研手段</a>
+                <a href="#roadmap" class="nav-link">执行路线图</a>
+                <a href="#conclusion" class="nav-link">总结</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 英雄区 -->
+    <header class="hero">
+        <div class="container">
+            <span class="hero-badge">📋 方案调研</span>
+            <h1><span class="gradient-text">Hertz外贸站三档方案</span></h1>
+            <p class="hero-subtitle">5000元总预算，基于 Hertz (Go) + HTML 模板渲染<br>单产品外贸独立站完整建设方案</p>
+            
+            <div class="hero-meta">
+                <div class="hero-meta-item">
+                    <span>📅</span>
+                    <span>2026年5月4日</span>
+                </div>
+                <div class="hero-meta-item">
+                    <span>⏱️</span>
+                    <span>预计周期：天级调研</span>
+                </div>
+                <div class="hero-meta-item">
+                    <span>💰</span>
+                    <span>预算：5000元</span>
+                </div>
+            </div>
+            
+            <div class="hero-tags">
+                <span class="hero-tag">Go语言</span>
+                <span class="hero-tag">Hertz框架</span>
+                <span class="hero-tag">HTML模板</span>
+                <span class="hero-tag">B2B外贸</span>
+                <span class="hero-tag">WhatsApp对接</span>
+                <span class="hero-tag">SEO优化</span>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 核心信息区 -->
+    <section id="overview" class="core-info-section">
+        <div class="container">
+            <h2 class="section-title"><span class="gradient-text">调研目标回顾</span></h2>
+            
+            <div class="core-info-grid">
+                <div class="core-info-card highlight">
+                    <div class="core-info-icon">🎯</div>
+                    <div class="core-info-title">核心信息点</div>
+                    <div class="core-info-desc">
+                        5000元总预算下，基于 Hertz（Go）+ HTML 模板渲染，建一个单产品外贸独立站的三档方案（基础版 / 标准版 / 高阶版），需精确到页面框架、内容结构、设计思路、工作量拆解和费用构成
+                    </div>
+                </div>
+                
+                <div class="core-info-card">
+                    <div class="core-info-icon">📊</div>
+                    <div class="core-info-title">辅助验证维度</div>
+                    <div class="core-info-desc">
+                        各档位交付物清单、开发周期、后续维护成本、SEO 深度优化覆盖项、WhatsApp 对接方案
+                    </div>
+                </div>
+                
+                <div class="core-info-card">
+                    <div class="core-info-icon">🚫</div>
+                    <div class="core-info-title">本轮不展开</div>
+                    <div class="core-info-desc">
+                        多语言、支付、会员、博客、广告投放、社媒运营
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: rgba(20, 20, 40, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 28px; margin-top: 32px;">
+                <p style="font-size: 16px; color: #CBD5E1; line-height: 1.9;">
+                    这是一个<strong style="color: #10B981;">主要依靠线上调研 + 部分行业经验判断</strong>的调研任务。因为方案设计需要联网获取 Hertz 框架最新版本能力、2026年独立站开发市场行情、WhatsApp Business API 接入现状、以及外贸 B2B 单页站的设计趋势——这些信息大多存在于官方文档、技术社区、外包平台和数据报告中，可通过多源交叉验证完成。
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 手段详细信息 -->
+    <section id="methods" class="methods-section">
+        <div class="container">
+            <h2 class="section-title"><span class="gradient-text">一、手段详细信息</span></h2>
+            
+            <!-- 浅层手段 -->
+            <div class="methods-level">
+                <div class="level-header">
+                    <span class="level-badge shallow">浅层手段</span>
+                    <span class="level-title gradient-text">快速获取公开数据</span>
+                </div>
+                
+                <!-- 手段1 -->
+                <div class="method-card">
+                    <div class="method-header">
+                        <div class="method-number">1</div>
+                        <div class="method-title-wrap">
+                            <div class="method-title">Hertz 框架能力摸底</div>
+                            <span class="method-tag">[AI可搜]</span>
+                        </div>
+                    </div>
+                    <div class="method-content">
+                        <div class="method-item">
+                            <div class="method-item-label">对核心信息点的作用</div>
+                            <div class="method-item-content">
+                                确认 Hertz 当前版本的模板渲染、静态文件服务、中间件生态是否支持单页站需求，直接影响方案的技术可行性
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">目标信息</div>
+                            <div class="method-item-content">
+                                Hertz 最新稳定版本号、HTML 模板渲染推荐方案（标准库 html/template 还是第三方）、静态资源托管最佳实践、生产部署方式
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">执行要点</div>
+                            <div class="method-item-content">
+                                搜索 Hertz GitHub 仓库 README 和 doc 目录；搜索 "Hertz HTML template rendering" 中英文；搜索 CloudWeGo 社区的生产案例
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">成本/耗时/可靠度</div>
+                            <div class="method-item-content">
+                                <strong>免费</strong> / <em>小时级</em> / 一手数据（官方文档）
+                            </div>
+                        </div>
+                        <div class="method-item" style="grid-column: 1 / -1;">
+                            <div class="method-item-label">注意事项</div>
+                            <div class="method-item-content">
+                                关注 2026年5月 前的最新 release，确认版本稳定性
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 手段2 -->
+                <div class="method-card">
+                    <div class="method-header">
+                        <div class="method-number">2</div>
+                        <div class="method-title-wrap">
+                            <div class="method-title">外贸 B2B 单产品站竞品调研</div>
+                            <span class="method-tag">[AI可搜]</span>
+                        </div>
+                    </div>
+                    <div class="method-content">
+                        <div class="method-item">
+                            <div class="method-item-label">对核心信息点的作用</div>
+                            <div class="method-item-content">
+                                收集当前主流外贸单产品独立站的页面结构模式和设计趋势，为三档方案的设计思路提供参照基准
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">目标信息</div>
+                            <div class="method-item-content">
+                                10-20 个外贸 B2B 单产品/少产品独立站的页面结构、内容模块布局、CTA 按钮策略、WhatsApp 引流方式
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">执行要点</div>
+                            <div class="method-item-content">
+                                搜索 "best B2B single product website examples 2025 2026"、"外贸单产品独立站案例"；分析页面共通结构
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">成本/耗时/可靠度</div>
+                            <div class="method-item-content">
+                                <strong>免费</strong> / <em>小时级</em> / 二手数据
+                            </div>
+                        </div>
+                        <div class="method-item" style="grid-column: 1 / -1;">
+                            <div class="method-item-label">注意事项</div>
+                            <div class="method-item-content">
+                                重点看工业品/机械/设备类单产品站，与你场景最接近
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 手段3 -->
+                <div class="method-card">
+                    <div class="method-header">
+                        <div class="method-number">3</div>
+                        <div class="method-title-wrap">
+                            <div class="method-title">独立站开发市场行情</div>
+                            <span class="method-tag">[AI可搜]</span>
+                        </div>
+                    </div>
+                    <div class="method-content">
+                        <div class="method-item">
+                            <div class="method-item-label">对核心信息点的作用</div>
+                            <div class="method-item-content">
+                                获取 2026年 Go 开发者外包时薪、项目制报价区间，为三档方案的工时核算和定价提供市场基准
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">目标信息</div>
+                            <div class="method-item-content">
+                                Go 后端开发者时薪（国内/远程）、HTML 切图前端时薪、整站外包项目报价区间、模板化建站 vs 定制开发的价差
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">执行要点</div>
+                            <div class="method-item-content">
+                                搜索 "Go 开发者外包时薪 2025 2026"、"独立站开发报价 5000"、"freelance Go developer hourly rate 2026"；查看码市/程序员客栈/Upwork 上 Go 项目报价
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">成本/耗时/可靠度</div>
+                            <div class="method-item-content">
+                                <strong>免费</strong> / <em>小时级</em> / 二手数据
+                            </div>
+                        </div>
+                        <div class="method-item" style="grid-column: 1 / -1;">
+                            <div class="method-item-label">注意事项</div>
+                            <div class="method-item-content">
+                                区分国内接单平台和海外平台的价差，以国内为准
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 中层手段 -->
+            <div class="methods-level">
+                <div class="level-header">
+                    <span class="level-badge middle">中层手段</span>
+                    <span class="level-title gradient-text">专业领域深度调研</span>
+                </div>
+                
+                <!-- 手段4 -->
+                <div class="method-card">
+                    <div class="method-header">
+                        <div class="method-number">4</div>
+                        <div class="method-title-wrap">
+                            <div class="method-title">WhatsApp Business API 对接方案</div>
+                            <span class="method-tag">[AI可搜]</span>
+                        </div>
+                    </div>
+                    <div class="method-content">
+                        <div class="method-item">
+                            <div class="method-item-label">对核心信息点的作用</div>
+                            <div class="method-item-content">
+                                确定在单页站上实现 WhatsApp 一键聊天的技术路径和费用，直接影响方案的功能完整性和成本核算
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">目标信息</div>
+                            <div class="method-item-content">
+                                WhatsApp Business API 的接入方式（免费 click-to-chat vs 付费 API）、链接格式、是否需要 Meta 审核、2026年政策变化
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">执行要点</div>
+                            <div class="method-item-content">
+                                搜索 "WhatsApp Business API click to chat link 2026"、"WhatsApp 独立站对接方案"、"wa.me 链接使用限制"
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">成本/耗时/可靠度</div>
+                            <div class="method-item-content">
+                                <strong>免费</strong> / <em>小时级</em> / 一手数据（Meta 官方文档）+ 二手数据
+                            </div>
+                        </div>
+                        <div class="method-item" style="grid-column: 1 / -1;">
+                            <div class="method-item-label">注意事项</div>
+                            <div class="method-item-content">
+                                重点确认免费 click-to-chat 方式是否仍可用，这决定零成本对接是否可行
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 手段5 -->
+                <div class="method-card">
+                    <div class="method-header">
+                        <div class="method-number">5</div>
+                        <div class="method-title-wrap">
+                            <div class="method-title">SEO 深度优化技术要求</div>
+                            <span class="method-tag">[AI可搜]</span>
+                        </div>
+                    </div>
+                    <div class="method-content">
+                        <div class="method-item">
+                            <div class="method-item-label">对核心信息点的作用</div>
+                            <div class="method-item-content">
+                                明确 2026年 Google 对单页站的 SEO 核心要求，确保方案中的 SEO 深度优化项是可落地的、有明确技术指标的
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">目标信息</div>
+                            <div class="method-item-content">
+                                Google 2025-2026 SEO 核心指标（Core Web Vitals、Mobile First）、单页站 SEO 最佳实践、结构化数据（Schema.org）要求、TDK 策略、页面加载速度基准
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">执行要点</div>
+                            <div class="method-item-content">
+                                搜索 "Google SEO best practices 2026 single page site"、"Core Web Vitals 标准 2026"、"结构化数据 Product schema 外贸站"
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">成本/耗时/可靠度</div>
+                            <div class="method-item-content">
+                                <strong>免费</strong> / <em>小时级</em> / 一手数据（Google 官方）
+                            </div>
+                        </div>
+                        <div class="method-item" style="grid-column: 1 / -1;">
+                            <div class="method-item-label">注意事项</div>
+                            <div class="method-item-content">
+                                区分 B2B 和 B2C 的 SEO 策略差异，你这个场景是 B2B 询盘型
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 手段6 -->
+                <div class="method-card">
+                    <div class="method-header">
+                        <div class="method-number">6</div>
+                        <div class="method-title-wrap">
+                            <div class="method-title">服务器 + 域名部署费用</div>
+                            <span class="method-tag">[AI可搜]</span>
+                        </div>
+                    </div>
+                    <div class="method-content">
+                        <div class="method-item">
+                            <div class="method-item-label">对核心信息点的作用</div>
+                            <div class="method-item-content">
+                                获取 2026年主流云服务器的海外节点价格，为方案中的部署费用提供精确数字，也是三档方案的重要分档维度
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">目标信息</div>
+                            <div class="method-item-content">
+                                阿里云/腾讯云/AWS 海外轻量服务器最低配置价格、域名注册和 SSL 证书费用、CDN 费用、首年 vs 续费价差
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">执行要点</div>
+                            <div class="method-item-content">
+                                搜索 "阿里云轻量服务器海外价格 2026"、"AWS Lightsail pricing 2026"、"域名 SSL 证书费用 2026"；对比三家首年最低价
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">成本/耗时/可靠度</div>
+                            <div class="method-item-content">
+                                <strong>免费</strong> / <em>小时级</em> / 一手数据（官网定价页）
+                            </div>
+                        </div>
+                        <div class="method-item" style="grid-column: 1 / -1;">
+                            <div class="method-item-label">注意事项</div>
+                            <div class="method-item-content">
+                                以面向东南亚/中东/南美的海外访客为前提，选新加坡或香港节点
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 深层手段 -->
+            <div class="methods-level">
+                <div class="level-header">
+                    <span class="level-badge deep">深层手段</span>
+                    <span class="level-title gradient-text">综合分析与方案建模</span>
+                </div>
+                
+                <!-- 手段7 -->
+                <div class="method-card">
+                    <div class="method-header">
+                        <div class="method-number">7</div>
+                        <div class="method-title-wrap">
+                            <div class="method-title">三档方案工作量模型拆解</div>
+                            <span class="method-tag">[AI可搜] + 经验判断</span>
+                        </div>
+                    </div>
+                    <div class="method-content">
+                        <div class="method-item">
+                            <div class="method-item-label">对核心信息点的作用</div>
+                            <div class="method-item-content">
+                                基于前述所有调研数据，建立 "工时 × 单价 + 基础设施成本" 的定价模型，产出三个档位的精确费用构成
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">目标信息</div>
+                            <div class="method-item-content">
+                                各档位的功能范围边界、具体工时估算、交付物清单、费用构成明细、开发周期
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">执行要点</div>
+                            <div class="method-item-content">
+                                设定三个档位的功能裁剪线；按设计工时 + 前端工时 + 后端工时 + 部署工时分项估算；总费用控制在 5000 以内
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">成本/耗时/可靠度</div>
+                            <div class="method-item-content">
+                                <strong>免费</strong> / <em>天级</em> / 推测性信息（基于市场行情建模）
+                            </div>
+                        </div>
+                        <div class="method-item" style="grid-column: 1 / -1;">
+                            <div class="method-item-label">注意事项</div>
+                            <div class="method-item-content">
+                                5000 元预算极度紧张（约合 20-35 个 Go 开发者工时），必须大幅依赖模板和开源方案
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 手段8 -->
+                <div class="method-card">
+                    <div class="method-header">
+                        <div class="method-number">8</div>
+                        <div class="method-title-wrap">
+                            <div class="method-title">开源 Hertz + HTML 模板方案参考</div>
+                            <span class="method-tag">[AI可搜]</span>
+                        </div>
+                    </div>
+                    <div class="method-content">
+                        <div class="method-item">
+                            <div class="method-item-label">对核心信息点的作用</div>
+                            <div class="method-item-content">
+                                寻找 GitHub 上现有的 Hertz + HTML 模板渲染项目、或者 Go 语言的单页站脚手架，作为方案设计的起点和加速器
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">目标信息</div>
+                            <div class="method-item-content">
+                                GitHub 上使用 Hertz 做模板渲染的开源项目、Go 语言的 landing page 脚手架/模板项目
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">执行要点</div>
+                            <div class="method-item-content">
+                                搜索 "Hertz template demo GitHub"、"Go HTML landing page template GitHub"、"Go single page website boilerplate"
+                            </div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-label">成本/耗时/可靠度</div>
+                            <div class="method-item-content">
+                                <strong>免费</strong> / <em>小时级</em> / 一手数据（开源仓库）
+                            </div>
+                        </div>
+                        <div class="method-item" style="grid-column: 1 / -1;">
+                            <div class="method-item-label">注意事项</div>
+                            <div class="method-item-content">
+                                关注 Star 数、最近更新时间、License 是否允许商用
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 执行路线图 -->
+    <section id="roadmap" class="roadmap-section">
+        <div class="container">
+            <h2 class="section-title"><span class="gradient-text">二、推荐执行顺序</span></h2>
+            
+            <div class="roadmap-table">
+                <div class="roadmap-header">
+                    <div>阶段</div>
+                    <div>时间</div>
+                    <div>优先执行手段</div>
+                    <div>为什么先做</div>
+                    <div>完成标准</div>
+                </div>
+                
+                <div class="roadmap-row">
+                    <div class="roadmap-phase">1</div>
+                    <div class="roadmap-timing"><span class="roadmap-timing-badge first">先做</span></div>
+                    <div class="roadmap-cell">手段1：Hertz 框架能力摸底</div>
+                    <div class="roadmap-cell">必须先确认 Hertz 是否支持单页模板渲染，否则整个技术方案需要推翻</div>
+                    <div class="roadmap-cell">拿到 Hertz 模板渲染的官方示例或社区案例</div>
+                </div>
+                
+                <div class="roadmap-row">
+                    <div class="roadmap-phase">2</div>
+                    <div class="roadmap-timing"><span class="roadmap-timing-badge sync">同步</span></div>
+                    <div class="roadmap-cell">手段2：外贸 B2B 单产品站竞品调研</div>
+                    <div class="roadmap-cell">为方案设计提供页面结构和设计模式的参照基准，与框架调研无依赖</div>
+                    <div class="roadmap-cell">整理出 10+ 个案例的共通页面结构</div>
+                </div>
+                
+                <div class="roadmap-row">
+                    <div class="roadmap-phase">3</div>
+                    <div class="roadmap-timing"><span class="roadmap-timing-badge sync">同步</span></div>
+                    <div class="roadmap-cell">手段4：WhatsApp API 对接</div>
+                    <div class="roadmap-cell">确认免费 click-to-chat 方案可行性，决定 WhatsApp 模块的成本和技术路径</div>
+                    <div class="roadmap-cell">明确免费方案是否可用、链接格式</div>
+                </div>
+                
+                <div class="roadmap-row">
+                    <div class="roadmap-phase">4</div>
+                    <div class="roadmap-timing"><span class="roadmap-timing-badge then">然后</span></div>
+                    <div class="roadmap-cell">手段5：SEO 深度优化技术要求</div>
+                    <div class="roadmap-cell">有了页面结构后，才能确定每个页面的 SEO 优化点</div>
+                    <div class="roadmap-cell">整理出单页站 SEO 检查清单</div>
+                </div>
+                
+                <div class="roadmap-row">
+                    <div class="roadmap-phase">5</div>
+                    <div class="roadmap-timing"><span class="roadmap-timing-badge then">然后</span></div>
+                    <div class="roadmap-cell">手段6：服务器 + 域名部署费用</div>
+                    <div class="roadmap-cell">为三档方案的部署成本提供精确数字</div>
+                    <div class="roadmap-cell">拿到 3 家云厂商的最低配置价格</div>
+                </div>
+                
+                <div class="roadmap-row">
+                    <div class="roadmap-phase">6</div>
+                    <div class="roadmap-timing"><span class="roadmap-timing-badge next">接着</span></div>
+                    <div class="roadmap-cell">手段3：独立站开发市场行情</div>
+                    <div class="roadmap-cell">为工时定价提供市场基准</div>
+                    <div class="roadmap-cell">拿到 Go 开发者时薪区间和项目报价案例</div>
+                </div>
+                
+                <div class="roadmap-row">
+                    <div class="roadmap-phase">7</div>
+                    <div class="roadmap-timing"><span class="roadmap-timing-badge next">接着</span></div>
+                    <div class="roadmap-cell">手段8：开源模板方案参考</div>
+                    <div class="roadmap-cell">有了框架能力和页面结构后，定向搜索可复用的开源模板</div>
+                    <div class="roadmap-cell">找到 2-3 个可参考的开源项目</div>
+                </div>
+                
+                <div class="roadmap-row">
+                    <div class="roadmap-phase">8</div>
+                    <div class="roadmap-timing"><span class="roadmap-timing-badge final">最后</span></div>
+                    <div class="roadmap-cell">手段7：三档方案工作量模型拆解</div>
+                    <div class="roadmap-cell">汇总所有数据后，建模输出三档方案</div>
+                    <div class="roadmap-cell">产出完整的三档方案对比表</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 总结区域 -->
+    <section id="conclusion" class="conclusion-section">
+        <div class="container">
+            <div class="conclusion-card">
+                <div class="conclusion-icon">💡</div>
+                <h3 class="conclusion-title"><span class="gradient-text">下一步行动建议</span></h3>
+                <p class="conclusion-text">
+                    以上是本轮调研方案。<strong>你是否需要我继续对 [AI可搜] 渠道进行联网搜索拿信息？</strong> 如果需要，我会进入第六步做多轮搜索、交叉验证和可信度判断，然后基于真实数据出三档方案；如果不需要，我可以直接基于现有经验生成包含调研手段和执行路线图的报告。
+                </p>
+                
+                <div class="conclusion-highlight">
+                    <div class="conclusion-highlight-title">💰 坦率建议</div>
+                    <div class="conclusion-highlight-text">
+                        这次任务我建议你选择"需要联网搜索"。因为 5000 元预算下的方案设计对数字精度要求很高：Hertz 框架的最新模板方案、2026 年的云服务器价格、WhatsApp 政策变化、Go 开发者市场行情——这些数据如果凭经验估算，误差可能达到 30-50%，会让方案失去参考价值。
+                    </div>
+                </div>
+                
+                <div style="margin-top: 32px; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="window.location.reload();">
+                        🚀 开始联网搜索
+                    </button>
+                    <button class="btn btn-outline" onclick="window.print();">
+                        🖨️ 导出 PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-text">© 2026 外贸站方案库 | 仅供学习交流</p>
+        </div>
+    </footer>
+    
+    <!-- 回到顶部 -->
+    <button id="backToTop" class="back-to-top" title="回到顶部">↑</button>
+    
+    <!-- 结构化数据 -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Hertz外贸站三档方案",
+        "description": "基于 Hertz (Go) + HTML 模板渲染，5000元总预算下的单产品外贸独立站三档方案",
+        "author": {
+            "@type": "Organization",
+            "name": "外贸站方案库"
+        },
+        "datePublished": "2026-05-04"
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "首页", "item": "https://example.com"},
+            {"@type": "ListItem", "position": 2, "name": "方案库", "item": "https://example.com/plans"},
+            {"@type": "ListItem", "position": 3, "name": "Hertz外贸站三档方案"}
+        ]
+    }
+    </script>
+    
+    <!-- 功能脚本 -->
+    <script>
+        // 回到顶部按钮
+        const backToTopBtn = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 400) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // 平滑滚动到锚点
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // 导航高亮
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        window.addEventListener('scroll', function() {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.style.color = '';
+                if (link.getAttribute('href') === '#' + current) {
+                    link.style.color = '#10B981';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>B-01 Remotion 安装与环境配置 | 知识库</title>
+<meta name="description" content="Remotion 基础教程第一章,系统讲解 Node.js / npm / FFmpeg / Remotion CLI 的安装步骤,详解 npx create-video 初始化流程与项目目录结构,适合 React 视频开发的入门者。">
+<meta name="keywords" content="Remotion 安装, Node.js, FFmpeg, create-video, React 视频">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://example.com/remotion/B-01-installation.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 安装与环境配置">
+<meta property="og:description" content="Node.js / npm / FFmpeg / Remotion CLI 完整安装流程。">
+<meta property="og:url" content="https://example.com/remotion/B-01-installation.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<meta property="og:locale" content="zh_CN">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"B-01 Remotion 安装与环境配置","description":"Remotion 入门第一章,完整介绍 Node.js、FFmpeg、Remotion CLI 的安装与项目初始化。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 安装, Node.js, FFmpeg"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html" class="active">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="S-01-code-walkthrough.html">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-basic">基础层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">B-01 安装与环境配置</span>
+    </nav>
+    <h1 id="hero-title">B-01 安装与环境配置 <span class="level-badge level-B">B 基础</span></h1>
+    <p class="hero-sub">Node.js、npm、FFmpeg、Remotion CLI 完整安装流程,项目初始化与目录结构解读。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 8 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> 无</div>
+      <div class="hero-meta-item"><strong>类型</strong> 入门</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>环境要求</h2>
+<p>Remotion 是一个 <strong>React 视频框架</strong>,运行依赖以下三件套:</p>
+<ul>
+  <li><strong>Node.js 18+</strong>:JavaScript 运行时,推荐使用 LTS 版本</li>
+  <li><strong>npm/pnpm/yarn</strong>:包管理器,任选其一</li>
+  <li><strong>FFmpeg</strong>:视频编码工具,Remotion 用它做最终合流</li>
+</ul>
+<div class="alert alert-info"><span class="alert-icon">💡</span><div class="alert-body"><p>macOS 用户推荐用 <code>brew install node ffmpeg</code> 一次性装好两个核心依赖。Windows 需手动下载 FFmpeg.exe 并加入 PATH。</p></div></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>检查环境</h2>
+<p>在终端运行以下命令,确认版本符合要求:</p>
+<pre class="line-numbers"><code class="language-bash">node --version    # 应当 >= v18.0.0
+npm --version     # 应当 >= 9.0.0
+ffmpeg -version   # 应当 >= 4.0</code></pre>
+<p>任一命令报错都意味着该依赖未正确安装或未加入 PATH,需先修复再继续。</p>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>初始化项目</h2>
+<p>Remotion 提供了官方脚手架,一条命令即可创建项目:</p>
+<pre class="line-numbers"><code class="language-bash">npx create-video@latest my-video
+cd my-video
+npm install
+npm start</code></pre>
+<p>脚手架会询问 4 个选项:视频名称、模板(Blank / Hello World / Recorder 等)、React 版本、是否启用 TypeScript。本教程选 <strong>Blank</strong> + <strong>TypeScript</strong>。</p>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>项目结构</h2>
+<p>初始化完成后会看到如下目录:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>路径</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>src/Root.tsx</code></td><td>Composition 注册中心,所有视频元数据在此声明</td></tr>
+<tr><td><code>src/Composition.tsx</code></td><td>具体视频组件,放置所有 React 节点与逻辑</td></tr>
+<tr><td><code>src/index.ts</code></td><td>浏览器入口,挂载 React 到 DOM</td></tr>
+<tr><td><code>remotion.config.ts</code></td><td>Remotion 全局配置(分辨率、并发、bundle 行为)</td></tr>
+<tr><td><code>public/</code></td><td>静态资源目录,放字体、图片、视频原文件</td></tr>
+<tr><td><code>out/</code></td><td>渲染输出目录,生成的 MP4 会出现在此</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>常用命令</h2>
+<pre class="line-numbers"><code class="language-bash">npm start           # 启动 Studio(交互式预览,默认 http://localhost:3000)
+npm run build       # 打包成可部署的网站
+npx remotion render # 渲染为 MP4
+npx remotion still  # 渲染为单帧 PNG/JPG
+npx remotion compositions # 列出所有已注册的 Composition</code></pre>
+<div class="alert alert-tip"><span class="alert-icon">🎬</span><div class="alert-body"><p>Studio 是 Remotion 最强大的特性——它会在浏览器中实时渲染视频每一帧,改代码后秒级热更新,极大提升开发效率。</p></div></div>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>常见问题</h2>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p><strong>Q: 提示 "ffmpeg: command not found"?</strong><br>A: macOS 用 brew install ffmpeg;Ubuntu 用 sudo apt install ffmpeg;Windows 需手动下载 ffmpeg.exe 并加入系统 PATH。</p></div></div>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p><strong>Q: npm start 报 ENOSPC?</strong><br>A: Linux 需调大 inotify 限制:<code>echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p</code></p></div></div>
+</section>
+
+<div class="source-note">Remotion 官方文档(2025)、create-video 脚手架、Remotion CLI 命令参考</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>Remotion 全局 CLI</h2>
+<p>Remotion 提供全局 CLI,可在任意位置使用:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npm i -g @remotion/cli
+# 升级到最新版
+npm i -g @remotion/cli@latest
+
+# 创建新项目
+npx create-video@latest</code></pre></div>
+<p>常用命令:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>命令</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>npx remotion versions</code></td><td>查看已安装版本</td></tr>
+<tr><td><code>npx remotion upgrade</code></td><td>升级到最新稳定版</td></tr>
+<tr><td><code>npx remotion upgrade [pkg]</code></td><td>升级指定包</td></tr>
+<tr><td><code>npx remotion add &lt;pkg&gt;</code></td><td>添加官方插件</td></tr>
+<tr><td><code>npx remotion &lt;studio|render|still|compositions|lambda&gt;</code></td><td>子命令</td></tr>
+</tbody>
+</table></div>
+</section>
+
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>CLI Flags 完整速查</h2>
+<p>Remotion 4.x 全部 render/still CLI 标志:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Flag</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>--props=JSON</code></td><td>输入 props JSON 字符串</td></tr>
+<tr><td><code>--concurrency=N</code></td><td>并行帧数(默认 CPU 核数 / 2)</td></tr>
+<tr><td><code>--frame-range=A-B</code></td><td>只渲染 A 到 B 帧</td></tr>
+<tr><td><code>--output=out.mp4</code></td><td>输出文件</td></tr>
+<tr><td><code>--codec=h264|h265|vp8|vp9|prores</code></td><td>视频编码</td></tr>
+<tr><td><code>--crf=N</code></td><td>恒定质量因子(0-51,越小越好)</td></tr>
+<tr><td><code>--pixel-format=yuv420p</code></td><td>像素格式</td></tr>
+<tr><td><code>--image-format=jpeg|png</code></td><td>单帧图片格式</td></tr>
+<tr><td><code>--jpeg-quality=80</code></td><td>JPEG 质量 0-100</td></tr>
+<tr><td><code>--audio-codec=aac|mp3|opus</code></td><td>音频编码</td></tr>
+<tr><td><code>--audio-bitrate=320k</code></td><td>音频比特率</td></tr>
+<tr><td><code>--muted</code></td><td>去除音频</td></tr>
+<tr><td><code>--video-bitrate=2M</code></td><td>视频比特率</td></tr>
+<tr><td><code>--gl=angle|swiftshader|swangle|egl</code></td><td>WebGL 后端</td></tr>
+<tr><td><code>--browser-executable=/path</code></td><td>Chrome 路径</td></tr>
+<tr><td><code>--user-agent=UA</code></td><td>浏览器 UA</td></tr>
+<tr><td><code>--height=1080</code></td><td>输出缩放高度</td></tr>
+<tr><td><code>--scale=0.5</code></td><td>分辨率缩放</td></tr>
+<tr><td><code>--log=verbose|info|warn|error</code></td><td>日志级别</td></tr>
+<tr><td><code>--overwrite</code></td><td>覆盖已存在输出</td></tr>
+<tr><td><code>--enforce-audio-codec</code></td><td>强制音频编码</td></tr>
+</tbody>
+</table></div>
+<div class="alert alert-tip"><span class="alert-icon">⚡</span><div class="alert-body"><p>完整参数列表见 <strong>npx remotion render --help</strong>。Lambda API 镜像相同字段名。</p></div></div>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="index.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">总目录</span></a>
+  <a href="B-02-core-concepts.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">B-02 核心概念</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,按"基础 → 进阶 → 高级 → 场景"四层递进,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body>
+</html>

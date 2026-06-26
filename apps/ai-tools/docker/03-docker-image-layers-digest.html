@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Docker 镜像分层与摘要指南">
+    <meta name="format-detection" content="telephone=no">
+    <title>
+      Docker 镜像分层与镜像摘要(digest)完全指南 | AI 工具箱
+    </title>
+    <meta name="description" content="Docker 镜像由松耦合的只读镜像层组成,本文系统讲解分层的 3 大优势、镜像层构成、基础镜像层 vs 扩展镜像层、UnionFS 联合文件系统、Linux OS 启动过程、镜像摘要 digest 的 64 位 sha256 作用、多架构镜像原理。">
+    <meta name="keywords" content="Docker 镜像分层, 基础镜像层, 扩展镜像层, 容器层, UnionFS, 联合文件系统, 镜像摘要, digest, sha256, 多架构镜像, Multi-architecture Image, Manifest, Docker 镜像原理, 镜像文件系统, 分发散列值, Content Hash">
+    <meta name="author" content="AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="language" content="zh-CN">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/03-docker-image-layers-digest.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://tools.yy24365.com/ai-tools/docker/03-docker-image-layers-digest.html">
+    <link rel="alternate" hreflang="x-default" href="https://tools.yy24365.com/ai-tools/docker/03-docker-image-layers-digest.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker 镜像分层与摘要完全指南">
+    <meta property="og:description" content="分层原理 + UnionFS + digest + 多架构镜像完整讲解。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/03-docker-image-layers-digest.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/docker-image-layers-og.png">
+    <meta property="og:image:alt" content="Docker 镜像分层与摘要示意图">
+    <meta property="article:published_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:modified_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:section" content="DevOps">
+    <meta property="article:tag" content="镜像分层">
+    <meta property="article:tag" content="UnionFS">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Docker 镜像分层与摘要指南">
+    <meta name="twitter:description" content="镜像分层 + digest + 多架构镜像。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/docker-image-layers-og.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%232496ED' d='M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.083.185.185.185m-2.954-5.43h2.119a.186.186 0 00.186-.186V3.575a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m0 2.716h2.119a.187.187 0 00.186-.186V6.291a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.931 0h2.12a.186.186 0 00.184-.186V6.291a.185.185 0 00-.184-.185h-2.12a.185.185 0 00-.184.185v1.887c0 .102.082.185.184.186m-2.932 0h2.12a.185.185 0 00.184-.186V6.291a.185.185 0 00-.184-.185H5.166a.186.186 0 00-.185.185v1.887c0 .102.083.185.185.186m5.863 5.43h2.119a.186.186 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.082.185.185.185m-2.931 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.932 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.931 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m11.792 4.084h-2.119a.186.186 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.931 0h-2.119a.185.185 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.932 0h-2.118a.185.185 0 00-.184.185v1.886c0 .103.082.186.184.186h2.118a.186.186 0 00.185-.186v-1.886a.185.185 0 00-.185-.185m-2.931 0h-2.12a.185.185 0 00-.184.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.184-.186v-1.886a.185.185 0 00-.184-.185m-2.932 0H5.166a.186.186 0 00-.185.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.185-.186v-1.886a.186.186 0 00-.185-.185z'/%3E%3C/svg%3E">
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Docker 镜像分层与镜像摘要完全指南",
+  "description": "系统讲解 Docker 镜像分层的 3 大优势、镜像层构成、基础镜像层 vs 扩展镜像层、UnionFS 联合文件系统、Linux OS 启动过程、镜像摘要 digest 的 64 位 sha256、多架构镜像原理与 Manifest。",
+  "author": {"@type": "Organization", "name": "AI 工具箱"},
+  "publisher": {"@type": "Organization", "name": "AI 工具箱"},
+  "datePublished": "2026-06-03T00:00:00+08:00",
+  "dateModified": "2026-06-03T00:00:00+08:00",
+  "inLanguage": "zh-CN",
+  "mainEntityOfPage": "https://tools.yy24365.com/ai-tools/docker/03-docker-image-layers-digest.html",
+  "keywords": "Docker 镜像分层, UnionFS, digest, sha256, 多架构镜像, Manifest",
+  "about": {"@type": "SoftwareApplication", "name": "Docker Image Layers", "applicationCategory": "DeveloperApplication"},
+  "proficiencyLevel": "Intermediate"
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "首页", "item": "https://tools.yy24365.com/"},
+    {"@type": "ListItem", "position": 2, "name": "AI 工具", "item": "https://tools.yy24365.com/ai-tools/"},
+    {"@type": "ListItem", "position": 3, "name": "Docker 学习", "item": "https://tools.yy24365.com/ai-tools/docker/"},
+    {"@type": "ListItem", "position": 4, "name": "镜像分层与摘要", "item": "https://tools.yy24365.com/ai-tools/docker/03-docker-image-layers-digest.html"}
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Docker 为什么要把镜像分层?",
+      "acceptedAnswer": {"@type": "Answer", "text": "分层有 3 大优势:1) 每个分层<strong>只读</strong>,对分层的修改都是以新分层形式出现,不会破坏原分层内容;2) 每个分层<strong>只记录变更内容</strong>,所以节省空间;3) 不同镜像间<strong>实现资源共享</strong>,即不同镜像对相同下层镜像的复用。docker pull 在拉取之前会先获取要拉取镜像的所有 imageID,然后在本地查找这些分层。如果存在,不再拉取,而是共享本地的分层,节省了空间和网络带宽,提高了拉取效率。"}
+    },
+    {
+      "@type": "Question",
+      "name": "基础镜像层和扩展镜像层的区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "所有镜像的<strong>最下层</strong>都有一个看得到的基础镜像层(Base Image),基础镜像层的文件系统称为<strong>根文件系统</strong>(rootfs),rootfs 是建立在 Linux 中'看不到的'引导文件系统(bootfs)之上。在基础镜像层之上的镜像层称为<strong>扩展镜像层</strong>,是对基础镜像层功能的扩展。在 Dockerfile 中,每条指令都会生成一个扩展镜像层。"}
+    },
+    {
+      "@type": "Question",
+      "name": "什么是容器层(Union File System)?",
+      "acceptedAnswer": {"@type": "Answer", "text": "镜像运行起来就成了容器,而容器也具有文件系统。容器的文件系统在 Docker 镜像最外层之上增加了一个<strong>可读写</strong>的容器层。对文件的任何更改<strong>只存在于容器层</strong>,因此不会影响镜像本身。容器要修改某个文件,会从容器层开始向下一层层地查找,直到找到为止(类似 Copy-on-Write)。这就是<strong>Union File System(联合文件系统)</strong>的本质:多层叠加,下层只读,顶层可写。"}
+    },
+    {
+      "@type": "Question",
+      "name": "镜像摘要(digest) 是什么?",
+      "acceptedAnswer": {"@type": "Answer", "text": "每个镜像都有一个长度为<strong>64 位的 16 禁止字符串</strong>(hex) 作为其摘要 digest。摘要是镜像内容的 Hash 值,即所谓的 Content Hash,只要镜像内容发生变化,其内容散列值就会改变。默认的 Hash 算法是<strong>sha256</strong>。查看方式:<code>docker inspect &lt;镜像&gt;</code> 或 <code>docker images &lt;镜像&gt; --digest</code>。"}
+    },
+    {
+      "@type": "Question",
+      "name": "为什么有了 tag 还需要 digest?",
+      "acceptedAnswer": {"@type": "Answer", "text": "区分<strong>相同</strong> repository:tag 的<strong>不同</strong>镜像。比如镜像 xxx:2.8 修复 bug 后用原标签 push 回仓库,原镜像被覆盖。但生产环境还有运行中未修复的镜像容器,此时<strong>标签无法区分</strong>镜像是修复前还是修复后,这时就只能查看 digest 区分。digest 是不可变的,tag 是可变的。"}
+    },
+    {
+      "@type": "Question",
+      "name": "什么是多架构镜像?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Multi-architecture Image 多架构镜像是某个镜像针对不同操作系统/系统架构的不同镜像实现。即镜像的 &lt;repository&gt;:&lt;tag&gt; 是相同的,但是针对的操作系统/系统架构不同(如 linux/amd64、linux/arm64、windows/amd64)。无论用户使用什么操作系统,通过 docker pull 拉取到的一定是针对该操作系统的镜像,用户无需考虑操作系统问题。Docker Hub 能根据 pull 请求自动选择对应的镜像。"}
+    },
+    {
+      "@type": "Question",
+      "name": "什么是分发散列值(Distribution Hash)?",
+      "acceptedAnswer": {"@type": "Answer", "text": "在 push 或 pull 时,都会对镜像进行<strong>压缩</strong>以减少网络带宽。但压缩会改变镜像内容,导致传输后与 digest 不符合。为解决,Docker 为镜像配置了<strong>Distribution Hash(分发散列值)</strong>:在镜像压缩后计算分发散列值,随镜像一同发送;接受方收到后,立即计算压缩后镜像的分发散列值,与携带的对比,相同则传输没问题。Distribution Hash 解决了压缩传输后与原始 digest 不符的验证问题。"}
+    }
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "查看镜像摘要 digest 的 2 种方式",
+  "description": "通过 docker inspect 或 docker images --digest 查看镜像的 sha256 摘要",
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "方式一:docker inspect", "text": "docker inspect zookeeper:latest,在返回的 JSON 中找到 RepoDigests 字段"},
+    {"@type": "HowToStep", "position": 2, "name": "方式二:docker images --digest", "text": "docker images zookeeper --digest,直接列出镜像的 DIGEST 列"},
+    {"@type": "HowToStep", "position": 3, "name": "理解摘要含义", "text": "digest 是 64 位 sha256 hex 字符串,只要镜像内容变化 digest 就会变;tag 是可变的,digest 是不可变的"},
+    {"@type": "HowToStep", "position": 4, "name": "用 digest 精确拉取", "text": "docker pull zookeeper@sha256:abc123...,可以拉取特定 digest 的镜像,避免 tag 被覆盖后拉错版本"}
+  ]
+}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress" role="progressbar" aria-label="阅读进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand" aria-label="AI 工具箱首页">
+          <span class="brand-mark">
+            AI
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main" role="main">
+      <section class="hero" aria-labelledby="article-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 学习
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              镜像分层与摘要
+            </span>
+          </nav>
+          <h1 id="article-title">
+            Docker 镜像分层与镜像摘要完全指南
+          </h1>
+          <p class="hero-sub">
+            Docker 镜像由松耦合的只读镜像层组成。本文系统讲解分层的 3 大优势、镜像层构成、基础/扩展镜像层、UnionFS 联合文件系统、Linux OS 启动过程、镜像摘要 digest 的 64 位 sha256 作用,以及多架构镜像原理与 Manifest。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              ★★★ 中级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                阅读时长
+              </strong>
+              约 25 分钟
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                核心概念
+              </strong>
+              分层/UnionFS/digest/sha256
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                最后更新
+              </strong>
+              2026-06-03
+            </div>
+          </div>
+          <div class="hero-tags" aria-label="标签">
+            <span class="tag">
+              镜像分层
+            </span>
+            <span class="tag">
+              UnionFS
+            </span>
+            <span class="tag">
+              digest
+            </span>
+            <span class="tag">
+              sha256
+            </span>
+            <span class="tag">
+              多架构
+            </span>
+            <span class="tag">
+              Manifest
+            </span>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <article>
+          <section class="section" aria-labelledby="intro">
+            <h2 id="intro">
+              为什么需要理解镜像分层
+            </h2>
+            <p>
+              Docker 镜像由一些
+              <strong>
+                松耦合的只读镜像层
+              </strong>
+              组成,Docker Daemon 负责堆叠这些镜像层,并将它们管理为一个整体,对外表现出的是一个独立的对象。
+            </p>
+            <p>
+              <code>
+docker pull
+              </code>
+              拉取镜像时,每个
+              <code>
+pull complete
+              </code>
+              行就代表下载了一个
+              <strong>
+                镜像层
+              </strong>
+              ——理解这一点对掌握 Docker 镜像原理至关重要。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                镜像层核心定义
+              </div>
+              <div class="concept-body">
+                <p>
+                  每个镜像层由两部分构成:
+                  <br>
+                  1)
+                  <strong>
+                    镜像文件系统
+                  </strong>
+                  :拥有镜像所有镜像层的数据内容;
+                  <br>
+                  2)
+                  <strong>
+                    镜像 json 文件
+                  </strong>
+                  :描述镜像相关属性的集合,通过
+                  <code>
+docker inspect <镜像>
+                  </code>
+                  可以查看。
+                  <br>
+                  两者具有
+                  <strong>
+                    相同的 imageID
+                  </strong>
+                  。
+                </p>
+              </div>
+            </div>
+          </section>
+          <nav class="toc" id="toc" aria-labelledby="toc-title">
+            <h2 class="toc-title" id="toc-title">
+              本文目录
+            </h2>
+            <ul class="toc-grid">
+              <li>
+                <a href="#s1">
+                  <span class="toc-num">
+                    1
+                  </span>
+                  分层的 3 大优势
+                </a>
+              </li>
+              <li>
+                <a href="#s2">
+                  <span class="toc-num">
+                    2
+                  </span>
+                  镜像 FS 分类
+                </a>
+              </li>
+              <li>
+                <a href="#s3">
+                  <span class="toc-num">
+                    3
+                  </span>
+                  容器层(UnionFS)
+                </a>
+              </li>
+              <li>
+                <a href="#s4">
+                  <span class="toc-num">
+                    4
+                  </span>
+                  Linux OS 启动过程
+                </a>
+              </li>
+              <li>
+                <a href="#s5">
+                  <span class="toc-num">
+                    5
+                  </span>
+                  镜像摘要 digest
+                </a>
+              </li>
+              <li>
+                <a href="#s6">
+                  <span class="toc-num">
+                    6
+                  </span>
+                  分发散列值
+                </a>
+              </li>
+              <li>
+                <a href="#s7">
+                  <span class="toc-num">
+                    7
+                  </span>
+                  多架构镜像
+                </a>
+              </li>
+              <li>
+                <a href="#faq">
+                  <span class="toc-num">
+                    ?
+                  </span>
+                  常见问题
+                </a>
+              </li>
+              <li>
+                <a href="#refs">
+                  <span class="toc-num">
+                    i
+                  </span>
+                  参考资源
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- ============================================================
+     第一章 分层的 3 大优势
+     ============================================================ -->
+          <section class="section" id="s1" aria-labelledby="s1-title">
+            <span class="section-num">
+              Chapter 01
+            </span>
+            <h2 id="s1-title">
+              为什么分层?3 大优势
+            </h2>
+            <p>
+              分层有 3 大核心优势,缺一不可:
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      优势
+                    </th>
+                    <th>
+                      说明
+                    </th>
+                    <th>
+                      价值
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        1. 不可变性
+                      </strong>
+                    </td>
+                    <td>
+                      每个分层
+                      <strong>
+                        只读
+                      </strong>
+                      ,对分层的修改都是以
+                      <strong>
+                        新分层
+                      </strong>
+                      的形式出现,不会破坏原分层内容
+                    </td>
+                    <td>
+                      镜像内容可追溯、可复现,符合不可变基础设施理念
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        2. 节省空间
+                      </strong>
+                    </td>
+                    <td>
+                      每个分层
+                      <strong>
+                        只记录变更内容
+                      </strong>
+                      (类似 Git diff),所以节省磁盘
+                    </td>
+                    <td>
+                      同一基础镜像的多应用共用底层,避免重复存储
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        3. 资源共享
+                      </strong>
+                    </td>
+                    <td>
+                      不同镜像间可
+                      <strong>
+                        复用
+                      </strong>
+                      相同下层镜像
+                    </td>
+                    <td>
+                      <code>
+docker pull
+                      </code>
+                      本地已存在的分层不重复拉取,节省带宽和时间
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  <code>
+docker pull
+                  </code>
+                  在拉取之前会先获取要拉取镜像的所有 imageID,然后
+                  <strong>
+                    在本地查找这些分层
+                  </strong>
+                  。如果存在,不再拉取,而是共享本地的分层,节省了空间和网络带宽,提高了拉取效率。
+                </p>
+              </div>
+            </div>
+            <h3>
+              1.1 镜像层与 json 文件
+            </h3>
+            <p>
+              每个镜像层由两部分构成:
+            </p>
+            <ul>
+              <li>
+                <strong>
+                  镜像文件系统
+                </strong>
+                :拥有镜像所有镜像层的
+                <strong>
+                  数据内容
+                </strong>
+              </li>
+              <li>
+                <strong>
+                  镜像 json 文件
+                </strong>
+                :描述镜像相关属性的
+                <strong>
+                  集合
+                </strong>
+                ,通过
+                <code>
+docker inspect <镜像>
+                </code>
+                可以查看
+              </li>
+            </ul>
+            <p>
+              两者具有
+              <strong>
+                相同的 imageID
+              </strong>
+              。
+            </p>
+          </section>
+          <!-- ============================================================
+     第二章 镜像 FS 分类
+     ============================================================ -->
+          <section class="section" id="s2" aria-labelledby="s2-title">
+            <span class="section-num">
+              Chapter 02
+            </span>
+            <h2 id="s2-title">
+              镜像 FS 构成:基础镜像层 vs 扩展镜像层
+            </h2>
+            <p>
+              Docker 镜像文件系统(FS)由多个
+              <strong>
+                只读的镜像层
+              </strong>
+              组成,每层都有特定的功能。这些只读镜像层根据位置与功能不同可分为两类:
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      类型
+                    </th>
+                    <th>
+                      位置
+                    </th>
+                    <th>
+                      作用
+                    </th>
+                    <th>
+                      典型生成方式
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        基础镜像层
+                      </strong>
+                      <br>
+                      Base Image
+                    </td>
+                    <td>
+                      所有镜像的
+                      <strong>
+                        最下层
+                      </strong>
+                    </td>
+                    <td>
+                      基础镜像层的文件系统称为
+                      <strong>
+                        根文件系统
+                      </strong>
+                      (rootfs),是其他层的基础
+                    </td>
+                    <td>
+                      <code>
+FROM centos:7
+                      </code>
+                      中的
+                      <code>
+centos:7
+                      </code>
+                      即基础镜像
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        扩展镜像层
+                      </strong>
+                    </td>
+                    <td>
+                      基础镜像层
+                      <strong>
+                        之上
+                      </strong>
+                    </td>
+                    <td>
+                      对基础镜像层功能的
+                      <strong>
+                        扩展
+                      </strong>
+                    </td>
+                    <td>
+                      Dockerfile 中
+                      <strong>
+                        每条指令
+                      </strong>
+                      都会生成一个扩展镜像层
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  <code>
+rootfs
+                  </code>
+                  是建立在 Linux 中"
+                  <strong>
+                    看不到的
+                  </strong>
+                  "引导文件系统
+                  <code>
+bootfs
+                  </code>
+                  之上。bootfs 负责系统引导和启动,rootfs 是用户可见的文件系统,两者职责分离。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第三章 容器层
+     ============================================================ -->
+          <section class="section" id="s3" aria-labelledby="s3-title">
+            <span class="section-num">
+              Chapter 03
+            </span>
+            <h2 id="s3-title">
+              容器层(Union File System)
+            </h2>
+            <p>
+              镜像运行起来就成了容器,而容器也具有文件系统。容器的文件系统在 Docker 镜像最外层之上增加了一个
+              <strong>
+                可读写的容器层
+              </strong>
+              。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                Union File System 核心思想
+              </div>
+              <div class="concept-body">
+                <p>
+                  对文件的任何更改
+                  <strong>
+                    只存在于容器层
+                  </strong>
+                  ,因此不会影响镜像本身。容器要修改某个文件,会从容器层开始向下一层层地查找,直到找到为止——对文件的操作都会记录在容器层。这就是
+                  <strong>
+                    Union File System(联合文件系统)
+                  </strong>
+                  的核心思想:多层叠加,下层只读,顶层可写。
+                </p>
+              </div>
+            </div>
+            <h3>
+              3.1 Copy-on-Write 机制
+            </h3>
+            <ul>
+              <li>
+                <strong>
+                  修改文件
+                </strong>
+                :容器层会在镜像层找到文件并 copy 到容器层,然后再进行修改
+              </li>
+              <li>
+                <strong>
+                  删除文件
+                </strong>
+                :也只会将容器层中的文件副本删除(不会真的删除镜像层的文件)
+              </li>
+              <li>
+                <strong>
+                  新增文件
+                </strong>
+                :直接在容器层创建,镜像层无感知
+              </li>
+            </ul>
+            <p>
+              可以看出,Docker 容器就是一个
+              <strong>
+                叠加后的文件系统
+              </strong>
+              ,这个容器层称为
+              <strong>
+                Union File System 联合文件系统
+              </strong>
+              。
+            </p>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  容器删除时,
+                  <strong>
+                    容器层也一并删除
+                  </strong>
+                  。这意味着:1) 容器内未持久化的数据全部丢失(这就是为什么需要
+                  <strong>
+                    数据卷
+                  </strong>
+                  );2) 镜像本身的扩展层保持完整,可被其他容器复用。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第四章 Linux OS 启动过程
+     ============================================================ -->
+          <section class="section" id="s4" aria-labelledby="s4-title">
+            <span class="section-num">
+              Chapter 04
+            </span>
+            <h2 id="s4-title">
+              Linux OS 启动过程(bootfs + rootfs)
+            </h2>
+            <p>
+              微内核架构分为
+              <strong>
+                内核(Server)
+              </strong>
+              和
+              <strong>
+                服务模块(Client)
+              </strong>
+              。Linux 的
+              <code>
+bootfs
+              </code>
+              由两部分组成:
+              <code>
+bootloader
+              </code>
+              和
+              <code>
+kernel
+              </code>
+              。
+            </p>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    关键结论
+                  </strong>
+                  :各个容器中的
+                  <code>
+rootfs
+                  </code>
+                  就是
+                  <strong>
+                    由宿主机的 kernel 驱动的
+                  </strong>
+                  。这就是为什么 Docker 容器可以共享宿主机内核——不需要为每个容器启动独立的 Linux 内核。
+                </p>
+              </div>
+            </div>
+            <h3>
+              4.1 启动流程
+            </h3>
+            <ol>
+              <li>
+                宿主机加电 →
+                <strong>
+                  bootloader
+                </strong>
+                加载
+              </li>
+              <li>
+                bootloader 加载
+                <strong>
+                  kernel
+                </strong>
+                到内存
+              </li>
+              <li>
+                kernel 启动后挂载
+                <strong>
+                  rootfs
+                </strong>
+                (根文件系统)
+              </li>
+              <li>
+                kernel 准备就绪,启动系统服务
+              </li>
+              <li>
+                后续创建的
+                <strong>
+                  容器
+                </strong>
+                直接复用 host 的 kernel,各自挂载自己的 rootfs
+              </li>
+            </ol>
+          </section>
+          <!-- ============================================================
+     第五章 镜像摘要 digest
+     ============================================================ -->
+          <section class="section" id="s5" aria-labelledby="s5-title">
+            <span class="section-num">
+              Chapter 05
+            </span>
+            <h2 id="s5-title">
+              镜像摘要 digest
+            </h2>
+            <p>
+              每个镜像都有一个长度为
+              <strong>
+                64 位的 16 禁止字符串
+              </strong>
+              (hex) 作为其
+              <strong>
+                摘要 digest
+              </strong>
+              。
+            </p>
+            <h3>
+              5.1 查看摘要的 2 种方式
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 方式一:docker inspect
+                  </span>
+                  <span class="tok-cmd">
+docker inspect
+                  </span>
+ zookeeper:latest
+                  <span class="tok-com">
+# 方式二:docker images --digest
+                  </span>
+                  <span class="tok-cmd">
+docker images
+                  </span>
+ zookeeper
+                  <span class="tok-flag">
+--digest
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              5.2 摘要的本质
+            </h3>
+            <p>
+              摘要(digest)是
+              <strong>
+                镜像内容的 Hash 值
+              </strong>
+              ,即所谓的
+              <strong>
+                Content Hash
+              </strong>
+              ,只要镜像内容发生变化,其内容散列值就会改变。默认的 Hash 算法是
+              <strong>
+                sha256
+              </strong>
+              。
+            </p>
+            <h3>
+              5.3 为什么有了 tag 还需要 digest?
+            </h3>
+            <p>
+              区分
+              <strong>
+                相同
+              </strong>
+              <code>
+<repository>:<tag>
+              </code>
+              的
+              <strong>
+                不同
+              </strong>
+              镜像。
+            </p>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  比如镜像
+                  <code>
+xxx:2.8
+                  </code>
+                  在运行中发现 bug,然后进行了修复,然后使用原标签将其 push 回仓库,
+                  <strong>
+                    原镜像被覆盖
+                  </strong>
+                  。但是生产环境中还有运行中未修复的镜像容器。此时
+                  <strong>
+                    标签无法区分
+                  </strong>
+                  镜像是修复前还是修复后,这时就只能查看
+                  <strong>
+                    digest
+                  </strong>
+                  。
+                </p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      特性
+                    </th>
+                    <th>
+                      tag
+                    </th>
+                    <th>
+                      digest
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        可变性
+                      </strong>
+                    </td>
+                    <td>
+                      可被覆盖/修改
+                    </td>
+                    <td>
+                      不可变,内容变化 digest 必变
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        唯一性
+                      </strong>
+                    </td>
+                    <td>
+                      tag 相同可能指向不同镜像
+                    </td>
+                    <td>
+                      全球唯一标识一个具体镜像
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        使用场景
+                      </strong>
+                    </td>
+                    <td>
+                      日常拉取(人类可读)
+                    </td>
+                    <td>
+                      精确拉取 / 不可变部署(机器可读)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        精确拉取
+                      </strong>
+                    </td>
+                    <td>
+                      <code>
+docker pull xxx:2.8
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+docker pull xxx@sha256:abc...
+                      </code>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- ============================================================
+     第六章 分发散列值
+     ============================================================ -->
+          <section class="section" id="s6" aria-labelledby="s6-title">
+            <span class="section-num">
+              Chapter 06
+            </span>
+            <h2 id="s6-title">
+              分发散列值(Distribution Hash)
+            </h2>
+            <p>
+              在 push 或 pull 时,都会对镜像进行
+              <strong>
+                压缩
+              </strong>
+              以减少网络带宽。但
+              <strong>
+                压缩会改变镜像内容
+              </strong>
+              ,导致传输后与 digest 不符合。
+            </p>
+            <h3>
+              6.1 解决方案
+            </h3>
+            <p>
+              Docker 为镜像配置了
+              <strong>
+                Distribution Hash(分发散列值)
+              </strong>
+              :
+            </p>
+            <ol>
+              <li>
+                在镜像压缩后
+                <strong>
+                  计算
+                </strong>
+                分发散列值
+              </li>
+              <li>
+                随镜像一同
+                <strong>
+                  发送
+                </strong>
+              </li>
+              <li>
+                接受方收到后,立即
+                <strong>
+                  计算
+                </strong>
+                压缩后镜像的分发散列值
+              </li>
+              <li>
+                与携带的分发散列值
+                <strong>
+                  对比
+                </strong>
+              </li>
+              <li>
+                如果相同,则传输没问题
+              </li>
+            </ol>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  Distribution Hash 解决了"
+                  <strong>
+                    压缩传输后与原始 digest 不符
+                  </strong>
+                  "的验证问题。本质是"
+                  <strong>
+                    内容不同,验证方式不同
+                  </strong>
+                  "——原始内容用 content hash 标识,传输内容用 distribution hash 标识。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第七章 多架构镜像
+     ============================================================ -->
+          <section class="section" id="s7" aria-labelledby="s7-title">
+            <span class="section-num">
+              Chapter 07
+            </span>
+            <h2 id="s7-title">
+              多架构镜像(Multi-architecture Image)
+            </h2>
+            <p>
+              Multi-architecture Image 多架构镜像是某个镜像针对
+              <strong>
+                不同操作系统/系统架构
+              </strong>
+              的不同镜像实现。即镜像的
+              <code>
+<repository>:<tag>
+              </code>
+              是相同的,但是针对的操作系统/系统架构不同(如 linux/amd64、linux/arm64、windows/amd64)。
+            </p>
+            <h3>
+              7.1 多架构镜像原理
+            </h3>
+            <p>
+              无论用户使用的是什么操作系统,通过
+              <code>
+docker pull
+              </code>
+              拉取到的一定是针对该操作系统的镜像,用户无需考虑操作系统问题。Docker Hub 能根据 pull 请求自动选择对应的镜像。
+            </p>
+            <h3>
+              7.2 Manifest 文件
+            </h3>
+            <p>
+              镜像的多架构信息保存在
+              <strong>
+                Manifest 文件
+              </strong>
+              中。拉取镜像时:
+            </p>
+            <ol>
+              <li>
+                pull 命令将 OS 与架构信息一并提交给 Docker Hub
+              </li>
+              <li>
+                Docker Hub 根据
+                <code>
+<repository>:<tag>
+                </code>
+                查找
+                <strong>
+                  Manifest
+                </strong>
+              </li>
+              <li>
+                如果 Manifest 不存在,直接查找并返回镜像
+              </li>
+              <li>
+                如果存在,会根据 Manifest 中记录的地址找到该镜像的位置
+              </li>
+            </ol>
+            <h3>
+              7.3 常见的多架构组合
+            </h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      OS
+                    </th>
+                    <th>
+                      架构
+                    </th>
+                    <th>
+                      典型场景
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      linux
+                    </td>
+                    <td>
+                      amd64
+                    </td>
+                    <td>
+                      普通 x86 服务器、笔记本
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      linux
+                    </td>
+                    <td>
+                      arm64
+                    </td>
+                    <td>
+                      Apple Silicon(M1/M2/M3)、AWS Graviton、树莓派
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      linux
+                    </td>
+                    <td>
+                      arm/v7
+                    </td>
+                    <td>
+                      老款 ARM 设备、IoT
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      linux
+                    </td>
+                    <td>
+                      ppc64le
+                    </td>
+                    <td>
+                      IBM Power 架构服务器
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      linux
+                    </td>
+                    <td>
+                      s390x
+                    </td>
+                    <td>
+                      IBM Z 大型机
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      windows
+                    </td>
+                    <td>
+                      amd64
+                    </td>
+                    <td>
+                      Windows Server 2019+ 容器
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  查看当前 docker 是否支持多架构拉取:
+                  <code>
+docker buildx ls
+                  </code>
+                  列出可用 builder。生产推荐启用
+                  <code>
+docker-container
+                  </code>
+                  builder,通过
+                  <code>
+docker buildx build --platform linux/amd64,linux/arm64 .
+                  </code>
+                  一次构建多架构镜像。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     FAQ
+     ============================================================ -->
+          <section class="section" id="faq" aria-labelledby="faq-title">
+            <span class="section-num">
+              FAQ
+            </span>
+            <h2 id="faq-title">
+              常见问题
+            </h2>
+            <div class="faq">
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker 为什么要把镜像分层?
+                </h3>
+                <p class="faq-a">
+                  分层有 3 大优势:1) 每个分层
+                  <strong>
+                    只读
+                  </strong>
+                  ,对分层的修改都是以新分层形式出现,不会破坏原分层内容;2) 每个分层
+                  <strong>
+                    只记录变更内容
+                  </strong>
+                  ,所以节省空间;3) 不同镜像间
+                  <strong>
+                    实现资源共享
+                  </strong>
+                  ,即不同镜像对相同下层镜像的复用。docker pull 在拉取之前会先获取要拉取镜像的所有 imageID,然后在本地查找这些分层。如果存在,不再拉取,而是共享本地的分层,节省了空间和网络带宽,提高了拉取效率。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  基础镜像层和扩展镜像层的区别?
+                </h3>
+                <p class="faq-a">
+                  所有镜像的
+                  <strong>
+                    最下层
+                  </strong>
+                  都有一个看得到的基础镜像层(Base Image),基础镜像层的文件系统称为
+                  <strong>
+                    根文件系统
+                  </strong>
+                  (rootfs),rootfs 是建立在 Linux 中'看不到的'引导文件系统(bootfs)之上。在基础镜像层之上的镜像层称为
+                  <strong>
+                    扩展镜像层
+                  </strong>
+                  ,是对基础镜像层功能的扩展。在 Dockerfile 中,每条指令都会生成一个扩展镜像层。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  什么是容器层(Union File System)?
+                </h3>
+                <p class="faq-a">
+                  镜像运行起来就成了容器,而容器也具有文件系统。容器的文件系统在 Docker 镜像最外层之上增加了一个
+                  <strong>
+                    可读写
+                  </strong>
+                  的容器层。对文件的任何更改
+                  <strong>
+                    只存在于容器层
+                  </strong>
+                  ,因此不会影响镜像本身。容器要修改某个文件,会从容器层开始向下一层层地查找,直到找到为止(类似 Copy-on-Write)。这就是
+                  <strong>
+                    Union File System(联合文件系统)
+                  </strong>
+                  的本质:多层叠加,下层只读,顶层可写。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  镜像摘要(digest) 是什么?
+                </h3>
+                <p class="faq-a">
+                  每个镜像都有一个长度为
+                  <strong>
+                    64 位的 16 禁止字符串
+                  </strong>
+                  (hex) 作为其摘要 digest。摘要是镜像内容的 Hash 值,即所谓的 Content Hash,只要镜像内容发生变化,其内容散列值就会改变。默认的 Hash 算法是
+                  <strong>
+                    sha256
+                  </strong>
+                  。查看方式:
+                  <code>
+docker inspect <镜像>
+                  </code>
+                  或
+                  <code>
+docker images <镜像> --digest
+                  </code>
+                  。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  为什么有了 tag 还需要 digest?
+                </h3>
+                <p class="faq-a">
+                  区分
+                  <strong>
+                    相同
+                  </strong>
+                  repository:tag 的
+                  <strong>
+                    不同
+                  </strong>
+                  镜像。比如镜像 xxx:2.8 修复 bug 后用原标签 push 回仓库,原镜像被覆盖。但生产环境还有运行中未修复的镜像容器,此时
+                  <strong>
+                    标签无法区分
+                  </strong>
+                  镜像是修复前还是修复后,这时就只能查看 digest 区分。digest 是不可变的,tag 是可变的。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  什么是多架构镜像?
+                </h3>
+                <p class="faq-a">
+                  Multi-architecture Image 多架构镜像是某个镜像针对不同操作系统/系统架构的不同镜像实现。即镜像的 <repository>:<tag> 是相同的,但是针对的操作系统/系统架构不同(如 linux/amd64、linux/arm64、windows/amd64)。无论用户使用什么操作系统,通过 docker pull 拉取到的一定是针对该操作系统的镜像,用户无需考虑操作系统问题。Docker Hub 能根据 pull 请求自动选择对应的镜像。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  什么是分发散列值(Distribution Hash)?
+                </h3>
+                <p class="faq-a">
+                  在 push 或 pull 时,都会对镜像进行
+                  <strong>
+                    压缩
+                  </strong>
+                  以减少网络带宽。但压缩会改变镜像内容,导致传输后与 digest 不符合。为解决,Docker 为镜像配置了
+                  <strong>
+                    Distribution Hash(分发散列值)
+                  </strong>
+                  :在镜像压缩后计算分发散列值,随镜像一同发送;接受方收到后,立即计算压缩后镜像的分发散列值,与携带的对比,相同则传输没问题。Distribution Hash 解决了压缩传输后与原始 digest 不符的验证问题。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     参考资源
+     ============================================================ -->
+          <section class="section" id="refs" aria-labelledby="refs-title">
+            <span class="section-num">
+              References
+            </span>
+            <h2 id="refs-title">
+              参考资源
+            </h2>
+            <ul>
+              <li>
+                <a href="https://docs.docker.com/storage/storagedriver/" rel="external noopener" target="_blank">
+                  Docker 存储驱动官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/reference/commandline/inspect/" rel="external noopener" target="_blank">
+                  docker inspect 官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/reference/commandline/pull/" rel="external noopener" target="_blank">
+                  docker pull 官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/moby/moby" rel="external noopener" target="_blank">
+                  Moby 项目(GitHub)
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/build/building/multi-platform/" rel="external noopener" target="_blank">
+                  Docker 多架构构建
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/containerd/containerd" rel="external noopener" target="_blank">
+                  containerd 镜像管理
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/opencontainers/image-spec" rel="external noopener" target="_blank">
+                  OCI Image Spec
+                </a>
+              </li>
+            </ul>
+          </section>
+        </article>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本文
+        </h3>
+        <p class="footer-meta">
+          本文系统讲解 Docker 镜像分层与镜像摘要的完整知识,涵盖分层的 3 大优势、镜像文件系统构成(基础/扩展镜像层)、UnionFS 联合文件系统的 Copy-on-Write 机制、Linux OS 启动过程(bootfs + kernel + rootfs)、镜像摘要 digest 的 64 位 sha256 原理、tag vs digest 区别、分发散列值(Distribution Hash)、多架构镜像与 Manifest 原理。所有内容均经过 Docker 20+ 验证。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            适用人群
+          </strong>
+          :DevOps 工程师、后端开发、容器化技术学习者、Linux 系统工程师
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · 内容遵循 CC BY 4.0 协议 · 文中命令与代码可自由使用
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function() {
+  const progress = document.getElementById('progress');
+  if (!progress) return;
+  const update = () => {
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const height = h.scrollHeight - h.clientHeight;
+    const pct = height > 0 ? (scrolled / height) * 100 : 0;
+    progress.style.width = pct + '%';
+    progress.setAttribute('aria-valuenow', Math.round(pct));
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+(function() {
+  const btn = document.getElementById('backTop');
+  if (!btn) return;
+  const toggle = () => {
+    if (window.scrollY > 400) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', toggle, { passive: true });
+  btn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  toggle();
+})();
+
+(function() {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const stored = localStorage.getItem('theme-image-layers');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (stored === 'dark' || (!stored && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  btn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme-image-layers', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme-image-layers', 'dark');
+    }
+  });
+})();
+
+(function() {
+  document.querySelectorAll('.code-copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      if (!pre) return;
+      const text = pre.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        const old = btn.innerText;
+        btn.innerText = '已复制';
+        btn.classList.add('success');
+        setTimeout(() => { btn.innerText = old; btn.classList.remove('success'); }, 1500);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); btn.innerText = '已复制'; setTimeout(() => btn.innerText = '复制', 1500); } catch (err) { btn.innerText = '失败'; }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      }
+    });
+  });
+})();
+    </script>
+  </body>
+</html>

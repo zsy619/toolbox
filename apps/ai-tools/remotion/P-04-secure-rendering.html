@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>P-04 Remotion 安全渲染 | 沙箱/校验/内存隔离</title>
+<meta name="description" content="Remotion 安全渲染高级专题:Zod schema 强类型校验、Chrome 沙箱配置、delayRender 超时与异常捕获、Lambda 内存隔离、用户输入消毒、避免 XSS 与命令注入。">
+<meta name="keywords" content="Remotion 安全, Zod, Chrome 沙箱, Lambda 隔离, XSS">
+<link rel="canonical" href="https://example.com/remotion/P-04-secure-rendering.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 安全渲染">
+<meta property="og:description" content="Zod 校验、沙箱、内存隔离三大安全机制。">
+<meta property="og:url" content="https://example.com/remotion/P-04-secure-rendering.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"P-04 Remotion 安全渲染","description":"Zod 强类型校验、Chrome 沙箱、Lambda 内存隔离。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 安全"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="P-01-internal-architecture.html" class="active">高级</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-pro">高级层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">P-04 安全渲染</span>
+    </nav>
+    <h1 id="hero-title">P-04 安全渲染 <span class="level-badge level-P">P 高级</span></h1>
+    <p class="hero-sub">Zod 强类型校验、Chrome 沙箱、Lambda 内存隔离——生产级安全三件套。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 10 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> P-01 内部架构</div>
+      <div class="hero-meta-item"><strong>类型</strong> 高级</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>三大安全威胁</h2>
+<p>Remotion 服务端渲染时面临的安全风险:</p>
+<ol>
+  <li><strong>用户输入 XSS</strong>:Props 来自数据库/API,含恶意脚本</li>
+  <li><strong>Bundle 代码注入</strong>:Webpack 加载恶意 npm 包</li>
+  <li><strong>Chrome 逃逸</strong>:渲染时浏览器被攻破</li>
+</ol>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>Zod Schema 校验</h2>
+<p>Props 接收外部数据时,首道防线是 schema 校验:</p>
+<pre class="line-numbers"><code class="language-tsx">import { z } from 'zod';
+
+const userSchema = z.object({
+  username: z.string().min(1).max(30)
+    .regex(/^[a-zA-Z0-9_]+$/),  // 仅允许字母数字下划线
+  email: z.string().email().max(100),
+  age: z.number().int().min(0).max(150),
+  bio: z.string().max(500).optional(),
+});
+
+&lt;Composition
+  id="UserCard"
+  component={UserCard}
+  schema={userSchema}
+  defaultProps={{ username: 'guest', email: 'guest@example.com', age: 18 }}
+/&gt;</code></pre>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>避免 dangerouslySetInnerHTML</h2>
+<p>展示用户内容时<strong>禁止</strong>直接 HTML 注入,改用 React 文本节点(自动转义):</p>
+<pre class="line-numbers"><code class="language-tsx">// ❌ 危险:XSS
+&lt;div dangerouslySetInnerHTML={{ __html: userInput }} /&gt;
+
+// ✅ 安全:React 自动转义
+&lt;div&gt;{userInput}&lt;/div&gt;
+
+// ✅ 允许受信任富文本:DOMPurify
+import DOMPurify from 'dompurify';
+&lt;div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userInput) }} /&gt;</code></pre>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>Chrome 沙箱配置</h2>
+<p>Puppeteer 渲染时的安全选项:</p>
+<pre class="line-numbers"><code class="language-ts">Config.setPuppeteerConfig({
+  args: [
+    '--no-sandbox',                     // ⚠️ 仅在容器中需要
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+  ],
+  executablePath: '/usr/bin/google-chrome',
+  headless: true,                        // 必须 true
+});</code></pre>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p><code>--no-sandbox</code> 会让 Chrome 失去沙箱保护,只有 Docker 容器(Linux namespace 已隔离)才用。本地开发不要开。</p></div></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>Lambda 内存隔离</h2>
+<p>AWS Lambda 默认每个函数 512MB 内存、3GB 临时磁盘。即使一个渲染任务出问题,不会影响其他任务:</p>
+<pre class="line-numbers"><code class="language-bash">npx remotion lambda functions deploy \
+  --memory=2048        # 提升到 2GB 适合复杂场景
+  --disk=5120          # 5GB 临时磁盘
+  --timeout=900        # 15 分钟最长</code></pre>
+<p>结合 CloudWatch + DLQ 死信队列,异常任务可自动告警与重试。</p>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>安全清单</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>威胁</th><th>防御措施</th></tr></thead>
+<tbody>
+<tr><td>Props 注入</td><td>Zod schema + 转义输出</td></tr>
+<tr><td>URL 注入</td><td>白名单域名 + URL 校验</td></tr>
+<tr><td>路径穿越</td><td>仅允许 public/ 目录</td></tr>
+<tr><td>内存泄漏</td><td>useEffect cleanup + Lambda 隔离</td></tr>
+<tr><td>Chrome 漏洞</td><td>最新版 Chrome + 容器隔离</td></tr>
+<tr><td>依赖投毒</td><td>npm audit + lockfile + 私有 npm</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<div class="source-note">Remotion 安全(2025)、Zod v3 文档、OWASP XSS Cheat Sheet</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>Webhook 回调</h2>
+<p>Lambda/Cloud 渲染完成时调用 Webhook 通知业务方:</p>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">import { renderMediaOnLambda } from '@remotion/lambda';
+
+await renderMediaOnLambda({
+  composition, serveUrl, functionName, region,
+  webhook: { url: 'https://api.myapp.com/hook', secret: 'my-secret' },
+});</code></pre></div>
+<p>Webhook 收到 POST,验证签名后即可在数据库中更新视频状态、触发推送通知等。</p>
+</section>
+
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>Studio 自部署</h2>
+<p>把 Remotion Studio 部署到 VPS 供团队内部预览。Studio 服务端基于 Express:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash"># 项目启用 Studio
+npx remotion add @remotion/studio
+# 生产启动
+NODE_ENV=production npx remotion studio --port 3000 --host 0.0.0.0
+
+# 配合 systemd 守护
+[Unit]
+Description=Remotion Studio
+[Service]
+ExecStart=/usr/bin/node node_modules/@remotion/studio/cli.js --port 3000
+Restart=always
+[Install]
+WantedBy=multi-user.target</code></pre></div>
+<p>Nginx 反代 + HTTPS + Basic Auth 即可暴露公网给团队预览。</p>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="P-03-custom-components.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">P-03 自定义组件</span></a>
+  <a href="S-01-code-walkthrough.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">S-01 代码讲解视频</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>B-03 Remotion 第一个视频 | Hello World 完整示例</title>
+<meta name="description" content="Remotion 入门实战,从零开始构建第一个 Composition 视频,理解 Component 完整生命周期,掌握 Studio 调试与 npx remotion render 输出 MP4 的端到端流程。">
+<meta name="keywords" content="Remotion 教程, Hello World, 第一个视频, Composition 生命周期">
+<link rel="canonical" href="https://example.com/remotion/B-03-first-video.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 第一个视频实战">
+<meta property="og:description" content="从零开始构建你的第一个程序化视频。">
+<meta property="og:url" content="https://example.com/remotion/B-03-first-video.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"B-03 Remotion 第一个视频","description":"Remotion 入门实战:Hello World 视频完整流程。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 教程"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="S-01-code-walkthrough.html">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-basic">基础层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">B-03 第一个视频</span>
+    </nav>
+    <h1 id="hero-title">B-03 Remotion 第一个视频 <span class="level-badge level-B">B 基础</span></h1>
+    <p class="hero-sub">从零开始构建你的第一个程序化视频:Hello World 完整流程。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 12 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> B-02 核心概念</div>
+      <div class="hero-meta-item"><strong>类型</strong> 入门实战</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>目标:5 秒淡入淡出标题</h2>
+<p>我们要做一个 5 秒的视频,中央显示 "Hello Remotion" 文字,带淡入淡出效果。涉及 4 个步骤:</p>
+<ol>
+  <li>编写视频组件 <code>MyVideo.tsx</code></li>
+  <li>在 <code>Root.tsx</code> 中注册 Composition</li>
+  <li>启动 Studio 调试</li>
+  <li>渲染输出 MP4</li>
+</ol>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>编写视频组件</h2>
+<p>创建 <code>src/MyVideo.tsx</code>:</p>
+<pre class="line-numbers"><code class="language-tsx">import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
+
+export const MyVideo: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+
+  // 淡入 0-30 帧,保持 30-120 帧,淡出 120-150 帧
+  const opacity = interpolate(
+    frame,
+    [0, 30, 120, 150],
+    [0, 1, 1, 0],
+    { extrapolateRight: 'clamp' }
+  );
+
+  // 标题从下方滑入
+  const translateY = interpolate(frame, [0, 30], [40, 0], {
+    extrapolateRight: 'clamp',
+  });
+
+  return (
+    &lt;AbsoluteFill style={{ backgroundColor: '#0a1a2a' }}&gt;
+      &lt;h1 style={{
+        position: 'absolute',
+        top: '50%', left: '50%',
+        transform: `translate(-50%, calc(-50% + ${translateY}px))`,
+        opacity,
+        color: '#2496ED',
+        fontSize: 120,
+        fontWeight: 800,
+      }}&gt;
+        Hello Remotion
+      &lt;/h1&gt;
+    &lt;/AbsoluteFill&gt;
+  );
+};</code></pre>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>注册 Composition</h2>
+<p>在 <code>src/Root.tsx</code> 中挂载组件:</p>
+<pre class="line-numbers"><code class="language-tsx">import { Composition } from 'remotion';
+import { MyVideo } from './MyVideo';
+
+export const RemotionRoot: React.FC = () => {
+  return (
+    &lt;&gt;
+      &lt;Composition
+        id="HelloWorld"
+        component={MyVideo}
+        durationInFrames={150}    // 5 秒 × 30 fps
+        fps={30}
+        width={1920}
+        height={1080}
+      /&gt;
+    &lt;/&gt;
+  );
+};</code></pre>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>Studio 实时调试</h2>
+<p>运行 <code>npm start</code> 打开 <code>http://localhost:3000</code>,你会看到:</p>
+<ul>
+  <li>左侧 Composition 列表(目前只有 HelloWorld)</li>
+  <li>中间视频预览,时间轴可拖动</li>
+  <li>右侧属性面板,可临时改 width/fps</li>
+</ul>
+<p>改代码会秒级热更新。每次保存 React 组件,Studio 自动重新渲染当前帧。</p>
+<div class="alert alert-tip"><span class="alert-icon">🎬</span><div class="alert-body"><p>Studio 是 Remotion 杀手锏:在浏览器中精确渲染每一帧,所见即所得,远比 After Effects 的预览器直观。</p></div></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>渲染输出 MP4</h2>
+<p>Studio 调试满意后,导出正式视频:</p>
+<pre class="line-numbers"><code class="language-bash">npx remotion render HelloWorld out/hello.mp4</code></pre>
+<p>过程会显示进度条,大约 10-30 秒完成。视频保存在 <code>out/hello.mp4</code>。</p>
+<p>其他常用选项:</p>
+<pre class="line-numbers"><code class="language-bash">npx remotion render HelloWorld out/hello.mp4 --concurrency=4
+npx remotion render HelloWorld out/hello.mp4 --quality=80
+npx remotion still HelloWorld out/cover.png --frame=75    # 单帧截图</code></pre>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>Composition 生命周期</h2>
+<p>理解 Composition 渲染时,React 树是这样构建的:</p>
+<pre class="line-numbers"><code class="language-bash">RemotionRoot (静态,只渲染一次)
+  └─ Composition 元数据(width, fps 等)
+       └─ MyVideo() (为每一帧重新调用)
+            ├─ useCurrentFrame()  // 当前帧
+            ├─ useVideoConfig()   // 视频元数据
+            └─ return JSX</code></pre>
+<p>每渲染一帧,Remotion 调用一次你的组件函数。这就是为什么 <code>useCurrentFrame</code> 能拿到当前帧号——它是 React Hook 调用的上下文。</p>
+</section>
+
+<div class="source-note">Remotion 官方文档(2025)、Remotion Studio 指南、interpolate API 参考</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>视频参数与编解码器</h2>
+<p>Composition 核心参数决定最终视频规格:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>参数</th><th>说明</th><th>常见值</th></tr></thead>
+<tbody>
+<tr><td><code>width × height</code></td><td>分辨率</td><td>1920×1080 / 1080×1920 / 1080×1080</td></tr>
+<tr><td><code>fps</code></td><td>帧率</td><td>30 / 60 / 24</td></tr>
+<tr><td><code>durationInFrames</code></td><td>总帧数</td><td>fps × 秒数</td></tr>
+<tr><td><code>outputFormat</code></td><td>封装格式</td><td>mp4 / webm / gif / mov</td></tr>
+<tr><td><code>codec</code></td><td>编码器</td><td>h264 / h265 / vp8 / vp9 / prores</td></tr>
+</tbody>
+</table></div>
+<div class="alert alert-info"><span class="alert-icon">💡</span><div class="alert-body"><p>社交平台兼容性最佳组合:<strong>mp4 + h264 + AAC 音频 + 30fps</strong>。Apple 设备可选 prores 422 HQ 保留更多色彩细节。</p></div></div>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="B-02-core-concepts.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">B-02 核心概念</span></a>
+  <a href="B-04-basic-hooks.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">B-04 基础 Hooks</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 效率工具深度解析 | 2026年3月第三周</title>
+  <meta name="description" content="DeepSeekMine V2.4.0、Claude Code 配置指南、Claude Code 增强工具对比，一站式了解最新 AI 效率工具。">
+  
+  <!-- 国内 CDN CSS -->
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-color: #1a1a2e;
+      --secondary-color: #16213e;
+      --accent-blue: #2563EB;
+      --accent-purple: #7C3AED;
+      --accent-green: #10B981;
+      --accent-orange: #F59E0B;
+      --bg-light: #fafafa;
+      --text-dark: #1a1a2e;
+      --text-muted: #6b7280;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      min-height: 100vh;
+      color: var(--text-dark);
+      line-height: 1.8;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    /* 头部 */
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 48px;
+      padding: 48px 24px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    
+    .header .subtitle {
+      font-size: 16px;
+      opacity: 0.8;
+      margin-bottom: 16px;
+    }
+    
+    .header .date-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+    
+    /* 文章卡片 */
+    .article-card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    
+    .article-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+    
+    .article-card .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .article-card .icon-box {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    .article-card .icon-blue {
+      background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+      color: white;
+    }
+    
+    .article-card .icon-green {
+      background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+      color: white;
+    }
+    
+    .article-card .icon-orange {
+      background: linear-gradient(135deg, var(--accent-orange) 0%, #d97706 100%);
+      color: white;
+    }
+    
+    .article-card .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    .article-card .description {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 0;
+      line-height: 1.6;
+    }
+    
+    .article-card .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    .article-card .tag {
+      background: #f3f4f6;
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+    
+    .article-card .arrow {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: 16px;
+      color: var(--accent-blue);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .article-card .arrow i {
+      margin-left: 6px;
+      transition: transform 0.3s;
+    }
+    
+    .article-card:hover .arrow i {
+      transform: translateX(4px);
+    }
+    
+    /* 底部导航 */
+    .footer {
+      text-align: center;
+      margin-top: 48px;
+      padding: 32px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .footer h3 {
+      color: white;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+    
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s;
+    }
+    
+    .footer-links a:hover {
+      color: white;
+    }
+    
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 24px;
+      }
+      
+      .article-card .card-header {
+        flex-direction: column;
+      }
+      
+      .article-card .icon-box {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 头部 -->
+    <header class="header">
+      <h1>🤖 AI 效率工具深度解析</h1>
+      <p class="subtitle">深入解读最新 AI 工具的核心功能与实战技巧</p>
+      <span class="date-badge">
+        <i class="far fa-calendar-alt me-2"></i>
+        2026年3月第三周
+      </span>
+    </header>
+    
+    <!-- 文章列表 -->
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <a href="31-01.html" class="article-card">
+          <div class="card-header">
+            <div class="icon-box icon-blue">
+              <i class="fas fa-brain"></i>
+            </div>
+            <div>
+              <h3 class="title">DeepSeekMine V2.4.0</h3>
+              <p class="description">让 AI 自动啃完你电脑文件，「第二大脑」真的来了</p>
+            </div>
+          </div>
+          <div class="tags">
+            <span class="tag"><i class="fas fa-file-alt me-1"></i>知识管理</span>
+            <span class="tag"><i class="fas fa-robot me-1"></i>AI助理</span>
+            <span class="tag"><i class="fas fa-shield-alt me-1"></i>隐私保护</span>
+          </div>
+          <div class="arrow">
+            阅读全文 <i class="fas fa-arrow-right"></i>
+          </div>
+        </a>
+      </div>
+      
+      <div class="col-md-6 col-lg-4">
+        <a href="31-02.html" class="article-card">
+          <div class="card-header">
+            <div class="icon-box icon-green">
+              <i class="fas fa-code"></i>
+            </div>
+            <div>
+              <h3 class="title">Claude Code 配置指南</h3>
+              <p class="description">月账单下降40%的秘密，系统性配置测试实战经验</p>
+            </div>
+          </div>
+          <div class="tags">
+            <span class="tag"><i class="fas fa-terminal me-1"></i>CLI工具</span>
+            <span class="tag"><i class="fas fa-dollar-sign me-1"></i>成本优化</span>
+            <span class="tag"><i class="fas fa-cog me-1"></i>配置调优</span>
+          </div>
+          <div class="arrow">
+            阅读全文 <i class="fas fa-arrow-right"></i>
+          </div>
+        </a>
+      </div>
+      
+      <div class="col-md-6 col-lg-4">
+        <a href="31-03.html" class="article-card">
+          <div class="card-header">
+            <div class="icon-box icon-orange">
+              <i class="fas fa-layer-group"></i>
+            </div>
+            <div>
+              <h3 class="title">Claude Code 增强工具对比</h3>
+              <p class="description">everything-claude-code vs oh-my-claudecode，选哪个？</p>
+            </div>
+          </div>
+          <div class="tags">
+            <span class="tag"><i class="fas fa-puzzle-piece me-1"></i>插件对比</span>
+            <span class="tag"><i class="fas fa-star me-1"></i>功能完整</span>
+            <span class="tag"><i class="fas fa-users me-1"></i>团队协作</span>
+          </div>
+          <div class="arrow">
+            阅读全文 <i class="fas fa-arrow-right"></i>
+          </div>
+        </a>
+      </div>
+    </div>
+    
+    <!-- 底部导航 -->
+    <footer class="footer">
+      <h3><i class="fas fa-folder-open me-2"></i>相关资源</h3>
+      <div class="footer-links">
+        <a href="../index.html">
+          <i class="fas fa-home me-1"></i> 返回首页
+        </a>
+        <a href="../ai_scene.html">
+          <i class="fas fa-lightbulb me-1"></i> AI 场景库
+        </a>
+        <a href="../deep-research-tools.html">
+          <i class="fas fa-search me-1"></i> 深度研究工具
+        </a>
+        <a href="https://github.com" target="_blank">
+          <i class="fab fa-github me-1"></i> GitHub
+        </a>
+      </div>
+    </footer>
+  </div>
+  
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

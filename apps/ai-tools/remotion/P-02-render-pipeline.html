@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>P-02 Remotion 渲染管线 | Frame Pipeline 全链路</title>
+<meta name="description" content="Remotion 帧渲染管线深度解析:Frame 任务切片、Puppeteer 调度、MediaRecorder vs 截图、合成顺序、错误重试、状态机与日志,资深开发者必读。">
+<meta name="keywords" content="Remotion 渲染管线, Frame Pipeline, Puppeteer 调度">
+<link rel="canonical" href="https://example.com/remotion/P-02-render-pipeline.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 渲染管线">
+<meta property="og:description" content="Frame 任务切片、Puppeteer 调度、FFmpeg 合流。">
+<meta property="og:url" content="https://example.com/remotion/P-02-render-pipeline.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"P-02 Remotion 渲染管线","description":"Frame Pipeline 任务切片、Puppeteer 调度、合流全链路。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 渲染管线"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="P-01-internal-architecture.html" class="active">高级</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-pro">高级层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">P-02 渲染管线</span>
+    </nav>
+    <h1 id="hero-title">P-02 渲染管线 <span class="level-badge level-P">P 高级</span></h1>
+    <p class="hero-sub">Frame Pipeline 任务切片、Puppeteer 调度、FFmpeg 合流全链路。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 13 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> P-01 内部架构</div>
+      <div class="hero-meta-item"><strong>类型</strong> 高级</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>管线总览</h2>
+<p>Remotion 渲染的 6 步管线:</p>
+<ol>
+  <li><strong>Bundle</strong>:Webpack 打包用户代码</li>
+  <li><strong>Plan</strong>:计算元数据 (calculateMetadata)</li>
+  <li><strong>Chunk</strong>:将 N 帧切分为 M 个任务</li>
+  <li><strong>Render</strong>:每个任务启动 Puppeteer 渲染一组帧</li>
+  <li><strong>Stitch</strong>:FFmpeg 合并所有帧 + 音频</li>
+  <li><strong>Cleanup</strong>:清理临时文件</li>
+</ol>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>任务切片策略</h2>
+<p>默认每任务渲染 1 帧。Lambda 模式可一次渲染多帧:</p>
+<pre class="line-numbers"><code class="language-bash"># 本地:每任务 1 帧
+npx remotion render Video out.mp4 --concurrency=4
+# 300 帧 = 300 个任务 → 4 并发 → 75 批次
+
+# Lambda:每任务 60 帧
+npx remotion lambda render Video out.mp4 --frames-per-lambda=60
+# 300 帧 = 5 个任务 → 5 Lambda 并行</code></pre>
+<p>Lambda 模式显著减少冷启动开销。</p>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>单帧渲染时序</h2>
+<p>每个帧的渲染需要 5 步:</p>
+<pre class="line-numbers"><code class="language-bash">1. await page.goto(bundleUrl)            // 加载 HTML
+2. await page.waitForFunction()          // 等待 delayRender 就绪
+3. await page.evaluate(setFrame, n)     // 注入当前帧号
+4. await page.screenshot({clip, type})  // 截该帧
+5. await fs.writeFile('frame-NNN.jpeg') // 写盘</code></pre>
+<p>典型一帧 50-200ms,瓶颈在 screenshot 阶段。</p>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>错误重试与降级</h2>
+<p>Remotion 自动处理两类错误:</p>
+<ul>
+  <li><strong>delayRender 超时</strong>:该帧渲染失败,标记为 retry</li>
+  <li><strong>Chrome 崩溃</strong>:重启 Puppeteer,重新加载 bundle</li>
+</ul>
+<p>可配置:</p>
+<pre class="line-numbers"><code class="language-ts">Config.setMaxRetries(3);                       // 最大重试次数
+Config.setDelayRenderTimeoutInMilliseconds(60000);  // 60 秒</code></pre>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>状态机</h2>
+<pre class="line-numbers"><code class="language-bash">init → bundle → plan → chunking →
+  rendering[concurrency] → stitching → cleanup → done
+       ↓
+     failed (retry / abort)</code></pre>
+<p>Lambda 模式:每帧有独立状态,失败帧可单独重试。</p>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>日志与 Profiling</h2>
+<p>开启 verbose 日志:</p>
+<pre class="line-numbers"><code class="language-bash">DEBUG=remotion* npx remotion render Video out.mp4
+# 输出每个阶段的详细时间戳</code></pre>
+<p>用 Chrome DevTools 远程调试:</p>
+<pre class="line-numbers"><code class="language-bash">npx remotion render Video out.mp4 --browser-executable=/path/to/chrome
+# 在另一终端打开 chrome://inspect,attach 到 Puppeteer</code></pre>
+</section>
+
+<div class="source-note">Remotion 渲染管线(2025)、Chrome DevTools Protocol、@remotion/renderer 源码</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>HTML-in-canvas(v4.0.455+)</h2>
+<p>Remotion 4.0.455 起支持 <strong>HTML-in-canvas</strong> 浏览器新 API,可将实时 DOM 节点绘制到 canvas,再用 Canvas 2D/WebGL/WebGPU 后处理:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { HtmlInCanvas, type HtmlInCanvasOnPaint } from 'remotion';
+
+const onPaint: HtmlInCanvasOnPaint = ({ canvas, elementImage }) =&gt; {
+  const ctx = canvas.getContext('2d');
+  ctx.filter = 'blur(8px)';
+  ctx.drawElementImage(elementImage, 0, 0);
+};
+
+&lt;HtmlInCanvas width={1920} height={1080} onPaint={onPaint}&gt;
+  &lt;div style={{ fontSize: 80 }}&gt;Remotion&lt;/div&gt;
+&lt;/HtmlInCanvas&gt;</code></pre></div>
+<p>渲染时无需特殊配置,Remotion 已编译专用 Chrome 并默认开启该 flag(<code>chrome://flags/#canvas-draw-element</code>)。WebGL 着色器需加 <code>--gl=angle</code>。</p>
+<div class="alert alert-info"><span class="alert-icon">💡</span><div class="alert-body"><p>HTML-in-canvas 把视频编辑器的 canvas 效果(模糊、色彩调整、混合模式)带入 Remotion,极大拓展视觉效果。</p></div></div>
+</section>
+
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>WebGL 着色器渲染</h2>
+<p>Remotion 通过 HTML5 Canvas 渲染 WebGL。<strong>关键</strong>:所有动画必须基于 <code>useCurrentFrame()</code> 才能保证帧精确。</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">const frame = useCurrentFrame();
+const { fps, width, height } = useVideoConfig();
+const time = frame / fps;  // 标准化为秒
+
+useEffect(() =&gt; {
+  const gl = canvasRef.current!.getContext('webgl')!;
+  const program = createProgram(gl, VS, FS);
+  // 每帧更新 uniform
+  gl.uniform1f(timeLoc, time);
+  gl.uniform2f(resLoc, width, height);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}, [time]);</code></pre></div>
+<p>渲染时 <strong>必须加</strong> <code>--gl=angle</code>:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npx remotion render ShaderVideo out.mp4 --gl=angle</code></pre></div>
+<p>否则无头浏览器可能没有 WebGL context。</p>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="P-01-internal-architecture.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">P-01 内部架构</span></a>
+  <a href="P-03-custom-components.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">P-03 自定义组件</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

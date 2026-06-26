@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>
+      Vue/React 前端应用容器化实战 | Docker 实战课程
+    </title>
+    <meta name="description" content="详解 Vue 3 / React 18 前端的 Node 20 构建 + Nginx 镜像、Vite 多阶段构建、history 路由 fallback、gzip/brotli 压缩、CDN 缓存策略。">
+    <meta name="keywords" content="Docker, Vue/React 前端应用容器化实战, Vue/React 前端应用容器化实战, 容器化实战, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/61-vue-react-frontend-containerization.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Vue/React 前端应用容器化实战">
+    <meta property="og:description" content="详解 Vue 3 / React 18 前端的 Node 20 构建 + Nginx 镜像、Vite 多阶段构建、history 路由 fallback、gzip/brotli 压缩、CDN 缓存策略。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/61-vue-react-frontend-containerization.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Vue/React 前端应用容器化实战">
+    <meta name="twitter:description" content="详解 Vue 3 / React 18 前端的 Node 20 构建 + Nginx 镜像、Vite 多阶段构建、history 路由 fallback、gzip/brotli 压缩、CDN 缓存策略。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Vue/React 前端应用容器化实战","description":"详解 Vue 3 / React 18 前端的 Node 20 构建 + Nginx 镜像、Vite 多阶段构建、history 路由 fallback、gzip/brotli 压缩、CDN 缓存策略。","author":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN","keywords":"Docker, Vue/React 前端应用容器化实战"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 教程","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"Vue/React 前端应用容器化实战","item":"https://tools.yy24365.com/ai-tools/docker/61-vue-react-frontend-containerization.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            D
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 实战
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Vue/React 前端应用容器化实战
+            </span>
+          </nav>
+          <h1 id="hero-title">
+            Vue/React 前端应用容器化实战
+          </h1>
+          <p class="hero-sub">
+            Webpack/Vite 多阶段 + Nginx 部署 + CDN 缓存
+          </p>
+          <p class="hero-desc">
+            详解 Vue 3 / React 18 前端的 Node 20 构建 + Nginx 镜像、Vite 多阶段构建、history 路由 fallback、gzip/brotli 压缩、CDN 缓存策略。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                课程编号
+              </strong>
+              第 37 课
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                分类
+              </strong>
+              应用容器化
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              intermediate
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                字数
+              </strong>
+              ~ 4000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <nav class="toc" id="toc">
+          <h2 class="toc-title">
+            本文目录
+          </h2>
+          <ul class="toc-grid">
+            <li>
+              <a href="#s1">
+                <span class="toc-num">
+                  01
+                </span>
+                前端构建工具 3 选
+              </a>
+            </li>
+            <li>
+              <a href="#s2">
+                <span class="toc-num">
+                  02
+                </span>
+                3 阶段 Dockerfile 模板
+              </a>
+            </li>
+            <li>
+              <a href="#s3">
+                <span class="toc-num">
+                  03
+                </span>
+                Nginx 关键配置 5 选
+              </a>
+            </li>
+            <li>
+              <a href="#s4">
+                <span class="toc-num">
+                  04
+                </span>
+                CDN 缓存策略
+              </a>
+            </li>
+            <li>
+              <a href="#s5">
+                <span class="toc-num">
+                  05
+                </span>
+                性能优化 4 指标
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">
+            Chapter 01
+          </span>
+          <h2 id="s1-title">
+            前端构建工具 3 选
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  Webpack 5:成熟稳定,生态丰富,构建慢(分钟级)
+                </li>
+                <li>
+                  Vite 5:esbuild + Rollup,启动 < 1s,生产 10x 更快
+                </li>
+                <li>
+                  Turbopack:Vite 替代,Rust 实现,Beta 中
+                </li>
+                <li>
+                  推荐:新项目用 Vite 5,老项目保留 Webpack
+                </li>
+                <li>
+                  SSR 用 Nuxt 3 / Next.js 14(支持 SSG/ISR/SSR)
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">
+            Chapter 02
+          </span>
+          <h2 id="s2-title">
+            3 阶段 Dockerfile 模板
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  Stage 1 (deps):npm ci 精确安装,lock 文件锁定版本
+                </li>
+                <li>
+                  Stage 2 (build):npm run build 输出 dist/ (Vue) 或 build/ (React)
+                </li>
+                <li>
+                  Stage 3 (runtime):nginx:1.25-alpine + 静态文件 + 配置
+                </li>
+                <li>
+                  COPY --from=build /app/dist /usr/share/nginx/html
+                </li>
+                <li>
+                  nginx 配置:history 路由 fallback、gzip、长缓存
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">
+            Chapter 03
+          </span>
+          <h2 id="s3-title">
+            Nginx 关键配置 5 选
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  1) history 路由:try_files $uri $uri/ /index.html (Vue Router/React Router)
+                </li>
+                <li>
+                  2) gzip on + gzip_types text/css application/javascript
+                </li>
+                <li>
+                  3) brotli on (brotli 模块需 --with-compat 编译)
+                </li>
+                <li>
+                  4) 静态资源长缓存:location ~* \.(js|css|png)$ expires 1y
+                </li>
+                <li>
+                  5) HTML 不缓存:location / expires -1 add_header Cache-Control no-cache
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">
+            Chapter 04
+          </span>
+          <h2 id="s4-title">
+            CDN 缓存策略
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  index.html:no-cache(确保更新即时生效)
+                </li>
+                <li>
+                  main.js + main.css:immutable + 1y(文件名带 hash,内容不变)
+                </li>
+                <li>
+                  图片/字体:1y + immutable(CDN 自动优化)
+                </li>
+                <li>
+                  API 响应:no-store(永缓存)
+                </li>
+                <li>
+                  用文件名 hash 而非 query:foo.abc123.js 优于 foo.js?v=abc123
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s5" aria-labelledby="s5-title">
+          <span class="section-num">
+            Chapter 05
+          </span>
+          <h2 id="s5-title">
+            性能优化 4 指标
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  FCP (First Contentful Paint) < 1.8s
+                </li>
+                <li>
+                  LCP (Largest Contentful Paint) < 2.5s
+                </li>
+                <li>
+                  CLS (Cumulative Layout Shift) < 0.1
+                </li>
+                <li>
+                  TTI (Time to Interactive) < 3.8s
+                </li>
+                <li>
+                  Lighthouse 评分 > 90
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <div class="alert alert-tip">
+          <span class="alert-icon">
+            💡 镜像大小
+          </span>
+          <div class="alert-body">
+            <p>
+              Vue/React + Nginx 整体 < 30MB(含 dist)
+            </p>
+          </div>
+        </div>
+        <div class="alert alert-info">
+          <span class="alert-icon">
+            🎯 缓存陷阱
+          </span>
+          <div class="alert-body">
+            <p>
+              文件名带 hash 才可设 immutable,否则用 max-age=3600
+            </p>
+          </div>
+        </div>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">
+            FAQ
+          </span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                前端构建工具 3 选
+              </h3>
+              <p class="faq-a">
+                Webpack 5:成熟稳定,生态丰富,构建慢(分钟级)
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                3 阶段 Dockerfile 模板
+              </h3>
+              <p class="faq-a">
+                Stage 1 (deps):npm ci 精确安装,lock 文件锁定版本
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Nginx 关键配置 5 选
+              </h3>
+              <p class="faq-a">
+                1) history 路由:try_files $uri $uri/ /index.html (Vue Router/React Router)
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                CDN 缓存策略
+              </h3>
+              <p class="faq-a">
+                index.html:no-cache(确保更新即时生效)
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                性能优化 4 指标
+              </h3>
+              <p class="faq-a">
+                FCP (First Contentful Paint) < 1.8s
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+      <section class="section" id="practice">
+        <span class="section-num">
+          实战代码
+        </span>
+        <h2 id="practice-title">
+          实战代码示例
+        </h2>
+        <div class="content-card">
+          <h3 class="content-card-title">
+            📝 Vue Vite 多阶段
+          </h3>
+          <p class="content-card-body">
+            完整可执行代码,直接复制即可在生产环境使用:
+          </p>
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">
+              Vue Vite 多阶段 · dockerfile
+            </span>
+            <button class="code-copy" aria-label="复制代码">
+              复制
+            </button>
+          </div>
+          <pre>
+            <code class="language-dockerfile">
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+FROM nginx:1.25-alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+            </code>
+          </pre>
+        </div>
+      </section>
+      <section class="section" id="workflow">
+        <span class="section-num">
+          操作流程
+        </span>
+        <h2 id="workflow-title">
+          可视化操作流程
+        </h2>
+        <div class="content-card">
+          <h3 class="content-card-title">
+            🔄 5 步标准操作流程
+          </h3>
+          <ol class="content-card-body" style="font-size:15px;line-height:1.8">
+            <li>
+              <strong>
+                写 Vite 配置
+              </strong>
+              → 启动容器或检查环境
+            </li>
+            <li>
+              <strong>
+                阶段一 build
+              </strong>
+              → 拉取依赖或配置
+            </li>
+            <li>
+              <strong>
+                阶段二 nginx
+              </strong>
+              → 启动核心服务
+            </li>
+            <li>
+              <strong>
+                复制 dist/
+              </strong>
+              → 验证运行状态
+            </li>
+            <li>
+              <strong>
+                启动 nginx
+              </strong>
+              → 部署上线
+            </li>
+          </ol>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本课程
+        </h3>
+        <p class="footer-meta">
+          Vue/React 前端应用容器化实战 · Docker 容器化实战系列课程。所有代码均经过实测,可直接运行于 Docker 20+ / Docker Desktop 4+ / K8s 1.24+ 环境。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            相关课程
+          </strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            完整 56 篇课程
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方
+          </a>
+          ·
+          <a href="https://kubernetes.io" style="color:#c4d1de">
+            Kubernetes 官方
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 实战系列 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-course-37';
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('.code-copy').forEach(function(a){
+    a.onclick=async function(){
+      var pre=a.closest('.code-block').querySelector('pre');if(!pre) return;
+      var text=pre.innerText;
+      try{await navigator.clipboard.writeText(text);var o=a.innerText;a.innerText='已复制';a.classList.add('success');setTimeout(function(){a.innerText=o;a.classList.remove('success')},1500)}catch(e){}
+    }
+  });
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

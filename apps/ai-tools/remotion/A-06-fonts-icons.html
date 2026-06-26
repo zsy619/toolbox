@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>A-06 Remotion 字体与图标系统 | Google Fonts/Iconify/中文支持</title>
+<meta name="description" content="Remotion 字体与图标系统进阶:@remotion/google-fonts 自动加载、Iconify 海量图标集成、中文字体子集化、动态字体切换、WebFont 性能优化、字体加载失败的回退方案。">
+<meta name="keywords" content="Remotion 字体, Google Fonts, Iconify, 中文字体, WebFont">
+<link rel="canonical" href="https://example.com/remotion/A-06-fonts-icons.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 字体与图标系统">
+<meta property="og:description" content="Google Fonts / Iconify / 中文字体子集化。">
+<meta property="og:url" content="https://example.com/remotion/A-06-fonts-icons.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"A-06 Remotion 字体与图标系统","description":"@remotion/google-fonts 自动加载、Iconify 海量图标、中文字体子集化。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 字体"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html" class="active">进阶</a>
+      <a href="S-01-code-walkthrough.html">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-advanced">进阶层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">A-06 字体与图标</span>
+    </nav>
+    <h1 id="hero-title">A-06 字体与图标系统 <span class="level-badge level-A">A 进阶</span></h1>
+    <p class="hero-sub">Google Fonts / Iconify / 中文字体子集化 —— 视觉系统的基石。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 9 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> A-04 静态资源</div>
+      <div class="hero-meta-item"><strong>类型</strong> 进阶</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>@remotion/google-fonts 自动加载</h2>
+<p>Remotion 官方提供的字体包,Studio 内自动注入 @import:</p>
+<pre class="line-numbers"><code class="language-tsx">import { loadFont } from '@remotion/google-fonts/Inter';
+
+const { fontFamily, waitUntilDone } = loadFont();
+
+const MyComp = () =&gt; {
+  waitUntilDone();  // 阻塞渲染直到字体就绪
+  return &lt;h1 style={{ fontFamily: fontFamily || 'sans-serif' }}&gt;Hello&lt;/h1&gt;;
+};</code></pre>
+<div class="alert alert-info"><span class="alert-icon">💡</span><div class="alert-body"><p>在 Studio 中即时下载字体,但在 Lambda 渲染时需要预先 bundle 进静态资源,详见官方包文档。</p></div></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>本地字体:CSS @font-face</h2>
+<p>自托管字体时,放在 <code>public/fonts/</code>:</p>
+<pre class="line-numbers"><code class="language-css">/* public/fonts/fonts.css */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: block;
+}</code></pre>
+<p>Root.tsx 中引入:</p>
+<pre class="line-numbers"><code class="language-tsx">import './styles/fonts.css';</code></pre>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>中文字体子集化</h2>
+<p>中文字体动辄 5-10MB,需用 fonttools 提取子集:</p>
+<pre class="line-numbers"><code class="language-python">from fontTools.subset import Subsetter
+from fontTools.ttLib import TTFont
+
+font = TTFont('SourceHanSans.otf')
+sub = Subsetter()
+sub.populate(text='只提取这些字')
+sub.subset(font)
+font.save('SourceHan-subset.woff2')</code></pre>
+<p>这样 8MB 字体可压缩到 50KB。</p>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>Iconify 海量图标</h2>
+<p>Iconify 提供 20 万+ 图标,直接 import 使用:</p>
+<pre class="line-numbers"><code class="language-tsx">import { Icon } from '@iconify/react';
+
+&lt;Icon icon="mdi:rocket" style={{ fontSize: 96, color: '#2496ED' }} /&gt;</code></pre>
+<div class="alert alert-tip"><span class="alert-icon">💡</span><div class="alert-body"><p>Iconify 会把用过的图标单独打包,体积仅 10-30KB。远胜于一次性打包 FontAwesome 全集(>1MB)。</p></div></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>动态字体切换</h2>
+<p>用 Props 让用户选字体:</p>
+<pre class="line-numbers"><code class="language-tsx">import { loadFont as loadInter } from '@remotion/google-fonts/Inter';
+import { loadFont as loadNoto } from '@remotion/google-fonts/NotoSansSC';
+
+const Video: React.FC&lt;{ font: 'inter' | 'noto' }&gt; = ({ font }) =&gt; {
+  const inter = loadInter();
+  const noto = loadNoto();
+  const family = font === 'inter' ? inter.fontFamily : noto.fontFamily;
+  return &lt;h1 style={{ fontFamily: family || 'sans-serif' }}&gt;Hi&lt;/h1&gt;;
+};</code></pre>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>字体加载失败的回退</h2>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p><strong>症状</strong>:Lambda 渲染中字体未加载完成,报 <code>delayRender timeout</code>。</p></div></div>
+<p>解决:在 <code>loadFont()</code> 后调用 <code>waitUntilDone()</code> 阻塞渲染:</p>
+<pre class="line-numbers"><code class="language-tsx">const { fontFamily, waitUntilDone } = loadFont();
+
+const Component = () =&gt; {
+  waitUntilDone();  // 阻塞到字体就绪
+  return &lt;div style={{ fontFamily: fontFamily || 'sans-serif' }} /&gt;;
+};</code></pre>
+</section>
+
+<div class="source-note">@remotion/google-fonts、Iconify 文档、fonttools 子集化</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>Tailwind CSS 集成</h2>
+<p>Remotion 完全兼容 Tailwind,初始化项目时勾选 <code>TailwindCSS</code> 即可:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash"># 已经初始化过项目,后续添加
+npx remotion add @remotion/tailwind</code></pre></div>
+<p>使用示例:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">// tsconfig.json 加 "types": ["@remotion/tailwind"]
+// 注意:需要任意值语法 (brackets)
+&lt;div className="w-[1920px] h-[1080px] bg-blue-500 text-[80px]"&gt;
+  Tailwind
+&lt;/div&gt;</code></pre></div>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p>Remotion 渲染时 1920×1080 实际生效,浏览器中通常缩小展示,因此需要 <strong>任意值语法</strong>而非响应式断点(sm/md)。</p></div></div>
+</section>
+
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>CSS 变量与主题切换</h2>
+<p>Remotion 支持 CSS 变量,可动态切换主题色而无需重渲染:</p>
+<div class="code-block"><div class="code-block-header">css</div><pre class="line-numbers"><code class="language-css">/* styles.css */
+:root {
+  --primary: #2496ED;
+  --bg: #0a1a2a;
+  --text: #ffffff;
+}
+.theme-red {
+  --primary: #e94560;
+}</code></pre></div>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">// 父级加 className 即可切换整组颜色
+&lt;AbsoluteFill className="theme-red" style={{
+  background: 'var(--bg)', color: 'var(--text)',
+}}&gt;
+  &lt;h1 style={{ color: 'var(--primary)' }}&gt;Title&lt;/h1&gt;
+&lt;/AbsoluteFill&gt;</code></pre></div>
+</section>
+
+
+<section class="section" id="s9">
+<span class="section-num">Chapter 09</span>
+<h2>@remotion/google-fonts 动态加载</h2>
+<p>官方包支持 1400+ Google Fonts,动态加载避免 Bundle 膨胀:</p>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">import { getAvailableFonts, loadFont } from '@remotion/google-fonts/Inter';
+
+const { fontFamily, waitUntilDone } = loadFont();
+await waitUntilDone();  // 阻塞渲染直到字体就绪
+
+// 动态切换:用户选择
+const fonts = getAvailableFonts();
+const font = await fonts[idx].load();
+const { fontFamily } = font.loadFont();</code></pre></div>
+<p>注意:必须 ES 模块导入,CJS 模式会报错。</p>
+</section>
+
+<section class="section" id="s10">
+<span class="section-num">Chapter 10</span>
+<h2>@remotion/noise 柏林/分形噪声</h2>
+<p>程序化纹理、云层、地形必备:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { noise2D, noise3D } from '@remotion/noise';
+
+const n = noise2D('cloud', x / width, y / height);  // 0~1
+const t = noise3D('smoke', x, y, frame / fps);       // 含时间维,3D 噪声
+
+// 烟/雾/水/云/火焰
+const opacity = interpolate(noise3D('fog', px, py, frame/30), [-1, 1], [0, 1]);</code></pre></div>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="A-05-performance.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">A-05 性能优化</span></a>
+  <a href="P-01-internal-architecture.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">P-01 内部架构</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 23 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

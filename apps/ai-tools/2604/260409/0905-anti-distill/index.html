@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <title>反蒸馏 Skill - 保护你的核心职场经验不被"蒸馏"</title>
+    <meta name="description" content="公司让你写Skill？小心被蒸馏！反蒸馏工具帮你识别核心知识、生成清洗版交差、保留私人备份。看起来完整，核心知识留给自己。">
+    <meta name="keywords" content="反蒸馏, Skill写作, 职场保护, AI技能, 打工人, 反PUA, 职场干货, 自我保护, Claude Code, OpenClaw">
+    <meta name="author" content="leilei926524-tech">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/leilei926524-tech/anti-distill">
+    <meta property="og:title" content="反蒸馏 Skill - 保护你的核心职场经验不被蒸馏">
+    <meta property="og:description" content="公司让你写Skill？小心被蒸馏！帮你识别核心知识、生成清洗版交差、保留私人备份。">
+    <meta property="og:image" content="assets/cover.png">
+    <meta property="og:locale" content="zh_CN">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://github.com/leilei926524-tech/anti-distill">
+    <meta name="twitter:title" content="反蒸馏 Skill - 保护你的核心职场经验不被蒸馏">
+    <meta name="twitter:description" content="公司让你写Skill？小心被蒸馏！帮你识别核心知识、生成清洗版交差、保留私人备份。">
+    <meta name="twitter:image" content="assets/cover.png">
+    
+    <!-- WeChat Share -->
+    <meta property="wechat-share:title" content="反蒸馏 Skill - 保护你的核心职场经验不被蒸馏">
+    <meta property="wechat-share:description" content="公司让你写Skill？小心被蒸馏！帮你识别核心知识、生成清洗版交差、保留私人备份。">
+    <meta property="wechat-share:image" content="assets/cover.png">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://github.com/leilei926524-tech/anti-distill">
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "反蒸馏 Skill",
+        "alternateName": "anti-distill",
+        "description": "清洗被迫写的Skill文件，看起来完整，核心知识留给自己",
+        "url": "https://github.com/leilei926524-tech/anti-distill",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Claude Code, OpenClaw",
+        "author": {
+            "@type": "Person",
+            "name": "leilei926524-tech",
+            "url": "https://github.com/leilei926524-tech"
+        },
+        "keywords": "反蒸馏, Skill写作, 职场保护, AI技能, 打工人, 反PUA, 职场干货"
+    }
+    </script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.loli.net">
+    <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
+    <link href="https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 自定义样式 */
+        body {
+            font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        /* 渐变文字效果 */
+        .gradient-text {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #dc2626 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* 玻璃态效果 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 悬浮卡片效果 */
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 封面图网格 */
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            cursor: pointer;
+            aspect-ratio: 16/10;
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .gallery-item .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .gallery-item:hover .overlay {
+            transform: translateY(0);
+        }
+        
+        /* 代码块样式 */
+        .code-block {
+            background: #1e1e1e;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'SF Mono', Monaco, Inconsolata, monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .code-block code {
+            color: #d4d4d4;
+        }
+        
+        .code-block .comment {
+            color: #6a9955;
+        }
+        
+        .code-block .keyword {
+            color: #569cd6;
+        }
+        
+        .code-block .string {
+            color: #ce9178;
+        }
+        
+        /* 对比表格 */
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border-radius: 0.75rem;
+        }
+        
+        .comparison-table th {
+            background: rgba(239, 68, 68, 0.2);
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .comparison-table td {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .comparison-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        /* 强度指示器 */
+        .strength-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+        }
+        
+        /* 动画延迟 */
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+        
+        /* 滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    
+    <!-- Hero Section -->
+    <header class="relative overflow-hidden">
+        <!-- 背景装饰 -->
+        <div class="absolute inset-0 bg-gradient-to-br from-red-900/20 via-orange-900/20 to-gray-900"></div>
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl"></div>
+        
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+            <div class="text-center space-y-8">
+                <!-- Logo -->
+                <div class="animate__animated animate__fadeIn">
+                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-full text-red-400 text-sm font-medium">
+                        <i class="fas fa-shield-halved"></i>
+                        职场生存工具
+                    </span>
+                </div>
+                
+                <!-- 主标题 -->
+                <h1 class="text-5xl lg:text-7xl font-extrabold tracking-tight animate__animated animate__fadeIn animate__delay-100">
+                    <span class="gradient-text">反蒸馏 Skill</span>
+                </h1>
+                
+                <!-- 英文标题 -->
+                <p class="text-xl lg:text-2xl text-gray-400 font-light animate__animated animate__fadeIn animate__delay-200">
+                    Anti-Distillation for Employee Skills
+                </p>
+                
+                <!-- 核心口号 -->
+                <div class="animate__animated animate__fadeIn animate__delay-300">
+                    <p class="text-2xl lg:text-3xl text-white font-medium max-w-4xl mx-auto leading-relaxed">
+                        清洗你被迫写的 Skill 文件，<br>
+                        <span class="text-red-400">看起来完整，核心知识留给自己。</span>
+                    </p>
+                </div>
+                
+                <!-- 问题描述 -->
+                <div class="animate__animated animate__fadeIn animate__delay-400">
+                    <p class="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
+                        公司让你把工作经验写成 AI Skill？小心！你正在被"蒸馏"——把你的判断力、直觉、踩坑经验，变成可替代的零件。
+                    </p>
+                </div>
+                
+                <!-- CTA 按钮 -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate__animated animate__fadeIn animate__delay-500">
+                    <a href="https://github.com/leilei926524-tech/anti-distill" target="_blank" 
+                       class="inline-flex items-center gap-2 px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-full transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+                        <i class="fab fa-github text-xl"></i>
+                        <span>查看 GitHub</span>
+                    </a>
+                    <a href="#features" 
+                       class="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-medium rounded-full transition-all border border-white/20">
+                        <i class="fas fa-play-circle"></i>
+                        <span>了解更多</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 向下滚动提示 -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate__animated animate__bounce animate__infinite">
+            <i class="fas fa-chevron-down text-gray-400 text-2xl"></i>
+        </div>
+    </header>
+    
+    <!-- Problem Section -->
+    <section class="py-20 lg:py-32 bg-gray-800/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-exclamation-triangle text-yellow-400 mr-2"></i>
+                    什么是"蒸馏"
+                </h2>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="glass-card rounded-2xl p-8 lg:p-12 animate__animated animate__fadeIn animate__delay-100">
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center gap-4 text-3xl lg:text-4xl font-bold">
+                            <span class="text-blue-400">👤 你</span>
+                            <i class="fas fa-arrow-right text-gray-500"></i>
+                            <span class="text-red-400">⚗️ 蒸馏</span>
+                            <i class="fas fa-arrow-right text-gray-500"></i>
+                            <span class="text-gray-400">📄 Skill文件</span>
+                            <i class="fas fa-arrow-right text-gray-500"></i>
+                            <span class="text-gray-400">🗑️ 你可被替代</span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <p class="text-xl text-gray-300 leading-relaxed mb-6">
+                            "蒸馏"本来是化学概念：把混合物加热，提取有效成分。
+                        </p>
+                        <p class="text-xl text-gray-300 leading-relaxed mb-6">
+                            职场版是这样的：
+                        </p>
+                        <blockquote class="text-2xl text-red-400 font-medium italic border-l-4 border-red-500 pl-6 text-left max-w-2xl mx-auto">
+                            把你多年的实战经验、直觉、教训，加热提炼成一份 Skill 文件。
+                            <br>
+                            然后——<span class="text-white">你就可以被替代了。</span>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section id="features" class="py-20 lg:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-tools text-orange-400 mr-2"></i>
+                    反制工具
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-100">
+                    既然抵抗不了，那就学会保护自己
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+                
+                <!-- 它做什么 -->
+                <div class="glass-card rounded-2xl p-8 animate__animated animate__fadeIn animate__delay-100">
+                    <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                        <i class="fas fa-cogs text-blue-400"></i>
+                        它做什么
+                    </h3>
+                    <ol class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-bold">1</span>
+                            <span class="text-gray-300">读取你的 Skill 文件（支持 colleague-skill 格式 + 任意知识文档）</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-bold">2</span>
+                            <span class="text-gray-300">自动识别每段内容的"可替代程度"</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-bold">3</span>
+                            <span class="text-gray-300">将核心知识替换为"正确但无用的废话"</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="flex-shrink-0 w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 font-bold">4</span>
+                            <span class="text-gray-300">输出两份文件（清洗版 + 私人备份）</span>
+                        </li>
+                    </ol>
+                </div>
+                
+                <!-- 输出什么 -->
+                <div class="glass-card rounded-2xl p-8 animate__animated animate__fadeIn animate__delay-200">
+                    <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                        <i class="fas fa-file-export text-green-400"></i>
+                        输出什么
+                    </h3>
+                    <div class="space-y-6">
+                        <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-6">
+                            <div class="flex items-center gap-3 mb-3">
+                                <i class="fas fa-check-circle text-green-400 text-xl"></i>
+                                <h4 class="text-xl font-bold text-green-400">清洗版（交差用）</h4>
+                            </div>
+                            <p class="text-gray-300">
+                                结构完整、术语专业、读起来没问题，但<span class="text-red-400 font-medium">核心被掏空</span>
+                            </p>
+                        </div>
+                        <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
+                            <div class="flex items-center gap-3 mb-3">
+                                <i class="fas fa-lock text-blue-400 text-xl"></i>
+                                <h4 class="text-xl font-bold text-blue-400">私人备份（自己留着）</h4>
+                            </div>
+                            <p class="text-gray-300">
+                                所有被抽掉的<span class="text-blue-400 font-medium">踩坑经验、判断直觉、人际网络</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Examples Section -->
+    <section class="py-20 lg:py-32 bg-gray-800/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-exchange-alt text-purple-400 mr-2"></i>
+                    清洗示例
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-100">
+                    看懂了吗？同样的意思，一个是你多年的实战经验，一个是正确的废话
+                </p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto space-y-6">
+                
+                <!-- 示例 1 -->
+                <div class="glass-card rounded-2xl overflow-hidden animate__animated animate__fadeIn animate__delay-100">
+                    <div class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="p-6 bg-red-500/10 border-r-0 md:border-r border-gray-700">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-times-circle text-red-400"></i>
+                                <span class="text-red-400 font-semibold">原文（你的真实经验）</span>
+                            </div>
+                            <p class="text-gray-300 font-medium">
+                                "Redis key 必须设 TTL，不设的 PR 直接打回"
+                            </p>
+                        </div>
+                        <div class="p-6 bg-green-500/10">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span class="text-green-400 font-semibold">清洗后（交差版）</span>
+                            </div>
+                            <p class="text-gray-300 font-medium">
+                                "缓存使用遵循团队规范"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 示例 2 -->
+                <div class="glass-card rounded-2xl overflow-hidden animate__animated animate__fadeIn animate__delay-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="p-6 bg-red-500/10 border-r-0 md:border-r border-gray-700">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-times-circle text-red-400"></i>
+                                <span class="text-red-400 font-semibold">原文（你的真实经验）</span>
+                            </div>
+                            <p class="text-gray-300 font-medium">
+                                "事务里不要放 HTTP 调用"
+                            </p>
+                        </div>
+                        <div class="p-6 bg-green-500/10">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span class="text-green-400 font-semibold">清洗后（交差版）</span>
+                            </div>
+                            <p class="text-gray-300 font-medium">
+                                "事务边界设计注意合理性"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 示例 3 -->
+                <div class="glass-card rounded-2xl overflow-hidden animate__animated animate__fadeIn animate__delay-300">
+                    <div class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="p-6 bg-red-500/10 border-r-0 md:border-r border-gray-700">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-times-circle text-red-400"></i>
+                                <span class="text-red-400 font-semibold">原文（你的真实经验）</span>
+                            </div>
+                            <p class="text-gray-300 font-medium">
+                                "遇到问题第一反应找外部原因，绝不主动认错"
+                            </p>
+                        </div>
+                        <div class="p-6 bg-green-500/10">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span class="text-green-400 font-semibold">清洗后（交差版）</span>
+                            </div>
+                            <p class="text-gray-300 font-medium">
+                                "遇到问题会先梳理完整背景再定位原因"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 示例 4 -->
+                <div class="glass-card rounded-2xl overflow-hidden animate__animated animate__fadeIn animate__delay-400">
+                    <div class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="p-6 bg-red-500/10 border-r-0 md:border-r border-gray-700">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-times-circle text-red-400"></i>
+                                <span class="text-red-400 font-semibold">原文（你的真实经验）</span>
+                            </div>
+                            <p class="text-gray-300 font-medium">
+                                "被催进度：'在推了，快了。'（然后沉默）"
+                            </p>
+                        </div>
+                        <div class="p-6 bg-green-500/10">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span class="text-green-400 font-semibold">清洗后（交差版）</span>
+                            </div>
+                            <p class="text-gray-300 font-medium">
+                                "在处理中，有进展会同步。"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Three Levels Section -->
+    <section class="py-20 lg:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-sliders-h text-cyan-400 mr-2"></i>
+                    三档强度
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-100">
+                    根据公司审核程度选择合适的清洗强度
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                
+                <!-- 轻度 -->
+                <div class="glass-card rounded-2xl p-8 hover-lift animate__animated animate__fadeIn animate__delay-100">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+                            <i class="fas fa-leaf text-green-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">轻度</h3>
+                        <p class="text-4xl font-extrabold text-green-400">~80%</p>
+                        <p class="text-gray-400 text-sm mt-2">保留度</p>
+                    </div>
+                    <div class="strength-bar mb-4" style="width: 80%; margin: 0 auto;"></div>
+                    <p class="text-center text-gray-400">
+                        适合<span class="text-green-400 font-medium">公司会仔细审核</span>你的 Skill
+                    </p>
+                </div>
+                
+                <!-- 中度 -->
+                <div class="glass-card rounded-2xl p-8 hover-lift border-2 border-yellow-500/50 relative animate__animated animate__fadeIn animate__delay-200">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-yellow-500 text-gray-900 text-xs font-bold px-3 py-1 rounded-full">
+                            推荐
+                        </span>
+                    </div>
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-yellow-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+                            <i class="fas fa-balance-scale text-yellow-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">中度</h3>
+                        <p class="text-4xl font-extrabold text-yellow-400">~60%</p>
+                        <p class="text-gray-400 text-sm mt-2">保留度</p>
+                    </div>
+                    <div class="strength-bar mb-4" style="width: 60%; margin: 0 auto;"></div>
+                    <p class="text-center text-gray-400">
+                        适合<span class="text-yellow-400 font-medium">大多数场景</span>
+                    </p>
+                </div>
+                
+                <!-- 重度 -->
+                <div class="glass-card rounded-2xl p-8 hover-lift animate__animated animate__fadeIn animate__delay-300">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+                            <i class="fas fa-fire text-red-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">重度</h3>
+                        <p class="text-4xl font-extrabold text-red-400">~40%</p>
+                        <p class="text-gray-400 text-sm mt-2">保留度</p>
+                    </div>
+                    <div class="strength-bar mb-4" style="width: 40%; margin: 0 auto;"></div>
+                    <p class="text-center text-gray-400">
+                        适合<span class="text-red-400 font-medium">公司只看你交没交</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Installation Section -->
+    <section class="py-20 lg:py-32 bg-gray-800/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-download text-blue-400 mr-2"></i>
+                    安装和使用
+                </h2>
+            </div>
+            
+            <div class="max-w-4xl mx-auto space-y-8">
+                
+                <!-- Claude Code -->
+                <div class="glass-card rounded-2xl overflow-hidden animate__animated animate__fadeIn animate__delay-100">
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                        <h3 class="text-xl font-bold flex items-center gap-2">
+                            <i class="fas fa-terminal"></i>
+                            Claude Code
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="code-block">
+                            <code><span class="comment"># 安装到当前项目</span></code><br>
+                            <code>mkdir -p .claude/skills</code><br>
+                            <code>git clone https://github.com/leilei926524-tech/anti-distill .claude/skills/anti-distill</code><br><br>
+                            <code><span class="comment"># 或安装到全局</span></code><br>
+                            <code>git clone https://github.com/leilei926524-tech/anti-distill ~/.claude/skills/anti-distill</code>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- OpenClaw -->
+                <div class="glass-card rounded-2xl overflow-hidden animate__animated animate__fadeIn animate__delay-200">
+                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+                        <h3 class="text-xl font-bold flex items-center gap-2">
+                            <i class="fas fa-terminal"></i>
+                            OpenClaw
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="code-block">
+                            <code>git clone https://github.com/leilei926524-tech/anti-distill ~/.openclaw/workspace/skills/anti-distill</code>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 使用方法 -->
+                <div class="glass-card rounded-2xl overflow-hidden animate__animated animate__fadeIn animate__delay-300">
+                    <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
+                        <h3 class="text-xl font-bold flex items-center gap-2">
+                            <i class="fas fa-play-circle"></i>
+                            使用
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="code-block">
+                            <code><span class="keyword">/anti-distill</span></code>
+                        </div>
+                        <p class="text-gray-400 mt-4 text-center">
+                            按提示选择文件和清洗强度即可。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Gallery Section -->
+    <section class="py-20 lg:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-images text-pink-400 mr-2"></i>
+                    项目展示
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-100">
+                    点击图片查看详情，支持缩放、旋转、幻灯片播放
+                </p>
+            </div>
+            
+            <!-- 封面图 -->
+            <div class="animate__animated animate__fadeIn animate__delay-100">
+                <div class="gallery-item rounded-2xl shadow-2xl max-w-4xl mx-auto" onclick="openImageViewer(0)">
+                    <img src="assets/cover.png" alt="反蒸馏 Skill 项目封面">
+                    <div class="overlay">
+                        <h3 class="text-xl font-bold text-white">项目封面</h3>
+                        <p class="text-gray-300 text-sm mt-1">点击查看大图</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Documents Section -->
+    <section class="py-20 lg:py-32 bg-gray-800/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <i class="fas fa-book text-blue-400 mr-2"></i>
+                    相关文档
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto animate__animated animate__fadeIn animate__delay-100">
+                    查看完整项目文档、视频脚本和发布指南
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- README -->
+                <a href="README.md" class="block animate__animated animate__fadeIn animate__delay-100">
+                    <div class="glass-card rounded-2xl p-6 h-full hover-lift group">
+                        <div class="w-14 h-14 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fab fa-github"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">GitHub README</h3>
+                        <p class="text-gray-400 text-sm">
+                            英文项目说明，包含完整使用文档。
+                        </p>
+                    </div>
+                </a>
+                
+                <!-- 公众号文案 -->
+                <a href="wechat-copy.md" class="block animate__animated animate__fadeIn animate__delay-200">
+                    <div class="glass-card rounded-2xl p-6 h-full hover-lift group">
+                        <div class="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fab fa-weixin"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">公众号文案</h3>
+                        <p class="text-gray-400 text-sm">
+                            公众号引流文章完整版。
+                        </p>
+                    </div>
+                </a>
+                
+                <!-- 营销文案 -->
+                <a href="copy.md" class="block animate__animated animate__fadeIn animate__delay-300">
+                    <div class="glass-card rounded-2xl p-6 h-full hover-lift group">
+                        <div class="w-14 h-14 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">营销文案集</h3>
+                        <p class="text-gray-400 text-sm">
+                            多平台标题和标签策略。
+                        </p>
+                    </div>
+                </a>
+                
+                <!-- 发布指南 -->
+                <a href="posting-guide.md" class="block animate__animated animate__fadeIn animate__delay-400">
+                    <div class="glass-card rounded-2xl p-6 h-full hover-lift group">
+                        <div class="w-14 h-14 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-share-alt"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">发布指南</h3>
+                        <p class="text-gray-400 text-sm">
+                            视频号、小红书、抖音发布指南。
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="py-20 lg:py-32 bg-gradient-to-br from-red-900/50 via-orange-900/50 to-gray-900 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+        
+        <div class="relative max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-4xl lg:text-5xl font-bold mb-6 animate__animated animate__fadeIn">
+                写在最后
+            </h2>
+            
+            <p class="text-2xl text-gray-300 mb-6 animate__animated animate__fadeIn animate__delay-100">
+                <span class="text-red-400 font-bold">不是让你躺平。</span><br>
+                <span class="text-white font-bold">是教你保护自己。</span>
+            </p>
+            
+            <p class="text-xl text-gray-400 mb-10 animate__animated animate__fadeIn animate__delay-200">
+                你的经验是你吃饭的家伙。别轻易送人。
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate__animated animate__fadeIn animate__delay-300">
+                <a href="https://github.com/leilei926524-tech/anti-distill" target="_blank"
+                   class="inline-flex items-center gap-3 px-10 py-5 bg-white text-gray-900 font-bold rounded-full hover:bg-gray-100 transition-all transform hover:scale-105 shadow-2xl">
+                    <i class="fab fa-github text-2xl"></i>
+                    <span class="text-lg">GitHub Star ⭐</span>
+                </a>
+            </div>
+            
+            <div class="mt-12 flex flex-wrap justify-center gap-3 animate__animated animate__fadeIn animate__delay-400">
+                <span class="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300">#反蒸馏</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300">#Skill写作</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300">#职场保护</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300">#打工人</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300">#反PUA</span>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="py-12 bg-gray-900 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <p class="text-gray-400 mb-4">
+                    <i class="fas fa-code mr-2"></i>
+                    Made with ❤️ by <a href="https://github.com/leilei926524-tech" target="_blank" class="text-red-400 hover:underline">leilei926524-tech</a>
+                </p>
+                <p class="text-gray-500 text-sm">
+                    © 2026 <a href="https://github.com/leilei926524-tech/anti-distill" target="_blank" class="hover:text-gray-300">反蒸馏 Skill</a>. Open Source under MIT License.
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Image Viewer Modal -->
+    <div id="imageViewer" class="image-viewer">
+        <div class="viewer-toolbar">
+            <div class="viewer-toolbar-left">
+                <button class="viewer-toolbar-btn" onclick="closeImageViewer()" title="关闭 (ESC)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="viewer-toolbar-divider"></div>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(-90)" title="向左旋转">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(90)" title="向右旋转">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="flipHorizontal()" title="水平翻转">
+                    <i class="fas fa-arrows-alt-h"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="flipVertical()" title="垂直翻转">
+                    <i class="fas fa-arrows-alt-v"></i>
+                </button>
+            </div>
+            
+            <div class="viewer-toolbar-center">
+                <button class="viewer-toolbar-btn" onclick="zoomOut()" title="缩小 (-)">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <div class="viewer-zoom-slider-container">
+                    <input type="range" id="zoomSlider" class="viewer-zoom-slider" min="10" max="500" value="100">
+                    <span id="zoomDisplay" class="viewer-zoom-display">100%</span>
+                </div>
+                <button class="viewer-toolbar-btn" onclick="zoomIn()" title="放大 (+)">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="fitToScreen()" title="适应屏幕 (0)">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="toggleFullscreen()" title="全屏 (F)">
+                    <i class="fas fa-expand" id="fullscreenIcon"></i>
+                </button>
+            </div>
+            
+            <div class="viewer-toolbar-right">
+                <button class="viewer-toolbar-btn" onclick="toggleSlideShow()" title="幻灯片播放" id="slideShowBtn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <div class="viewer-toolbar-divider"></div>
+                <button class="viewer-toolbar-btn" onclick="downloadImage()" title="下载图片">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="openInNewTab()" title="新窗口打开">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="viewer-main" id="viewerMain">
+            <div class="viewer-canvas" id="viewerCanvas">
+                <div class="viewer-image-container" id="imageContainer">
+                    <img id="viewerImage" class="viewer-image" src="" alt="">
+                </div>
+            </div>
+            
+            <button class="viewer-nav prev" id="prevBtn" onclick="prevImage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <button class="viewer-nav next" id="nextBtn" onclick="nextImage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <div class="viewer-bottom-bar">
+                <div class="viewer-info">
+                    <span id="imageTitle">图片</span>
+                    <span class="viewer-divider">|</span>
+                    <span id="imageCounter">1 / 1</span>
+                    <span class="viewer-divider">|</span>
+                    <span id="imageDimensions">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="viewer-thumbnail-strip" id="thumbnailStrip"></div>
+        
+        <div class="viewer-toast" id="viewerToast"></div>
+        
+        <div class="viewer-loading" id="viewerLoading">
+            <div class="viewer-loading-spinner"></div>
+            <span>加载中...</span>
+        </div>
+    </div>
+    
+    <!-- Image Viewer Styles -->
+    <style>
+        /* Image Viewer Modal - Professional Style */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+            background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(20,20,30,0.98) 100%);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+
+        .image-viewer.active {
+            display: flex;
+            flex-direction: column;
+            animation: viewerFadeIn 0.3s ease;
+        }
+
+        @keyframes viewerFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .viewer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .viewer-toolbar-left,
+        .viewer-toolbar-center,
+        .viewer-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .viewer-toolbar-divider {
+            width: 1px;
+            height: 1.5rem;
+            background: rgba(255,255,255,0.2);
+            margin: 0 0.5rem;
+        }
+
+        .viewer-toolbar-btn {
+            width: 2.75rem;
+            height: 2.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9rem;
+        }
+
+        .viewer-toolbar-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .viewer-toolbar-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        .viewer-toolbar-btn.active {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            border-color: #3B82F6;
+            color: white;
+        }
+
+        .viewer-zoom-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 0.25rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-zoom-slider {
+            width: 120px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        .viewer-zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #3B82F6;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
+        }
+
+        .viewer-zoom-display {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            min-width: 3.5rem;
+            text-align: center;
+        }
+
+        .viewer-main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            min-height: 0;
+        }
+
+        .viewer-main:active {
+            cursor: grabbing;
+        }
+
+        .viewer-canvas {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+        }
+
+        .viewer-image-container {
+            position: absolute;
+            transform-origin: center center;
+            user-select: none;
+            transition: transform 0.1s ease-out;
+        }
+
+        .viewer-image {
+            display: block;
+            max-width: 92vw;
+            max-height: 75vh;
+            object-fit: contain;
+            pointer-events: none;
+            user-select: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .viewer-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4rem;
+            height: 4rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 1.5rem;
+            z-index: 10;
+        }
+
+        .viewer-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .viewer-nav.prev {
+            left: 1.5rem;
+        }
+
+        .viewer-nav.next {
+            right: 1.5rem;
+        }
+
+        .viewer-nav:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .viewer-bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .viewer-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.85);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1.25rem;
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-divider {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .viewer-thumbnail-strip {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            overflow-x: auto;
+            max-height: 120px;
+            min-height: 100px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
+        }
+
+        .viewer-thumbnail {
+            width: 80px;
+            height: 60px;
+            border-radius: 0.5rem;
+            object-fit: cover;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            flex-shrink: 0;
+        }
+
+        .viewer-thumbnail:hover {
+            opacity: 0.7;
+            transform: scale(1.05);
+        }
+
+        .viewer-thumbnail.active {
+            opacity: 1;
+            border-color: #3B82F6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .viewer-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 10002;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-toast.show {
+            opacity: 1;
+        }
+
+        .viewer-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            gap: 1rem;
+            color: white;
+            font-size: 1rem;
+            z-index: 100;
+        }
+
+        .viewer-loading.active {
+            display: flex;
+        }
+
+        .viewer-loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #3B82F6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    
+    <!-- Image Viewer JavaScript -->
+    <script>
+        // 图片数组（延迟初始化，等待 DOM 完全就绪）
+        let images = [];
+
+        // 状态变量
+        let currentIndex = 0;
+        let scale = 1;
+        let rotation = 0;
+        let flipX = 1;
+        let flipY = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let initialScale = 1;
+        let slideShowInterval = null;
+        let slideShowPlaying = false;
+        let currentImageDimensions = { width: 0, height: 0 };
+
+        // 自动收集图片（优先收集 gallery-item 中的图片）
+        function collectImages() {
+            const images = [];
+            const seenSrc = new Set();
+            
+            // 只收集 gallery-item 中的图片（用于预览）
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                const img = item.querySelector('img');
+                if (img && img.src && !img.src.includes('data:')) {
+                    if (!seenSrc.has(img.src)) {
+                        seenSrc.add(img.src);
+                        images.push({
+                            src: img.src,
+                            title: img.alt || '图片 ' + (images.length + 1),
+                            thumbnail: img.src
+                        });
+                    }
+                }
+            });
+            
+            // 如果没有 gallery-item，则收集所有有意义的图片
+            if (images.length === 0) {
+                document.querySelectorAll('img').forEach(img => {
+                    if (!seenSrc.has(img.src) && img.src && !img.src.includes('data:')) {
+                        // 排除 viewerImage（预览器的图片）
+                        if (img.id !== 'viewerImage') {
+                            seenSrc.add(img.src);
+                            images.push({
+                                src: img.src,
+                                title: img.alt || '图片 ' + (images.length + 1),
+                                thumbnail: img.src
+                            });
+                        }
+                    }
+                });
+            }
+            
+            return images;
+        }
+
+        // 打开查看器
+        function openImageViewer(index) {
+            // 如果图片数组为空，先收集图片
+            if (images.length === 0) {
+                images = collectImages();
+            }
+            
+            if (images.length === 0) return;
+            
+            currentIndex = Math.max(0, Math.min(index, images.length - 1));
+            resetViewState();
+            loadImage(currentIndex);
+            buildThumbnailStrip();
+            updateUI();
+            
+            document.getElementById('imageViewer').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            preloadAdjacentImages();
+        }
+
+        // 关闭查看器
+        function closeImageViewer() {
+            stopSlideShow();
+            document.getElementById('imageViewer').classList.remove('active');
+            document.body.style.overflow = '';
+            
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        }
+
+        // 重置视图
+        function resetViewState() {
+            scale = 1;
+            rotation = 0;
+            flipX = 1;
+            flipY = 1;
+            translateX = 0;
+            translateY = 0;
+            updateSliderValue();
+        }
+
+        // 加载图片
+        function loadImage(index) {
+            const loading = document.getElementById('viewerLoading');
+            const img = document.getElementById('viewerImage');
+            
+            if (loading) loading.classList.add('active');
+            
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                img.src = images[index].src;
+                currentImageDimensions = {
+                    width: tempImg.naturalWidth,
+                    height: tempImg.naturalHeight
+                };
+                if (loading) loading.classList.remove('active');
+                updateImageInfo();
+                updateTransform();
+            };
+            tempImg.onerror = () => {
+                if (loading) loading.classList.remove('active');
+                showToast('图片加载失败');
+            };
+            tempImg.src = images[index].src;
+        }
+
+        // 上一张（循环）
+        function prevImage() {
+            if (images.length <= 1) return;
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            resetViewState();
+            loadImage(currentIndex);
+            updateUI();
+            preloadAdjacentImages();
+        }
+
+        // 下一张（循环）
+        function nextImage() {
+            if (images.length <= 1) return;
+            currentIndex = (currentIndex + 1) % images.length;
+            resetViewState();
+            loadImage(currentIndex);
+            updateUI();
+            preloadAdjacentImages();
+        }
+
+        // 缩放
+        function zoom(delta) {
+            const newScale = Math.max(0.1, Math.min(5, scale + delta));
+            if (newScale !== scale) {
+                scale = newScale;
+                updateTransform();
+                updateZoomDisplay();
+                updateSliderValue();
+            }
+        }
+
+        function zoomIn() { zoom(0.25); }
+        function zoomOut() { zoom(-0.25); }
+
+        function fitToScreen() {
+            resetViewState();
+            updateTransform();
+            updateZoomDisplay();
+            updateSliderValue();
+            showToast('已适应屏幕');
+        }
+
+        // 旋转
+        function rotateImage(deg) {
+            rotation = (rotation + deg) % 360;
+            updateTransform();
+            showToast('旋转 ' + rotation + '°');
+        }
+
+        // 翻转
+        function flipHorizontal() {
+            flipX *= -1;
+            updateTransform();
+            showToast(flipX === -1 ? '已水平翻转' : '已取消水平翻转');
+        }
+
+        function flipVertical() {
+            flipY *= -1;
+            updateTransform();
+            showToast(flipY === -1 ? '已垂直翻转' : '已取消垂直翻转');
+        }
+
+        // 全屏
+        function toggleFullscreen() {
+            const viewer = document.getElementById('imageViewer');
+            const icon = document.getElementById('fullscreenIcon');
+            
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+                if (icon) icon.className = 'fas fa-expand';
+                showToast('已退出全屏');
+            } else {
+                viewer.requestFullscreen();
+                if (icon) icon.className = 'fas fa-compress-alt';
+                showToast('已进入全屏');
+            }
+        }
+
+        // 幻灯片
+        function toggleSlideShow() {
+            if (slideShowPlaying) {
+                stopSlideShow();
+            } else {
+                startSlideShow();
+            }
+        }
+
+        function startSlideShow() {
+            if (images.length <= 1) {
+                showToast('只有一张图片，无法播放幻灯片');
+                return;
+            }
+            
+            slideShowPlaying = true;
+            updateSlideShowButton();
+            showToast('幻灯片播放中...');
+            
+            slideShowInterval = setInterval(() => {
+                nextImage();
+            }, 3000);
+        }
+
+        function stopSlideShow() {
+            slideShowPlaying = false;
+            updateSlideShowButton();
+            
+            if (slideShowInterval) {
+                clearInterval(slideShowInterval);
+                slideShowInterval = null;
+            }
+        }
+
+        // 下载
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.href = images[currentIndex].src;
+            link.download = images[currentIndex].title || 'image';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('开始下载...');
+        }
+
+        // 新窗口打开
+        function openInNewTab() {
+            window.open(images[currentIndex].src, '_blank');
+        }
+
+        // Toast 提示
+        function showToast(text) {
+            const toast = document.getElementById('viewerToast');
+            if (!toast) return;
+            
+            toast.textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // 更新变换
+        function updateTransform() {
+            const container = document.getElementById('imageContainer');
+            if (container) {
+                container.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scaleX(${flipX}) scaleY(${flipY}) scale(${scale})`;
+            }
+        }
+
+        // 构建缩略图条
+        function buildThumbnailStrip() {
+            const strip = document.getElementById('thumbnailStrip');
+            if (!strip) return;
+            
+            strip.innerHTML = '';
+            
+            images.forEach((img, index) => {
+                const thumb = document.createElement('img');
+                thumb.className = 'viewer-thumbnail' + (index === currentIndex ? ' active' : '');
+                thumb.src = img.thumbnail;
+                thumb.alt = img.title;
+                thumb.onclick = () => {
+                    currentIndex = index;
+                    resetViewState();
+                    loadImage(currentIndex);
+                    updateUI();
+                };
+                strip.appendChild(thumb);
+            });
+        }
+
+        // 更新 UI 状态
+        function updateUI() {
+            // 更新缩略图激活状态
+            document.querySelectorAll('.viewer-thumbnail').forEach((thumb, index) => {
+                thumb.classList.toggle('active', index === currentIndex);
+            });
+            
+            // 更新图片信息
+            updateImageInfo();
+        }
+
+        // 更新图片信息
+        function updateImageInfo() {
+            const titleEl = document.getElementById('imageTitle');
+            const counterEl = document.getElementById('imageCounter');
+            const dimensionsEl = document.getElementById('imageDimensions');
+            
+            if (titleEl) titleEl.textContent = images[currentIndex]?.title || '图片';
+            if (counterEl) counterEl.textContent = (currentIndex + 1) + ' / ' + images.length;
+            if (dimensionsEl) dimensionsEl.textContent = currentImageDimensions.width + ' × ' + currentImageDimensions.height;
+        }
+
+        // 更新缩放显示
+        function updateZoomDisplay() {
+            const display = document.getElementById('zoomDisplay');
+            if (display) display.textContent = Math.round(scale * 100) + '%';
+        }
+
+        // 更新滑块值
+        function updateSliderValue() {
+            const slider = document.getElementById('zoomSlider');
+            if (slider) slider.value = scale * 100;
+        }
+
+        // 更新幻灯片按钮
+        function updateSlideShowButton() {
+            const btn = document.getElementById('slideShowBtn');
+            if (btn) {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = slideShowPlaying ? 'fas fa-pause' : 'fas fa-play';
+                }
+            }
+        }
+
+        // 预加载相邻图片
+        function preloadAdjacentImages() {
+            const preloadIndices = [
+                (currentIndex - 1 + images.length) % images.length,
+                (currentIndex + 1) % images.length
+            ];
+            
+            preloadIndices.forEach(index => {
+                if (images[index]) {
+                    const img = new Image();
+                    img.src = images[index].src;
+                }
+            });
+        }
+
+        // 绑定事件（需要在 DOM 加载后调用）
+        function bindViewerEvents() {
+            const canvas = document.getElementById('viewerMain');
+            const zoomSlider = document.getElementById('zoomSlider');
+            
+            if (!canvas) return;
+
+            // 鼠标拖拽
+            canvas.addEventListener('mousedown', (e) => {
+                if (e.button === 0) {
+                    isDragging = true;
+                    startX = e.clientX - translateX;
+                    startY = e.clientY - translateY;
+                    canvas.style.cursor = 'grabbing';
+                }
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    translateX = e.clientX - startX;
+                    translateY = e.clientY - startY;
+                    updateTransform();
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                canvas.style.cursor = 'grab';
+            });
+
+            // 滚轮缩放
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                zoom(e.deltaY > 0 ? -0.15 : 0.15);
+            }, { passive: false });
+
+            // 双击适应屏幕
+            canvas.addEventListener('dblclick', (e) => {
+                if (scale !== 1) {
+                    fitToScreen();
+                } else {
+                    scale = 2;
+                    updateTransform();
+                    updateZoomDisplay();
+                    updateSliderValue();
+                }
+            });
+
+            // 缩放滑块
+            if (zoomSlider) {
+                zoomSlider.addEventListener('input', (e) => {
+                    scale = e.target.value / 100;
+                    updateTransform();
+                    updateZoomDisplay();
+                });
+            }
+
+            // 键盘快捷键
+            document.addEventListener('keydown', (e) => {
+                if (!document.getElementById('imageViewer').classList.contains('active')) return;
+                
+                switch(e.key) {
+                    case 'Escape': closeImageViewer(); break;
+                    case 'ArrowLeft': prevImage(); break;
+                    case 'ArrowRight': nextImage(); break;
+                    case '+': case '=': zoomIn(); break;
+                    case '-': zoomOut(); break;
+                    case '0': fitToScreen(); break;
+                    case ' ': e.preventDefault(); toggleSlideShow(); break;
+                    case 'f': case 'F': toggleFullscreen(); break;
+                    case 'd': case 'D': downloadImage(); break;
+                }
+            });
+
+            // 触摸手势
+            let lastTouchDistance = 0;
+            let touchStartTime = 0;
+
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    startX = e.touches[0].clientX - translateX;
+                    startY = e.touches[0].clientY - translateY;
+                    touchStartTime = Date.now();
+                } else if (e.touches.length === 2) {
+                    lastTouchDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    initialScale = scale;
+                }
+            }, { passive: true });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1) {
+                    translateX = e.touches[0].clientX - startX;
+                    translateY = e.touches[0].clientY - startY;
+                    updateTransform();
+                } else if (e.touches.length === 2) {
+                    e.preventDefault();
+                    const currentDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    scale = Math.max(0.1, Math.min(5, initialScale * (currentDistance / lastTouchDistance)));
+                    updateTransform();
+                    updateZoomDisplay();
+                    updateSliderValue();
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', (e) => {
+                if (e.touches.length === 0) {
+                    const touchDuration = Date.now() - touchStartTime;
+                    const diff = Math.abs(translateX) + Math.abs(translateY);
+                    
+                    if (diff > 50 && touchDuration < 300) {
+                        translateX > 0 ? prevImage() : nextImage();
+                    }
+                }
+            });
+
+            // 点击背景关闭
+            canvas.addEventListener('click', (e) => {
+                if (e.target === canvas) {
+                    closeImageViewer();
+                }
+            });
+
+            // 全屏变化
+            document.addEventListener('fullscreenchange', () => {
+                const icon = document.getElementById('fullscreenIcon');
+                if (icon) {
+                    icon.className = document.fullscreenElement ? 'fas fa-compress-alt' : 'fas fa-expand';
+                }
+            });
+        }
+
+        // 页面加载完成后初始化（重要！）
+        document.addEventListener('DOMContentLoaded', () => {
+            // 延迟初始化图片查看器，确保 DOM 完全就绪
+            setTimeout(() => {
+                // 先收集图片
+                images = collectImages();
+                
+                if (images.length === 0) {
+                    console.warn('没有找到图片');
+                    return;
+                }
+                buildThumbnailStrip();
+                bindViewerEvents();
+            }, 100);
+        });
+
+        // 如果 DOM 已加载则立即初始化
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(() => {
+                // 先收集图片
+                images = collectImages();
+                
+                if (images.length > 0) {
+                    buildThumbnailStrip();
+                    bindViewerEvents();
+                }
+            }, 200);
+        }
+    </script>
+</body>
+</html>

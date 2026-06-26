@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- SEO Meta Tags -->
+    <title>fireworks-tech-graph - Claude Code 技术图生成神器 | 一句话出高清架构图</title>
+    <meta name="description" content="fireworks-tech-graph 专为 Claude Code 打造的技术图生成 Skill，支持 8 种图类型、5 种视觉风格，自动识别、语义形状、颜色编码，高清 SVG+PNG 一键导出">
+    <meta name="keywords" content="fireworks-tech-graph, Claude Code, 技术图, 架构图, Multi-Agent, RAG, Tool Call, AI工具, 开源">
+    <meta name="author" content="元曜科技">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/yizhiyanhua-ai/fireworks-tech-graph">
+    <meta property="og:title" content="fireworks-tech-graph - Claude Code 技术图生成神器">
+    <meta property="og:description" content="专为 Claude Code 打造的技术图生成 Skill，8种图类型+5种视觉风格，一句话出高清架构图">
+    <meta property="og:image" content="assets/cover.png">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:site_name" content="fireworks-tech-graph">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://github.com/yizhiyanhua-ai/fireworks-tech-graph">
+    <meta name="twitter:title" content="fireworks-tech-graph - Tech Diagram Generator">
+    <meta name="twitter:description" content="Claude Code Skill for generating technical diagrams">
+    <meta name="twitter:image" content="assets/cover.png">
+    
+    <!-- WeChat Share -->
+    <meta property="wechat-share:title" content="技术架构图终于有救了！Claude Code 一句话出图 🚀">
+    <meta property="wechat-share:description" content="8种图类型+5种视觉风格，自动识别图类型，智能颜色编码，高清导出">
+    <meta property="wechat-share:img" content="assets/cover.png">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://github.com/yizhiyanhua-ai/fireworks-tech-graph">
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "fireworks-tech-graph",
+        "description": "Claude Code 技术图生成 Skill，自动识别图类型，智能颜色编码",
+        "url": "https://github.com/yizhiyanhua-ai/fireworks-tech-graph",
+        "applicationCategory": "DeveloperTool",
+        "operatingSystem": "Claude Code",
+        "license": "MIT",
+        "author": {
+            "@type": "Person",
+            "name": "yizhiyanhua-ai"
+        }
+    }
+    </script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="assets/cover.png" type="image/png">
+    
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .feature-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .feature-icon:hover {
+            transform: scale(1.15) rotate(5deg);
+        }
+        
+        /* Image Viewer Styles */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10000;
+            background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(20,20,30,0.98) 100%);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+        
+        .image-viewer.active {
+            display: flex;
+            flex-direction: column;
+            animation: viewerFadeIn 0.3s ease;
+        }
+        
+        @keyframes viewerFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .viewer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .viewer-toolbar-left,
+        .viewer-toolbar-center,
+        .viewer-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .viewer-toolbar-divider {
+            width: 1px;
+            height: 1.5rem;
+            background: rgba(255,255,255,0.2);
+            margin: 0 0.5rem;
+        }
+        
+        .viewer-toolbar-btn {
+            width: 2.75rem;
+            height: 2.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9rem;
+        }
+        
+        .viewer-toolbar-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .viewer-toolbar-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+        
+        .viewer-toolbar-btn.active {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            border-color: #f59e0b;
+            color: white;
+        }
+        
+        .viewer-zoom-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 0.75rem;
+            padding: 0.25rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .viewer-zoom-slider {
+            width: 120px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        
+        .viewer-zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.5);
+        }
+        
+        .viewer-zoom-display {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+            min-width: 3.5rem;
+            text-align: center;
+        }
+        
+        .viewer-main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            min-height: 0;
+        }
+        
+        .viewer-main:active {
+            cursor: grabbing;
+        }
+        
+        .viewer-canvas {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+        }
+        
+        .viewer-image-container {
+            position: absolute;
+            transform-origin: center center;
+            user-select: none;
+            transition: transform 0.1s ease-out;
+        }
+        
+        .viewer-image {
+            display: block;
+            max-width: 92vw;
+            max-height: 75vh;
+            object-fit: contain;
+            pointer-events: none;
+            user-select: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .viewer-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4rem;
+            height: 4rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 1.5rem;
+            z-index: 10;
+        }
+        
+        .viewer-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .viewer-nav.prev {
+            left: 1.5rem;
+        }
+        
+        .viewer-nav.next {
+            right: 1.5rem;
+        }
+        
+        .viewer-nav:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .viewer-bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .viewer-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.85);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1.25rem;
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .viewer-divider {
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .viewer-thumbnail-strip {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            overflow-x: auto;
+            max-height: 120px;
+            min-height: 100px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
+        }
+        
+        .viewer-thumbnail {
+            width: 80px;
+            height: 60px;
+            border-radius: 0.5rem;
+            object-fit: cover;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            flex-shrink: 0;
+        }
+        
+        .viewer-thumbnail:hover {
+            opacity: 0.7;
+            transform: scale(1.05);
+        }
+        
+        .viewer-thumbnail.active {
+            opacity: 1;
+            border-color: #f59e0b;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+        }
+        
+        .viewer-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 10002;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .viewer-toast.show {
+            opacity: 1;
+        }
+        
+        .viewer-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            gap: 1rem;
+            color: white;
+            font-size: 1rem;
+            z-index: 100;
+        }
+        
+        .viewer-loading.active {
+            display: flex;
+        }
+        
+        .viewer-loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #f59e0b;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+    
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-br from-orange-900 via-red-900 to-pink-900 text-white overflow-hidden">
+        <!-- Background Decorations -->
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-red-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        </div>
+        
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+            <div class="text-center space-y-8">
+                <!-- Main Title -->
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight animate__animated animate__fadeInDown">
+                    <span class="block">fireworks-tech-graph</span>
+                    <span class="block text-3xl md:text-4xl lg:text-5xl mt-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-pink-200">
+                        Claude Code 技术图生成神器
+                    </span>
+                </h1>
+                
+                <!-- Subtitle -->
+                <p class="text-xl md:text-2xl text-yellow-100 max-w-4xl mx-auto animate__animated animate__fadeInUp animate__delay-300ms">
+                    一句话就能出高清技术架构图<br class="hidden md:block">
+                    自动识别、语义形状、<strong class="text-yellow-300">智能颜色编码</strong>
+                </p>
+                
+                <!-- Core Features -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto animate__animated animate__fadeInUp animate__delay-500ms">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                        <div class="text-4xl font-bold text-yellow-300">8+</div>
+                        <div class="text-yellow-200 mt-2">图类型</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                        <div class="text-4xl font-bold text-pink-300">5+</div>
+                        <div class="text-yellow-200 mt-2">视觉风格</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                        <div class="text-4xl font-bold text-green-300">SVG</div>
+                        <div class="text-yellow-200 mt-2">高清导出</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                        <div class="text-4xl font-bold text-blue-300">PNG</div>
+                        <div class="text-yellow-200 mt-2">一键导出</div>
+                    </div>
+                </div>
+                
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center animate__animated animate__fadeInUp animate__delay-700ms">
+                    <a href="https://github.com/yizhiyanhua-ai/fireworks-tech-graph" target="_blank" 
+                       class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full text-lg font-semibold hover:from-yellow-600 hover:to-orange-700 transform hover:scale-105 transition-all shadow-2xl">
+                        <i class="fab fa-github mr-3 text-2xl"></i>
+                        GitHub Star
+                    </a>
+                    <a href="#features" 
+                       class="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur-sm rounded-full text-lg font-semibold hover:bg-white/20 transition-all border border-white/30">
+                        <i class="fas fa-magic mr-3"></i>
+                        了解更多
+                    </a>
+                </div>
+                
+                <!-- Cover Image (hidden) -->
+                <div class="mt-12 animate__animated animate__fadeInUp animate__delay-1000ms" style="display: none;">
+                    <div class="gallery-item cursor-pointer transform hover:scale-105 transition-transform" onclick="openImageViewer(0)">
+                        <img src="assets/cover.png" alt="fireworks-tech-graph 项目封面" 
+                             class="max-w-full md:max-w-3xl mx-auto rounded-2xl shadow-2xl border-4 border-white/20">
+                        <p class="text-yellow-200 mt-4 text-sm">
+                            <i class="fas fa-search-plus mr-2"></i>点击图片查看大图
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Decorative Line -->
+        <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 to-transparent"></div>
+    </section>
+    
+    <!-- Problem Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-4"></i>
+                    画技术图的痛苦
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    还在用 diagrams.net 画架构图吗？
+                </p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-gradient-to-br from-red-50 to-orange-50 rounded-3xl p-12 border-2 border-red-200">
+                    <div class="grid md:grid-cols-3 gap-6 text-center">
+                        <div class="bg-white rounded-xl p-6 shadow-md">
+                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-align-left text-red-500 text-2xl"></i>
+                            </div>
+                            <h3 class="font-bold text-gray-900 mb-2">对不齐</h3>
+                            <p class="text-gray-600 text-sm">元素总是偏移</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-md">
+                            <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-palette text-orange-500 text-2xl"></i>
+                            </div>
+                            <h3 class="font-bold text-gray-900 mb-2">颜色土</h3>
+                            <p class="text-gray-600 text-sm">配色不专业</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-md">
+                            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-image text-yellow-600 text-2xl"></i>
+                            </div>
+                            <h3 class="font-bold text-gray-900 mb-2">导出模糊</h3>
+                            <p class="text-gray-600 text-sm">清晰度不够</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 text-center">
+                        <p class="text-2xl font-bold text-red-600">
+                            画一次头秃一次
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Solution Section -->
+    <section id="features" class="py-20 bg-gradient-to-br from-orange-50 to-red-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center bg-yellow-100 text-yellow-800 rounded-full px-6 py-2 mb-6">
+                    <i class="fas fa-magic mr-2"></i>
+                    解决方案
+                </div>
+                <h2 class="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+                    fireworks-tech-graph 来救场
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    专为 Claude Code打造的技术图生成 Skill，一句话就能出高清图
+                </p>
+            </div>
+            
+            <!-- Core Features -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="bg-white rounded-2xl p-6 shadow-xl card-hover">
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 feature-icon">
+                        <i class="fas fa-brain text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">自动识别</h3>
+                    <p class="text-gray-600 text-sm">智能识别图类型并选择最佳样式</p>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-6 shadow-xl card-hover">
+                    <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-4 feature-icon">
+                        <i class="fas fa-shapes text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">语义形状</h3>
+                    <p class="text-gray-600 text-sm">智能分配语义化形状和颜色编码</p>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-6 shadow-xl card-hover">
+                    <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mb-4 feature-icon">
+                        <i class="fas fa-palette text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">高级风格</h3>
+                    <p class="text-gray-600 text-sm">支持玻璃态、Neon 等视觉风格</p>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-6 shadow-xl card-hover">
+                    <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mb-4 feature-icon">
+                        <i class="fas fa-download text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">高清导出</h3>
+                    <p class="text-gray-600 text-sm">SVG + PNG 一键导出</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Diagram Types Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+                    <i class="fas fa-project-diagram text-orange-500 mr-4"></i>
+                    8+ 图类型覆盖
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    AI/Agent 常见 Pattern 全部内置
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-network-wired text-white text-3xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900">Multi-Agent</h3>
+                    <p class="text-gray-600 text-sm mt-2">多代理架构图</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-white text-3xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900">RAG</h3>
+                    <p class="text-gray-600 text-sm mt-2">检索增强生成</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-tools text-white text-3xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900">Tool Call</h3>
+                    <p class="text-gray-600 text-sm mt-2">工具调用图</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-memory text-white text-3xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900">Mem0</h3>
+                    <p class="text-gray-600 text-sm mt-2">记忆架构图</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-red-50 to-rose-50 rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search-plus text-white text-3xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900">Agentic Search</h3>
+                    <p class="text-gray-600 text-sm mt-2">智能搜索架构</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-6 text-center card-hover">
+                    <div class="w-16 h-16 bg-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-project-diagram text-white text-3xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900">更多类型</h3>
+                    <p class="text-gray-600 text-sm mt-2">持续更新中</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Visual Styles Section -->
+    <section class="py-20 bg-gradient-to-br from-gray-900 to-purple-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-bold mb-6">
+                    5+ 视觉风格
+                </h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    满足不同场景需求
+                </p>
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-6">
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 card-hover">
+                    <div class="w-20 h-20 bg-gradient-to-br from-cyan-400/50 to-blue-500/50 rounded-2xl mx-auto mb-4"></div>
+                    <h3 class="text-xl font-bold text-center">玻璃态</h3>
+                    <p class="text-gray-300 text-center text-sm mt-2">Glassmorphism</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 card-hover">
+                    <div class="w-20 h-20 bg-gradient-to-br from-pink-500/50 via-purple-500/50 to-indigo-500/50 rounded-2xl mx-auto mb-4 shadow-[0_0_30px_rgba(240,147,251,0.5]"></div>
+                    <h3 class="text-xl font-bold text-center">Neon</h3>
+                    <p class="text-gray-300 text-center text-sm mt-2">霓虹发光效果</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 card-hover">
+                    <div class="w-20 h-20 bg-gray-200 mx-auto mb-4"></div>
+                    <h3 class="text-xl font-bold text-center">极简</h3>
+                    <p class="text-gray-300 text-center text-sm mt-2">简约线条风格</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 card-hover">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl mx-auto mb-4"></div>
+                    <h3 class="text-xl font-bold text-center">渐变</h3>
+                    <p class="text-gray-300 text-center text-sm mt-2">色彩渐变风格</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 card-hover">
+                    <div class="w-20 h-20 bg-gradient-to-br from-emerald-400/50 to-teal-500/50 rounded-2xl mx-auto mb-4"></div>
+                    <h3 class="text-xl font-bold text-center">科技</h3>
+                    <p class="text-gray-300 text-center text-sm mt-2">科技感线条</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Color Coding Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+                    <i class="fas fa-palette text-pink-500 mr-4"></i>
+                    智能颜色编码
+                </h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div class="bg-blue-50 rounded-2xl p-8 text-center">
+                    <div class="w-20 h-20 bg-blue-500 rounded-full mx-auto mb-4"></div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">流程蓝</h3>
+                    <p class="text-gray-600">表示工作流程和控制流</p>
+                </div>
+                <div class="bg-orange-50 rounded-2xl p-8 text-center">
+                    <div class="w-20 h-20 bg-orange-500 rounded-full mx-auto mb-4"></div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">控制橙</h3>
+                    <p class="text-gray-600">表示控制逻辑和决策</p>
+                </div>
+                <div class="bg-green-50 rounded-2xl p-8 text-center">
+                    <div class="w-20 h-20 bg-green-500 rounded-full mx-auto mb-4"></div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">数据绿</h3>
+                    <p class="text-gray-600">表示数据和存储</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Marketing Copy Section -->
+    <section class="py-20 bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+                    营销文案
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    针对不同平台优化的内容
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 小红书 -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-pink-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fab fa-weibo text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900">小红书</h3>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="text-sm font-bold text-pink-600 mb-2">标题</h4>
+                            <p class="text-gray-900 font-medium">
+                                技术架构图终于有救了！Claude Code 一句话出图 🚀
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-sm font-bold text-pink-600 mb-2">正文</h4>
+                            <p class="text-gray-700 text-sm leading-relaxed">
+                                以前画 Multi-Agent、RAG、Tool Call 这些架构图，diagrams.net 里永远对不齐、颜色土、导出还模糊……现在直接放大招！fireworks-tech-graph —— 专为 Claude Code 打造的技术图生成 Skill！一句话就能出图，效果直接起飞：✅ 自动识别图类型 ✅ 智能语义形状 + 颜色编码 ✅ 支持玻璃态、Neon 等高级风格 ✅ 高清 SVG + PNG 一键导出。8 种图类型 + 5 种视觉风格，AI/Agent 常见 Pattern 全覆盖！从此再也不用为画图焦虑了，生产力直接拉满！
+                            </p>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">#ClaudeCode</span>
+                            <span class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">#技术图</span>
+                            <span class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">#AI工具</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 视频号 -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-video text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900">视频号</h3>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="text-sm font-bold text-green-600 mb-2">标题</h4>
+                            <p class="text-gray-900 font-medium">
+                                Claude Code 一句话生成技术架构图，太丝滑了！
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-sm font-bold text-green-600 mb-2">描述</h4>
+                            <p class="text-gray-700 text-sm leading-relaxed">
+                                fireworks-tech-graph 开源了！专为 Claude Code 打造的技术图生成 Skill，支持 8 种图类型、5 种视觉风格，一句话就能出高清技术图。
+                            </p>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">#ClaudeCode</span>
+                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">#技术图</span>
+                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">#AI工具</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Navigation Cards -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+                    相关文档
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    查看更多营销素材和视频脚本
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <a href="copy.md" class="bg-white rounded-2xl p-6 shadow-lg card-hover group border-2 border-transparent hover:border-orange-500">
+                    <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-red-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-bullhorn text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">营销文案集</h3>
+                    <p class="text-gray-600 text-sm mb-4">小红书、视频号文案</p>
+                    <div class="text-orange-600 text-sm font-medium">
+                        copy.md <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </a>
+                
+                <a href="video-script.md" class="bg-white rounded-2xl p-6 shadow-lg card-hover group border-2 border-transparent hover:border-orange-500">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-video text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">视频脚本</h3>
+                    <p class="text-gray-600 text-sm mb-4">详细视频脚本和配音文案</p>
+                    <div class="text-orange-600 text-sm font-medium">
+                        video-script.md <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </a>
+                
+                <a href="wechat-copy.md" class="bg-white rounded-2xl p-6 shadow-lg card-hover group border-2 border-transparent hover:border-orange-500">
+                    <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fab fa-weixin text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">公众号文案</h3>
+                    <p class="text-gray-600 text-sm mb-4">微信公众号图文消息</p>
+                    <div class="text-orange-600 text-sm font-medium">
+                        wechat-copy.md <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="mb-8">
+                    <h3 class="text-3xl font-bold mb-4">fireworks-tech-graph</h3>
+                    <p class="text-gray-400 max-w-2xl mx-auto">
+                        专为 Claude Code 打造的技术图生成 Skill，从此告别画图焦虑
+                    </p>
+                </div>
+                
+                <div class="flex justify-center gap-6 mb-8">
+                    <a href="https://github.com/yizhiyanhua-ai/fireworks-tech-graph" target="_blank" 
+                       class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors">
+                        <i class="fab fa-github text-2xl"></i>
+                    </a>
+                </div>
+                
+                <div class="border-t border-gray-800 pt-8">
+                    <p class="text-gray-400 text-sm">
+                        &copy; 2026 元曜科技. All rights reserved.
+                    </p>
+                    <p class="text-gray-500 text-xs mt-2">
+                        Made with <i class="fas fa-heart text-red-500"></i> for AI 编程社区
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Image Viewer Modal -->
+    <div id="imageViewer" class="image-viewer">
+        <div class="viewer-toolbar">
+            <div class="viewer-toolbar-left">
+                <button class="viewer-toolbar-btn" onclick="closeImageViewer()" title="关闭 (ESC)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="viewer-toolbar-divider"></div>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(-90)" title="向左旋转">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="rotateImage(90)" title="向右旋转">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="flipHorizontal()" title="水平翻转">
+                    <i class="fas fa-arrows-alt-h"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="flipVertical()" title="垂直翻转">
+                    <i class="fas fa-arrows-alt-v"></i>
+                </button>
+            </div>
+            
+            <div class="viewer-toolbar-center">
+                <button class="viewer-toolbar-btn" onclick="zoomOut()" title="缩小 (-)">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <div class="viewer-zoom-slider-container">
+                    <input type="range" id="zoomSlider" class="viewer-zoom-slider" min="10" max="500" value="100">
+                    <span id="zoomDisplay" class="viewer-zoom-display">100%</span>
+                </div>
+                <button class="viewer-toolbar-btn" onclick="zoomIn()" title="放大 (+)">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="fitToScreen()" title="适应屏幕 (0)">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="toggleFullscreen()" title="全屏 (F)">
+                    <i class="fas fa-expand" id="fullscreenIcon"></i>
+                </button>
+            </div>
+            
+            <div class="viewer-toolbar-right">
+                <button class="viewer-toolbar-btn" onclick="toggleSlideShow()" title="幻灯片播放" id="slideShowBtn">
+                    <i class="fas fa-play"></i>
+                </button>
+                <div class="viewer-toolbar-divider"></div>
+                <button class="viewer-toolbar-btn" onclick="downloadImage()" title="下载图片">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="viewer-toolbar-btn" onclick="openInNewTab()" title="新窗口打开">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="viewer-main" id="viewerMain">
+            <div class="viewer-canvas" id="viewerCanvas">
+                <div class="viewer-image-container" id="imageContainer">
+                    <img id="viewerImage" class="viewer-image" src="" alt="">
+                </div>
+            </div>
+            
+            <button class="viewer-nav prev" id="prevBtn" onclick="prevImage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <button class="viewer-nav next" id="nextBtn" onclick="nextImage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <div class="viewer-bottom-bar">
+                <div class="viewer-info">
+                    <span id="imageTitle">图片</span>
+                    <span class="viewer-divider">|</span>
+                    <span id="imageCounter">1 / 1</span>
+                    <span class="viewer-divider">|</span>
+                    <span id="imageDimensions">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="viewer-thumbnail-strip" id="thumbnailStrip"></div>
+        
+        <div class="viewer-toast" id="viewerToast"></div>
+        
+        <div class="viewer-loading" id="viewerLoading">
+            <div class="viewer-loading-spinner"></div>
+            <span>加载中...</span>
+        </div>
+    </div>
+    
+    <!-- JavaScript for Image Viewer -->
+    <script>
+        let images = [];
+        let currentIndex = 0;
+        let scale = 1;
+        let rotation = 0;
+        let flipX = 1;
+        let flipY = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let initialScale = 1;
+        let slideShowInterval = null;
+        let slideShowPlaying = false;
+        let currentImageDimensions = { width: 0, height: 0 };
+        
+        function collectImages() {
+            const images = [];
+            const seenSrc = new Set();
+            
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                const img = item.querySelector('img');
+                if (img && img.src && !img.src.includes('data:')) {
+                    if (!seenSrc.has(img.src)) {
+                        seenSrc.add(img.src);
+                        images.push({
+                            src: img.src,
+                            title: img.alt || '图片 ' + (images.length + 1),
+                            thumbnail: img.src
+                        });
+                    }
+                }
+            });
+            
+            if (images.length === 0) {
+                document.querySelectorAll('img').forEach(img => {
+                    if (!seenSrc.has(img.src) && img.src && !img.src.includes('data:')) {
+                        if (img.id !== 'viewerImage') {
+                            seenSrc.add(img.src);
+                            images.push({
+                                src: img.src,
+                                title: img.alt || '图片 ' + (images.length + 1),
+                                thumbnail: img.src
+                            });
+                        }
+                    }
+                });
+            }
+            
+            return images;
+        }
+        
+        function openImageViewer(index) {
+            if (images.length === 0) {
+                images = collectImages();
+            }
+            
+            if (images.length === 0) return;
+            
+            currentIndex = Math.max(0, Math.min(index, images.length - 1));
+            resetViewState();
+            loadImage(currentIndex);
+            buildThumbnailStrip();
+            updateUI();
+            
+            document.getElementById('imageViewer').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            preloadAdjacentImages();
+        }
+        
+        function closeImageViewer() {
+            stopSlideShow();
+            document.getElementById('imageViewer').classList.remove('active');
+            document.body.style.overflow = '';
+            
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        }
+        
+        function resetViewState() {
+            scale = 1;
+            rotation = 0;
+            flipX = 1;
+            flipY = 1;
+            translateX = 0;
+            translateY = 0;
+            updateSliderValue();
+        }
+        
+        function loadImage(index) {
+            const loading = document.getElementById('viewerLoading');
+            const img = document.getElementById('viewerImage');
+            
+            if (loading) loading.classList.add('active');
+            
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                img.src = images[index].src;
+                currentImageDimensions = {
+                    width: tempImg.naturalWidth,
+                    height: tempImg.naturalHeight
+                };
+                if (loading) loading.classList.remove('active');
+                updateImageInfo();
+                updateTransform();
+            };
+            tempImg.onerror = () => {
+                if (loading) loading.classList.remove('active');
+                showToast('图片加载失败');
+            };
+            tempImg.src = images[index].src;
+        }
+        
+        function prevImage() {
+            if (images.length <= 1) return;
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            resetViewState();
+            loadImage(currentIndex);
+            updateUI();
+            preloadAdjacentImages();
+        }
+        
+        function nextImage() {
+            if (images.length <= 1) return;
+            currentIndex = (currentIndex + 1) % images.length;
+            resetViewState();
+            loadImage(currentIndex);
+            updateUI();
+            preloadAdjacentImages();
+        }
+        
+        function zoom(delta) {
+            const newScale = Math.max(0.1, Math.min(5, scale + delta));
+            if (newScale !== scale) {
+                scale = newScale;
+                updateTransform();
+                updateZoomDisplay();
+                updateSliderValue();
+            }
+        }
+        
+        function zoomIn() { zoom(0.25); }
+        function zoomOut() { zoom(-0.25); }
+        
+        function fitToScreen() {
+            resetViewState();
+            updateTransform();
+            updateZoomDisplay();
+            updateSliderValue();
+            showToast('已适应屏幕');
+        }
+        
+        function rotateImage(deg) {
+            rotation = (rotation + deg) % 360;
+            updateTransform();
+            showToast('旋转 ' + rotation + '°');
+        }
+        
+        function flipHorizontal() {
+            flipX *= -1;
+            updateTransform();
+            showToast(flipX === -1 ? '已水平翻转' : '已取消水平翻转');
+        }
+        
+        function flipVertical() {
+            flipY *= -1;
+            updateTransform();
+            showToast(flipY === -1 ? '已垂直翻转' : '已取消垂直翻转');
+        }
+        
+        function toggleFullscreen() {
+            const viewer = document.getElementById('imageViewer');
+            const icon = document.getElementById('fullscreenIcon');
+            
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+                if (icon) icon.className = 'fas fa-expand';
+                showToast('已退出全屏');
+            } else {
+                viewer.requestFullscreen();
+                if (icon) icon.className = 'fas fa-compress-alt';
+                showToast('已进入全屏');
+            }
+        }
+        
+        function toggleSlideShow() {
+            if (slideShowPlaying) {
+                stopSlideShow();
+            } else {
+                startSlideShow();
+            }
+        }
+        
+        function startSlideShow() {
+            if (images.length <= 1) {
+                showToast('只有一张图片，无法播放幻灯片');
+                return;
+            }
+            
+            slideShowPlaying = true;
+            updateSlideShowButton();
+            showToast('幻灯片播放中...');
+            
+            slideShowInterval = setInterval(() => {
+                nextImage();
+            }, 3000);
+        }
+        
+        function stopSlideShow() {
+            slideShowPlaying = false;
+            updateSlideShowButton();
+            
+            if (slideShowInterval) {
+                clearInterval(slideShowInterval);
+                slideShowInterval = null;
+            }
+        }
+        
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.href = images[currentIndex].src;
+            link.download = images[currentIndex].title || 'image';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('开始下载...');
+        }
+        
+        function openInNewTab() {
+            window.open(images[currentIndex].src, '_blank');
+        }
+        
+        function showToast(text) {
+            const toast = document.getElementById('viewerToast');
+            if (!toast) return;
+            
+            toast.textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+        
+        function updateTransform() {
+            const container = document.getElementById('imageContainer');
+            if (container) {
+                container.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scaleX(${flipX}) scaleY(${flipY}) scale(${scale})`;
+            }
+        }
+        
+        function buildThumbnailStrip() {
+            const strip = document.getElementById('thumbnailStrip');
+            if (!strip) return;
+            
+            strip.innerHTML = '';
+            
+            images.forEach((img, index) => {
+                const thumb = document.createElement('img');
+                thumb.className = 'viewer-thumbnail' + (index === currentIndex ? ' active' : '');
+                thumb.src = img.thumbnail;
+                thumb.alt = img.title;
+                thumb.onclick = () => {
+                    currentIndex = index;
+                    resetViewState();
+                    loadImage(currentIndex);
+                    updateUI();
+                };
+                strip.appendChild(thumb);
+            });
+        }
+        
+        function updateUI() {
+            document.querySelectorAll('.viewer-thumbnail').forEach((thumb, index) => {
+                thumb.classList.toggle('active', index === currentIndex);
+            });
+            
+            updateImageInfo();
+        }
+        
+        function updateImageInfo() {
+            const titleEl = document.getElementById('imageTitle');
+            const counterEl = document.getElementById('imageCounter');
+            const dimensionsEl = document.getElementById('imageDimensions');
+            
+            if (titleEl) titleEl.textContent = images[currentIndex]?.title || '图片';
+            if (counterEl) counterEl.textContent = (currentIndex + 1) + ' / ' + images.length;
+            if (dimensionsEl) dimensionsEl.textContent = currentImageDimensions.width + ' × ' + currentImageDimensions.height;
+        }
+        
+        function updateZoomDisplay() {
+            const display = document.getElementById('zoomDisplay');
+            if (display) display.textContent = Math.round(scale * 100) + '%';
+        }
+        
+        function updateSliderValue() {
+            const slider = document.getElementById('zoomSlider');
+            if (slider) slider.value = scale * 100;
+        }
+        
+        function updateSlideShowButton() {
+            const btn = document.getElementById('slideShowBtn');
+            if (btn) {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = slideShowPlaying ? 'fas fa-pause' : 'fas fa-play';
+                }
+            }
+        }
+        
+        function preloadAdjacentImages() {
+            const preloadIndices = [
+                (currentIndex - 1 + images.length) % images.length,
+                (currentIndex + 1) % images.length
+            ];
+            
+            preloadIndices.forEach(index => {
+                if (images[index]) {
+                    const img = new Image();
+                    img.src = images[index].src;
+                }
+            });
+        }
+        
+        function bindViewerEvents() {
+            const canvas = document.getElementById('viewerMain');
+            const zoomSlider = document.getElementById('zoomSlider');
+            
+            if (!canvas) return;
+            
+            canvas.addEventListener('mousedown', (e) => {
+                if (e.button === 0) {
+                    isDragging = true;
+                    startX = e.clientX - translateX;
+                    startY = e.clientY - translateY;
+                    canvas.style.cursor = 'grabbing';
+                }
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    translateX = e.clientX - startX;
+                    translateY = e.clientY - startY;
+                    updateTransform();
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                canvas.style.cursor = 'grab';
+            });
+            
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                zoom(e.deltaY > 0 ? -0.15 : 0.15);
+            }, { passive: false });
+            
+            canvas.addEventListener('dblclick', (e) => {
+                if (scale !== 1) {
+                    fitToScreen();
+                } else {
+                    scale = 2;
+                    updateTransform();
+                    updateZoomDisplay();
+                    updateSliderValue();
+                }
+            });
+            
+            if (zoomSlider) {
+                zoomSlider.addEventListener('input', (e) => {
+                    scale = e.target.value / 100;
+                    updateTransform();
+                    updateZoomDisplay();
+                });
+            }
+            
+            document.addEventListener('keydown', (e) => {
+                if (!document.getElementById('imageViewer').classList.contains('active')) return;
+                
+                switch(e.key) {
+                    case 'Escape': closeImageViewer(); break;
+                    case 'ArrowLeft': prevImage(); break;
+                    case 'ArrowRight': nextImage(); break;
+                    case '+': case '=': zoomIn(); break;
+                    case '-': zoomOut(); break;
+                    case '0': fitToScreen(); break;
+                    case ' ': e.preventDefault(); toggleSlideShow(); break;
+                    case 'f': case 'F': toggleFullscreen(); break;
+                    case 'd': case 'D': downloadImage(); break;
+                }
+            });
+            
+            let lastTouchDistance = 0;
+            let touchStartTime = 0;
+            
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    startX = e.touches[0].clientX - translateX;
+                    startY = e.touches[0].clientY - translateY;
+                    touchStartTime = Date.now();
+                } else if (e.touches.length === 2) {
+                    lastTouchDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    initialScale = scale;
+                }
+            }, { passive: true });
+            
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1) {
+                    translateX = e.touches[0].clientX - startX;
+                    translateY = e.touches[0].clientY - startY;
+                    updateTransform();
+                } else if (e.touches.length === 2) {
+                    e.preventDefault();
+                    const currentDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    scale = Math.max(0.1, Math.min(5, initialScale * (currentDistance / lastTouchDistance));
+                    updateTransform();
+                    updateZoomDisplay();
+                    updateSliderValue();
+                }
+            }, { passive: false });
+            
+            canvas.addEventListener('touchend', (e) => {
+                if (e.touches.length === 0) {
+                    const touchDuration = Date.now() - touchStartTime;
+                    const diff = Math.abs(translateX) + Math.abs(translateY);
+                    
+                    if (diff > 50 && touchDuration < 300) {
+                        translateX > 0 ? prevImage() : nextImage();
+                    }
+                }
+            });
+            
+            canvas.addEventListener('click', (e) => {
+                if (e.target === canvas) {
+                    closeImageViewer();
+                }
+            });
+            
+            document.addEventListener('fullscreenchange', () => {
+                const icon = document.getElementById('fullscreenIcon');
+                if (icon) {
+                    icon.className = document.fullscreenElement ? 'fas fa-compress-alt' : 'fas fa-expand';
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                images = collectImages();
+                
+                if (images.length === 0) {
+                    console.warn('没有找到图片');
+                    return;
+                }
+                buildThumbnailStrip();
+                bindViewerEvents();
+            }, 100);
+        });
+        
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(() => {
+                images = collectImages();
+                
+                if (images.length > 0) {
+                    buildThumbnailStrip();
+                    bindViewerEvents();
+                }
+            }, 200);
+        }
+    </script>
+</body>
+</html>

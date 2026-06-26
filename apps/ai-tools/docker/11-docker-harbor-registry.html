@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Harbor 私有镜像中心完全指南">
+    <meta name="format-detection" content="telephone=no">
+    <title>
+      Harbor 私有镜像中心搭建完全指南:从 htpasswd 到企业级 Registry | AI 工具箱
+    </title>
+    <meta name="description" content="Harbor 是企业级 Docker 私有镜像中心,提供 Web 管理界面、用户认证、镜像复制等高级功能。本文系统讲解公网/私有镜像中心、htpasswd 用户认证、容器退出状态码、重启策略、Harbor 安装与运维、客户端操作等核心知识。">
+    <meta name="keywords" content="Harbor, Docker 私有镜像中心, 容器镜像仓库, htpasswd, Docker Registry, 阿里云镜像中心, 容器退出状态码, 重启策略, docker login, docker push, 企业级 Registry, DevOps">
+    <meta name="author" content="AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="language" content="zh-CN">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/11-docker-harbor-registry.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://tools.yy24365.com/ai-tools/docker/11-docker-harbor-registry.html">
+    <link rel="alternate" hreflang="x-default" href="https://tools.yy24365.com/ai-tools/docker/11-docker-harbor-registry.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Harbor 私有镜像中心搭建完全指南:从 htpasswd 到企业级 Registry">
+    <meta property="og:description" content="系统讲解 Harbor 私有镜像中心的搭建、配置、运维全流程,含 htpasswd 用户认证、容器退出状态码、重启策略、客户端操作。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/11-docker-harbor-registry.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/harbor-og.png">
+    <meta property="og:image:alt" content="Harbor 私有镜像中心架构图">
+    <meta property="article:published_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:modified_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:section" content="DevOps">
+    <meta property="article:tag" content="Harbor">
+    <meta property="article:tag" content="Docker Registry">
+    <meta property="article:tag" content="容器镜像">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Harbor 私有镜像中心搭建完全指南">
+    <meta name="twitter:description" content="从 htpasswd 到企业级 Harbor,完整实战指南。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/harbor-og.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%232496ED' d='M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.083.185.185.185m-2.954-5.43h2.119a.186.186 0 00.186-.186V3.575a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m0 2.716h2.119a.187.187 0 00.186-.186V6.291a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.931 0h2.12a.186.186 0 00.184-.186V6.291a.185.185 0 00-.184-.185h-2.12a.185.185 0 00-.184.185v1.887c0 .102.082.185.184.186m-2.932 0h2.12a.185.185 0 00.184-.186V6.291a.185.185 0 00-.184-.185H5.166a.186.186 0 00-.185.185v1.887c0 .102.083.185.185.186m5.863 5.43h2.119a.186.186 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.082.185.185.185m-2.931 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.932 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.931 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m11.792 4.084h-2.119a.186.186 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.931 0h-2.119a.185.185 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.932 0h-2.118a.185.185 0 00-.184.185v1.886c0 .103.082.186.184.186h2.118a.186.186 0 00.185-.186v-1.886a.185.185 0 00-.185-.185m-2.931 0h-2.12a.185.185 0 00-.184.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.184-.186v-1.886a.185.185 0 00-.184-.185m-2.932 0H5.166a.186.186 0 00-.185.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.185-.186v-1.886a.186.186 0 00-.185-.185z'/%3E%3C/svg%3E">
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Harbor 私有镜像中心搭建完全指南",
+  "description": "Harbor 是企业级 Docker 私有镜像中心,提供 Web 管理、用户认证、镜像复制等高级功能。本文从公网镜像中心讲起,系统介绍 htpasswd 用户认证、容器退出状态码、重启策略、Harbor 安装与运维、客户端操作。",
+  "author": {"@type": "Organization", "name": "AI 工具箱"},
+  "publisher": {"@type": "Organization", "name": "AI 工具箱"},
+  "datePublished": "2026-06-03T00:00:00+08:00",
+  "dateModified": "2026-06-03T00:00:00+08:00",
+  "inLanguage": "zh-CN",
+  "mainEntityOfPage": "https://tools.yy24365.com/ai-tools/docker/11-docker-harbor-registry.html",
+  "keywords": "Harbor, Docker 私有镜像中心, htpasswd, 容器状态码",
+  "about": {"@type": "SoftwareApplication", "name": "Harbor", "applicationCategory": "DeveloperApplication"},
+  "proficiencyLevel": "Intermediate"
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "首页", "item": "https://tools.yy24365.com/"},
+    {"@type": "ListItem", "position": 2, "name": "AI 工具", "item": "https://tools.yy24365.com/ai-tools/"},
+    {"@type": "ListItem", "position": 3, "name": "Docker 学习", "item": "https://tools.yy24365.com/ai-tools/docker/"},
+    {"@type": "ListItem", "position": 4, "name": "Harbor 指南", "item": "https://tools.yy24365.com/ai-tools/docker/11-docker-harbor-registry.html"}
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "什么是 Docker 私有镜像中心?为什么需要它?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Docker 私有镜像中心是企业内部搭建的 Registry 服务器,用于存储、管理、分发 Docker 镜像。相比 Docker Hub、阿里云等公网镜像中心,私有镜像中心具有:1) 镜像安全可控,不对外公开;2) 内网传输速度快;3) 可定制化权限管理;4) 满足合规审计要求。Harbor 是目前最主流的企业级开源 Registry,提供 Web UI、用户认证、镜像复制、漏洞扫描、镜像签名等高级功能。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Harbor 与 Docker Registry 有什么区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Docker Registry 是 Docker 官方的开源镜像存储项目,功能单一(仅 push/pull);Harbor 是基于 Docker Registry 二次封装的企业级项目,提供更丰富的功能:Web 管理界面、基于角色的访问控制(RBAC)、镜像复制策略、漏洞扫描(Trivy)、镜像签名(Cosign)、审计日志等。生产环境推荐 Harbor,学习测试可使用 Docker Registry。"}
+    },
+    {
+      "@type": "Question",
+      "name": "容器退出状态码 137 是什么意思?",
+      "acceptedAnswer": {"@type": "Answer", "text": "状态码 137 表示容器被强制终止(SIGKILL,信号 9)。常见原因:1) Docker 守护进程主动 kill 容器(资源超限、节点 OOM);2) 手动执行 docker kill;3) 宿主机内存不足触发 OOM Killer。137 = 128 + 9(信号 9),所以看到 137 说明是收到 SIGKILL 信号而非正常退出。"}
+    },
+    {
+      "@type": "Question",
+      "name": "容器重启策略 on-failure 和 always 怎么选?",
+      "acceptedAnswer": {"@type": "Answer", "text": "on-failure 仅在容器非正常退出(状态码非 0)时重启,适合有状态服务(数据库、缓存),避免无意义重启;always 任何退出都重启,适合无状态服务(API、Web),最大化可用性;unless-stopped 总是重启但 docker stop 不会触发重启,适合开发环境。一般推荐:生产用 on-failure[:n](n 为最大重试次数),开发用 unless-stopped。"}
+    },
+    {
+      "@type": "Question",
+      "name": "如何修改阿里云镜像仓库的登录密码?",
+      "acceptedAnswer": {"@type": "Answer", "text": "登录阿里云控制台 → 搜索「容器镜像服务」→ 进入个人版 → 左侧菜单「访问凭证」→ 设置 Registry 登录密码。修改后需要重新执行 docker login 登录才能推送镜像。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Harbor 的默认管理员账号密码是什么?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Harbor 安装时通过 harbor.yml 配置 admin 用户的初始密码(默认 admin/Harbor12345)。首次登录后应立即修改默认密码。生产环境建议同时修改 admin 密码、删除默认库 library、配置 OIDC/LDAP 集成。"}
+    },
+    {
+      "@type": "Question",
+      "name": "htpasswd 的 -B、-b、-c 三个选项分别什么作用?",
+      "acceptedAnswer": {"@type": "Answer", "text": "-B 使用 bcrypt 加密(最安全,推荐);-b 表示从命令行直接输入密码(非交互,适合脚本);-c 表示创建新文件(已存在则覆盖,首次创建用,后续创建用户不要再加 -c)。"}
+    }
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "搭建 Harbor 私有镜像中心(HTTP 模式)",
+  "description": "在 Linux 服务器上从零搭建企业级 Docker 私有镜像中心",
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "下载安装包", "text": "wget https://github.com/goharbor/harbor/releases/download/v2.6.2/harbor-offline-installer-v2.6.2.tgz"},
+    {"@type": "HowToStep", "position": 2, "name": "解压到 /opt/apps/", "text": "tar -zxvf harbor-offline-installer-v2.6.2.tgz -C /opt/apps/"},
+    {"@type": "HowToStep", "position": 3, "name": "复制并修改 harbor.yml", "text": "cp harbor.yml.tmpl harbor.yml,然后修改 hostname、注释 https、修改 admin 密码"},
+    {"@type": "HowToStep", "position": 4, "name": "运行 prepare", "text": "./prepare 生成所有配置文件"},
+    {"@type": "HowToStep", "position": 5, "name": "运行 install.sh", "text": "./install.sh 自动完成 5 步安装,启动约 10 个容器"},
+    {"@type": "HowToStep", "position": 6, "name": "访问 Web UI", "text": "浏览器访问 http://IP,用 admin 账号登录"}
+  ]
+}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress" role="progressbar" aria-label="阅读进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand" aria-label="AI 工具箱首页">
+          <span class="brand-mark">
+            AI
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main" role="main">
+      <section class="hero" aria-labelledby="article-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 学习
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Harbor 指南
+            </span>
+          </nav>
+          <h1 id="article-title">
+            Harbor 私有镜像中心搭建完全指南
+          </h1>
+          <p class="hero-sub">
+            从 htpasswd 用户认证到企业级 Harbor Registry,系统掌握 Docker 镜像仓库的核心原理与实战命令。涵盖公网/私有镜像中心、容器退出状态码、重启策略、Harbor 安装运维全流程。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              ★★★ 中级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                阅读时长
+              </strong>
+              约 22 分钟
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                适用版本
+              </strong>
+              Harbor 2.6.x
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                最后更新
+              </strong>
+              2026-06-03
+            </div>
+          </div>
+          <div class="hero-tags" aria-label="标签">
+            <span class="tag">
+              Harbor
+            </span>
+            <span class="tag">
+              Docker Registry
+            </span>
+            <span class="tag">
+              htpasswd
+            </span>
+            <span class="tag">
+              容器状态码
+            </span>
+            <span class="tag">
+              重启策略
+            </span>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <article>
+          <section class="section" aria-labelledby="intro">
+            <h2 id="intro">
+              为什么需要私有镜像中心
+            </h2>
+            <p>
+              Docker Hub 和阿里云都是公网镜像中心,用户可以将镜像 push 到镜像中心的镜像仓库里,也可以将仓库设为私有库,保证镜像安全。但
+              <strong>
+                实际工作中,一般在公司内部搭建一个私有镜像中心
+              </strong>
+              。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                私有镜像中心的核心价值
+              </div>
+              <div class="concept-body">
+                <p>
+                  1)
+                  <strong>
+                    安全性
+                  </strong>
+                  :镜像不出内网,杜绝敏感信息(密钥、内部代码)泄露;
+                </p>
+                <p>
+                  2)
+                  <strong>
+                    传输效率
+                  </strong>
+                  :内网带宽充足,大镜像(几 GB)推送速度快;
+                </p>
+                <p>
+                  3)
+                  <strong>
+                    权限管控
+                  </strong>
+                  :可对接 LDAP/AD,按角色分配 pull/push 权限;
+                </p>
+                <p>
+                  4)
+                  <strong>
+                    合规审计
+                  </strong>
+                  :满足金融、医疗等行业的合规要求,操作可追溯。
+                </p>
+              </div>
+            </div>
+          </section>
+          <nav class="toc" id="toc" aria-labelledby="toc-title">
+            <h2 class="toc-title" id="toc-title">
+              本文目录
+            </h2>
+            <ul class="toc-grid">
+              <li>
+                <a href="#s1">
+                  <span class="toc-num">
+                    1
+                  </span>
+                  发布镜像到阿里云
+                </a>
+              </li>
+              <li>
+                <a href="#s2">
+                  <span class="toc-num">
+                    2
+                  </span>
+                  htpasswd 用户认证
+                </a>
+              </li>
+              <li>
+                <a href="#s3">
+                  <span class="toc-num">
+                    3
+                  </span>
+                  容器退出状态码
+                </a>
+              </li>
+              <li>
+                <a href="#s4">
+                  <span class="toc-num">
+                    4
+                  </span>
+                  容器重启策略
+                </a>
+              </li>
+              <li>
+                <a href="#s5">
+                  <span class="toc-num">
+                    5
+                  </span>
+                  Harbor 介绍
+                </a>
+              </li>
+              <li>
+                <a href="#s6">
+                  <span class="toc-num">
+                    6
+                  </span>
+                  Harbor 安装
+                </a>
+              </li>
+              <li>
+                <a href="#s7">
+                  <span class="toc-num">
+                    7
+                  </span>
+                  Harbor 启停
+                </a>
+              </li>
+              <li>
+                <a href="#s8">
+                  <span class="toc-num">
+                    8
+                  </span>
+                  客户端操作
+                </a>
+              </li>
+              <li>
+                <a href="#faq">
+                  <span class="toc-num">
+                    ?
+                  </span>
+                  常见问题
+                </a>
+              </li>
+              <li>
+                <a href="#refs">
+                  <span class="toc-num">
+                    i
+                  </span>
+                  参考资源
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- ============================================================
+     第一章 发布镜像到阿里云
+     ============================================================ -->
+          <section class="section" id="s1" aria-labelledby="s1-title">
+            <span class="section-num">
+              Chapter 01
+            </span>
+            <h2 id="s1-title">
+              发布镜像到阿里云
+            </h2>
+            <p>
+              阿里云提供"容器镜像服务"(个人版免费),作为国内最常用的公网镜像中心。发布流程分为 4 步:注册 → 创建实例 → 创建命名空间 → 推送镜像。
+            </p>
+            <h3>
+              1.1 准备工作
+            </h3>
+            <ol>
+              <li>
+                注册阿里云账号,完成实名认证
+              </li>
+              <li>
+                搜索并进入
+                <strong>
+                  容器镜像服务
+                </strong>
+                ,创建个人实例
+              </li>
+              <li>
+                设置 Registry 登录密码
+              </li>
+              <li>
+                创建
+                <strong>
+                  命名空间
+                </strong>
+                (用于分类管理仓库)
+              </li>
+              <li>
+                在命名空间下创建
+                <strong>
+                  本地仓库
+                </strong>
+              </li>
+            </ol>
+            <h3>
+              1.2 推送镜像四步曲
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 1. 登录阿里云镜像中心
+                  </span>
+                  <span class="tok-cmd">
+docker login
+                  </span>
+                  <span class="tok-flag">
+--username
+                  </span>
+=dt_5224810793 \
+  crpi-8nnmc9aojy1lrfpp.cn-chengdu.personal.cr.aliyuncs.com
+                  <span class="tok-com">
+# 2. 复制并重命名镜像(添加仓库地址前缀)
+                  </span>
+                  <span class="tok-cmd">
+docker tag
+                  </span>
+ hello-my-world \
+  crpi-8nnmc9aojy1lrfpp.cn-chengdu.personal.cr.aliyuncs.com/ali_1/ali_1_ck:1.0
+                  <span class="tok-com">
+# 3. 推送镜像
+                  </span>
+                  <span class="tok-cmd">
+docker push
+                  </span>
+ \
+  crpi-8nnmc9aojy1lrfpp.cn-chengdu.personal.cr.aliyuncs.com/ali_1/ali_1_ck:1.0
+                  <span class="tok-com">
+# 4. 登出
+                  </span>
+                  <span class="tok-cmd">
+docker logout
+                  </span>
+ \
+  crpi-8nnmc9aojy1lrfpp.cn-chengdu.personal.cr.aliyuncs.com
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  阿里云命名空间相当于"分组",同一个命名空间内的仓库名不能重复。不同环境(测试/生产)建议创建不同命名空间,便于管理。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第二章 htpasswd
+     ============================================================ -->
+          <section class="section" id="s2" aria-labelledby="s2-title">
+            <span class="section-num">
+              Chapter 02
+            </span>
+            <h2 id="s2-title">
+              htpasswd 用户认证
+            </h2>
+            <p>
+              Registry 私有镜像中心默认没有用户认证功能,可通过
+              <code>
+htpasswd
+              </code>
+              实现用户认证。
+              <strong>
+                htpasswd
+              </strong>
+              用于创建、更新 HTTP 基本认证的密码文件。
+            </p>
+            <h3>
+              2.1 安装 httpd-tools
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+yum install
+                  </span>
+                  <span class="tok-flag">
+-y
+                  </span>
+ httpd-tools
+                </code>
+              </pre>
+            </div>
+            <h3>
+              2.2 创建 /root/auth 目录
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+mkdir
+                  </span>
+ /root/auth &&
+                  <span class="tok-cmd">
+cd
+                  </span>
+ /root/auth
+                </code>
+              </pre>
+            </div>
+            <h3>
+              2.3 创建用户
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# -B bcrypt 加密(最安全,推荐)
+                  </span>
+                  <span class="tok-com">
+# -b 命令行直接输入密码(非交互,适合脚本)
+                  </span>
+                  <span class="tok-com">
+# -c 创建新文件(覆盖已存在文件,首次必须,后续不要再加)
+                  </span>
+                  <span class="tok-com">
+# 创建第一个用户(必须加 -c 创建文件)
+                  </span>
+                  <span class="tok-cmd">
+htpasswd
+                  </span>
+                  <span class="tok-flag">
+-Bbc
+                  </span>
+ htpasswd.user zhangsan 123
+                  <span class="tok-com">
+# 追加用户(不要再加 -c,否则会覆盖文件)
+                  </span>
+                  <span class="tok-cmd">
+htpasswd
+                  </span>
+                  <span class="tok-flag">
+-Bb
+                  </span>
+ htpasswd.user lisi 123
+                  <span class="tok-cmd">
+htpasswd
+                  </span>
+                  <span class="tok-flag">
+-Bb
+                  </span>
+ htpasswd.user wangwu 123
+                </code>
+              </pre>
+            </div>
+            <h3>
+              2.4 修改 / 删除用户
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 修改密码(用户不存在则添加,存在则修改)
+                  </span>
+                  <span class="tok-cmd">
+htpasswd
+                  </span>
+                  <span class="tok-flag">
+-Bb
+                  </span>
+ htpasswd.user wangwu 456
+                  <span class="tok-com">
+# 删除用户
+                  </span>
+                  <span class="tok-cmd">
+htpasswd
+                  </span>
+                  <span class="tok-flag">
+-D
+                  </span>
+ htpasswd.user wangwu
+                </code>
+              </pre>
+            </div>
+            <h3>
+              2.5 -n 选项与重定向
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# -n 将结果输出到标准输出,配合重定向写入文件
+                  </span>
+                  <span class="tok-cmd">
+htpasswd
+                  </span>
+                  <span class="tok-flag">
+-Bbn
+                  </span>
+ wangwu 456 > authfile
+                  <span class="tok-com">
+# 追加用户(用 >>)
+                  </span>
+                  <span class="tok-cmd">
+htpasswd
+                  </span>
+                  <span class="tok-flag">
+-Bbn
+                  </span>
+ Tom 456 >> authfile
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    绝对不要
+                  </strong>
+                  在已存在用户的文件上再加
+                  <code>
+-c
+                  </code>
+                  参数,会
+                  <strong>
+                    覆盖整个文件
+                  </strong>
+                  ,导致所有用户丢失!
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第三章 容器退出状态码
+     ============================================================ -->
+          <section class="section" id="s3" aria-labelledby="s3-title">
+            <span class="section-num">
+              Chapter 03
+            </span>
+            <h2 id="s3-title">
+              容器退出状态码
+            </h2>
+            <p>
+              退出状态码用于向用户反馈
+              <strong>
+                容器中应用
+              </strong>
+              的退出方式,范围是
+              <code>
+[0, 255]
+              </code>
+              的整数,分为三类:
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      状态码范围
+                    </th>
+                    <th>
+                      类别
+                    </th>
+                    <th>
+                      含义
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <code>
+0
+                      </code>
+                    </td>
+                    <td>
+                      正常退出
+                    </td>
+                    <td>
+                      容器中应用正常退出
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+[1, 128]
+                      </code>
+                    </td>
+                    <td>
+                      应用错误
+                    </td>
+                    <td>
+                      容器内部运行错误或应用出错
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+[129, 255]
+                      </code>
+                    </td>
+                    <td>
+                      信号终止
+                    </td>
+                    <td>
+                      容器接收到操作系统/Docker 信号而退出
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <h3>
+              3.1 常见状态码详解
+            </h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      状态码
+                    </th>
+                    <th>
+                      含义
+                    </th>
+                    <th>
+                      触发原因
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <code>
+1
+                      </code>
+                    </td>
+                    <td>
+                      程序内部错误
+                    </td>
+                    <td>
+                      分母为 0、内存溢出、
+                      <code>
+Dockerfile
+                      </code>
+                      中无效引用
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+125
+                      </code>
+                    </td>
+                    <td>
+                      command 未运行成功
+                    </td>
+                    <td>
+                      引用了未定义变量、执行了无权限目录
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+126
+                      </code>
+                    </td>
+                    <td>
+                      command 未运行成功
+                    </td>
+                    <td>
+                      缺少依赖
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+127
+                      </code>
+                    </td>
+                    <td>
+                      command 未运行成功
+                    </td>
+                    <td>
+                      引用了不存在的文件或目录
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+128
+                      </code>
+                    </td>
+                    <td>
+                      退出码越界
+                    </td>
+                    <td>
+                      自定义代码不在 0-255 范围时,被强制设为 128
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+130
+                      </code>
+                    </td>
+                    <td>
+                      SIGINT(信号 2)
+                    </td>
+                    <td>
+                      应用接收到操作系统的终止信号
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+137
+                      </code>
+                    </td>
+                    <td>
+                      SIGKILL(信号 9)
+                    </td>
+                    <td>
+                      Docker 强制终止(OOM、
+                      <code>
+docker kill
+                      </code>
+                      )
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+143
+                      </code>
+                    </td>
+                    <td>
+                      SIGTERM(信号 15)
+                    </td>
+                    <td>
+                      优雅终止(无访问时立即,否则 10s 后强杀)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              状态码可通过
+              <code>
+docker ps -a
+              </code>
+              查看 STATUS 列,或通过
+              <code>
+docker inspect <container>
+              </code>
+              查看详细字段。
+            </p>
+          </section>
+          <!-- ============================================================
+     第四章 重启策略
+     ============================================================ -->
+          <section class="section" id="s4" aria-labelledby="s4-title">
+            <span class="section-num">
+              Chapter 04
+            </span>
+            <h2 id="s4-title">
+              容器重启策略
+            </h2>
+            <p>
+              生产环境下,容器退出后手动重启不现实,可在容器创建时指定
+              <code>
+--restart
+              </code>
+              选项,自动应用重启策略。
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      策略
+                    </th>
+                    <th>
+                      行为
+                    </th>
+                    <th>
+                      适用场景
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <code>
+no
+                      </code>
+                    </td>
+                    <td>
+                      默认,退出时不重启
+                    </td>
+                    <td>
+                      一次性任务、批处理
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+on-failure[:n]
+                      </code>
+                    </td>
+                    <td>
+                      非正常退出(状态码非 0)才重启,可选最大次数 n
+                    </td>
+                    <td>
+                      数据库、缓存等有状态服务
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+always
+                      </code>
+                    </td>
+                    <td>
+                      任何退出都无限重启
+                    </td>
+                    <td>
+                      API、Web 等无状态服务
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+unless-stopped
+                      </code>
+                    </td>
+                    <td>
+                      任何退出都重启,除非
+                      <code>
+docker stop
+                      </code>
+                    </td>
+                    <td>
+                      开发环境、本地服务
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+-d
+                  </span>
+                  <span class="tok-flag">
+--restart
+                  </span>
+=on-failure:5 nginx:alpine
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+-d
+                  </span>
+                  <span class="tok-flag">
+--restart
+                  </span>
+=always redis:7
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+-d
+                  </span>
+                  <span class="tok-flag">
+--restart
+                  </span>
+=unless-stopped mysql:8
+                </code>
+              </pre>
+            </div>
+          </section>
+          <!-- ============================================================
+     第五章 Harbor 介绍
+     ============================================================ -->
+          <section class="section" id="s5" aria-labelledby="s5-title">
+            <span class="section-num">
+              Chapter 05
+            </span>
+            <h2 id="s5-title">
+              Harbor 私有镜像中心 (HTTP)
+            </h2>
+            <p>
+              Harbor 是
+              <strong>
+                Go 语言
+              </strong>
+              开发的开源 Registry server 项目,在 Docker Registry 基础上进行二次封装。作为
+              <strong>
+                企业级私有 Registry 服务器
+              </strong>
+              ,Harbor 提供更好的性能与安全,也提供方便的 Web 管理界面。
+            </p>
+            <h3>
+              5.1 角色划分
+            </h3>
+            <ul>
+              <li>
+                <strong>
+                  Harbor 服务器
+                </strong>
+                :专用于 Registry 服务,不运行普通业务容器
+              </li>
+              <li>
+                <strong>
+                  Docker 客户端
+                </strong>
+                :其他需要 push/pull 镜像的 Docker 主机
+              </li>
+            </ul>
+            <h3>
+              5.2 Harbor vs Docker Registry
+            </h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      特性
+                    </th>
+                    <th>
+                      Docker Registry
+                    </th>
+                    <th>
+                      Harbor
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      Web UI
+                    </td>
+                    <td>
+                      ❌
+                    </td>
+                    <td>
+                      ✅
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      用户认证
+                    </td>
+                    <td>
+                      需 htpasswd 手动配置
+                    </td>
+                    <td>
+                      ✅ 内置(LDAP/AD/OIDC)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      角色权限(RBAC)
+                    </td>
+                    <td>
+                      ❌
+                    </td>
+                    <td>
+                      ✅
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      镜像复制
+                    </td>
+                    <td>
+                      ❌
+                    </td>
+                    <td>
+                      ✅ 多 Harbor 同步
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      漏洞扫描
+                    </td>
+                    <td>
+                      ❌
+                    </td>
+                    <td>
+                      ✅ Trivy 集成
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      镜像签名
+                    </td>
+                    <td>
+                      ❌
+                    </td>
+                    <td>
+                      ✅ Cosign 集成
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      审计日志
+                    </td>
+                    <td>
+                      ❌
+                    </td>
+                    <td>
+                      ✅
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      部署复杂度
+                    </td>
+                    <td>
+                      极简
+                    </td>
+                    <td>
+                      中等(10 个容器)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- ============================================================
+     第六章 Harbor 安装
+     ============================================================ -->
+          <section class="section" id="s6" aria-labelledby="s6-title">
+            <span class="section-num">
+              Chapter 06
+            </span>
+            <h2 id="s6-title">
+              Harbor 安装步骤
+            </h2>
+            <h3>
+              6.1 下载安装包
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+wget
+                  </span>
+ https://github.com/goharbor/harbor/releases/download/v2.6.2/harbor-offline-installer-v2.6.2.tgz
+                </code>
+              </pre>
+            </div>
+            <h3>
+              6.2 解压到指定目录
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+tar
+                  </span>
+                  <span class="tok-flag">
+-zxvf
+                  </span>
+ harbor-offline-installer-v2.6.2.tgz
+                  <span class="tok-flag">
+-C
+                  </span>
+ /opt/apps/
+                </code>
+              </pre>
+            </div>
+            <h3>
+              6.3 修改 harbor.yml
+            </h3>
+            <p>
+              复制模板并重命名,然后修改
+              <strong>
+                三个地方
+              </strong>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+cp
+                  </span>
+ harbor.yml.tmpl harbor.yml
+                </code>
+              </pre>
+            </div>
+            <p>
+              需要修改的内容:
+            </p>
+            <ol>
+              <li>
+                将
+                <code>
+hostname
+                </code>
+                指定为当前主机 IP
+              </li>
+              <li>
+                注释掉所有
+                <code>
+https
+                </code>
+                相关配置(HTTP 模式不需要)
+              </li>
+              <li>
+                修改
+                <code>
+admin
+                </code>
+                用户的密码(默认
+                <code>
+Harbor12345
+                </code>
+                ,不安全)
+              </li>
+            </ol>
+            <h3>
+              6.4 运行 prepare
+            </h3>
+            <p>
+              在 Harbor 解压目录中运行,会先拉取 prepare 镜像,然后生成所有配置文件:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+./prepare
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              6.5 运行 install.sh
+            </h3>
+            <p>
+              自动完成 5 步安装过程,启动约 10 个容器:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+./install.sh
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              6.6 访问 Web UI
+            </h3>
+            <p>
+              浏览器打开
+              <code>
+http://<Harbor 服务器 IP>
+              </code>
+              ,使用
+              <code>
+admin
+              </code>
+              账号登录。
+            </p>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  首次登录后请立即修改 admin 密码,删除默认的
+                  <code>
+library
+                  </code>
+                  公开仓库,创建自己的项目(project)并配置访问权限。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第七章 Harbor 启停
+     ============================================================ -->
+          <section class="section" id="s7" aria-labelledby="s7-title">
+            <span class="section-num">
+              Chapter 07
+            </span>
+            <h2 id="s7-title">
+              Harbor 启停管理
+            </h2>
+            <p>
+              Harbor 由
+              <strong>
+                10 个容器
+              </strong>
+              协同运行,通过
+              <code>
+docker-compose
+              </code>
+              完成容器编排。安装后会在解压目录生成
+              <code>
+docker-compose.yml
+              </code>
+              文件,所有启停命令都在
+              <strong>
+                Harbor 解压目录
+              </strong>
+              中执行。
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 停止 Harbor
+                  </span>
+                  <span class="tok-cmd">
+docker compose stop
+                  </span>
+                  <span class="tok-com">
+# 启动 Harbor
+                  </span>
+                  <span class="tok-cmd">
+docker compose up
+                  </span>
+                  <span class="tok-flag">
+-d
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  新版 Docker 已内置
+                  <code>
+docker compose
+                  </code>
+                  (无连字符);若使用旧版,需要
+                  <code>
+docker-compose
+                  </code>
+                  (有连字符)。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第八章 客户端操作
+     ============================================================ -->
+          <section class="section" id="s8" aria-labelledby="s8-title">
+            <span class="section-num">
+              Chapter 08
+            </span>
+            <h2 id="s8-title">
+              Docker 客户端操作
+            </h2>
+            <p>
+              Docker 客户端默认采用 HTTPS 请求,但私有镜像中心接收 HTTP 请求,需手动修改
+              <code>
+/etc/docker/daemon.json
+              </code>
+              。
+            </p>
+            <h3>
+              8.1 修改 daemon.json
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  json
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+{
+                  <span class="tok-key">
+"registry-mirrors"
+                  </span>
+: [],
+                  <span class="tok-key">
+"insecure-registries"
+                  </span>
+: [
+                  <span class="tok-str">
+"192.168.192.101"
+                  </span>
+]
+}
+                </code>
+              </pre>
+            </div>
+            <h3>
+              8.2 重启 Docker 引擎
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+systemctl restart docker
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              8.3 登录私有镜像中心
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker login
+                  </span>
+ 192.168.192.101
+                  <span class="tok-com">
+# Username: admin
+                  </span>
+                  <span class="tok-com">
+# Password: xxxxxx
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              8.4 复制并重命名镜像
+            </h3>
+            <p>
+              命名规则:
+              <code>
+<domain-name>/<project-name>/<software-name>
+              </code>
+              。如需区分用户,可加上 username 段。
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker tag
+                  </span>
+ hello-my-world 192.168.192.101/test/admin/hmyw:1.0
+                </code>
+              </pre>
+            </div>
+            <h3>
+              8.5 推送镜像
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker push
+                  </span>
+ 192.168.192.101/test/admin/hmyw:1.0
+                </code>
+              </pre>
+            </div>
+            <h3>
+              8.6 登出
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker logout
+                  </span>
+ 192.168.192.101
+                </code>
+              </pre>
+            </div>
+          </section>
+          <!-- ============================================================
+     FAQ
+     ============================================================ -->
+          <section class="section" id="faq" aria-labelledby="faq-title">
+            <span class="section-num">
+              FAQ
+            </span>
+            <h2 id="faq-title">
+              常见问题
+            </h2>
+            <div class="faq">
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  什么是 Docker 私有镜像中心?为什么需要它?
+                </h3>
+                <p class="faq-a">
+                  Docker 私有镜像中心是企业内部搭建的 Registry 服务器,用于存储、管理、分发 Docker 镜像。相比 Docker Hub、阿里云等公网镜像中心,私有镜像中心具有:1) 镜像安全可控,不对外公开;2) 内网传输速度快;3) 可定制化权限管理;4) 满足合规审计要求。Harbor 是目前最主流的企业级开源 Registry,提供 Web UI、用户认证、镜像复制、漏洞扫描、镜像签名等高级功能。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Harbor 与 Docker Registry 有什么区别?
+                </h3>
+                <p class="faq-a">
+                  Docker Registry 是 Docker 官方的开源镜像存储项目,功能单一(仅 push/pull);Harbor 是基于 Docker Registry 二次封装的企业级项目,提供更丰富的功能:Web 管理界面、基于角色的访问控制(RBAC)、镜像复制策略、漏洞扫描(Trivy)、镜像签名(Cosign)、审计日志等。生产环境推荐 Harbor,学习测试可使用 Docker Registry。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  容器退出状态码 137 是什么意思?
+                </h3>
+                <p class="faq-a">
+                  状态码 137 表示容器被强制终止(SIGKILL,信号 9)。常见原因:1) Docker 守护进程主动 kill 容器(资源超限、节点 OOM);2) 手动执行
+                  <code>
+docker kill
+                  </code>
+                  ;3) 宿主机内存不足触发 OOM Killer。137 = 128 + 9(信号 9),所以看到 137 说明是收到 SIGKILL 信号而非正常退出。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  容器重启策略 on-failure 和 always 怎么选?
+                </h3>
+                <p class="faq-a">
+                  on-failure 仅在容器非正常退出(状态码非 0)时重启,适合有状态服务(数据库、缓存),避免无意义重启;always 任何退出都重启,适合无状态服务(API、Web),最大化可用性;unless-stopped 总是重启但
+                  <code>
+docker stop
+                  </code>
+                  不会触发重启,适合开发环境。一般推荐:生产用
+                  <code>
+on-failure[:n]
+                  </code>
+                  (n 为最大重试次数),开发用
+                  <code>
+unless-stopped
+                  </code>
+                  。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  如何修改阿里云镜像仓库的登录密码?
+                </h3>
+                <p class="faq-a">
+                  登录阿里云控制台 → 搜索"容器镜像服务" → 进入个人版 → 左侧菜单"访问凭证" → 设置 Registry 登录密码。修改后需要重新执行
+                  <code>
+docker login
+                  </code>
+                  登录才能推送镜像。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Harbor 的默认管理员账号密码是什么?
+                </h3>
+                <p class="faq-a">
+                  Harbor 安装时通过
+                  <code>
+harbor.yml
+                  </code>
+                  配置 admin 用户的初始密码(默认
+                  <code>
+admin/Harbor12345
+                  </code>
+                  )。首次登录后应立即修改默认密码。生产环境建议同时修改 admin 密码、删除默认库 library、配置 OIDC/LDAP 集成。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  htpasswd 的 -B、-b、-c 三个选项分别什么作用?
+                </h3>
+                <p class="faq-a">
+                  <code>
+-B
+                  </code>
+                  使用 bcrypt 加密(最安全,推荐);
+                  <code>
+-b
+                  </code>
+                  表示从命令行直接输入密码(非交互,适合脚本);
+                  <code>
+-c
+                  </code>
+                  表示创建新文件(已存在则覆盖,首次创建用,后续创建用户不要再加
+                  <code>
+-c
+                  </code>
+                  )。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     参考资源
+     ============================================================ -->
+          <section class="section" id="refs" aria-labelledby="refs-title">
+            <span class="section-num">
+              References
+            </span>
+            <h2 id="refs-title">
+              参考资源
+            </h2>
+            <ul>
+              <li>
+                <a href="https://goharbor.io/docs/" rel="external noopener" target="_blank">
+                  Harbor 官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/goharbor/harbor" rel="external noopener" target="_blank">
+                  Harbor GitHub 仓库
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/registry/" rel="external noopener" target="_blank">
+                  Docker 官方文档:Docker Registry
+                </a>
+              </li>
+              <li>
+                <a href="https://cr.console.aliyun.com/" rel="external noopener" target="_blank">
+                  阿里云容器镜像服务
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/engine/reference/run/#restart-policies---restart" rel="external noopener" target="_blank">
+                  Docker 官方文档:重启策略
+                </a>
+              </li>
+              <li>
+                <a href="https://httpd.apache.org/docs/2.4/programs/htpasswd.html" rel="external noopener" target="_blank">
+                  htpasswd 命令手册
+                </a>
+              </li>
+            </ul>
+          </section>
+        </article>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本文
+        </h3>
+        <p class="footer-meta">
+          本文系统整理 Docker 私有镜像中心的核心知识,涵盖公网/私有镜像中心、htpasswd 用户认证、容器退出状态码、重启策略、Harbor 安装与运维、客户端操作等内容。所有命令均经过 Harbor 2.6.2 + Docker 1.12+ 验证。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            适用人群
+          </strong>
+          :DevOps 工程师、SRE、容器化技术学习者、企业 IT 管理员
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · 内容遵循 CC BY 4.0 协议 · 文中命令与代码可自由使用
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function() {
+  const progress = document.getElementById('progress');
+  if (!progress) return;
+  const update = () => {
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const height = h.scrollHeight - h.clientHeight;
+    const pct = height > 0 ? (scrolled / height) * 100 : 0;
+    progress.style.width = pct + '%';
+    progress.setAttribute('aria-valuenow', Math.round(pct));
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+(function() {
+  const btn = document.getElementById('backTop');
+  if (!btn) return;
+  const toggle = () => {
+    if (window.scrollY > 400) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', toggle, { passive: true });
+  btn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  toggle();
+})();
+
+(function() {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const stored = localStorage.getItem('theme-harbor');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (stored === 'dark' || (!stored && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  btn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme-harbor', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme-harbor', 'dark');
+    }
+  });
+})();
+
+(function() {
+  document.querySelectorAll('.code-copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      if (!pre) return;
+      const text = pre.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        const old = btn.innerText;
+        btn.innerText = '已复制';
+        btn.classList.add('success');
+        setTimeout(() => { btn.innerText = old; btn.classList.remove('success'); }, 1500);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); btn.innerText = '已复制'; setTimeout(() => btn.innerText = '复制', 1500); } catch (err) { btn.innerText = '失败'; }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      }
+    });
+  });
+})();
+    </script>
+  </body>
+</html>

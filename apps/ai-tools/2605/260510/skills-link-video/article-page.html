@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skills-Link - 深度解析</title>
+<style>
+  :root {
+    --bg: #0a1628;
+    --card: #0f2744;
+    --accent: #00d4ff;
+    --text: #e8f4ff;
+    --muted: #7eb8da;
+    --green: #00ff88;
+    --red: #ff6b6b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'PingFang SC', sans-serif; min-height: 100vh; }
+  .container { max-width: 680px; margin: 0 auto; padding: 20px; }
+  .header { text-align: center; padding: 60px 20px; border-bottom: 1px solid rgba(0,212,255,0.1); }
+  .badge { display: inline-block; background: rgba(0,212,255,0.1); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-bottom: 16px; }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 12px; }
+  .subtitle { font-size: 14px; color: var(--muted); line-height: 1.8; }
+  .content { padding: 32px 0; }
+  .section { margin-bottom: 32px; }
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: var(--accent); border-left: 3px solid var(--accent); padding-left: 12px; }
+  p { font-size: 15px; line-height: 1.9; color: var(--text); margin-bottom: 16px; }
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .feature-card { background: var(--card); border-radius: 8px; padding: 16px; border: 1px solid rgba(0,212,255,0.1); }
+  .feature-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; color: var(--accent); }
+  .feature-card p { font-size: 13px; color: var(--muted); margin-bottom: 0; }
+  .cmd-list { list-style: none; }
+  .cmd-list li { padding: 10px 0; border-bottom: 1px solid rgba(0,212,255,0.1); }
+  .cmd-list li::before { content: "→ "; color: var(--accent); }
+  .code-block { background: #060f1a; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; color: var(--green); margin: 16px 0; border: 1px solid rgba(0,212,255,0.1); }
+  .flow-box { background: var(--card); border-radius: 12px; padding: 24px; text-align: center; border: 1px solid rgba(0,212,255,0.1); margin: 16px 0; }
+  .flow-row { display: flex; align-items: center; justify-content: center; gap: 12px; font-family: monospace; font-size: 13px; flex-wrap: wrap; }
+  .flow-node { background: rgba(0,212,255,0.1); padding: 8px 16px; border-radius: 8px; color: var(--text); }
+  .flow-arrow { color: var(--accent); font-size: 18px; }
+  .cta { text-align: center; padding: 40px; background: var(--card); border-radius: 16px; border: 1px solid rgba(0,212,255,0.1); margin: 32px 0; }
+  .cta-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--accent); }
+  .cta-link { font-size: 14px; color: var(--text); word-break: break-all; }
+  .agent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+  .agent-chip { background: rgba(0,212,255,0.1); border-radius: 6px; padding: 8px; font-size: 12px; text-align: center; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">Skills-Link</div>
+    <h1>一个文件夹，所有AI应用共享skills</h1>
+    <p class="subtitle">41+ AI Agent 支持 · 符号链接方案<br>跨设备同步 · 一条命令搞定</p>
+  </div>
+
+  <div class="content">
+    <div class="section">
+      <h2>问题：每个AI工具都要单独配置skills？</h2>
+      <p>Claude Code一套skills，Cursor另一套，Windsurf又一套……改一次要同步41个地方。每次更新都要手动同步，效率太低。</p>
+      <p>Skills-Link的解决思路：用符号链接方案，让所有AI应用的skills共享同一个Master目录。</p>
+      <div class="flow-box">
+        <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">41个AI应用，每个都有自己独立的skills配置</div>
+        <div class="flow-row">
+          <div class="flow-node">Claude Code</div>
+          <div class="flow-arrow">×</div>
+          <div class="flow-node" style="background: rgba(255,107,107,0.1); color: var(--red);">41份副本</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>解决方案：符号链接</h2>
+      <div class="flow-box">
+        <div class="flow-row">
+          <div class="flow-node">Claude Code</div>
+          <div class="flow-arrow">←</div>
+          <div class="flow-node" style="background: rgba(0,212,255,0.2); color: var(--accent);">~/AISkills/</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node">Cursor</div>
+        </div>
+        <div style="font-size: 12px; color: var(--muted); margin-top: 8px;">所有app的skills链接到同一个Master目录</div>
+      </div>
+      <p>每个app的<code>~/.xxx/skills</code>变成指向~/AISkills/的符号链接。新增或编辑一个skill，所有应用立即可见。</p>
+    </div>
+
+    <div class="section">
+      <h2>支持的功能</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>🔗 符号链接</h3>
+          <p>~/AISkills/ 作为唯一数据源，所有app链接到这里</p>
+        </div>
+        <div class="feature-card">
+          <h3>🔄 跨设备同步</h3>
+          <p>skills-link sync 推送到GitHub，另一台机器自动拉取</p>
+        </div>
+        <div class="feature-card">
+          <h3>📋 rules-link</h3>
+          <p>同时支持rules同步</p>
+        </div>
+        <div class="feature-card">
+          <h3>🌐 universal fallback</h3>
+          <p>任何未列出的agent也能用</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>41+ AI Agent 支持</h2>
+      <div class="agent-grid">
+        <div class="agent-chip">Claude Code</div>
+        <div class="agent-chip">Cursor</div>
+        <div class="agent-chip">Windsurf</div>
+        <div class="agent-chip">Cline</div>
+        <div class="agent-chip">Gemini CLI</div>
+        <div class="agent-chip">Trae</div>
+        <div class="agent-chip">Roo Code</div>
+        <div class="agent-chip">Continue</div>
+        <div class="agent-chip">GitHub Copilot</div>
+        <div class="agent-chip">Goose</div>
+        <div class="agent-chip">OpenClaw</div>
+        <div class="agent-chip">Qwen Code</div>
+      </div>
+      <p style="font-size: 13px; color: var(--muted);">AdaL, Amp, Antigravity, Augment, CodeBuddy, Codex, Command Code, Cortex Code, Crush, Droid, iFlow CLI, Junie, Kilo Code, Kimi Code CLI, Kiro CLI, Kode, MCPJam, Mistral Vibe, Mux, Neovate, OpenCode, OpenHands, Pi, Pochi, Qoder, Replit, Trae CN, Zencoder 等</p>
+    </div>
+
+    <div class="section">
+      <h2>命令</h2>
+      <ul class="cmd-list">
+        <li><code>skills-link</code> — 主命令，同步skills到所有应用</li>
+        <li><code>skills-link add &lt;repo&gt;</code> — 从GitHub安装skill</li>
+        <li><code>skills-link list</code> — 列出本地skills</li>
+        <li><code>skills-link sync</code> — 推送变更到GitHub</li>
+        <li><code>skills-link app</code> — 管理启用的应用</li>
+        <li><code>rules-link</code> — 同步rules</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>安装使用</h2>
+      <div class="code-block">npm i -g skills-link</div>
+      <div class="code-block">skills-link</div>
+      <p style="font-size: 13px; color: var(--muted);">首次运行自动引导：检测应用、导入skills、创建链接。随时再运行一次即可同步变更和检查状态。</p>
+    </div>
+
+    <div class="cta">
+      <div class="cta-title">立即体验</div>
+      <p class="cta-link">github.com/shanliuling/skills-link</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

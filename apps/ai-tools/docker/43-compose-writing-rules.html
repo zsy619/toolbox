@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Prism.js 代码高亮（轻量 2KB gzip，CDN 加载） -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js" defer>
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js" defer>
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js" defer>
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-docker.min.js" defer>
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js" defer>
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js" defer>
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js" defer>
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet">
+    <!-- 来源：Prism.js 官方文档 https://prismjs.com/ -->
+    <title>
+      Docker Compose 编写规范 | AI 工具箱 Docker 规则库
+    </title>
+    <meta name="description" content="从 compose 文件结构、6 大顶级属性、12 条编写铁律 3 维度规范化 docker-compose.yml,提升多容器应用的可读性、可维护性、可移植性。">
+    <meta name="keywords" content="Docker, 文件结构 5 原则, Docker Compose 编写规范, Docker 规范, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/31-compose-writing-rules.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker Compose 编写规范">
+    <meta property="og:description" content="从 compose 文件结构、6 大顶级属性、12 条编写铁律 3 维度规范化 docker-compose.yml,提升多容器应用的可读性、可维护性、可移植性。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/31-compose-writing-rules.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Docker Compose 编写规范">
+    <meta name="twitter:description" content="从 compose 文件结构、6 大顶级属性、12 条编写铁律 3 维度规范化 docker-compose.yml,提升多容器应用的可读性、可维护性、可移植性。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Docker Compose 编写规范","description":"从 compose 文件结构、6 大顶级属性、12 条编写铁律 3 维度规范化 docker-compose.yml,提升多容器应用的可读性、可维护性、可移植性。","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN","keywords":"Docker, 文件结构 5 原则"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 规则库","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"Docker Compose 编写规范","item":"https://tools.yy24365.com/ai-tools/docker/31-compose-writing-rules.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+    <style>
+
+.rules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin:16px 0}
+.rule-card{background:var(--paper-card);border:1px solid var(--border);border-left:3px solid var(--docker-blue);border-radius:var(--radius-sm);padding:12px 16px;display:flex;gap:10px;align-items:flex-start;transition:all .2s}
+.rule-card:hover{box-shadow:var(--shadow-md);transform:translateX(2px);border-left-width:4px}
+.rule-num{background:rgba(36,150,237,.15);color:var(--docker-blue);min-width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;font-weight:800;flex-shrink:0}
+.rule-card p{margin:0;font-size:14px;line-height:1.6;color:var(--ink-2)}
+.code-block-header{font-family:var(--font-mono);font-size:11px;color:#88c0d0;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;opacity:.7}
+/* === 学习路径侧边栏（响应式） === */
+.sidebar{position:fixed;top:80px;left:0;width:260px;height:calc(100vh - 80px);background:var(--paper-card);border-right:1px solid var(--border);overflow-y:auto;padding:20px 16px;z-index:40;transition:transform .3s}
+.sidebar-section{margin-bottom:20px}
+.sidebar-level{font-size:12px;font-weight:700;color:var(--docker-blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding:6px 10px;background:rgba(36,150,237,.08);border-radius:6px}
+.sidebar-list{list-style:none;padding:0;margin:0}
+.sidebar-list li{margin:2px 0}
+.sidebar-list a{display:block;padding:8px 12px;color:var(--ink-2);text-decoration:none;font-size:13px;border-radius:6px;transition:all .15s;line-height:1.4}
+.sidebar-list a:hover{background:var(--paper-2);color:var(--docker-blue);padding-left:16px}
+.sidebar-list .active a{background:var(--docker-blue);color:#fff;font-weight:600}
+.sidebar-list .active a:hover{background:var(--docker-blue-dark);padding-left:12px}
+.sidebar-toggle{display:none;position:fixed;top:90px;left:12px;z-index:60;background:var(--docker-blue);color:#fff;border:0;border-radius:50%;width:44px;height:44px;font-size:18px;cursor:pointer;box-shadow:var(--shadow-md)}
+/* 主内容左移为侧边栏留位 */
+.main-wrap{margin-left:260px;max-width:calc(var(--max-w) + 260px);padding:0 20px}
+/* === 学习层级徽章 === */
+.level-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.5px;margin-left:8px;vertical-align:middle}
+.level-badge.basic{background:#d1fae5;color:#065f46}
+.level-badge.intermediate{background:#dbeafe;color:#1e40af}
+.level-badge.advanced{background:#fee2e2;color:#991b1b}
+/* === 来源标注 === */
+.source-note{font-size:11px;color:var(--ink-3);font-style:italic;margin-top:6px;padding:6px 10px;background:var(--paper-2);border-radius:4px;display:inline-block}
+.source-note::before{content:"📚 ";margin-right:4px}
+/* === 代码块标题 === */
+.code-title{font-family:var(--font-mono);font-size:11px;color:#88c0d0;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;opacity:.8;display:block}
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar" aria-label="学习路径导航">
+      <div class="sidebar-section">
+        <div class="sidebar-level">
+          📘 学习路径
+        </div>
+        <div style="font-size:11px;color:var(--ink-3);padding:0 10px;margin-bottom:12px">
+          基础 → 进阶 → 高级
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-level">
+          基础
+        </div>
+        <ul class="sidebar-list">
+          <li>
+            <a href="37-docker-commands-cheatsheet.html">
+              Docker 常用命令速查
+            </a>
+          </li>
+          <li>
+            <a href="45-image-gc-cleanup.html">
+              Docker 镜像清理与回收
+            </a>
+          </li>
+          <li>
+            <a href="39-static-site-containerization.html">
+              静态站点容器化
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-level">
+          进阶
+        </div>
+        <ul class="sidebar-list">
+          <li>
+            <a href="38-dockerfile-best-practices.html">
+              Dockerfile 最佳实践
+            </a>
+          </li>
+          <li>
+            <a href="36-multi-stage-build-rules.html">
+              多阶段构建
+            </a>
+          </li>
+          <li>
+            <a href="35-image-slimming-cleanup.html">
+              镜像瘦身清理
+            </a>
+          </li>
+          <li class="active">
+            <a href="43-compose-writing-rules.html">
+              📍 Compose 编写规范
+            </a>
+          </li>
+          <li>
+            <a href="26-network-troubleshooting.html">
+              网络故障排查
+            </a>
+          </li>
+          <li>
+            <a href="29-network-planning-rules.html">
+              网络规划
+            </a>
+          </li>
+          <li>
+            <a href="27-storage-driver-rules.html">
+              存储驱动选型
+            </a>
+          </li>
+          <li>
+            <a href="30-volume-management-rules.html">
+              数据卷管理
+            </a>
+          </li>
+          <li>
+            <a href="28-container-lifecycle-rules.html">
+              容器生命周期
+            </a>
+          </li>
+          <li>
+            <a href="31-healthcheck-rules.html">
+              健康检查
+            </a>
+          </li>
+          <li>
+            <a href="33-java-springboot-containerization.html">
+              Java Spring Boot
+            </a>
+          </li>
+          <li>
+            <a href="34-nodejs-containerization.html">
+              Node.js 容器化
+            </a>
+          </li>
+          <li>
+            <a href="44-mongodb-containerization.html">
+              MongoDB 容器化
+            </a>
+          </li>
+          <li>
+            <a href="47-log-management-rules.html">
+              日志管理
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-level">
+          高级
+        </div>
+        <ul class="sidebar-list">
+          <li>
+            <a href="32-performance-tuning.html">
+              性能调优
+            </a>
+          </li>
+          <li>
+            <a href="41-cross-host-network.html">
+              跨主机通信
+            </a>
+          </li>
+          <li>
+            <a href="42-registry-management.html">
+              镜像仓库管理
+            </a>
+          </li>
+          <li>
+            <a href="40-cicd-integration-rules.html">
+              CI/CD 集成
+            </a>
+          </li>
+          <li>
+            <a href="46-container-security-audit.html">
+              容器安全审计
+            </a>
+          </li>
+          <li>
+            <a href="48-vulnerability-scanning.html">
+              漏洞扫描
+            </a>
+          </li>
+          <li>
+            <a href="25-logging-monitoring-rules.html">
+              日志与监控
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-section" style="border-top:1px solid var(--border);padding-top:12px;margin-top:16px">
+        <div class="sidebar-level">
+          📚 来源
+        </div>
+        <div style="font-size:11px;color:var(--ink-3);padding:4px 10px;line-height:1.6">
+          Docker 官方文档 (2025-2026)
+          <br>
+          Prism.js 语法高亮
+          <br>
+          Docker Scout / DHI 2025
+        </div>
+      </div>
+    </aside>
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="切换目录">
+      ☰
+    </button>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">D</span>
+          <span>AI 工具箱</span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main" class="main-wrap">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">/</span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">/</span>
+            <a href="index.html">
+              Docker 规则库
+            </a>
+            <span class="breadcrumb-sep">/</span>
+            <span aria-current="page">Docker Compose 编写规范</span>
+          </nav>
+          <h1 id="hero-title">
+            Docker Compose 编写规范
+          </h1>
+          <p class="hero-sub">
+            YAML 结构 + 6 大属性 + 12 条铁律
+          </p>
+          <p class="hero-desc">
+            从 compose 文件结构、6 大顶级属性、12 条编写铁律 3 维度规范化 docker-compose.yml,提升多容器应用的可读性、可维护性、可移植性。
+          </p>
+          <p style="margin:12px 0">
+            <span class="level-badge intermediate">🎓 进阶</span>
+            <span style="color:var(--ink-3);font-size:13px;margin-left:10px">📂 分类:编排</span>
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>编号</strong>
+              第 19 号规则
+            </div>
+            <div class="hero-meta-item">
+              <strong>分类</strong>
+              Compose
+            </div>
+            <div class="hero-meta-item">
+              <strong>难度</strong>
+              中级
+            </div>
+            <div class="hero-meta-item">
+              <strong>字数</strong>
+              ~ 3000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">Chapter 01</span>
+          <h2 id="s1-title">
+            Compose 12 编写铁律
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                version 已弃用;image/build 二选一;固定 tag;env 写 .env。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                新项目 compose.yaml 编写。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">yaml</span><pre class="line-numbers"><code class="language-yaml">services:
+api:
+image: myapp:v1
+container_name: myapp
+restart: unless-stopped
+healthcheck:
+test: ["CMD", "curl", "-f", "http://localhost:8080/health"]</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                depends_on 只控制启动顺序;健康需 healthcheck。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">Chapter 02</span>
+          <h2 id="s2-title">
+            Compose Watch 2025 GA
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                Compose Watch 监听源码变化自动同步;3 种 action。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                本地开发热加载。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">yaml</span><pre class="line-numbers"><code class="language-yaml">services:
+web:
+develop:
+watch:
+- action: sync
+path: ./src
+target: /app/src
+- action: rebuild
+path: package.json</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                docker compose up --watch 启动。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">Chapter 03</span>
+          <h2 id="s3-title">
+            GPU shorthand + Profiles
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                Compose v2.30+ 支持 gpus: all;profiles 多环境。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                AI/LLM 部署;多环境 CI/CD。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">yaml</span><pre class="line-numbers"><code class="language-yaml">services:
+llm:
+image: ollama/ollama
+gpus: all
+profiles: ["gpu"]
+cpu-mode:
+image: ollama/ollama
+profiles: ["dev"]</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                docker compose --profile gpu up。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">Chapter 04</span>
+          <h2 id="s4-title">
+            环境变量与 secrets
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                .env 不入版本控制;secrets 用 file 引用。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                敏感信息管理。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">yaml</span><pre class="line-numbers"><code class="language-yaml">services:
+api:
+env_file: [.env]
+secrets: [db_password]
+secrets:
+db_password: { file: ./secrets/db_password.txt }</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                环境变量会出现在 docker inspect。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s5" aria-labelledby="s5-title">
+          <span class="section-num">Chapter 05</span>
+          <h2 id="s5-title">
+            Compose 生产部署
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                Compose v2.30+ 支持 docker compose deploy;Swarm 部署。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                中小团队生产部署。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">bash</span><pre class="line-numbers"><code class="language-bash">docker swarm init
+docker compose up --deploy</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                Compose deploy 是实验性;生产建议 K8s。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s6" aria-labelledby="s6-title">
+          <span class="section-num">Chapter 06</span>
+          <h2 id="s6-title">
+            容器与镜像核心概念
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                镜像(Image)是静态只读模板,容器(Container)是运行实例,Docker 基于 Linux Namespace(隔离)+Cgroups(资源限制)+UnionFS(分层)三大内核特性。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                理解 Docker 工作原理;区分 Image/Container/Volume/Network 概念。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">bash</span><pre class="line-numbers"><code class="language-bash">docker images
+docker ps -a
+docker history nginx:alpine
+docker inspect nginx | jq '.[0].GraphDriver.Data'</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                镜像层(ReadOnly)+容器层(ReadWrite)=完整文件系统;层数过多拖慢拉取。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s7" aria-labelledby="s7-title">
+          <span class="section-num">Chapter 07</span>
+          <h2 id="s7-title">
+            Docker 安装与配置
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                Docker 支持 Linux/macOS/Windows;Linux 推荐 docker-ce+buildx+compose;macOS/Windows 用 Docker Desktop。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                首次安装;配置镜像加速器;权限管理。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">bash</span><pre class="line-numbers"><code class="language-bash">curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+
+# /etc/docker/daemon.json
+{
+"registry-mirrors": ["https://docker.m.daocloud.io"],
+"experimental": true
+}
+sudo systemctl restart docker
+docker run hello-world</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                macOS/Windows 用 Docker Desktop;Linux 服务器用 docker-ce;中国网络需镜像加速器。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s8" aria-labelledby="s8-title">
+          <span class="section-num">Chapter 08</span>
+          <h2 id="s8-title">
+            基本命令速查
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                Docker CLI 涵盖 image/container/network/volume/system 子命令。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                日常运维;脚本自动化;面试准备。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">bash</span><pre class="line-numbers"><code class="language-bash"># 镜像: pull/push/tag/rmi/images/inspect
+# 容器: run/exec/start/stop/logs/stats/cp
+# 网络: network create/connect
+# 卷:   volume create/prune
+# 系统: system df/prune/info
+# Compose: docker compose up/down</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                2024+ 新增:scout/debug/init/buildx/sbom/model-runner;高频命令熟记。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s9" aria-labelledby="s9-title">
+          <span class="section-num">Chapter 09</span>
+          <h2 id="s9-title">
+            Dockerfile 编写规范
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                Dockerfile 是镜像构建脚本;FROM/RUN/COPY/ENV/EXPOSE/CMD/ENTRYPOINT;最佳实践:小基础镜像、合并 RUN、非 root。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                应用容器化;CI/CD 流水线构建。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">dockerfile</span><pre class="line-numbers"><code class="language-dockerfile">FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+USER node
+COPY --from=builder --chown=node:node /app/dist ./dist
+HEALTHCHECK --interval=30s CMD curl -f http://localhost:3000/ || exit 1
+CMD ["node", "dist/main.js"]</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                USER 非 root;HEALTHCHECK 必加;CMD exec 形式。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s10" aria-labelledby="s10-title">
+          <span class="section-num">Chapter 10</span>
+          <h2 id="s10-title">
+            多阶段构建高级用法
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                多阶段用 AS 命名,--from= 跨阶段 COPY;BuildKit --mount/--secret/--ssh 高级特性。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                需编译应用(Java/Go/Node);CI/CD 加速;体积优化。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">dockerfile</span><pre class="line-numbers"><code class="language-dockerfile">#syntax=docker/dockerfile:1.7
+FROM golang:1.22 AS builder
+WORKDIR /app
+COPY go.mod ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -o /bin/app
+
+FROM gcr.io/distroless/base-debian12
+COPY --from=builder /bin/app /app
+USER 1000
+ENTRYPOINT ["/app"]</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                BuildKit 替代 DOCKER_BUILDKIT;--mount type=cache 持久化缓存。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s11" aria-labelledby="s11-title">
+          <span class="section-num">Chapter 11</span>
+          <h2 id="s11-title">
+            Docker Compose 编排
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                docker compose 用 YAML 定义多服务;version 已弃用(v2);profiles/depends_on/healthcheck 高级特性。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                本地多服务开发(API+DB+Cache);中小团队生产部署;CI 集成测试。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">yaml</span><pre class="line-numbers"><code class="language-yaml">services:
+api:
+build: .
+ports: ["3000:3000"]
+depends_on:
+db: { condition: service_healthy }
+develop:
+watch:
+- action: sync
+path: ./src
+target: /app/src
+
+db:
+image: postgres:16-alpine
+volumes: ["db-data:/var/lib/postgresql/data"]
+healthcheck: { test: ["CMD-SHELL", "pg_isready"] }
+
+volumes: { db-data: }</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                Compose Watch 2025 GA 替代 nodemon;depends_on+healthcheck。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s12" aria-labelledby="s12-title">
+          <span class="section-num">Chapter 12</span>
+          <h2 id="s12-title">
+            Docker Swarm 集群编排
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                Docker Swarm 是内置容器编排工具;manager/worker 节点、service/stack/replicas、overlay 网络、滚动更新。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                中等规模集群(
+                <
+                200 节点);不想引入 K8s;学习编排入门。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">bash</span><pre class="line-numbers"><code class="language-bash">docker swarm init --advertise-addr <IP>
+docker swarm join --token <TOKEN> <IP>:2377
+
+docker service create --name web \
+--replicas 3 --publish 80:80 \
+--network my-overlay nginx:alpine
+
+docker service update --image nginx:1.25 web</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                Swarm 比 K8s 简单但生态较弱;新项目建议 K8s。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s13" aria-labelledby="s13-title">
+          <span class="section-num">Chapter 13</span>
+          <h2 id="s13-title">
+            Kubernetes 入门对接
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                K8s 是容器编排事实标准;Pod/Deployment/Service/Ingress/ConfigMap/Secret/PV 等核心概念。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                生产环境大规模部署;多云/混合云;微服务架构。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">yaml</span><pre class="line-numbers"><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata: { name: myapp }
+spec:
+replicas: 3
+selector: { matchLabels: { app: myapp } }
+template:
+spec:
+containers:
+- name: myapp
+image: myapp:v1
+resources:
+limits: { memory: 512Mi, cpu: 500m }
+readinessProbe:
+httpGet: { path: /health, port: 8080 }</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                K8s 是大势所趋;Swarm 是过渡;学习曲线陡但生态强大。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s14" aria-labelledby="s14-title">
+          <span class="section-num">Chapter 14</span>
+          <h2 id="s14-title">
+            容器安全加固 6 步
+          </h2>
+          <div class="learn-block">
+            <div class="learn-row concept">
+              <span class="learn-icon">💡</span>
+              <span>
+                <strong>概念:</strong>
+                非 root/最小 capabilities/只读根 FS/资源限制/网络隔离/漏洞扫描;CIS Benchmark 完整列表。
+              </span>
+            </div>
+            <div class="learn-row scenario">
+              <span class="learn-icon">🎯</span>
+              <span>
+                <strong>使用场景:</strong>
+                生产安全合规;金融/医疗/政府行业。
+              </span>
+            </div>
+            <div class="learn-row">
+              <span class="learn-icon">💻</span>
+              <span style="width:100%">
+                <strong>代码示例:</strong>
+                <span class="code-title">bash</span><pre class="line-numbers"><code class="language-bash">docker run -d \
+--user 1000 \
+--cap-drop ALL --cap-add CHOWN \
+--read-only \
+--tmpfs /tmp:size=100m \
+--security-opt no-new-privileges \
+--memory 512m --cpus 1.0 --pids-limit 100 \
+myapp:v1
+
+docker scout cves myapp:v1
+trivy image myapp:v1</code></pre>
+            </div>
+            <div class="learn-row notes">
+              <span class="learn-icon">⚠️</span>
+              <span>
+                <strong>注意事项:</strong>
+                非 root+cap-drop+read-only 是三件套;DHI 镜像 CVE 数
+                <
+                5。
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">FAQ</span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                文件结构 5 原则
+              </h3>
+              <p class="faq-a">
+                版本化:version 3.x 兼容旧版即可(4.0+ 已不写 version)
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                services 配置 6 必填
+              </h3>
+              <p class="faq-a">
+                image 或 build:二选一
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                12 条编写铁律
+              </h3>
+              <p class="faq-a">
+                1) 不用 latest 标签,固定版本
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本规则
+        </h3>
+        <p class="footer-meta">
+          {title} · 属于 Docker 规则库系列,与 12 节课程内容深度协同。所有规则均经过 Docker 20+ 版本验证,可直接应用于生产环境。
+        </p>
+        <p class="footer-meta">
+          <strong>相关主题</strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            Docker 12 节课系列
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方文档
+          </a>
+          ·
+          <a href="https://hub.docker.com" style="color:#c4d1de">
+            Docker Hub
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 规则库 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+      <div class="source-note">
+        📚 来源:Docker 官方文档(2025-2026)、Docker Scout 平台、DHI Hardened Images、Prism.js 语法高亮 v1.29.0
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-rule-'+19;
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

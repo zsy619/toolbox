@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Docker Compose 完全指南">
+    <meta name="format-detection" content="telephone=no">
+    <title>
+      Docker Compose 容器编排完全指南:从 yml 文件到微服务部署 | AI 工具箱
+    </title>
+    <meta name="description" content="Docker Compose 是 Docker 官方的容器编排工具,通过声明式 yml 文件一键部署多容器应用。本文详解 compose.yml 6 大顶级属性、常用命令、安装、Spring Boot+MySQL+Redis 完整编排实战、自定义组件名称等。">
+    <meta name="keywords" content="Docker Compose, docker-compose, compose.yml, 容器编排, 多容器应用, Spring Boot, MySQL, Redis, Dockerfile, depends_on, 声明式部署, YAML, DevOps">
+    <meta name="author" content="AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="language" content="zh-CN">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/09-docker-compose-orchestration.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://tools.yy24365.com/ai-tools/docker/09-docker-compose-orchestration.html">
+    <link rel="alternate" hreflang="x-default" href="https://tools.yy24365.com/ai-tools/docker/09-docker-compose-orchestration.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker Compose 容器编排完全指南">
+    <meta property="og:description" content="Docker Compose 完整实战:yml 语法、Spring Boot 编排、MySQL/Redis 一键部署。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/09-docker-compose-orchestration.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/docker-compose-og.png">
+    <meta property="og:image:alt" content="Docker Compose 容器编排架构图">
+    <meta property="article:published_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:modified_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:section" content="DevOps">
+    <meta property="article:tag" content="Docker Compose">
+    <meta property="article:tag" content="容器编排">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Docker Compose 容器编排完全指南">
+    <meta name="twitter:description" content="Docker Compose 完整实战教程。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/docker-compose-og.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%232496ED' d='M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.083.185.185.185m-2.954-5.43h2.119a.186.186 0 00.186-.186V3.575a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m0 2.716h2.119a.187.187 0 00.186-.186V6.291a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.931 0h2.12a.186.186 0 00.184-.186V6.291a.185.185 0 00-.184-.185h-2.12a.185.185 0 00-.184.185v1.887c0 .102.082.185.184.186m-2.932 0h2.12a.185.185 0 00.184-.186V6.291a.185.185 0 00-.184-.185H5.166a.186.186 0 00-.185.185v1.887c0 .102.083.185.185.186m5.863 5.43h2.119a.186.186 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.082.185.185.185m-2.931 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.932 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.931 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m11.792 4.084h-2.119a.186.186 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.931 0h-2.119a.185.185 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.932 0h-2.118a.185.185 0 00-.184.185v1.886c0 .103.082.186.184.186h2.118a.186.186 0 00.185-.186v-1.886a.185.185 0 00-.185-.185m-2.931 0h-2.12a.185.185 0 00-.184.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.184-.186v-1.886a.185.185 0 00-.184-.185m-2.932 0H5.166a.186.186 0 00-.185.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.185-.186v-1.886a.186.186 0 00-.185-.185z'/%3E%3C/svg%3E">
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Docker Compose 容器编排完全指南",
+  "description": "Docker Compose 是 Docker 官方的容器编排外部工具,通过声明式 yml 文件一键部署多容器应用。本文详解 compose.yml 6 大顶级属性、常用命令、安装、Spring Boot 完整实战。",
+  "author": {"@type": "Organization", "name": "AI 工具箱"},
+  "publisher": {"@type": "Organization", "name": "AI 工具箱"},
+  "datePublished": "2026-06-03T00:00:00+08:00",
+  "dateModified": "2026-06-03T00:00:00+08:00",
+  "inLanguage": "zh-CN",
+  "mainEntityOfPage": "https://tools.yy24365.com/ai-tools/docker/09-docker-compose-orchestration.html",
+  "keywords": "Docker Compose, compose.yml, 容器编排, 多容器",
+  "about": {"@type": "SoftwareApplication", "name": "Docker Compose", "applicationCategory": "DeveloperApplication"},
+  "proficiencyLevel": "Intermediate"
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "首页", "item": "https://tools.yy24365.com/"},
+    {"@type": "ListItem", "position": 2, "name": "AI 工具", "item": "https://tools.yy24365.com/ai-tools/"},
+    {"@type": "ListItem", "position": 3, "name": "Docker 学习", "item": "https://tools.yy24365.com/ai-tools/docker/"},
+    {"@type": "ListItem", "position": 4, "name": "Compose 指南", "item": "https://tools.yy24365.com/ai-tools/docker/09-docker-compose-orchestration.html"}
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Docker Compose 与 Dockerfile、docker run 有什么区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Dockerfile:镜像构建的说明书,定义如何从一个基础镜像构建出可运行的应用镜像;docker run:启动单个容器的命令,适合 1-2 个容器场景;Docker Compose:多容器编排工具,通过 yml 文件一键管理整个应用栈(应用 + 数据库 + 缓存 + 网关),适合微服务场景。三者关系:用 Dockerfile 构建镜像,用 docker run 验证,最终用 Compose 统一编排。"}
+    },
+    {
+      "@type": "Question",
+      "name": "compose.yml 和 docker-compose.yml 有什么区别?",
+      "acceptedAnswer": {"@type": "Answer", "text": "两者都支持,只是默认文件名不同:Docker Compose v2(无连字符 docker compose)默认使用 compose.yml;v1(有连字符 docker-compose)默认使用 docker-compose.yml。推荐使用 compose.yml + docker compose 命令,这是当前主流且未来方向。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Compose 中的 version 字段还需要写吗?",
+      "acceptedAnswer": {"@type": "Answer", "text": "不需要。Docker Compose v2 起,version 顶级属性已过时且不再需要。Docker Engine 28.0+ 起,Docker Compose Spec 统一由 Docker 自动推断,完全不需要 version 字段。继续写 version 不会有错误,但属于冗余配置。"}
+    },
+    {
+      "@type": "Question",
+      "name": "depends_on 能保证服务启动顺序吗?",
+      "acceptedAnswer": {"@type": "Answer", "text": "depends_on 仅控制<strong>启动顺序</strong>(先启动依赖,再启动当前服务),但<strong>不等待依赖服务就绪</strong>(如 MySQL 启动后还需 5-10 秒初始化数据)。如果应用需要等待数据库就绪,需要:1) 应用层实现重试连接;2) 使用 healthcheck + condition: service_healthy;3) 使用 wait-for-it.sh 脚本。"}
+    },
+    {
+      "@type": "Question",
+      "name": "docker-compose down 会删除数据吗?",
+      "acceptedAnswer": {"@type": "Answer", "text": "down 命令会停止并删除容器、网络,但<strong>默认不删除数据卷</strong>(volumes),所以 MySQL 等数据可以保留。如果要彻底删除包括数据卷,使用 docker-compose down -v。新版 docker compose 命令同样支持 -v 选项。"}
+    },
+    {
+      "@type": "Question",
+      "name": "如何在 Compose 中使用环境变量?",
+      "acceptedAnswer": {"@type": "Answer", "text": "三种方式:1) compose.yml 中直接 environment 写死值;2) .env 文件中定义 KEY=VALUE,compose.yml 用 ${KEY} 引用;3) shell 环境变量,compose.yml 用 ${VAR} 引用(需先 export)。推荐敏感信息(密码)使用 Docker secrets 而非 environment,生产环境强烈建议。"}
+    },
+    {
+      "@type": "Question",
+      "name": "Compose 文件的 6 个顶级属性是哪些?",
+      "acceptedAnswer": {"@type": "Answer", "text": "1) version:已过时,无需再写;2) services:定义应用包含的所有服务,每个服务部署为独立容器;3) networks:定义和创建网络,服务通过 networks 加入;4) volumes:定义和创建数据卷,用于持久化;5) configs:定义非敏感配置文件,通过文件或外部注入;6) secrets:定义敏感信息(如密码、证书),通过文件或外部注入。"}
+    }
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "使用 Docker Compose 部署 Spring Boot + MySQL + Redis",
+  "description": "通过单个 compose.yml 一键部署三服务完整应用",
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "准备项目结构", "text": "创建项目目录,如 finance/,其中包含 Dockerfile、compose.yml、jar 包"},
+    {"@type": "HowToStep", "position": 2, "name": "编写 Dockerfile", "text": "FROM openjdk:17;COPY target/*.jar app.jar;EXPOSE 8080;ENTRYPOINT [\"java\", \"-jar\", \"app.jar\"]"},
+    {"@type": "HowToStep", "position": 3, "name": "编写 compose.yml", "text": "定义 app、mysql、redis 三个 service,通过 depends_on 控制启动顺序"},
+    {"@type": "HowToStep", "position": 4, "name": "修改应用配置", "text": "将数据库主机名从 IP 改为服务名 mysql/redis(Compose 内置 DNS 解析)"},
+    {"@type": "HowToStep", "position": 5, "name": "打包上传", "text": "mvn package 打包,scp 上传到服务器项目目录"},
+    {"@type": "HowToStep", "position": 6, "name": "启动服务", "text": "docker-compose up -d 一键启动所有服务,自动构建应用镜像 + 拉取 mysql/redis 镜像"},
+    {"@type": "HowToStep", "position": 7, "name": "验证部署", "text": "docker-compose ps 查看状态,访问 http://IP:9000 验证应用"}
+  ]
+}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress" role="progressbar" aria-label="阅读进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand" aria-label="AI 工具箱首页">
+          <span class="brand-mark">
+            AI
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main" role="main">
+      <section class="hero" aria-labelledby="article-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 学习
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Compose 指南
+            </span>
+          </nav>
+          <h1 id="article-title">
+            Docker Compose 容器编排完全指南
+          </h1>
+          <p class="hero-sub">
+            从 compose.yml 语法到 Spring Boot + MySQL + Redis 一键编排,Docker Compose 是多容器应用部署的事实标准。本文详解 6 大顶级属性、常用命令、完整实战与自定义命名。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              ★★★ 中级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                阅读时长
+              </strong>
+              约 25 分钟
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                适用版本
+              </strong>
+              Compose v2.x
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                最后更新
+              </strong>
+              2026-06-03
+            </div>
+          </div>
+          <div class="hero-tags" aria-label="标签">
+            <span class="tag">
+              Docker Compose
+            </span>
+            <span class="tag">
+              compose.yml
+            </span>
+            <span class="tag">
+              容器编排
+            </span>
+            <span class="tag">
+              Spring Boot
+            </span>
+            <span class="tag">
+              MySQL
+            </span>
+            <span class="tag">
+              Redis
+            </span>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <article>
+          <section class="section" aria-labelledby="intro">
+            <h2 id="intro">
+              为什么需要 Docker Compose
+            </h2>
+            <p>
+              现代应用大多由
+              <strong>
+                多个微服务
+              </strong>
+              组成:订单管理、用户管理、品类管理、网关、数据库、缓存……部署和管理大量的服务容器非常繁琐。而
+              <strong>
+                Docker Compose
+              </strong>
+              正是为解决此问题而生。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                Docker Compose 是什么
+              </div>
+              <div class="concept-body">
+                <p>
+                  Docker Compose 是一个安装在 Docker 主机上的
+                  <strong>
+                    Docker 容器编排外部工具
+                  </strong>
+                  ,通过一个声明式的
+                  <strong>
+                    配置文件描述整个应用
+                  </strong>
+                  ,然后通过
+                  <strong>
+                    一条命令
+                  </strong>
+                  完成应用部署。部署成功后,可通过一系列简单命令完成其生命周期管理。其
+                  <strong>
+                    前身是 Fig(无花果)
+                  </strong>
+                  。
+                </p>
+              </div>
+            </div>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  Compose 解决的不是"容器怎么跑"而是"应用怎么组装"。Dockerfile 解决镜像构建,docker run 解决单容器启动,Compose 解决
+                  <strong>
+                    多容器协同
+                  </strong>
+                  。
+                </p>
+              </div>
+            </div>
+          </section>
+          <nav class="toc" id="toc" aria-labelledby="toc-title">
+            <h2 class="toc-title" id="toc-title">
+              本文目录
+            </h2>
+            <ul class="toc-grid">
+              <li>
+                <a href="#s1">
+                  <span class="toc-num">
+                    1
+                  </span>
+                  Compose 文件结构
+                </a>
+              </li>
+              <li>
+                <a href="#s2">
+                  <span class="toc-num">
+                    2
+                  </span>
+                  6 大顶级属性
+                </a>
+              </li>
+              <li>
+                <a href="#s3">
+                  <span class="toc-num">
+                    3
+                  </span>
+                  常用命令
+                </a>
+              </li>
+              <li>
+                <a href="#s4">
+                  <span class="toc-num">
+                    4
+                  </span>
+                  安装
+                </a>
+              </li>
+              <li>
+                <a href="#s5">
+                  <span class="toc-num">
+                    5
+                  </span>
+                  Spring Boot 实战
+                </a>
+              </li>
+              <li>
+                <a href="#s6">
+                  <span class="toc-num">
+                    6
+                  </span>
+                  Dockerfile
+                </a>
+              </li>
+              <li>
+                <a href="#s7">
+                  <span class="toc-num">
+                    7
+                  </span>
+                  手动 vs Compose
+                </a>
+              </li>
+              <li>
+                <a href="#s8">
+                  <span class="toc-num">
+                    8
+                  </span>
+                  自定义命名
+                </a>
+              </li>
+              <li>
+                <a href="#faq">
+                  <span class="toc-num">
+                    ?
+                  </span>
+                  常见问题
+                </a>
+              </li>
+              <li>
+                <a href="#refs">
+                  <span class="toc-num">
+                    i
+                  </span>
+                  参考资源
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- ============================================================
+     第一章 Compose 文件结构
+     ============================================================ -->
+          <section class="section" id="s1" aria-labelledby="s1-title">
+            <span class="section-num">
+              Chapter 01
+            </span>
+            <h2 id="s1-title">
+              Compose 文件结构
+            </h2>
+            <p>
+              Docker Compose 使用
+              <strong>
+                YAML 文件
+              </strong>
+              来定义服务,默认文件名为
+              <code>
+compose.yml
+              </code>
+              ,同时也支持
+              <code>
+docker-compose.yml
+              </code>
+              (旧版命名)。
+            </p>
+            <h3>
+              1.1 项目目录约定
+            </h3>
+            <p>
+              由于一个 compose 文件为一个项目服务,一般按以下流程创建:
+            </p>
+            <ol>
+              <li>
+                创建项目目录(目录名建议与项目名一致)
+              </li>
+              <li>
+                将项目所需的所有镜像、微服务的
+                <code>
+Dockerfile
+                </code>
+                放入该目录
+              </li>
+              <li>
+                在该目录中新建 compose 文件
+              </li>
+            </ol>
+            <h3>
+              1.2 文件名对比
+            </h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      文件名
+                    </th>
+                    <th>
+                      适用命令
+                    </th>
+                    <th>
+                      状态
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <code>
+compose.yml
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+docker compose
+                      </code>
+                      (无连字符)
+                    </td>
+                    <td>
+                      ✅ 推荐,新版主流
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>
+docker-compose.yml
+                      </code>
+                    </td>
+                    <td>
+                      <code>
+docker-compose
+                      </code>
+                      (有连字符)
+                    </td>
+                    <td>
+                      旧版兼容
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- ============================================================
+     第二章 6 大顶级属性
+     ============================================================ -->
+          <section class="section" id="s2" aria-labelledby="s2-title">
+            <span class="section-num">
+              Chapter 02
+            </span>
+            <h2 id="s2-title">
+              compose.yml 的 6 大顶级属性
+            </h2>
+            <p>
+              compose 文件包含 6 个顶级属性:
+              <code>
+version
+              </code>
+              、
+              <code>
+services
+              </code>
+              、
+              <code>
+networks
+              </code>
+              、
+              <code>
+volumes
+              </code>
+              、
+              <code>
+configs
+              </code>
+              、
+              <code>
+secrets
+              </code>
+              及其子属性。
+            </p>
+            <h3>
+              2.1 version (已过时)
+            </h3>
+            <p>
+              顶级属性,但是已过时,
+              <strong>
+                不再需要
+              </strong>
+              出现在 compose 文件中。Docker Compose v2 起,Docker Engine 28.0+ 完全自动推断,无需指定版本。
+            </p>
+            <h3>
+              2.2 services (核心)
+            </h3>
+            <p>
+              顶级属性,用于定义一个应用所包含的服务。Docker Compose 会将
+              <strong>
+                每个服务部署在各自容器中
+              </strong>
+              。
+            </p>
+            <h3>
+              2.3 networks (网络)
+            </h3>
+            <p>
+              顶级属性,用于定义与创建网络:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  yaml
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+services:
+                  </span>
+                  <span class="tok-key">
+apps:
+                  </span>
+                  <span class="tok-com">
+# 服务名称
+                  </span>
+                  <span class="tok-key">
+networks:
+                  </span>
+                  <span class="tok-com">
+# 这里使用的不是网络名称
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ app_bridge
+                  <span class="tok-key">
+networks:
+                  </span>
+                  <span class="tok-key">
+app_bridge:
+                  </span>
+                  <span class="tok-key">
+name:
+                  </span>
+ appBGnet
+                  <span class="tok-com">
+# 这才是网络名称
+                  </span>
+                  <span class="tok-key">
+driver:
+                  </span>
+ bridge
+                  <span class="tok-com">
+# 网络驱动,缺省为 bridge
+                  </span>
+                  <span class="tok-key">
+attachable:
+                  </span>
+                  <span class="tok-com">
+# true 表示允许其他独立容器连接
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              2.4 volumes (数据卷)
+            </h3>
+            <p>
+              顶级属性,用于定义和创建应用中所用到的所有
+              <code>
+volume
+              </code>
+              (数据卷),实现
+              <strong>
+                数据持久化
+              </strong>
+              。MySQL、Redis 等有状态服务必须挂载数据卷,否则容器删除后数据丢失。
+            </p>
+            <h3>
+              2.5 configs (配置文件)
+            </h3>
+            <p>
+              用于定义
+              <strong>
+                非敏感
+              </strong>
+              配置文件(如 nginx.conf、redis.conf),通过文件或外部注入到容器中。
+            </p>
+            <h3>
+              2.6 secrets (敏感信息)
+            </h3>
+            <p>
+              用于定义
+              <strong>
+                敏感信息
+              </strong>
+              (如数据库密码、API 密钥、TLS 证书),通过文件或外部 secret store 注入,不会出现在环境变量或镜像层中。
+            </p>
+          </section>
+          <!-- ============================================================
+     第三章 常用命令
+     ============================================================ -->
+          <section class="section" id="s3" aria-labelledby="s3-title">
+            <span class="section-num">
+              Chapter 03
+            </span>
+            <h2 id="s3-title">
+              常用命令
+            </h2>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker-compose pull
+                  </span>
+                  <span class="tok-com">
+# 拉取 compose 中服务依赖的全部或指定镜像
+                  </span>
+                  <span class="tok-cmd">
+docker-compose config
+                  </span>
+                  <span class="tok-com">
+# 检查 compose 文件是否正确(-q 仅输出错误)
+                  </span>
+                  <span class="tok-cmd">
+docker-compose up
+                  </span>
+                  <span class="tok-com">
+# 启动所有容器
+                  </span>
+                  <span class="tok-cmd">
+docker-compose logs
+                  </span>
+                  <span class="tok-com">
+# 查看所有/指定服务的运行日志
+                  </span>
+                  <span class="tok-cmd">
+docker-compose ps
+                  </span>
+                  <span class="tok-com">
+# 列出所有/指定服务
+                  </span>
+                  <span class="tok-cmd">
+docker-compose top
+                  </span>
+                  <span class="tok-com">
+# 列出正在运行的所有/指定服务
+                  </span>
+                  <span class="tok-cmd">
+docker-compose images
+                  </span>
+                  <span class="tok-com">
+# 列出所有/指定服务镜像
+                  </span>
+                  <span class="tok-cmd">
+docker-compose port
+                  </span>
+                  <span class="tok-com">
+# 列出指定容器的指定端口所映射的宿主机端口
+                  </span>
+                  <span class="tok-cmd">
+docker-compose run
+                  </span>
+                  <span class="tok-com">
+# 在指定服务上执行一条命令
+                  </span>
+                  <span class="tok-cmd">
+docker-compose exec
+                  </span>
+                  <span class="tok-com">
+# 进入指定容器
+                  </span>
+                  <span class="tok-cmd">
+docker-compose pause
+                  </span>
+                  <span class="tok-com">
+# 暂停 compose 中所有/指定容器
+                  </span>
+                  <span class="tok-cmd">
+docker-compose unpause
+                  </span>
+                  <span class="tok-com">
+# 恢复处于暂停状态的容器
+                  </span>
+                  <span class="tok-cmd">
+docker-compose stop
+                  </span>
+                  <span class="tok-com">
+# 停止 compose 中所有/指定容器
+                  </span>
+                  <span class="tok-cmd">
+docker-compose restart
+                  </span>
+                  <span class="tok-com">
+# 重启 compose 中所有/指定容器
+                  </span>
+                  <span class="tok-cmd">
+docker-compose start
+                  </span>
+                  <span class="tok-com">
+# 启动 compose 中所有/指定容器
+                  </span>
+                  <span class="tok-cmd">
+docker-compose kill
+                  </span>
+                  <span class="tok-com">
+# 停止指定容器
+                  </span>
+                  <span class="tok-cmd">
+docker-compose rm
+                  </span>
+                  <span class="tok-com">
+# 删除处于停止状态的容器
+                  </span>
+                  <span class="tok-cmd">
+docker-compose down
+                  </span>
+                  <span class="tok-com">
+# 停止并删除所有容器、网络、镜像、数据卷
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  <code>
+docker-compose down
+                  </code>
+                  默认
+                  <strong>
+                    不删除数据卷
+                  </strong>
+                  ,数据可保留。如果要彻底清理,使用
+                  <code>
+docker-compose down -v
+                  </code>
+                  。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第四章 安装
+     ============================================================ -->
+          <section class="section" id="s4" aria-labelledby="s4-title">
+            <span class="section-num">
+              Chapter 04
+            </span>
+            <h2 id="s4-title">
+              安装 Docker Compose
+            </h2>
+            <h3>
+              4.1 下载二进制
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+curl
+                  </span>
+                  <span class="tok-flag">
+-SL
+                  </span>
+ https://github.com/docker/compose/releases/download/v2.12.2/docker-compose-linux-x86_64 \
+                  <span class="tok-flag">
+-o
+                  </span>
+ /usr/local/bin/docker-compose
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  GitHub 下载可能较慢,可多尝试几次或使用国内镜像(如 DaoCloud 镜像)。
+                </p>
+              </div>
+            </div>
+            <h3>
+              4.2 添加可执行权限
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+chmod
+                  </span>
+ +x /usr/local/bin/docker-compose
+                </code>
+              </pre>
+            </div>
+            <h3>
+              4.3 验证安装
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker-compose version
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  新版 Docker 桌面版(Win/Mac)和 Docker Engine 20.10+ 已
+                  <strong>
+                    内置
+                  </strong>
+                  Compose v2,无需单独安装,直接使用
+                  <code>
+docker compose
+                  </code>
+                  (无连字符)即可。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第五章 Spring Boot 实战
+     ============================================================ -->
+          <section class="section" id="s5" aria-labelledby="s5-title">
+            <span class="section-num">
+              Chapter 05
+            </span>
+            <h2 id="s5-title">
+              Spring Boot 完整实战
+            </h2>
+            <p>
+              以一个 Spring Boot 项目为例,演示如何组合 Redis 与 MySQL,完整通过 Compose 一键部署。
+            </p>
+            <h3>
+              5.1 项目结构
+            </h3>
+            <p>
+              典型 Spring Boot + MySQL + Redis 项目结构:
+            </p>
+            <ul>
+              <li>
+                <code>
+pom.xml
+                </code>
+                (Maven 依赖)
+              </li>
+              <li>
+                <code>
+src/main/java/...
+                </code>
+                (Java 源码:实体、Controller、Service、Dao)
+              </li>
+              <li>
+                <code>
+src/main/resources/application.yml
+                </code>
+                (应用配置)
+              </li>
+              <li>
+                <code>
+Dockerfile
+                </code>
+                (镜像构建)
+              </li>
+              <li>
+                <code>
+compose.yml
+                </code>
+                (容器编排)
+              </li>
+            </ul>
+            <h3>
+              5.2 application.yml 配置
+            </h3>
+            <p>
+              Compose 启动后,容器之间通过
+              <strong>
+                服务名
+              </strong>
+              (而非 IP)互访(DNS 自动解析)。所以数据库主机名从
+              <code>
+192.168.192.101
+              </code>
+              改为
+              <code>
+mysql
+              </code>
+              、Redis 主机名改为
+              <code>
+redis
+              </code>
+              。
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  yaml
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+spring:
+                  </span>
+                  <span class="tok-key">
+datasource:
+                  </span>
+                  <span class="tok-key">
+url:
+                  </span>
+ jdbc:mysql://mysql:3306/your_database_name?useSSL=false&serverTimezone=UTC
+                  <span class="tok-key">
+username:
+                  </span>
+ your_username
+                  <span class="tok-key">
+password:
+                  </span>
+ your_password
+                  <span class="tok-key">
+driver-class-name:
+                  </span>
+ com.mysql.cj.jdbc.Driver
+                  <span class="tok-key">
+type:
+                  </span>
+ com.alibaba.druid.pool.DruidDataSource
+                  <span class="tok-key">
+redis:
+                  </span>
+                  <span class="tok-key">
+host:
+                  </span>
+ redis
+                  <span class="tok-key">
+port:
+                  </span>
+ 6379
+                  <span class="tok-key">
+mybatis:
+                  </span>
+                  <span class="tok-key">
+mapper-locations:
+                  </span>
+ classpath:mapper/*.xml
+                  <span class="tok-key">
+type-aliases-package:
+                  </span>
+ com.example.yourpackage.model
+                </code>
+              </pre>
+            </div>
+          </section>
+          <!-- ============================================================
+     第六章 Dockerfile
+     ============================================================ -->
+          <section class="section" id="s6" aria-labelledby="s6-title">
+            <span class="section-num">
+              Chapter 06
+            </span>
+            <h2 id="s6-title">
+              编写 Dockerfile
+            </h2>
+            <p>
+              在项目目录下新建
+              <code>
+Dockerfile
+              </code>
+              ,然后将项目打成 jar 包并上传到该目录。
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  dockerfile
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+FROM
+                  </span>
+ swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/openjdk:17
+                  <span class="tok-key">
+MAINTAINER
+                  </span>
+ zhangsan zs@163.com
+                  <span class="tok-key">
+LABEL
+                  </span>
+ version="1.0" description="this is a spring boot application"
+                  <span class="tok-key">
+COPY
+                  </span>
+ target/ssrm-0.0.1-SNAPSHOT.jar ssrm.jar
+                  <span class="tok-key">
+ENTRYPOINT
+                  </span>
+ ["java", "-jar", "ssrm.jar"]
+                  <span class="tok-key">
+EXPOSE
+                  </span>
+ 8080
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  基础镜像
+                  <code>
+openjdk:17
+                  </code>
+                  来自华为云镜像仓库,国内拉取速度更快。生产建议固定具体版本号(如
+                  <code>
+openjdk:17.0.10
+                  </code>
+                  )避免不可控升级。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第七章 手动 vs Compose 启动
+     ============================================================ -->
+          <section class="section" id="s7" aria-labelledby="s7-title">
+            <span class="section-num">
+              Chapter 07
+            </span>
+            <h2 id="s7-title">
+              手动启动 vs Compose 编排
+            </h2>
+            <h3>
+              7.1 手动启动(传统方式)
+            </h3>
+            <p>
+              需要分别启动 MySQL、Redis、应用容器:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 1. 启动 MySQL
+                  </span>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ mysql
+                  <span class="tok-flag">
+-e
+                  </span>
+ MYSQL_ROOT_PASSWORD=111 \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/mysql/log:/var/log/mysql \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/mysql/data:/var/lib/mysql \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/mysql/conf:/etc/mysql/conf.d \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 3306:3306 mysql:5.7
+                  <span class="tok-com">
+# 2. 启动 Redis
+                  </span>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myredis \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/redis.conf:/etc/redis/redis.conf \
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/redis/data:/data \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 6379:6379 redis:7.0 \
+  redis-server /etc/redis/redis.conf
+                  <span class="tok-com">
+# 3. 构建应用镜像
+                  </span>
+                  <span class="tok-cmd">
+docker build
+                  </span>
+                  <span class="tok-flag">
+-t
+                  </span>
+ finance:1.0 .
+                  <span class="tok-com">
+# 4. 启动应用
+                  </span>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ myapp
+                  <span class="tok-flag">
+-v
+                  </span>
+ /root/myapp/log:/var/applogs \
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 9000:8080 finance:1.0
+                </code>
+              </pre>
+            </div>
+            <p>
+              需手动按顺序启动,且要保证每个服务都健康后才能启动下一个。
+            </p>
+            <h3>
+              7.2 Compose 编排启动(推荐)
+            </h3>
+            <p>
+              一个
+              <code>
+compose.yml
+              </code>
+              搞定所有:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  yaml
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+services:
+                  </span>
+                  <span class="tok-key">
+app:
+                  </span>
+                  <span class="tok-key">
+build:
+                  </span>
+ ./
+                  <span class="tok-key">
+container_name:
+                  </span>
+ myapp
+                  <span class="tok-key">
+ports:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ 9000:8080
+                  <span class="tok-key">
+volumes:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ ./logs:/var/applogs
+                  <span class="tok-key">
+depends_on:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ mysql
+                  <span class="tok-key">
+-
+                  </span>
+ redis
+                  <span class="tok-key">
+mysql:
+                  </span>
+                  <span class="tok-key">
+image:
+                  </span>
+ mysql:5.7
+                  <span class="tok-key">
+environment:
+                  </span>
+                  <span class="tok-key">
+MYSQL_ROOT_PASSWORD:
+                  </span>
+ 111
+                  <span class="tok-key">
+ports:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ 3306:3306
+                  <span class="tok-key">
+volumes:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ /root/mysql/log:/var/log/mysql
+                  <span class="tok-key">
+-
+                  </span>
+ /root/mysql/data:/var/lib/mysql
+                  <span class="tok-key">
+-
+                  </span>
+ /root/mysql/conf:/etc/mysql/conf.d
+                  <span class="tok-key">
+redis:
+                  </span>
+                  <span class="tok-key">
+image:
+                  </span>
+ redis:7.0
+                  <span class="tok-key">
+ports:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ 6379:6379
+                  <span class="tok-key">
+volumes:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ /root/redis/redis.conf:/etc/redis/redis.conf
+                  <span class="tok-key">
+-
+                  </span>
+ /root/redis/data:/data
+                  <span class="tok-key">
+command:
+                  </span>
+ redis-server /etc/redis/redis.conf
+                </code>
+              </pre>
+            </div>
+            <h3>
+              7.3 一键启动
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 启动所有服务(后台运行)
+                  </span>
+                  <span class="tok-cmd">
+docker-compose up
+                  </span>
+                  <span class="tok-flag">
+-d
+                  </span>
+                  <span class="tok-com">
+# 查看运行状态
+                  </span>
+                  <span class="tok-cmd">
+docker-compose ps
+                  </span>
+                  <span class="tok-com">
+# 查看日志
+                  </span>
+                  <span class="tok-cmd">
+docker-compose logs
+                  </span>
+                  <span class="tok-flag">
+-f
+                  </span>
+ app
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  <code>
+depends_on
+                  </code>
+                  仅控制
+                  <strong>
+                    启动顺序
+                  </strong>
+                  (先启 MySQL/Redis,再启应用),但
+                  <strong>
+                    不等待就绪
+                  </strong>
+                  。如果应用启动时 MySQL 尚未初始化完成,需要应用层实现重试连接,或使用
+                  <code>
+healthcheck
+                  </code>
+                  +
+                  <code>
+condition: service_healthy
+                  </code>
+                  。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第八章 自定义命名
+     ============================================================ -->
+          <section class="section" id="s8" aria-labelledby="s8-title">
+            <span class="section-num">
+              Chapter 08
+            </span>
+            <h2 id="s8-title">
+              自定义组件名称
+            </h2>
+            <p>
+              默认情况下,Compose 自动生成镜像、容器、网络名称(项目名前缀 + 服务名)。可通过
+              <code>
+container_name
+              </code>
+              、
+              <code>
+image
+              </code>
+              、
+              <code>
+networks
+              </code>
+              等字段显式指定。
+            </p>
+            <h3>
+              8.1 自定义 compose2.yml
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  yaml
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-key">
+services:
+                  </span>
+                  <span class="tok-key">
+app:
+                  </span>
+                  <span class="tok-key">
+build:
+                  </span>
+ ./
+                  <span class="tok-key">
+container_name:
+                  </span>
+ someapp
+                  <span class="tok-com">
+# 自定义容器名
+                  </span>
+                  <span class="tok-key">
+image:
+                  </span>
+ finance:2.0
+                  <span class="tok-com">
+# 自定义镜像名:tag
+                  </span>
+                  <span class="tok-key">
+ports:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ 9000:8080
+                  <span class="tok-key">
+volumes:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ ./logs:/var/applogs
+                  <span class="tok-key">
+networks:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ ab
+                  <span class="tok-key">
+depends_on:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ mysql
+                  <span class="tok-key">
+-
+                  </span>
+ redis
+                  <span class="tok-key">
+mysql:
+                  </span>
+                  <span class="tok-key">
+image:
+                  </span>
+ mysql:5.7
+                  <span class="tok-key">
+container_name:
+                  </span>
+ somemysql
+                  <span class="tok-key">
+environment:
+                  </span>
+                  <span class="tok-key">
+MYSQL_ROOT_PASSWORD:
+                  </span>
+ 111
+                  <span class="tok-key">
+ports:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ 3306:3306
+                  <span class="tok-key">
+volumes:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ /root/mysql/log:/var/log/mysql
+                  <span class="tok-key">
+-
+                  </span>
+ /root/mysql/data:/var/lib/mysql
+                  <span class="tok-key">
+-
+                  </span>
+ /root/mysql/conf:/etc/mysql/conf.d
+                  <span class="tok-key">
+networks:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ ab
+                  <span class="tok-key">
+redis:
+                  </span>
+                  <span class="tok-key">
+image:
+                  </span>
+ redis:7.0
+                  <span class="tok-key">
+container_name:
+                  </span>
+ someredis
+                  <span class="tok-key">
+ports:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ 6379:6379
+                  <span class="tok-key">
+volumes:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ /root/redis/redis.conf:/etc/redis/redis.conf
+                  <span class="tok-key">
+-
+                  </span>
+ /root/redis/data:/data
+                  <span class="tok-key">
+networks:
+                  </span>
+                  <span class="tok-key">
+-
+                  </span>
+ ab
+                  <span class="tok-key">
+command:
+                  </span>
+ redis-server /etc/redis/redis.conf
+                  <span class="tok-key">
+networks:
+                  </span>
+                  <span class="tok-key">
+ab:
+                  </span>
+                  <span class="tok-com">
+# 自定义网络 ab
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              8.2 通过 -f 指定 compose 文件启动
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker-compose
+                  </span>
+                  <span class="tok-flag">
+-f
+                  </span>
+ compose2.yml
+                  <span class="tok-cmd">
+up
+                  </span>
+                  <span class="tok-flag">
+-d
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              8.3 验证
+            </h3>
+            <p>
+              启动后可查看:
+            </p>
+            <ul>
+              <li>
+                <code>
+docker ps
+                </code>
+                :容器名为
+                <code>
+someapp
+                </code>
+                、
+                <code>
+somemysql
+                </code>
+                、
+                <code>
+someredis
+                </code>
+              </li>
+              <li>
+                <code>
+docker network ls
+                </code>
+                :新增自定义网络
+                <code>
+<项目前缀>_ab
+                </code>
+              </li>
+            </ul>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  同时存在多个 compose 文件(如开发、测试、生产)时,
+                  <code>
+-f
+                  </code>
+                  标志非常有用,无需重命名文件。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     FAQ
+     ============================================================ -->
+          <section class="section" id="faq" aria-labelledby="faq-title">
+            <span class="section-num">
+              FAQ
+            </span>
+            <h2 id="faq-title">
+              常见问题
+            </h2>
+            <div class="faq">
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker Compose 与 Dockerfile、docker run 有什么区别?
+                </h3>
+                <p class="faq-a">
+                  Dockerfile 是镜像构建的说明书,定义如何从一个基础镜像构建出可运行的应用镜像;docker run 是启动单个容器的命令,适合 1-2 个容器场景;Docker Compose 是多容器编排工具,通过 yml 文件一键管理整个应用栈(应用 + 数据库 + 缓存 + 网关),适合微服务场景。三者关系:用 Dockerfile 构建镜像,用 docker run 验证,最终用 Compose 统一编排。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  compose.yml 和 docker-compose.yml 有什么区别?
+                </h3>
+                <p class="faq-a">
+                  两者都支持,只是默认文件名不同:Docker Compose v2(无连字符 docker compose)默认使用 compose.yml;v1(有连字符 docker-compose)默认使用 docker-compose.yml。推荐使用 compose.yml + docker compose 命令,这是当前主流且未来方向。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Compose 中的 version 字段还需要写吗?
+                </h3>
+                <p class="faq-a">
+                  不需要。Docker Compose v2 起,version 顶级属性已过时且不再需要。Docker Engine 28.0+ 起,Docker Compose Spec 统一由 Docker 自动推断,完全不需要 version 字段。继续写 version 不会有错误,但属于冗余配置。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  depends_on 能保证服务启动顺序吗?
+                </h3>
+                <p class="faq-a">
+                  depends_on 仅控制
+                  <strong>
+                    启动顺序
+                  </strong>
+                  (先启动依赖,再启动当前服务),但
+                  <strong>
+                    不等待依赖服务就绪
+                  </strong>
+                  (如 MySQL 启动后还需 5-10 秒初始化数据)。如果应用需要等待数据库就绪,需要:1) 应用层实现重试连接;2) 使用 healthcheck + condition: service_healthy;3) 使用 wait-for-it.sh 脚本。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  docker-compose down 会删除数据吗?
+                </h3>
+                <p class="faq-a">
+                  down 命令会停止并删除容器、网络,但
+                  <strong>
+                    默认不删除数据卷
+                  </strong>
+                  (volumes),所以 MySQL 等数据可以保留。如果要彻底删除包括数据卷,使用
+                  <code>
+docker-compose down -v
+                  </code>
+                  。新版 docker compose 命令同样支持 -v 选项。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  如何在 Compose 中使用环境变量?
+                </h3>
+                <p class="faq-a">
+                  三种方式:1) compose.yml 中直接 environment 写死值;2) .env 文件中定义 KEY=VALUE,compose.yml 用 ${KEY} 引用;3) shell 环境变量,compose.yml 用 ${VAR} 引用(需先 export)。推荐敏感信息(密码)使用 Docker secrets 而非 environment,生产环境强烈建议。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Compose 文件的 6 个顶级属性是哪些?
+                </h3>
+                <p class="faq-a">
+                  1) version:已过时,无需再写;2) services:定义应用包含的所有服务,每个服务部署为独立容器;3) networks:定义和创建网络,服务通过 networks 加入;4) volumes:定义和创建数据卷,用于持久化;5) configs:定义非敏感配置文件,通过文件或外部注入;6) secrets:定义敏感信息(如密码、证书),通过文件或外部注入。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     参考资源
+     ============================================================ -->
+          <section class="section" id="refs" aria-labelledby="refs-title">
+            <span class="section-num">
+              References
+            </span>
+            <h2 id="refs-title">
+              参考资源
+            </h2>
+            <ul>
+              <li>
+                <a href="https://docs.docker.com/compose/" rel="external noopener" target="_blank">
+                  Docker Compose 官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/compose-spec/compose-spec" rel="external noopener" target="_blank">
+                  Compose Specification GitHub
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/compose/compose-file/" rel="external noopener" target="_blank">
+                  compose.yml 完整参考
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/reference/compose-file/" rel="external noopener" target="_blank">
+                  Compose File Reference
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/compose/compose-file/05-services/" rel="external noopener" target="_blank">
+                  services 顶级属性
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/compose/compose-file/06-networks/" rel="external noopener" target="_blank">
+                  networks 顶级属性
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/compose/compose-file/07-volumes/" rel="external noopener" target="_blank">
+                  volumes 顶级属性
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/compose/how-tos/healthcheck/" rel="external noopener" target="_blank">
+                  Compose 健康检查
+                </a>
+              </li>
+            </ul>
+          </section>
+        </article>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本文
+        </h3>
+        <p class="footer-meta">
+          本文系统讲解 Docker Compose 容器编排工具,涵盖 compose.yml 6 大顶级属性、常用命令、安装、Spring Boot + MySQL + Redis 完整编排实战、自定义组件名称等。所有命令均经过 Docker Compose v2.12+ 验证。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            适用人群
+          </strong>
+          :DevOps 工程师、后端开发、Spring Boot 工程师、容器化技术学习者
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · 内容遵循 CC BY 4.0 协议 · 文中命令与代码可自由使用
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function() {
+  const progress = document.getElementById('progress');
+  if (!progress) return;
+  const update = () => {
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const height = h.scrollHeight - h.clientHeight;
+    const pct = height > 0 ? (scrolled / height) * 100 : 0;
+    progress.style.width = pct + '%';
+    progress.setAttribute('aria-valuenow', Math.round(pct));
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+(function() {
+  const btn = document.getElementById('backTop');
+  if (!btn) return;
+  const toggle = () => {
+    if (window.scrollY > 400) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', toggle, { passive: true });
+  btn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  toggle();
+})();
+
+(function() {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const stored = localStorage.getItem('theme-compose');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (stored === 'dark' || (!stored && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  btn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme-compose', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme-compose', 'dark');
+    }
+  });
+})();
+
+(function() {
+  document.querySelectorAll('.code-copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      if (!pre) return;
+      const text = pre.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        const old = btn.innerText;
+        btn.innerText = '已复制';
+        btn.classList.add('success');
+        setTimeout(() => { btn.innerText = old; btn.classList.remove('success'); }, 1500);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); btn.innerText = '已复制'; setTimeout(() => btn.innerText = '复制', 1500); } catch (err) { btn.innerText = '失败'; }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      }
+    });
+  });
+})();
+    </script>
+  </body>
+</html>

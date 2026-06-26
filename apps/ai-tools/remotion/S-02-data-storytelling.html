@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>S-02 Remotion 数据故事化 | CSV 到动态可视化视频</title>
+<meta name="description" content="Remotion 数据故事化实战:CSV/JSON 解析、calculateMetadata 动态时长、D3 折线图、柱状图动画、关键数字逐帧飞入,业务报告视频的端到端案例。">
+<meta name="keywords" content="Remotion 数据可视化, CSV, D3, 报告视频, 动态图表">
+<link rel="canonical" href="https://example.com/remotion/S-02-data-storytelling.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 数据故事化">
+<meta property="og:description" content="从 CSV/JSON 到动态数据可视化视频。">
+<meta property="og:url" content="https://example.com/remotion/S-02-data-storytelling.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"S-02 Remotion 数据故事化","description":"从 CSV/JSON 到动态数据可视化视频的端到端案例。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 数据"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="S-01-code-walkthrough.html" class="active">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-scene">场景层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">S-02 数据故事化</span>
+    </nav>
+    <h1 id="hero-title">S-02 数据故事化 <span class="level-badge level-S">S 场景</span></h1>
+    <p class="hero-sub">从 CSV/JSON 到动态可视化视频:业务报告、年度回顾的可复用模板。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 12 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> A-01 数据驱动</div>
+      <div class="hero-meta-item"><strong>类型</strong> 场景实战</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>典型用例</h2>
+<ul>
+  <li><strong>年度报告</strong>:Q1-Q4 营收柱状图,关键数字飞入</li>
+  <li><strong>用户增长</strong>:折线图展示 MAU 增长曲线</li>
+  <li><strong>产品介绍</strong>:功能特性卡片+性能数据</li>
+  <li><strong>新闻动态</strong>:实时股价、热搜词云</li>
+</ul>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>CSV 数据读取</h2>
+<p>用 PapaParse 解析 CSV:</p>
+<pre class="line-numbers"><code class="language-tsx">import Papa from 'papaparse';
+import { useEffect, useState } from 'react';
+
+type Row = { month: string; revenue: number };
+const [data, setData] = useState&lt;Row[]&gt;([]);
+
+useEffect(() =&gt; {
+  fetch('/sales-2026.csv').then(r =&gt; r.text()).then(csv =&gt; {
+    Papa.parse&lt;Row&gt;(csv, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      complete: r =&gt; setData(r.data),
+    });
+  });
+}, []);</code></pre>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>动态时长:calculateMetadata</h2>
+<p>Composition 时长根据数据行数决定:</p>
+<pre class="line-numbers"><code class="language-tsx">const calculate: CalculateMetadataFunction = async () =&gt; {
+  const r = await fetch('/sales-2026.csv');
+  const csv = await r.text();
+  const parsed = Papa.parse(csv, { header: true });
+  // 每行数据 1.5 秒
+  return { durationInFrames: parsed.data.length * 45, fps: 30 };
+};</code></pre>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>柱状图动画</h2>
+<p>高度逐帧增长:</p>
+<pre class="line-numbers"><code class="language-tsx">import { useCurrentFrame, interpolate } from 'remotion';
+
+const Bar: React.FC&lt;{ value: number; max: number; delay: number }&gt; = ({ value, max, delay }) =&gt; {
+  const frame = useCurrentFrame();
+  const h = interpolate(frame - delay, [0, 30], [0, (value / max) * 500], {
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp',
+  });
+  return &lt;div style={{ width: 60, height: h, background: '#2496ED', marginRight: 10 }} /&gt;;
+};</code></pre>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>数字飞入动画</h2>
+<p>关键指标从 0 滚动到目标值:</p>
+<pre class="line-numbers"><code class="language-tsx">const CountUp: React.FC&lt;{ target: number; duration: number }&gt; = ({ target, duration }) =&gt; {
+  const frame = useCurrentFrame();
+  const v = Math.floor(interpolate(frame, [0, duration], [0, target], { extrapolateRight: 'clamp' }));
+  return &lt;span style={{ fontSize: 96, fontWeight: 800, color: '#2496ED' }}&gt;{v.toLocaleString()}&lt;/span&gt;;
+};</code></pre>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>实战:年度报告模板</h2>
+<pre class="line-numbers"><code class="language-tsx">const AnnualReport: React.FC = () =&gt; (
+  &lt;&gt;
+    &lt;Sequence from={0} durationInFrames={90}&gt;
+      &lt;TitleSlide title="2026 年度报告" subtitle="Q1-Q4" /&gt;
+    &lt;/Sequence&gt;
+    &lt;Sequence from={90} durationInFrames={135}&gt;
+      &lt;KpiSlide value={12000000} label="全年营收" /&gt;
+    &lt;/Sequence&gt;
+    &lt;Sequence from={225} durationInFrames={180}&gt;
+      &lt;BarChartSlide data={salesData} /&gt;
+    &lt;/Sequence&gt;
+    &lt;Sequence from={405} durationInFrames={120}&gt;
+      &lt;ConclusionSlide /&gt;
+    &lt;/Sequence&gt;
+  &lt;/&gt;
+);</code></pre>
+</section>
+
+<div class="source-note">D3.js 数据可视化、PapaParse CSV 库、Remotion 系列动画</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>D3.js / Recharts 数据可视化</h2>
+<p>Remotion 与 D3 完美兼容,D3 负责计算 path,Remotion 负责时间动画:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { line, curveMonotoneX } from 'd3-shape';
+import { scaleLinear } from 'd3-scale';
+
+const data = [{x:0,y:0}, {x:1,y:5}, {x:2,y:3}];
+const xScale = scaleLinear().domain([0, 2]).range([0, 800]);
+const yScale = scaleLinear().domain([0, 5]).range([400, 0]);
+const lineGen = line().x(d =&gt; xScale(d.x)).y(d =&gt; yScale(d.y)).curve(curveMonotoneX);
+
+&lt;svg width={800} height={400}&gt;
+  &lt;path d={lineGen(data)} stroke="white" fill="none" /&gt;
+&lt;/svg&gt;</code></pre></div>
+<p>搭配 <code>useCurrentFrame</code> 做 path 描边动画(类似 Chart.js 风格的入场效果)。</p>
+</section>
+
+
+<section class="section" id="s8">
+<span class="section-num">Chapter 08</span>
+<h2>Recharts 完整图表动画</h2>
+<p>用 Recharts 做柱状图/折线图,搭配 spring 平滑入场:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { BarChart, Bar, XAxis, YAxis } from 'recharts';
+
+const data = [{n:'一',v:10},{n:'二',v:30},{n:'三',v:20}];
+
+&lt;BarChart width={800} height={400} data={data}&gt;
+  &lt;XAxis dataKey="n" /&gt;
+  &lt;YAxis /&gt;
+  &lt;Bar dataKey="v" fill="cyan"
+    isAnimationActive={true} animationDuration={2000} /&gt;
+&lt;/BarChart&gt;</code></pre></div>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p>Recharts 默认开启动画,在 Studio 中实时可见但 Lambda 渲染时需禁用或显式控制时长(配合帧数)。</p></div></div>
+</section>
+
+
+<section class="section" id="s9">
+<span class="section-num">Chapter 09</span>
+<h2>Remotion 官方模板(2026)</h2>
+<p>Remotion 4.x 提供多种开箱即用模板:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>模板</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td><code>blank</code></td><td>空白项目</td></tr>
+<tr><td><code>next</code></td><td>Next.js + Player + Lambda</td></tr>
+<tr><td><code>vercel</code></td><td>Next.js + Vercel Sandbox</td></tr>
+<tr><td><code>react-router</code></td><td>Remix/React Router 7 集成</td></tr>
+<tr><td><code>music-visualization</code></td><td>音乐频谱可视化</td></tr>
+<tr><td><code>code-walkthrough</code></td><td>代码讲解 + 配音 + 字幕</td></tr>
+<tr><td><code>tiktok</code></td><td>9:16 竖屏 + 字幕高亮</td></tr>
+<tr><td><code>tailwind</code></td><td>Tailwind CSS 集成</td></tr>
+</tbody>
+</table></div>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npx create-video@latest --template next my-app</code></pre></div>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="S-01-code-walkthrough.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">S-01 代码讲解视频</span></a>
+  <a href="S-03-lambda-deployment.html" class="next"><span class="nav-label">下一站 →</span><span class="nav-title">S-03 Lambda 云端渲染</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 19 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

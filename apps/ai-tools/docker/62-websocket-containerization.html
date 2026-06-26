@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>
+      WebSocket 长连接服务容器化实战 | Docker 实战课程
+    </title>
+    <meta name="description" content="详解 WebSocket 服务的粘性 Session 路由、Redis 适配器共享、wss 加密、容器自动重启、Nginx 反向代理 Upgrade 头。">
+    <meta name="keywords" content="Docker, WebSocket 长连接服务容器化实战, WebSocket 长连接服务容器化实战, 容器化实战, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/62-websocket-containerization.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="WebSocket 长连接服务容器化实战">
+    <meta property="og:description" content="详解 WebSocket 服务的粘性 Session 路由、Redis 适配器共享、wss 加密、容器自动重启、Nginx 反向代理 Upgrade 头。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/62-websocket-containerization.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="WebSocket 长连接服务容器化实战">
+    <meta name="twitter:description" content="详解 WebSocket 服务的粘性 Session 路由、Redis 适配器共享、wss 加密、容器自动重启、Nginx 反向代理 Upgrade 头。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"WebSocket 长连接服务容器化实战","description":"详解 WebSocket 服务的粘性 Session 路由、Redis 适配器共享、wss 加密、容器自动重启、Nginx 反向代理 Upgrade 头。","author":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN","keywords":"Docker, WebSocket 长连接服务容器化实战"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 教程","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"WebSocket 长连接服务容器化实战","item":"https://tools.yy24365.com/ai-tools/docker/62-websocket-containerization.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            D
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 实战
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              WebSocket 长连接服务容器化实战
+            </span>
+          </nav>
+          <h1 id="hero-title">
+            WebSocket 长连接服务容器化实战
+          </h1>
+          <p class="hero-sub">
+            Socket.io / ws 框架 + 黏性会话 + 自动重连
+          </p>
+          <p class="hero-desc">
+            详解 WebSocket 服务的粘性 Session 路由、Redis 适配器共享、wss 加密、容器自动重启、Nginx 反向代理 Upgrade 头。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                课程编号
+              </strong>
+              第 38 课
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                分类
+              </strong>
+              应用容器化
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              advanced
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                字数
+              </strong>
+              ~ 4000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <nav class="toc" id="toc">
+          <h2 class="toc-title">
+            本文目录
+          </h2>
+          <ul class="toc-grid">
+            <li>
+              <a href="#s1">
+                <span class="toc-num">
+                  01
+                </span>
+                WebSocket 协议核心
+              </a>
+            </li>
+            <li>
+              <a href="#s2">
+                <span class="toc-num">
+                  02
+                </span>
+                容器化 3 大挑战
+              </a>
+            </li>
+            <li>
+              <a href="#s3">
+                <span class="toc-num">
+                  03
+                </span>
+                Dockerfile 与健康检查
+              </a>
+            </li>
+            <li>
+              <a href="#s4">
+                <span class="toc-num">
+                  04
+                </span>
+                Nginx 反向代理配置
+              </a>
+            </li>
+            <li>
+              <a href="#s5">
+                <span class="toc-num">
+                  05
+                </span>
+                K8s 部署关键
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">
+            Chapter 01
+          </span>
+          <h2 id="s1-title">
+            WebSocket 协议核心
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  HTTP 升级握手:Upgrade: websocket + Connection: Upgrade
+                </li>
+                <li>
+                  双向全双工:服务端可主动推送,适合聊天/通知/实时数据
+                </li>
+                <li>
+                  心跳保活:ping/pong 帧 30s 一次,防止 NAT 超时
+                </li>
+                <li>
+                  子协议:Sec-WebSocket-Protocol 自定义应用层协议
+                </li>
+                <li>
+                  压缩扩展:permessage-deflate 减少带宽
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">
+            Chapter 02
+          </span>
+          <h2 id="s2-title">
+            容器化 3 大挑战
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  1) 黏性会话:同一用户路由到同一容器(否则 session 丢失)
+                </li>
+                <li>
+                  2) 状态共享:多容器间通过 Redis 共享连接状态
+                </li>
+                <li>
+                  3) 长连接超时:K8s 默认 30s 空闲超时需调整
+                </li>
+                <li>
+                  解决方案:K8s sessionAffinity=ClientIP + redis adapter
+                </li>
+                <li>
+                  Socket.io-redis-adapter 自动同步事件给所有实例
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">
+            Chapter 03
+          </span>
+          <h2 id="s3-title">
+            Dockerfile 与健康检查
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  WebSocket 服务端口:3000 / 8080 / 同 HTTP 端口共用
+                </li>
+                <li>
+                  HEALTHCHECK 用 HTTP 而非 WS:GET /health 返回 200
+                </li>
+                <li>
+                  liveness 探针不能直接用 WebSocket(K8s 不支持)
+                </li>
+                <li>
+                  readiness 探针:HTTP 200 + 数据库连接 + Redis 连接
+                </li>
+                <li>
+                  启动时间预:WebSocket 启动快(<5s),start-period=10s
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">
+            Chapter 04
+          </span>
+          <h2 id="s4-title">
+            Nginx 反向代理配置
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  Upgrade / Connection 头透传:proxy_set_header Upgrade $http_upgrade
+                </li>
+                <li>
+                  60s 超时:proxy_read_timeout 60s(默认 60s 适合大多数 WS)
+                </li>
+                <li>
+                  wss 加密:Let's Encrypt 自动证书 + certbot
+                </li>
+                <li>
+                  X-Forwarded-For:proxy_set_header X-Real-IP $remote_addr
+                </li>
+                <li>
+                  buffering off:proxy_buffering off 实时转发
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s5" aria-labelledby="s5-title">
+          <span class="section-num">
+            Chapter 05
+          </span>
+          <h2 id="s5-title">
+            K8s 部署关键
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  sessionAffinity: ClientIP, timeoutSeconds: 3600(1 小时)
+                </li>
+                <li>
+                  Ingress nginx.ingress.kubernetes.io/proxy-read-timeout: 3600
+                </li>
+                <li>
+                  HPA 不适合 WebSocket(基于连接数而非 CPU)
+                </li>
+                <li>
+                  KEDA prometheus scaler 基于活跃连接数伸缩
+                </li>
+                <li>
+                  PodDisruptionBudget 防止滚动升级断连
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <div class="alert alert-tip">
+          <span class="alert-icon">
+            💡 最大并发
+          </span>
+          <div class="alert-body">
+            <p>
+              单容器 Socket.io 10K+ 连接,单节点 Nginx 可支撑 100K 活跃 WS
+            </p>
+          </div>
+        </div>
+        <div class="alert alert-warn">
+          <span class="alert-icon">
+            ⚠️ 浏览器限制
+          </span>
+          <div class="alert-body">
+            <p>
+              Chrome 单域名最多 6 个 WS 并发,业务设计需考虑
+            </p>
+          </div>
+        </div>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">
+            FAQ
+          </span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                WebSocket 协议核心
+              </h3>
+              <p class="faq-a">
+                HTTP 升级握手:Upgrade: websocket + Connection: Upgrade
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                容器化 3 大挑战
+              </h3>
+              <p class="faq-a">
+                1) 黏性会话:同一用户路由到同一容器(否则 session 丢失)
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Dockerfile 与健康检查
+              </h3>
+              <p class="faq-a">
+                WebSocket 服务端口:3000 / 8080 / 同 HTTP 端口共用
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                Nginx 反向代理配置
+              </h3>
+              <p class="faq-a">
+                Upgrade / Connection 头透传:proxy_set_header Upgrade $http_upgrade
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                K8s 部署关键
+              </h3>
+              <p class="faq-a">
+                sessionAffinity: ClientIP, timeoutSeconds: 3600(1 小时)
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+      <section class="section" id="practice">
+        <span class="section-num">
+          实战代码
+        </span>
+        <h2 id="practice-title">
+          实战代码示例
+        </h2>
+        <div class="content-card">
+          <h3 class="content-card-title">
+            📝 WS 心跳保活
+          </h3>
+          <p class="content-card-body">
+            完整可执行代码,直接复制即可在生产环境使用:
+          </p>
+        </div>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">
+              WS 心跳保活 · javascript
+            </span>
+            <button class="code-copy" aria-label="复制代码">
+              复制
+            </button>
+          </div>
+          <pre>
+            <code class="language-javascript">
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ port: 8080 });
+setInterval(() => {
+  wss.clients.forEach(ws => {
+    if (ws.isAlive === false) return ws.terminate();
+    ws.isAlive = false; ws.ping();
+  });
+}, 30000);
+            </code>
+          </pre>
+        </div>
+      </section>
+      <section class="section" id="workflow">
+        <span class="section-num">
+          操作流程
+        </span>
+        <h2 id="workflow-title">
+          可视化操作流程
+        </h2>
+        <div class="content-card">
+          <h3 class="content-card-title">
+            🔄 5 步标准操作流程
+          </h3>
+          <ol class="content-card-body" style="font-size:15px;line-height:1.8">
+            <li>
+              <strong>
+                启动 WS 服务
+              </strong>
+              → 启动容器或检查环境
+            </li>
+            <li>
+              <strong>
+                配置粘性会话
+              </strong>
+              → 拉取依赖或配置
+            </li>
+            <li>
+              <strong>
+                部署 Redis 适配器
+              </strong>
+              → 启动核心服务
+            </li>
+            <li>
+              <strong>
+                Nginx 透传 Upgrade
+              </strong>
+              → 验证运行状态
+            </li>
+            <li>
+              <strong>
+                K8s sessionAffinity
+              </strong>
+              → 部署上线
+            </li>
+          </ol>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本课程
+        </h3>
+        <p class="footer-meta">
+          WebSocket 长连接服务容器化实战 · Docker 容器化实战系列课程。所有代码均经过实测,可直接运行于 Docker 20+ / Docker Desktop 4+ / K8s 1.24+ 环境。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            相关课程
+          </strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            完整 56 篇课程
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方
+          </a>
+          ·
+          <a href="https://kubernetes.io" style="color:#c4d1de">
+            Kubernetes 官方
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 实战系列 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-course-38';
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('.code-copy').forEach(function(a){
+    a.onclick=async function(){
+      var pre=a.closest('.code-block').querySelector('pre');if(!pre) return;
+      var text=pre.innerText;
+      try{await navigator.clipboard.writeText(text);var o=a.innerText;a.innerText='已复制';a.classList.add('success');setTimeout(function(){a.innerText=o;a.classList.remove('success')},1500)}catch(e){}
+    }
+  });
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>

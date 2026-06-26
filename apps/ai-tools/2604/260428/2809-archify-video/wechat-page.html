@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Archify - Claude Skill 架构图生成器</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; color: #333; line-height: 1.8; background: #fff; font-size: 16px; max-width: 100%; overflow-x: hidden; }
+    .container { max-width: 680px; margin: 0 auto; padding: 20px; }
+    h1 { font-size: 26px; font-weight: 700; line-height: 1.4; margin-bottom: 16px; color: #1a1a1a; }
+    h2 { font-size: 20px; font-weight: 600; margin: 32px 0 16px; color: #1a1a1a; border-left: 4px solid #07c160; padding-left: 12px; }
+    p { margin-bottom: 16px; color: #444; }
+    .lead { font-size: 18px; color: #222; background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 24px; border-left: 4px solid #07c160; }
+    .tag { display: inline-block; background: #07c160; color: white; font-size: 12px; padding: 2px 10px; border-radius: 20px; margin-bottom: 12px; }
+    .meta { font-size: 14px; color: #999; margin-bottom: 24px; }
+    .card { background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .card h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; color: #1a1a1a; }
+    .card p { font-size: 14px; color: #666; margin: 0; }
+    .feature { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid #eee; }
+    .feature:last-child { border-bottom: none; }
+    .feature-icon { font-size: 22px; flex-shrink: 0; width: 32px; text-align: center; }
+    .feature h3 { font-size: 16px; font-weight: 600; margin-bottom: 2px; color: #1a1a1a; }
+    .feature p { font-size: 14px; color: #666; margin: 0; }
+    .steps { counter-reset: step; }
+    .step { display: flex; gap: 14px; padding: 12px 0; align-items: flex-start; }
+    .step-num { counter-increment: step; flex-shrink: 0; width: 26px; height: 26px; background: #07c160; color: white; border-radius: 50%; font-size: 13px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+    .step-num::before { content: counter(step); }
+    .step p { margin: 0; font-size: 15px; color: #444; }
+    .cta { background: linear-gradient(135deg, #07c160, #04a854); color: white; text-align: center; padding: 28px 20px; border-radius: 12px; margin-top: 32px; }
+    .cta h2 { color: white; border: none; padding: 0; margin: 0 0 8px; font-size: 20px; border-left: none; }
+    .cta p { color: rgba(255,255,255,0.85); margin-bottom: 16px; font-size: 15px; }
+    .cta-btn { display: inline-block; background: white; color: #07c160; padding: 12px 28px; border-radius: 30px; font-weight: 600; text-decoration: none; font-size: 15px; }
+    .divider { height: 1px; background: #eee; margin: 32px 0; }
+    .diagrams { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+    .diagram-item { background: #f8f9fa; border-radius: 10px; padding: 14px; text-align: center; }
+    .diagram-item .icon { font-size: 28px; margin-bottom: 8px; }
+    .diagram-item h4 { font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+    .diagram-item p { font-size: 12px; color: #888; margin: 0; line-height: 1.4; }
+    @media (max-width: 480px) { .container { padding: 16px; } h1 { font-size: 22px; } .diagrams { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <span class="tag">Claude Skill</span>
+    <h1>Archify：让 AI 帮你画专业架构图</h1>
+    <p class="meta">2026-04-26 · 阅读约 5 分钟</p>
+
+    <div class="lead">
+      你用大白话描述系统，Claude 直接生成一张做工精细的技术图。<br>
+      深色/浅色一键切换，4×超清导出 PNG/JPEG/WebP/SVG。
+    </div>
+
+    <p>画一张专业的系统架构图，需要花几个小时？选工具、拖组件、调样式、对齐像素……改一行需求，整张图重来。</p>
+
+    <p><strong>Archify</strong> 改变了一切。你用大白话描述自己的系统，它直接把架构图画出来。</p>
+
+    <div class="divider"></div>
+
+    <h2>🤖 5 种图表类型</h2>
+
+    <div class="diagrams">
+      <div class="diagram-item">
+        <div class="icon">🏗️</div>
+        <h4>Architecture</h4>
+        <p>架构图 · 系统组件一目了然</p>
+      </div>
+      <div class="diagram-item">
+        <div class="icon">🔄</div>
+        <h4>Workflow</h4>
+        <p>流程图 · 请求生命周期</p>
+      </div>
+      <div class="diagram-item">
+        <div class="icon">📋</div>
+        <h4>Sequence</h4>
+        <p>时序图 · API 调用链</p>
+      </div>
+      <div class="diagram-item">
+        <div class="icon">🔀</div>
+        <h4>Data Flow</h4>
+        <p>数据流图 · 数据管线</p>
+      </div>
+      <div class="diagram-item" style="grid-column: span 2;">
+        <div class="icon">🔁</div>
+        <h4>Lifecycle</h4>
+        <p>生命周期图 · 状态机 · Agent Run</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2>🎨 核心功能</h2>
+
+    <div class="feature">
+      <span class="feature-icon">🎨</span>
+      <div>
+        <h3>深色/浅色主题一键切换</h3>
+        <p>浏览器自动记住偏好，快捷键 T 手动切换</p>
+      </div>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">📐</span>
+      <div>
+        <h3>4× 超清导出</h3>
+        <p>PNG / JPEG / WebP / SVG 全部原生光栅化，不是位图放大</p>
+      </div>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">📋</span>
+      <div>
+        <h3>直接复制到剪贴板</h3>
+        <p>粘贴到 Slack / 飞书 / Notion / GitHub / Figma</p>
+      </div>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">📦</span>
+      <div>
+        <h3>单文件 HTML，零依赖</h3>
+        <p>发一个文件就能分享</p>
+      </div>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">💬</span>
+      <div>
+        <h3>聊天迭代修改</h3>
+        <p>加组件、改颜色、换布局——继续说，Claude 帮你改</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2>🚀 安装超简单</h2>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-num"></span>
+        <p>下载 archify.zip</p>
+      </div>
+      <div class="step">
+        <span class="step-num"></span>
+        <p>Claude Settings → Capabilities → Skills</p>
+      </div>
+      <div class="step">
+        <span class="step-num"></span>
+        <p>Add → 上传 zip → 开启开关</p>
+      </div>
+      <div class="step">
+        <span class="step-num"></span>
+        <p>直接开聊："用 archify 画一张架构图"</p>
+      </div>
+    </div>
+
+    <div class="cta">
+      <h2>描述你的系统</h2>
+      <p>获得一张 publication-ready 的专业架构图</p>
+      <a href="https://github.com/tt-a1i/archify" class="cta-btn" target="_blank">立刻体验 →</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Remotion 场景:字幕与 Whisper 转录集成 | Remotion 知识库</title>
+<meta name="description" content="详解 Remotion 4.x 中使用 @remotion/captions、@remotion/whisper-web 和 @remotion/openai-whisper 实现视频字幕自动生成与同步显示,涵盖 SRT 导入、TikTok 风格高亮、useDelayRender 异步加载等关键模式。">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Remotion 场景:字幕与 Whisper 转录集成","description":"...","author":{"@type":"Organization","name":"AI 工具箱"},"inLanguage":"zh-CN"}</script>
+</head><body>
+<header class="site-header"><nav class="nav-wrap">
+<a href="index.html" class="brand"><span class="brand-mark">R</span><span>Remotion 知识库</span></a>
+<div class="nav-links"><a href="index.html">总目录</a><a href="S-06-migration.html">迁移</a></div>
+</nav></header>
+<main class="container">
+<nav class="breadcrumb"><a href="index.html">首页</a> / <a href="index.html#scene">场景层</a> / 字幕与 Whisper</nav>
+<h1>字幕与 Whisper 转录集成</h1>
+<p class="hero-sub">@remotion/captions + @remotion/openai-whisper 完整实践</p>
+<div class="alert alert-info"><span class="alert-icon">📚</span><div class="alert-body"><p>来源:Remotion 官方文档(2025-2026) + DeepWiki AI/ML Features + CSDN 实战文章。</p></div></div>
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>三个相关包</h2>
+<div class="rules-grid">
+<div class="rule-card"><span class="rule-num">01</span><p><strong>@remotion/captions</strong>:核心包,提供 Caption 数据结构、parseSrt、createTikTokStyleCaptions</p></div>
+<div class="rule-card"><span class="rule-num">02</span><p><strong>@remotion/whisper-web</strong>:浏览器内 Whisper WASM 转录,无 API 成本</p></div>
+<div class="rule-card"><span class="rule-num">03</span><p><strong>@remotion/openai-whisper</strong>:服务端 OpenAI API 转录,精度最高</p></div>
+</div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>导入已有 SRT 字幕</h2>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npx remotion add @remotion/captions</code></pre></div>
+<p>解析标准 .srt 文件:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { useState, useEffect, useCallback } from 'react';
+import { staticFile, useDelayRender } from 'remotion';
+import { parseSrt, type Caption } from '@remotion/captions';
+
+const { delayRender, continueRender, cancelRender } = useDelayRender();
+const [captions, setCaptions] = useState&lt;Caption[] | null&gt;(null);
+const [handle] = useState(() =&gt; delayRender());
+
+const fetchCaptions = useCallback(async () =&gt; {
+  try {
+    const r = await fetch(staticFile('subtitles.srt'));
+    const text = await r.text();
+    setCaptions(parseSrt({ input: text }).captions);
+    continueRender(handle);
+  } catch (e) { cancelRender(e); }
+}, [handle]);
+
+useEffect(() =&gt; { fetchCaptions(); }, [fetchCaptions]);
+if (!captions) return null;</code></pre></div>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>OpenAI Whisper API 转录</h2>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npm i @remotion/openai-whisper @remotion/captions</code></pre></div>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">import { generateTranscript } from '@remotion/openai-whisper';
+import { openAiWhisperApiToCaptions } from '@remotion/openai-whisper';
+
+const transcript = await generateTranscript({
+  apiKey: process.env.OPENAI_API_KEY!,
+  audioUrl: 'https://example.com/speech.mp3',
+  language: 'en',
+  timestampGranularities: ['word'],  // 单词级时间戳
+});
+
+const { captions } = openAiWhisperApiToCaptions({ transcription: transcript });</code></pre></div>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>浏览器内 Whisper(零 API 成本)</h2>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash">npx remotion add @remotion/whisper-web</code></pre></div>
+<p>适合隐私敏感场景(用户语音不外传)与开发调试:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { transcribe } from '@remotion/whisper-web';
+
+const result = await transcribe({
+  model: 'tiny.en',  // tiny/base/small/medium
+  audioBuffer,        // 来自 AudioContext.decodeAudioData
+  language: 'en',
+});</code></pre></div>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p>首次加载需下载约 75MB(tiny)~ 1.5GB(medium)WASM 模型,适合开发或一次性任务,生产建议用云端 API。</p></div></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>TikTok 风格高亮字幕</h2>
+<p>使用 <code>createTikTokStyleCaptions</code> 把 caption 切分为短页:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { createTikTokStyleCaptions, type TikTokPage } from '@remotion/captions';
+
+const { pages } = useMemo(() =&gt; createTikTokStyleCaptions({
+  captions,
+  combineTokensWithinMilliseconds: 1200,  // 每 1.2 秒换页
+}), [captions]);</code></pre></div>
+<p>渲染并高亮当前单词:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">const frame = useCurrentFrame();
+const { fps } = useVideoConfig();
+const t = page.startMs + (frame / fps) * 1000;
+
+return (
+  &lt;div style={{ fontSize: 80, whiteSpace: 'pre' }}&gt;
+    {page.tokens.map(token =&gt; (
+      &lt;span style={{ color: token.fromMs &lt;= t &amp;&amp; t &lt; token.toMs ? '#39E508' : 'white' }}&gt;
+        {token.text}
+      &lt;/span&gt;
+    ))}
+  &lt;/div&gt;
+);</code></pre></div>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>完整流水线</h2>
+<p>从麦克风到视频字幕端到端:</p>
+<div class="code-block"><div class="code-block-header">bash</div><pre class="line-numbers"><code class="language-bash"># 1) 录音 → mp3(可在 Lambda 之外的脚本)
+ffmpeg -i input.m4a -c:a libmp3lame speech.mp3
+
+# 2) Whisper 转录 + 保存 captions.json
+# 3) 加载到 Remotion:
+#    staticFile('captions.json') + parseSrt/parseSrt
+# 4) 渲染为带字幕的 mp4
+npx remotion render CaptionedVideo out.mp4</code></pre></div>
+</section>
+
+<nav class="page-nav">
+<a href="S-06-migration.html" class="prev">← 上一页:v3→v4 迁移</a>
+<a href="index.html" class="next">回到总目录 →</a>
+</nav>
+</main>
+<footer class="site-footer"><p>© 2026 AI 工具箱 · Remotion 知识库 · 内容基于官方文档整理</p></footer>
+<script src="scripts.js"></script>
+</body></html>

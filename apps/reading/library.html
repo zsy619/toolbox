@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>个人图书馆 | 阅读统计与进度 | 工具箱</title>
+    <meta name="description" content="基于 localStorage 的个人阅读统计仪表盘：阅读时长、完成进度、主题分布、阅读路径进度">
+
+    <link rel="preconnect" href="https://fonts.loli.net">
+    <link rel="preconnect" href="https://gstatic.loli.net" crossorigin>
+    <link href="https://fonts.loli.net/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/styles/seedance.css">
+    <link href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<!-- WeChat -->
+    <meta name="wechat-share-title" content="个人图书馆">
+    <meta name="wechat-share-desc" content="基于 localStorage 的个人阅读统计仪表盘：阅读时长、完成进度、主题分布、阅读路径进度">
+    <meta name="wechat-share-img" content="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=%E4%B8%AA%E4%BA%BA%E5%9B%BE%E4%B9%A6%E9%A6%86%20warm%20gold%20amber%20gradient%20cinematic&image_size=landscape_16_9">
+    <meta name="wechat-share-link" content="https://tools.yy24365.com/apps/reading/library.html">
+<meta name="msapplication-TileColor" content="#0F172A">
+    <meta name="book-id" content="个人图书馆">
+    <meta name="book-title" content="个人图书馆">
+    <meta name="book-prev" content="liaoyu-chang.html">
+    <meta name="book-next" content="lidai-zhihui-rili.html">
+    <script src="assets/scripts/book-template.js" defer></script>
+</head>
+<body class="scroll-smooth">
+
+    <!-- Unified Top Navigation -->
+    <nav class="unified-top-nav" aria-label="主导航">
+        <div class="unified-top-nav-inner">
+            <a href="index.html" class="nav-brand">
+                <span class="nav-brand-icon">📚</span>
+                <span class="nav-brand-text">工具箱 · 读书笔记</span>
+            </a>
+            <div class="nav-pills">
+                <a href="index.html" class="nav-pill">
+                    <span class="nav-pill-icon">🏠</span>
+                    <span class="nav-pill-label">书库</span>
+                </a>
+                <a href="topics.html" class="nav-pill">
+                    <span class="nav-pill-icon">📚</span>
+                    <span class="nav-pill-label">主题</span>
+                </a>
+                <a href="paths.html" class="nav-pill">
+                    <span class="nav-pill-icon">🗺️</span>
+                    <span class="nav-pill-label">路径</span>
+                </a>
+                <a href="library.html" class="nav-pill active">
+                    <span class="nav-pill-icon">📊</span>
+                    <span class="nav-pill-label">我的</span>
+                </a>
+                <a href="quotes.html" class="nav-pill">
+                    <span class="nav-pill-icon">💎</span>
+                    <span class="nav-pill-label">语录</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="lib-hero">
+        <div class="content-container">
+            <div class="text-6xl mb-4">📚</div>
+            <h1 class="text-5xl font-bold text-[var(--body)] mb-4">个人图书馆</h1>
+            <p class="text-xl text-blue-200 mb-2">你的阅读统计与进度追踪</p>
+            <p class="text-sm text-muted">所有数据存储在本地浏览器（localStorage），隐私安全</p>
+        </div>
+    </section>
+
+    <!-- 核心统计 -->
+    <section class="content-container py-12">
+        <h2 class="text-2xl font-bold text-[var(--body)] mb-6">
+            <i class="fas fa-chart-line text-yellow-400 mr-2"></i>阅读概览
+        </h2>
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🔖</div>
+                <div class="stat-value" id="bookmarksCount">0</div>
+                <div class="stat-label">已添加书签</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📖</div>
+                <div class="stat-value" id="totalProgress">0</div>
+                <div class="stat-label">正在阅读</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value" id="completedCount">0</div>
+                <div class="stat-label">已完成 (路径)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-value" id="pathsActive">0</div>
+                <div class="stat-label">活跃路径</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 进度可视化 -->
+    <section class="content-container py-8">
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- 完成度环形图 -->
+            <div class="bg-canvas rounded-2xl p-6 border border-hairline">
+                <h3 class="text-xl font-bold text-[var(--body)] mb-4">
+                    <i class="fas fa-chart-pie text-blue-400 mr-2"></i>整体完成度
+                </h3>
+                <div class="flex items-center justify-center">
+                    <svg width="200" height="200" class="progress-ring">
+                        <circle cx="100" cy="100" r="80" stroke="rgba(255,255,255,0.05)" stroke-width="14" fill="none"/>
+                        <circle id="progressRing" class="progress-ring-circle" cx="100" cy="100" r="80"
+                                stroke="#FBBF24" stroke-width="14" fill="none"
+                                stroke-dasharray="502" stroke-dashoffset="502" stroke-linecap="round"/>
+                        <text x="100" y="100" text-anchor="middle" dy="0.35em" fill="white" font-size="36" font-weight="700"
+                              transform="rotate(90 100 100)" id="ringText">0%</text>
+                    </svg>
+                </div>
+                <p class="text-center text-muted text-sm mt-3">基于已完成路径书籍数量</p>
+            </div>
+
+            <!-- 阅读路径进度 -->
+            <div class="bg-canvas rounded-2xl p-6 border border-hairline">
+                <h3 class="text-xl font-bold text-[var(--body)] mb-4">
+                    <i class="fas fa-route text-green-400 mr-2"></i>阅读路径进度
+                </h3>
+                <div id="pathsList">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🗺️</div>
+                        <p>还没有开始任何阅读路径</p>
+                        <a href="paths.html" class="inline-block mt-3 px-4 py-2 bg-amber-500 text-slate-900 rounded-lg text-sm font-semibold hover:bg-amber-400">
+                            探索路径 →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 最近书签 -->
+    <section class="content-container py-8">
+        <div class="bg-canvas rounded-2xl p-6 border border-hairline">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-[var(--body)]">
+                    <i class="fas fa-bookmark text-pink-400 mr-2"></i>最近书签
+                </h3>
+                <button id="exportBtn" class="px-3 py-1.5 bg-surface-card text-[var(--body)] text-sm rounded-lg hover:bg-slate-600 transition">
+                    <i class="fas fa-download mr-1"></i>导出
+                </button>
+            </div>
+            <div id="bookmarksList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📑</div>
+                    <p>还没有书签</p>
+                    <p class="text-xs mt-2">在任何书籍页面点击浮动书签按钮即可添加</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 阅读目标 -->
+    <section class="content-container py-8 mb-12">
+        <div class="bg-gradient-to-br from-amber-500/10 to-blue-500/10 rounded-2xl p-6 border border-amber-500/20">
+            <h3 class="text-xl font-bold text-[var(--body)] mb-3">
+                <i class="fas fa-bullseye text-amber-400 mr-2"></i>2026 阅读目标
+            </h3>
+            <p class="text-body text-sm mb-4">设定你的年度阅读目标</p>
+            <div class="flex items-center gap-3">
+                <input type="number" id="yearlyGoal" value="24" min="1" max="365"
+                       class="w-24 px-3 py-2 bg-canvas border border-hairline rounded-lg text-[var(--body)] text-center">
+                <span class="text-body">本/年</span>
+                <button id="saveGoal" class="px-4 py-2 bg-amber-500 text-slate-900 rounded-lg hover:bg-amber-400 transition font-semibold text-sm">
+                    保存目标
+                </button>
+                <span id="goalProgress" class="ml-auto text-amber-400 font-semibold">0 / 24</span>
+            </div>
+            <div class="mt-3 h-2 bg-canvas rounded-full overflow-hidden">
+                <div id="goalProgressBar" class="h-full bg-gradient-to-r from-amber-500 to-amber-300 transition-all" style="width: 0%"></div>
+            </div>
+        </div>
+    </section>
+
+        <!-- Cross Navigation -->
+    <section class="cross-nav-section">
+        <div class="cross-nav-container">
+            <h2 class="cross-nav-title">🔗 继续探索</h2>
+            <div class="cross-nav-grid">
+                <a href="index.html" class="cross-nav-card">
+                    <div class="cross-nav-icon">🏠</div>
+                    <div class="cross-nav-text">
+                        <div class="cross-nav-label">返回书库</div>
+                        <div class="cross-nav-desc">浏览全部 712 本书</div>
+                    </div>
+                </a>
+                <a href="topics.html" class="cross-nav-card">
+                    <div class="cross-nav-icon">📚</div>
+                    <div class="cross-nav-text">
+                        <div class="cross-nav-label">主题书单</div>
+                        <div class="cross-nav-desc">按主题领域浏览</div>
+                    </div>
+                </a>
+                <a href="paths.html" class="cross-nav-card">
+                    <div class="cross-nav-icon">🗺️</div>
+                    <div class="cross-nav-text">
+                        <div class="cross-nav-label">阅读路径</div>
+                        <div class="cross-nav-desc">10 条精选学习路径</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // ========== 加载所有数据 ==========
+        function loadBookmarks() {
+            try { return JSON.parse(localStorage.getItem('toolbox_bookmarks') || '{}'); }
+            catch(e) { return {}; }
+        }
+
+        function loadPathProgress() {
+            const result = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('toolbox_path_')) {
+                    try {
+                        const slug = key.replace('toolbox_path_', '');
+                        const read = JSON.parse(localStorage.getItem(key) || '[]');
+                        result[slug] = read.length;
+                    } catch(e) {}
+                }
+            }
+            return result;
+        }
+
+        function loadGoal() {
+            return parseInt(localStorage.getItem('toolbox_yearly_goal') || '24');
+        }
+
+        function saveGoal(value) {
+            localStorage.setItem('toolbox_yearly_goal', value.toString());
+        }
+
+        // ========== 渲染统计 ==========
+        function renderStats() {
+            const bookmarks = loadBookmarks();
+            const pathProgress = loadPathProgress();
+            const goal = loadGoal();
+
+            const bookmarksCount = Object.keys(bookmarks).length;
+            const completedInPaths = Object.values(pathProgress).reduce((a, b) => a + b, 0);
+            const activePaths = Object.values(pathProgress).filter(v => v > 0).length;
+            const completedBooks = completedInPaths;
+
+            document.getElementById('bookmarksCount').textContent = bookmarksCount;
+            document.getElementById('totalProgress').textContent = bookmarksCount;
+            document.getElementById('completedCount').textContent = completedBooks;
+            document.getElementById('pathsActive').textContent = activePaths;
+
+            const pct = Math.min(100, Math.round((completedBooks / goal) * 100));
+            const circumference = 502;
+            const offset = circumference - (circumference * pct / 100);
+            document.getElementById('progressRing').style.strokeDashoffset = offset;
+            document.getElementById('ringText').textContent = pct + '%';
+
+            document.getElementById('goalProgress').textContent = `${completedBooks} / ${goal}`;
+            document.getElementById('goalProgressBar').style.width = Math.min(100, pct) + '%';
+        }
+
+        function renderBookmarks() {
+            const bookmarks = loadBookmarks();
+            const list = document.getElementById('bookmarksList');
+            const entries = Object.entries(bookmarks).sort((a, b) =>
+                (b[1].added || 0) - (a[1].added || 0)
+            ).slice(0, 10);
+
+            if (entries.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📑</div>
+                        <p>还没有书签</p>
+                        <p class="text-xs mt-2">在任何书籍页面点击浮动书签按钮即可添加</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = entries.map(([slug, b]) => `
+                <a href="${b.url || slug + '.html'}" class="book-list-item">
+                    <div class="text-2xl">📖</div>
+                    <div class="flex-1">
+                        <div class="book-list-title">${b.title || slug}</div>
+                        <div class="book-list-meta">${b.added ? new Date(b.added).toLocaleDateString('zh-CN') : ''}</div>
+                    </div>
+                    <i class="fas fa-arrow-right text-muted"></i>
+                </a>
+            `).join('');
+        }
+
+        function renderPaths() {
+            const pathProgress = loadPathProgress();
+            const list = document.getElementById('pathsList');
+            if (Object.keys(pathProgress).length === 0) return;
+
+            const PATH_INFO = {
+                'philosophy-starter': { name: '哲学入门之路', total: 8, icon: '🏛️' },
+                'wealth-freedom': { name: '财富自由之路', total: 7, icon: '💰' },
+                'system-thinking': { name: '系统思维之路', total: 8, icon: '⚙️' },
+                'psychology-deep': { name: '深度心理学之旅', total: 8, icon: '🧠' },
+                'stoic-life': { name: '斯多葛生活之道', total: 7, icon: '⚖️' },
+                'mindfulness-meditation': { name: '正念冥想之路', total: 6, icon: '🧘' },
+                'scientific-thinking': { name: '科学思维之路', total: 7, icon: '🔬' },
+                'existentialism-deep': { name: '存在主义深度阅读', total: 9, icon: '🌌' },
+                'deep-work': { name: '深度工作之路', total: 5, icon: '🎯' },
+                'leadership-business': { name: '领导力与商业思维', total: 6, icon: '💼' },
+            };
+
+            list.innerHTML = Object.entries(pathProgress).map(([slug, count]) => {
+                const info = PATH_INFO[slug];
+                if (!info) return '';
+                const pct = Math.round((count / info.total) * 100);
+                return `
+                    <a href="path-${slug}.html" class="path-progress-card block mb-3 hover:border-blue-400 transition">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl">${info.icon}</span>
+                                <span class="text-[var(--body)] font-medium">${info.name}</span>
+                            </div>
+                            <span class="text-amber-400 font-bold text-sm">${count}/${info.total}</span>
+                        </div>
+                        <div class="path-progress-bar">
+                            <div class="path-progress-fill" style="width: ${pct}%"></div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        // ========== 事件绑定 ==========
+        document.getElementById('saveGoal').addEventListener('click', () => {
+            const val = parseInt(document.getElementById('yearlyGoal').value);
+            if (val > 0 && val <= 365) {
+                saveGoal(val);
+                renderStats();
+            }
+        });
+
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const data = {
+                bookmarks: loadBookmarks(),
+                pathProgress: loadPathProgress(),
+                goal: loadGoal(),
+                exportedAt: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `toolbox-library-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // ========== 初始化 ==========
+        renderStats();
+        renderBookmarks();
+        renderPaths();
+        document.getElementById('yearlyGoal').value = loadGoal();
+    })();
+    </script>
+
+    <!-- 底部导航 (自动注入 - 由 book-template.js 注入, 但因页面已有标记, 此处保留以防 JS 失败) -->
+    <section class="footer-nav py-12 bg-gradient-to-br from-gray-50 to-blue-50 border-t border-gray-200">
+        <div class="content-container">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <a href="liaoyu-chang.html" class="footer-nav-card group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="footer-nav-label">← 上一本</p>
+                            <h3 class="footer-nav-title">疗愈场 宇宙秘密力量的探寻</h3>
+                        </div>
+                        <span class="footer-nav-arrow footer-nav-arrow-left">←</span>
+                    </div>
+                </a>
+                <a href="index.html" class="footer-nav-center group">
+                    <div class="flex flex-col items-center justify-center text-center">
+                        <svg class="footer-nav-icon" width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                        <p class="footer-nav-label">返回</p>
+                        <h3 class="footer-nav-title">阅读目录</h3>
+                    </div>
+                </a>
+                <a href="lidai-zhihui-rili.html" class="footer-nav-card group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="footer-nav-label">下一本 →</p>
+                            <h3 class="footer-nav-title">历代智慧日历</h3>
+                        </div>
+                        <span class="footer-nav-arrow footer-nav-arrow-right">→</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 黑色 footer (品牌区) -->
+    <footer id="uxFooterBrand" class="bg-black text-white py-12 border-t border-white/10">
+        <div class="content-container text-center">
+            <div class="flex items-center justify-center space-x-3 mb-4">
+                <span class="text-3xl">🏛️</span>
+                <h3 class="text-xl font-bold text-white">个人图书馆</h3>
+            </div>
+            <p class="text-[var(--muted)] mb-6">持续更新高质量读书笔记，助你快速成长</p>
+            <div class="border-t border-gray-700 pt-6">
+                <p class="text-gray-500 text-sm">仅供学习交流，内容版权归原作者所有</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

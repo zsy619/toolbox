@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>微信收藏可视化 Claude Code Skill</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #FFFFFF; color: #1a1a1a; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    .container { max-width: 680px; margin: 0 auto; padding: 48px 32px; }
+    h1 { font-size: 28px; font-weight: 700; line-height: 1.5; margin-bottom: 24px; color: #000; }
+    h2 { font-size: 20px; font-weight: 600; margin: 36px 0 14px; color: #333; border-left: 4px solid #07C160; padding-left: 12px; }
+    p { font-size: 16px; line-height: 1.9; color: #444; margin-bottom: 14px; }
+    .highlight { background: #F3F4F6; border-left: 4px solid #07C160; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 20px 0; }
+    .highlight p { color: #333; margin: 0; }
+    code { background: #F3F4F6; padding: 2px 6px; border-radius: 4px; font-family: 'Menlo', monospace; font-size: 13px; color: #07C160; }
+    pre { background: #F8F9FA; padding: 16px; border-radius: 8px; margin: 16px 0; overflow-x: auto; border: 1px solid #E5E7EB; }
+    pre code { background: none; padding: 0; color: #333; }
+    .footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #E5E7EB; text-align: center; }
+    .footer p { color: #999; font-size: 13px; }
+    .author { display: inline-block; background: #07C160; color: white; padding: 6px 16px; border-radius: 20px; font-size: 13px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>对 Claude Code 说一句，微信收藏自动变可视化报告</h1>
+    
+    <p style="color: #666; font-size: 15px; margin-bottom: 28px;">微信收藏了 1000+ 篇文章却从来不看？一个 Claude Code Skill 把它们全分析了一遍。</p>
+    
+    <h2>一句话搞定</h2>
+    <div class="highlight">
+      <p style="font-size: 15px;">在 Claude Code 里输入：<strong>微信收藏可视化</strong></p>
+      <p class="mt-2" style="margin-top: 8px;">Claude 就会自动执行完整管线：密钥提取 → 数据库解密 → 数据解析 → 报告生成。全程不需要手动操作。</p>
+    </div>
+    
+    <h2>技术管线</h2>
+    <p><strong>第一步：frida 提取加密密钥</strong></p>
+    <p>微信 Mac 4.x 版的收藏数据存在 favorite.db 里，是 SQLCipher 4 加密的。密钥通过 CCKeyDerivationPBKDF 函数在运行时派生。用 frida hook 捕获密钥派生调用。</p>
+    
+    <p><strong>第二步：AES-256-CBC 解密数据库</strong></p>
+    <p>拿到密钥后，用 PyCryptodome 解密。AES-256-CBC、HMAC-SHA512、PBKDF2 256000 轮。</p>
+    
+    <p><strong>第三步：ECharts 生成交互报告</strong></p>
+    <p>用 Python 解析数据库，生成单文件 HTML，内联 ECharts 5.x CDN。</p>
+    
+    <h2>报告功能</h2>
+    <p>统计卡片、月度趋势图、内容类型甜甜圈图、来源 Top 15 排行榜、星期×小时活跃热力图、词云、标签云、可筛选可搜索可分页的收藏浏览区。</p>
+    
+    <h2>踩坑记录</h2>
+    <p>实现过程踩了 8 个坑，迭代 6 轮。特别注意微信 4.x 表结构变化，收藏密钥只在打开收藏页面时才加载。</p>
+    
+    <div class="footer">
+      <p>GitHub: zhuyansen/wx-favorites-report</p>
+      <span class="author">元曜科技</span>
+    </div>
+  </div>
+</body>
+</html>

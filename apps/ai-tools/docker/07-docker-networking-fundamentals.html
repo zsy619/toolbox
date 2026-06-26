@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Docker 网络完全指南">
+    <meta name="format-detection" content="telephone=no">
+    <title>
+      Docker 网络完全指南:Network Namespace、CNM、bridge/none/host 全解析 | AI 工具箱
+    </title>
+    <meta name="description" content="Docker 网络是容器通信的基石。本文系统讲解 Linux Network Namespace 基础、CNM 容器网络模型、Libnetwork 实现、5 种 Driver,以及 bridge/none/host 三种网络模式的工作原理与实战。">
+    <meta name="keywords" content="Docker 网络, Network Namespace, CNM, Libnetwork, veth pair, docker0 网桥, bridge 网络, none 网络, host 网络, docker network ls, 容器网络, 端口映射, NAT, Linux 网络">
+    <meta name="author" content="AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="language" content="zh-CN">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/07-docker-networking-fundamentals.html">
+    <link rel="alternate" hreflang="zh-CN" href="https://tools.yy24365.com/ai-tools/docker/07-docker-networking-fundamentals.html">
+    <link rel="alternate" hreflang="x-default" href="https://tools.yy24365.com/ai-tools/docker/07-docker-networking-fundamentals.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Docker 网络完全指南:Network Namespace、CNM、bridge/none/host 全解析">
+    <meta property="og:description" content="从 Linux Namespace 基础到 CNM 容器网络模型,系统讲解 Docker 网络。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/07-docker-networking-fundamentals.html">
+    <meta property="og:site_name" content="AI 工具箱">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/docker-networking-og.png">
+    <meta property="og:image:alt" content="Docker 网络架构图">
+    <meta property="article:published_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:modified_time" content="2026-06-03T00:00:00+08:00">
+    <meta property="article:section" content="DevOps">
+    <meta property="article:tag" content="Docker 网络">
+    <meta property="article:tag" content="CNM">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Docker 网络完全指南">
+    <meta name="twitter:description" content="Docker 网络从基础到实战。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/docker-networking-og.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%232496ED' d='M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.083.185.185.185m-2.954-5.43h2.119a.186.186 0 00.186-.186V3.575a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m0 2.716h2.119a.187.187 0 00.186-.186V6.291a.186.186 0 00-.186-.185h-2.119a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.931 0h2.12a.186.186 0 00.184-.186V6.291a.185.185 0 00-.184-.185h-2.12a.185.185 0 00-.184.185v1.887c0 .102.082.185.184.186m-2.932 0h2.12a.185.185 0 00.184-.186V6.291a.185.185 0 00-.184-.185H5.166a.186.186 0 00-.185.185v1.887c0 .102.083.185.185.186m5.863 5.43h2.119a.186.186 0 00.185-.185V9.006a.185.185 0 00-.185-.186h-2.119a.185.185 0 00-.185.186v1.887c0 .102.082.185.185.185m-2.931 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.932 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m-2.931 0h2.12a.186.186 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.184.186v1.887c0 .102.082.185.184.185m11.792 4.084h-2.119a.186.186 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.931 0h-2.119a.185.185 0 00-.185.185v1.886c0 .103.082.186.185.186h2.119a.186.186 0 00.186-.186v-1.886a.186.186 0 00-.186-.185m-2.932 0h-2.118a.185.185 0 00-.184.185v1.886c0 .103.082.186.184.186h2.118a.186.186 0 00.185-.186v-1.886a.185.185 0 00-.185-.185m-2.931 0h-2.12a.185.185 0 00-.184.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.184-.186v-1.886a.185.185 0 00-.184-.185m-2.932 0H5.166a.186.186 0 00-.185.185v1.886c0 .103.083.186.185.186h2.119a.186.186 0 00.185-.186v-1.886a.186.186 0 00-.185-.185z'/%3E%3C/svg%3E">
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Docker 网络完全指南",
+  "description": "系统讲解 Linux Network Namespace 基础、CNM 容器网络模型、Libnetwork 实现、bridge/none/host 三种网络模式的工作原理与实战。",
+  "author": {"@type": "Organization", "name": "AI 工具箱"},
+  "publisher": {"@type": "Organization", "name": "AI 工具箱"},
+  "datePublished": "2026-06-03T00:00:00+08:00",
+  "dateModified": "2026-06-03T00:00:00+08:00",
+  "inLanguage": "zh-CN",
+  "mainEntityOfPage": "https://tools.yy24365.com/ai-tools/docker/07-docker-networking-fundamentals.html",
+  "keywords": "Docker 网络, Network Namespace, CNM, Libnetwork, veth pair",
+  "about": {"@type": "SoftwareApplication", "name": "Docker Networking", "applicationCategory": "DeveloperApplication"},
+  "proficiencyLevel": "Advanced"
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "首页", "item": "https://tools.yy24365.com/"},
+    {"@type": "ListItem", "position": 2, "name": "AI 工具", "item": "https://tools.yy24365.com/ai-tools/"},
+    {"@type": "ListItem", "position": 3, "name": "Docker 学习", "item": "https://tools.yy24365.com/ai-tools/docker/"},
+    {"@type": "ListItem", "position": 4, "name": "Docker 网络", "item": "https://tools.yy24365.com/ai-tools/docker/07-docker-networking-fundamentals.html"}
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Docker 网络的底层是什么?",
+      "acceptedAnswer": {"@type": "Answer", "text": "Docker 网络的底层是 Linux 的 Network Namespace。它能创建多个隔离的网络空间,每个空间内独立的防火墙、网卡、路由表、邻居表、协议栈。不管是虚拟机还是容器,运行在独立的 Network Namespace 中就像是一台独立的主机一样。"}
+    },
+    {
+      "@type": "Question",
+      "name": "什么是 veth pair?",
+      "acceptedAnswer": {"@type": "Answer", "text": "veth pair 是成对出现的虚拟网络接口,数据从一端进入必定从另一端出来,像一根'网线'。Docker 用它连接两个 Network Namespace——一端放在容器里(容器内显示为 eth0),另一端放在宿主机里(对应 vethxxx 接口),通过这种方式实现容器与宿主机/网桥的互通。"}
+    },
+    {
+      "@type": "Question",
+      "name": "CNM 三要素是什么?",
+      "acceptedAnswer": {"@type": "Answer", "text": "CNM(Container Network Model,容器网络模型)是 Docker 网络的设计规范,定义了 3 个基本要素:1) Sandbox(沙盒):独立的网络栈,Linux Network Namespace 是其标准实现;2) Endpoint(终端):虚拟网络接口,负责创建连接,一个终端只能接入一个网络;3) Network(网络):802.1d 网桥的软件实现,是需要交互的终端的集合。"}
+    },
+    {
+      "@type": "Question",
+      "name": "bridge、none、host 三种网络模式怎么选?",
+      "acceptedAnswer": {"@type": "Answer", "text": "bridge:默认模式,容器有独立 Network Namespace,通过 docker0 网桥互联,适合<strong>单机多容器</strong>互访;none:无网络,容器只有回环地址 lo,适合<strong>不需要网络的批处理任务</strong>;host:与宿主机共用 Network Namespace,网络性能最高但端口冲突风险大,适合<strong>对网络性能敏感的特定场景</strong>。多机通信用 overlay 网络。"}
+    },
+    {
+      "@type": "Question",
+      "name": "默认 bridge 网络为什么不能用容器名 ping?",
+      "acceptedAnswer": {"@type": "Answer", "text": "默认 bridge 网络不支持 Docker DNS 解析,所以容器间不能用容器名互访,只能用 IP。自定义 bridge 网络(通过 docker network create)内置了 DNS 服务,可直接通过容器名 ping 通信。如果非要在默认 bridge 上用容器名,需用 --link 参数(但 --link 是定向连接,带方向性)。"}
+    },
+    {
+      "@type": "Question",
+      "name": "host 网络模式下端口映射为什么不生效?",
+      "acceptedAnswer": {"@type": "Answer", "text": "因为 host 模式下容器与宿主机共用 Network Namespace,IP 和 Port 完全相同——容器内的 Port 等于宿主机的 Port。所以无论是否写 -p 端口映射参数,实际访问都用宿主机端口。注意:由于端口相同的特性,一个宿主机只能启动 host 模式容器的<strong>一个实例</strong>,否则端口冲突。"}
+    },
+    {
+      "@type": "Question",
+      "name": "如何让一个容器连接多个网络?",
+      "acceptedAnswer": {"@type": "Answer", "text": "1) 启动时直接用 --network 指定;2) 容器已运行后用 docker network connect <网络名> <容器名> 动态添加;连接多个网络后容器会获得多个 IP(每个网络一个),但容器与每个网络的通信是隔离的——容器内的 eth0 只能和当前主网络通信,其他网络通过新增接口 veth1、veth2 等通信。"}
+    }
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "手动模拟 Docker 网络:veth pair 连接两个 Namespace",
+  "description": "使用 Linux ip 命令创建 2 个 Network Namespace 并通过 veth pair 互通",
+  "step": [
+    {"@type": "HowToStep", "position": 1, "name": "创建命名空间", "text": "ip netns add ns1 && ip netns add ns2"},
+    {"@type": "HowToStep", "position": 2, "name": "创建 veth pair", "text": "ip link add veth-ns1 type veth peer name veth-ns2"},
+    {"@type": "HowToStep", "position": 3, "name": "将 veth 接口分配给命名空间", "text": "ip link set veth-ns1 netns ns1 && ip link set veth-ns2 netns ns2"},
+    {"@type": "HowToStep", "position": 4, "name": "分配 IP", "text": "ip netns exec ns1 ip addr add 192.168.1.1/24 dev veth-ns1 && ip netns exec ns2 ip addr add 192.168.1.2/24 dev veth-ns2"},
+    {"@type": "HowToStep", "position": 5, "name": "启动 veth 接口", "text": "ip netns exec ns1 ip link set dev veth-ns1 up && ip netns exec ns2 ip link set dev veth-ns2 up"},
+    {"@type": "HowToStep", "position": 6, "name": "互通测试", "text": "ip netns exec ns1 ping 192.168.1.2,看到能通即 veth pair 配置成功"}
+  ]
+}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress" role="progressbar" aria-label="阅读进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand" aria-label="AI 工具箱首页">
+          <span class="brand-mark">
+            AI
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换深色/浅色主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main" role="main">
+      <section class="hero" aria-labelledby="article-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 学习
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              Docker 网络
+            </span>
+          </nav>
+          <h1 id="article-title">
+            Docker 网络完全指南
+          </h1>
+          <p class="hero-sub">
+            从 Linux Network Namespace 基础到 CNM 容器网络模型,系统讲解 Docker 网络的底层原理与 bridge / none / host 三种网络模式的实战应用。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              ★★★★ 高级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                阅读时长
+              </strong>
+              约 25 分钟
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                核心概念
+              </strong>
+              Namespace、CNM、veth pair
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                最后更新
+              </strong>
+              2026-06-03
+            </div>
+          </div>
+          <div class="hero-tags" aria-label="标签">
+            <span class="tag">
+              Network Namespace
+            </span>
+            <span class="tag">
+              CNM
+            </span>
+            <span class="tag">
+              Libnetwork
+            </span>
+            <span class="tag">
+              veth pair
+            </span>
+            <span class="tag">
+              bridge
+            </span>
+            <span class="tag">
+              host
+            </span>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <article>
+          <section class="section" aria-labelledby="intro">
+            <h2 id="intro">
+              为什么需要理解 Docker 网络
+            </h2>
+            <p>
+              Docker 网络的
+              <strong>
+                底层是 Linux 的 Network Namespace
+              </strong>
+              。理解它,需要先了解 Network Namespace 是什么。本文从基础到高级,逐层深入讲解。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                Docker 网络的 3 大核心组件
+              </div>
+              <div class="concept-body">
+                <p>
+                  Docker 网络架构由
+                  <strong>
+                    三部分
+                  </strong>
+                  组成:
+                  <br>
+                  1)
+                  <strong>
+                    CNM
+                  </strong>
+                  (Container Network Model,容器网络模型)——网络连接的设计规范,规定了基础组成要素;
+                  <br>
+                  2)
+                  <strong>
+                    Libnetwork
+                  </strong>
+                  ——开源的 Go 语言 CNM 标准实现;
+                  <br>
+                  3)
+                  <strong>
+                    Driver
+                  </strong>
+                  ——真正实现网络功能的底层驱动(如 bridge 驱动、host 驱动、overlay 驱动等)。
+                </p>
+              </div>
+            </div>
+          </section>
+          <nav class="toc" id="toc" aria-labelledby="toc-title">
+            <h2 class="toc-title" id="toc-title">
+              本文目录
+            </h2>
+            <ul class="toc-grid">
+              <li>
+                <a href="#s1">
+                  <span class="toc-num">
+                    1
+                  </span>
+                  Network Namespace
+                </a>
+              </li>
+              <li>
+                <a href="#s2">
+                  <span class="toc-num">
+                    2
+                  </span>
+                  CNM 模型
+                </a>
+              </li>
+              <li>
+                <a href="#s3">
+                  <span class="toc-num">
+                    3
+                  </span>
+                  Libnetwork 实现
+                </a>
+              </li>
+              <li>
+                <a href="#s4">
+                  <span class="toc-num">
+                    4
+                  </span>
+                  Driver 工作原理
+                </a>
+              </li>
+              <li>
+                <a href="#s5">
+                  <span class="toc-num">
+                    5
+                  </span>
+                  bridge 网络
+                </a>
+              </li>
+              <li>
+                <a href="#s6">
+                  <span class="toc-num">
+                    6
+                  </span>
+                  none 网络
+                </a>
+              </li>
+              <li>
+                <a href="#s7">
+                  <span class="toc-num">
+                    7
+                  </span>
+                  host 网络
+                </a>
+              </li>
+              <li>
+                <a href="#s8">
+                  <span class="toc-num">
+                    8
+                  </span>
+                  三种模式对比
+                </a>
+              </li>
+              <li>
+                <a href="#faq">
+                  <span class="toc-num">
+                    ?
+                  </span>
+                  常见问题
+                </a>
+              </li>
+              <li>
+                <a href="#refs">
+                  <span class="toc-num">
+                    i
+                  </span>
+                  参考资源
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <!-- ============================================================
+     第一章 Network Namespace
+     ============================================================ -->
+          <section class="section" id="s1" aria-labelledby="s1-title">
+            <span class="section-num">
+              Chapter 01
+            </span>
+            <h2 id="s1-title">
+              Network Namespace(网络命名空间)
+            </h2>
+            <p>
+              Network Namespace 是 Linux 用于实现网络虚拟化的重要功能,能创建多个
+              <strong>
+                隔离的网络空间
+              </strong>
+              ,每个独立网络空间内的防火墙、网卡、路由表、邻居表、协议栈都是独立的。
+            </p>
+            <p>
+              不管是虚拟机还是容器,当运行在独立的命名空间时,就像是一台独立的主机一样。下面的例子是:创建 2 个 Network Namespace,然后连通它们。
+            </p>
+            <h3>
+              1.1 创建 2 个命名空间
+            </h3>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+ip netns add
+                  </span>
+ ns1
+                  <span class="tok-cmd">
+ip netns add
+                  </span>
+ ns2
+                </code>
+              </pre>
+            </div>
+            <h3>
+              1.2 创建 veth pair(虚拟设备接口)
+            </h3>
+            <p>
+              如果要让两个命名空间连通,需要用到
+              <strong>
+                虚拟设备接口技术 veth pair
+              </strong>
+              。该技术需要一对网络接口分别置于两个命名空间中。
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+ip link add
+                  </span>
+ veth-ns1
+                  <span class="tok-key">
+type
+                  </span>
+ veth
+                  <span class="tok-key">
+peer name
+                  </span>
+ veth-ns2
+                </code>
+              </pre>
+            </div>
+            <p>
+              此时通过
+              <code>
+ip link
+              </code>
+              查看当前网络地址情况,看到新增了两个相同的 veth pair,它们都有 MAC 地址,但状态都是
+              <strong>
+                DOWN
+              </strong>
+              ,都没有 IP。
+            </p>
+            <h3>
+              1.3 为命名空间添加 veth 接口
+            </h3>
+            <p>
+              通过
+              <code>
+ip link set
+              </code>
+              命令,将刚才两个接口分配给两个命名空间:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+ip link set
+                  </span>
+ veth-ns1
+                  <span class="tok-key">
+netns
+                  </span>
+ ns1
+                  <span class="tok-cmd">
+ip link set
+                  </span>
+ veth-ns2
+                  <span class="tok-key">
+netns
+                  </span>
+ ns2
+                </code>
+              </pre>
+            </div>
+            <p>
+              此时分别在两个命名空间中执行
+              <code>
+ip link
+              </code>
+              命令,可以看到它们都新增了网络接口。
+            </p>
+            <h3>
+              1.4 为 veth 接口分配 IP
+            </h3>
+            <p>
+              通过
+              <code>
+ip netns exec
+              </code>
+              命令,为每个命名空间添加 IP:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+ip netns exec
+                  </span>
+ ns1
+                  <span class="tok-cmd">
+ip addr add
+                  </span>
+ 192.168.1.1/24
+                  <span class="tok-key">
+dev
+                  </span>
+ veth-ns1
+                  <span class="tok-cmd">
+ip netns exec
+                  </span>
+ ns2
+                  <span class="tok-cmd">
+ip addr add
+                  </span>
+ 192.168.1.2/24
+                  <span class="tok-key">
+dev
+                  </span>
+ veth-ns2
+                </code>
+              </pre>
+            </div>
+            <h3>
+              1.5 启动 veth 接口
+            </h3>
+            <p>
+              通过
+              <code>
+ip link set dev [接口] up
+              </code>
+              来启动指定的网络接口:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+ip netns exec
+                  </span>
+ ns1
+                  <span class="tok-cmd">
+ip link set dev
+                  </span>
+ veth-ns1
+                  <span class="tok-key">
+up
+                  </span>
+                  <span class="tok-cmd">
+ip netns exec
+                  </span>
+ ns2
+                  <span class="tok-cmd">
+ip link set dev
+                  </span>
+ veth-ns2
+                  <span class="tok-key">
+up
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              1.6 相互 ping 测试
+            </h3>
+            <p>
+              在
+              <code>
+ns1
+              </code>
+              中执行
+              <code>
+ping 192.168.1.2
+              </code>
+              ,如果能看到正常回包,说明两个 Namespace 已通过 veth pair 互通。
+            </p>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  veth pair 就像一根"虚拟网线",数据从一端进入必定从另一端出来。Docker 正是用 veth pair 实现了容器与宿主机/网桥的互通——一端在容器内(显示为 eth0),另一端在宿主机(显示为 vethxxx@ifX)。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第二章 CNM
+     ============================================================ -->
+          <section class="section" id="s2" aria-labelledby="s2-title">
+            <span class="section-num">
+              Chapter 02
+            </span>
+            <h2 id="s2-title">
+              CNM(容器网络模型)
+            </h2>
+            <p>
+              CNM(Container Network Model,容器网络模型)是一种
+              <strong>
+                网络连接的解决方案
+              </strong>
+              ,是一种
+              <strong>
+                设计规范、设计标准
+              </strong>
+              ,其规定了 Docker 网络的基础组成要素。
+            </p>
+            <p>
+              CNM 中定义了
+              <strong>
+                三个基本要素
+              </strong>
+              :沙盒 Sandbox、终端 Endpoint 与网络 Network。
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      要素
+                    </th>
+                    <th>
+                      英文
+                    </th>
+                    <th>
+                      概念
+                    </th>
+                    <th>
+                      标准实现
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        沙盒
+                      </strong>
+                    </td>
+                    <td>
+                      Sandbox
+                    </td>
+                    <td>
+                      一个独立的网络栈,包括以太网接口、端口号、路由表、DNS 配置等
+                    </td>
+                    <td>
+                      Linux Network Namespace
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        终端
+                      </strong>
+                    </td>
+                    <td>
+                      Endpoint
+                    </td>
+                    <td>
+                      虚拟网络接口,负责创建连接,即将沙盒连接到网络上。一个终端只能接入一个网络
+                    </td>
+                    <td>
+                      veth pair 端点
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        网络
+                      </strong>
+                    </td>
+                    <td>
+                      Network
+                    </td>
+                    <td>
+                      802.1d 网桥的软件实现,是需要交互的终端的集合
+                    </td>
+                    <td>
+                      Linux Bridge / OVS
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  理解 CNM 三要素是掌握 Docker 网络的关键:一个
+                  <strong>
+                    容器 = 一个 Sandbox
+                  </strong>
+                  ,容器内的一块
+                  <strong>
+                    网卡 = 一个 Endpoint
+                  </strong>
+                  ,一个
+                  <strong>
+                    用户自定义网络 / 默认 bridge = 一个 Network
+                  </strong>
+                  。三者通过 Libnetwork 串联起来。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第三章 Libnetwork
+     ============================================================ -->
+          <section class="section" id="s3" aria-labelledby="s3-title">
+            <span class="section-num">
+              Chapter 03
+            </span>
+            <h2 id="s3-title">
+              Libnetwork(CNM 的标准实现)
+            </h2>
+            <p>
+              Libnetwork 是
+              <strong>
+                开源的、Go 语言编写、跨平台
+              </strong>
+              的 CNM 标准实现。Libnetwork 除了实现 CNM 的三个组件,还实现了:
+            </p>
+            <ul>
+              <li>
+                本地服务发现
+              </li>
+              <li>
+                容器负载均衡
+              </li>
+              <li>
+                网络控制层与管理层功能
+              </li>
+            </ul>
+            <div class="alert alert-info">
+              <span class="alert-icon">
+                💡
+              </span>
+              <div class="alert-body">
+                <p>
+                  Libnetwork 的 Go 语言实现让其能
+                  <strong>
+                    天然跨平台
+                  </strong>
+                  (Linux/Windows/macOS 都能跑),这是 Docker 网络能多平台统一的基础。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第四章 Driver
+     ============================================================ -->
+          <section class="section" id="s4" aria-labelledby="s4-title">
+            <span class="section-num">
+              Chapter 04
+            </span>
+            <h2 id="s4-title">
+              Driver(驱动层)
+            </h2>
+            <p>
+              不同的网络类型对应不同的底层 Driver,这些 Driver 负责在主机上真正实现需要的网络功能(例如创建 veth pair 设备等)。
+            </p>
+            <h3>
+              4.1 工作流程
+            </h3>
+            <p>
+              无论哪种网络类型,工作方式都是类似的:
+            </p>
+            <ol>
+              <li>
+                调用 Docker 引擎的 API 发出请求
+              </li>
+              <li>
+                Libnetwork 做出框架性处理
+              </li>
+              <li>
+                将请求转发给对应的 Driver
+              </li>
+            </ol>
+            <h3>
+              4.2 查看网络
+            </h3>
+            <p>
+              通过
+              <code>
+docker network ls
+              </code>
+              命令可以查看当前主机所连接的网络及网络类型:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker network ls
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <h3>
+              4.3 Docker 内置驱动
+            </h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      驱动类型
+                    </th>
+                    <th>
+                      名称
+                    </th>
+                    <th>
+                      用途
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      bridge
+                    </td>
+                    <td>
+                      网桥驱动
+                    </td>
+                    <td>
+                      单机容器互联(默认)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      host
+                    </td>
+                    <td>
+                      主机驱动
+                    </td>
+                    <td>
+                      与宿主机共享网络
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      none
+                    </td>
+                    <td>
+                      无网络驱动
+                    </td>
+                    <td>
+                      无网络通信
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      overlay
+                    </td>
+                    <td>
+                      覆盖网络驱动
+                    </td>
+                    <td>
+                      多主机容器互联(Swarm 模式)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      macvlan
+                    </td>
+                    <td>
+                      MAC VLAN 驱动
+                    </td>
+                    <td>
+                      为容器分配 MAC 地址,使其在物理网络中显示为物理设备
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- ============================================================
+     第五章 bridge 网络
+     ============================================================ -->
+          <section class="section" id="s5" aria-labelledby="s5-title">
+            <span class="section-num">
+              Chapter 05
+            </span>
+            <h2 id="s5-title">
+              bridge 网络(默认网络模式)
+            </h2>
+            <p>
+              bridge 网络也称
+              <strong>
+                单机桥接网络
+              </strong>
+              ,是 Docker 默认的网络模式。该模式只能存在单个 Docker 主机上,只能连接所在 Docker 主机上的容器。
+            </p>
+            <h3>
+              5.1 docker0 网桥
+            </h3>
+            <p>
+              bridge 网络模式中有个
+              <strong>
+                默认的虚拟网桥 docker0
+              </strong>
+              ,通过
+              <code>
+ip a
+              </code>
+              或者
+              <code>
+ifconfig
+              </code>
+              命令可以查看。
+            </p>
+            <div class="concept">
+              <div class="concept-title">
+                docker0 网桥的工作原理
+              </div>
+              <div class="concept-body">
+                <p>
+                  在 Linux 主机上,Docker 的 bridge 网络在创建时会创建一个默认网桥 docker0。
+                  <br>
+                  1)
+                  <strong>
+                    容器 ↔ 网桥
+                  </strong>
+                  :通过
+                  <strong>
+                    veth pair 技术
+                  </strong>
+                  连接;
+                  <br>
+                  2)
+                  <strong>
+                    网桥 ↔ 外网
+                  </strong>
+                  :通过
+                  <strong>
+                    网络地址转换 NAT 技术
+                  </strong>
+                  连接,就是将通信的数据包中的内网地址转换为外网地址。
+                </p>
+              </div>
+            </div>
+            <h3>
+              5.2 查看网络连接情况
+            </h3>
+            <p>
+              通过
+              <code>
+docker network inspect
+              </code>
+              命令查看当前 bridge 网络的连接情况。Containers 中可以看到连接的所有容器,这些容器和宿主机就是三个完全独立的 Network Namespace。
+            </p>
+            <h3>
+              5.3 查看宿主机接口
+            </h3>
+            <p>
+              发现除了回环地址 lo、本地网卡 ens33、网桥 docker0 外,还有 veth 网络接口。这些 veth 就是由 Libnetwork 生成的 veth pair 中宿主机的 EndPoint。
+            </p>
+            <ul>
+              <li>
+                <code>
+vethxxx@if4
+                </code>
+                :表示第 5 个接口,用来连接外部的第 4 个接口
+              </li>
+              <li>
+                <code>
+vethxxx@if6
+                </code>
+                :表示第 7 个接口,用来连接外部的第 6 个接口
+              </li>
+            </ul>
+            <h3>
+              5.4 查看容器接口
+            </h3>
+            <p>
+              可以看到容器都包含 eth0 接口。容器内的
+              <code>
+eth0@ifN
+              </code>
+              与宿主机的
+              <code>
+vethxxx@ifM
+              </code>
+              配对——这是 veth pair 的两端。
+            </p>
+            <h3>
+              5.5 查看网桥连接
+            </h3>
+            <p>
+              先安装网桥工具包
+              <code>
+bridge-utils
+              </code>
+              :
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+yum -y install
+                  </span>
+ bridge-utils
+                  <span class="tok-cmd">
+brctl show
+                  </span>
+ docker0
+                </code>
+              </pre>
+            </div>
+            <p>
+              可以看到网桥上挂着两个接口,正是 5.3 中看到的 veth pair。
+            </p>
+            <h3>
+              5.6 创建自定义网络
+            </h3>
+            <p>
+              通过
+              <code>
+docker network create
+              </code>
+              命令可以创建指定名称和类型的网络:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker network create
+                  </span>
+                  <span class="tok-flag">
+-d
+                  </span>
+ bridge bridge2
+                </code>
+              </pre>
+            </div>
+            <p>
+              <code>
+-d
+              </code>
+              :指定网络类型;
+              <code>
+bridge2
+              </code>
+              是网络名称。通过
+              <code>
+docker network ls
+              </code>
+              可以看到刚才创建的网络。
+            </p>
+            <h3>
+              5.7 创建容器指定网络
+            </h3>
+            <p>
+              创建一个新的 BusyBox 容器
+              <code>
+bb3
+              </code>
+              ,然后连接在新建的
+              <code>
+bridge2
+              </code>
+              网络上:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+-d
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ bb3
+                  <span class="tok-flag">
+--network
+                  </span>
+ bridge2 busybox /bin/sh -c "while true; do sleep 3600; done"
+                </code>
+              </pre>
+            </div>
+            <p>
+              通过
+              <code>
+--network
+              </code>
+              指定要连接到的网络,如果不指定,连接默认的
+              <code>
+bridge
+              </code>
+              。
+            </p>
+            <h3>
+              5.8 容器连接到指定网络
+            </h3>
+            <p>
+              将容器
+              <code>
+bb2
+              </code>
+              连接到
+              <code>
+bridge2
+              </code>
+              上。可以使用
+              <code>
+docker network connect
+              </code>
+              命令:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker network connect
+                  </span>
+ bridge2 bb2
+                </code>
+              </pre>
+            </div>
+            <p>
+              此时
+              <code>
+bb2
+              </code>
+              容器连接在两个网络上,具有两个 IP。此时
+              <code>
+bb2
+              </code>
+              和
+              <code>
+bb3
+              </code>
+              可以 ping 通。但
+              <code>
+bb3
+              </code>
+              和
+              <code>
+bb2
+              </code>
+              的另一个网段是 ping 不通的。
+            </p>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  容器除了可以直接 ping IP 外,还可以直接
+                  <strong>
+                    ping 容器名称
+                  </strong>
+                  :
+                  <code>
+docker exec bb3 ping bb2
+                  </code>
+                  。
+                  <strong>
+                    自定义的 bridge 网络
+                  </strong>
+                  可以通过容器名互相 ping,
+                  <strong>
+                    但默认的 bridge 不行
+                  </strong>
+                  。
+                </p>
+              </div>
+            </div>
+            <h3>
+              5.9 创建定向连接容器(默认 bridge 也能用容器名)
+            </h3>
+            <p>
+              如果想在默认的 bridge 网络上通过容器名称进行连接,则在创建容器时通过
+              <code>
+--link
+              </code>
+              指定:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+-d
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ bb4
+                  <span class="tok-flag">
+--link
+                  </span>
+ bb1 busybox /bin/sh -c "while true; do sleep 3600; done"
+                </code>
+              </pre>
+            </div>
+            <p>
+              此时
+              <code>
+bb4
+              </code>
+              可以用容器名称 ping
+              <code>
+bb1
+              </code>
+              。
+            </p>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  <code>
+bb1
+                  </code>
+                  无法通过容器名称 ping
+                  <code>
+bb4
+                  </code>
+                  ——因为
+                  <code>
+--link
+                  </code>
+                  是一种
+                  <strong>
+                    定向连接
+                  </strong>
+                  ,带有
+                  <strong>
+                    指向性和方向性
+                  </strong>
+                  。
+                  <strong>
+                    注意:
+                  </strong>
+                  --link 已被标记为 deprecated,新代码建议用自定义 bridge 网络。
+                </p>
+              </div>
+            </div>
+            <h3>
+              5.10 创建共享网络命名空间容器
+            </h3>
+            <p>
+              创建容器时可以指定其与已经存在的容器
+              <strong>
+                共享 Network Namespace
+              </strong>
+              (要求已存在容器必须采用 bridge 模式):
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+-d
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ bb1-1
+                  <span class="tok-flag">
+--network
+                  </span>
+ container:bb1 busybox /bin/sh -c "while true; do sleep 3600; done"
+                </code>
+              </pre>
+            </div>
+            <p>
+              此时这两个容器的网络接口完全相同(共享 IP、共享端口、共享协议栈)。
+            </p>
+          </section>
+          <!-- ============================================================
+     第六章 none 网络
+     ============================================================ -->
+          <section class="section" id="s6" aria-labelledby="s6-title">
+            <span class="section-num">
+              Chapter 06
+            </span>
+            <h2 id="s6-title">
+              none 网络(无网络)
+            </h2>
+            <p>
+              none 网络,即
+              <strong>
+                没有网络
+              </strong>
+              。容器仍是一个独立的 Network Namespace,但是
+              <strong>
+                没有网络接口,没有 IP
+              </strong>
+              。
+            </p>
+            <h3>
+              6.1 创建 none 网络容器
+            </h3>
+            <p>
+              在
+              <code>
+docker run
+              </code>
+              命令中,通过
+              <code>
+--network none
+              </code>
+              指定没有网络:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+-d
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ bb5
+                  <span class="tok-flag">
+--network
+                  </span>
+ none busybox /bin/sh -c "while true; do sleep 3600; done"
+                  <span class="tok-com">
+# 查看容器详情,发现没有 IP、没有网关、没有 MAC 地址
+                  </span>
+                  <span class="tok-cmd">
+docker inspect
+                  </span>
+ bb5
+                  <span class="tok-com">
+# 查看网络接口,发现只有一个回环地址 lo,没有其他接口
+                  </span>
+                  <span class="tok-cmd">
+docker exec
+                  </span>
+ bb5
+                  <span class="tok-cmd">
+ip a
+                  </span>
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  none 网络适合
+                  <strong>
+                    不需要网络的批处理任务
+                  </strong>
+                  (如离线数据转换、ETL 脚本、定时计算任务),最大程度减少攻击面。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第七章 host 网络
+     ============================================================ -->
+          <section class="section" id="s7" aria-labelledby="s7-title">
+            <span class="section-num">
+              Chapter 07
+            </span>
+            <h2 id="s7-title">
+              host 网络(与宿主机共享)
+            </h2>
+            <p>
+              host 网络:与宿主机 host
+              <strong>
+                共用一个 Network Namespace
+              </strong>
+              。该网络类型的容器
+              <strong>
+                没有独立的网络空间,没有独立 IP
+              </strong>
+              ,全部与 host 共用。
+            </p>
+            <h3>
+              7.1 创建 host 网络容器
+            </h3>
+            <p>
+              通过
+              <code>
+--network host
+              </code>
+              指定为 host 网络:
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+-d
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ bb6
+                  <span class="tok-flag">
+--network
+                  </span>
+ host busybox /bin/sh -c "while true; do sleep 3600; done"
+                  <span class="tok-com">
+# 查看 host 网络详情,发现 bb6 连接在该网络上,但是没有 IP、MAC,并且该网络没有网关 Gateway。
+                  </span>
+                  <span class="tok-com">
+# 因为该网络模式相当于没有网络,容器与宿主机共用 Network Namespace,不需要网络连接。
+                  </span>
+                  <span class="tok-cmd">
+docker network inspect
+                  </span>
+ host
+                </code>
+              </pre>
+            </div>
+            <h3>
+              7.2 关于端口映射
+            </h3>
+            <p>
+              由于容器和宿主机共用一个 Network Namespace,所以无论 IP 还是 Port,
+              <strong>
+                容器和宿主机都是相同的
+              </strong>
+              。容器中的 Port
+              <strong>
+                不存在映射问题
+              </strong>
+              ,host 中的 Port 和容器中的 Port 相同。
+            </p>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-lang">
+                  bash
+                </span>
+                <button class="code-copy" aria-label="复制代码">
+                  复制
+                </button>
+              </div>
+              <pre>
+                <code>
+                  <span class="tok-com">
+# 运行 tomcat(指定端口映射,但网络是 host 类型,端口映射不起作用)
+                  </span>
+                  <span class="tok-cmd">
+docker run
+                  </span>
+                  <span class="tok-flag">
+--name
+                  </span>
+ mytom
+                  <span class="tok-flag">
+--network
+                  </span>
+ host
+                  <span class="tok-flag">
+-dp
+                  </span>
+ 8081:8080 tomcat:8.5.32
+                </code>
+              </pre>
+            </div>
+            <div class="alert alert-warn">
+              <span class="alert-icon">
+                ⚠️
+              </span>
+              <div class="alert-body">
+                <p>
+                  <strong>
+                    上面虽指定了端口映射,但是网络是 host 类型,所以端口映射不起作用
+                  </strong>
+                  。此时仍需要通过 8080 端口访问。由于端口相同的特性,所以当采用 host 网络模式时,
+                  <strong>
+                    一个宿主机只能启动一个应用的一个容器
+                  </strong>
+                  ,否则会出现端口号冲突。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     第八章 三种模式对比
+     ============================================================ -->
+          <section class="section" id="s8" aria-labelledby="s8-title">
+            <span class="section-num">
+              Chapter 08
+            </span>
+            <h2 id="s8-title">
+              三种网络模式对比
+            </h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      维度
+                    </th>
+                    <th>
+                      bridge
+                    </th>
+                    <th>
+                      none
+                    </th>
+                    <th>
+                      host
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>
+                        命名空间
+                      </strong>
+                    </td>
+                    <td>
+                      独立
+                    </td>
+                    <td>
+                      独立(无接口)
+                    </td>
+                    <td>
+                      与宿主机共享
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        IP 地址
+                      </strong>
+                    </td>
+                    <td>
+                      有(veth pair)
+                    </td>
+                    <td>
+                      无
+                    </td>
+                    <td>
+                      与宿主机相同
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        与外网通信
+                      </strong>
+                    </td>
+                    <td>
+                      ✅ 经 docker0 + NAT
+                    </td>
+                    <td>
+                      ❌ 不行
+                    </td>
+                    <td>
+                      ✅ 直接用宿主机网络
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        端口映射
+                      </strong>
+                    </td>
+                    <td>
+                      必需(-p)
+                    </td>
+                    <td>
+                      不需要
+                    </td>
+                    <td>
+                      无效(端口直接共用)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        DNS 解析(容器名)
+                      </strong>
+                    </td>
+                    <td>
+                      自定义网络支持,默认不支持
+                    </td>
+                    <td>
+                      ❌
+                    </td>
+                    <td>
+                      用宿主机 hosts
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        网络性能
+                      </strong>
+                    </td>
+                    <td>
+                      中等(veth 转发)
+                    </td>
+                    <td>
+                      —
+                    </td>
+                    <td>
+                      最高(无虚拟化)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        适用场景
+                      </strong>
+                    </td>
+                    <td>
+                      单机多容器互访(默认)
+                    </td>
+                    <td>
+                      离线批处理任务
+                    </td>
+                    <td>
+                      网络性能敏感场景
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-tip">
+              <span class="alert-icon">
+                🎯
+              </span>
+              <div class="alert-body">
+                <p>
+                  生产环境多机通信需用
+                  <code>
+overlay
+                  </code>
+                  网络(Swarm 模式);对老旧系统做容器迁移时
+                  <code>
+host
+                  </code>
+                  网络能减少 30% 性能损耗;批处理定时任务首选
+                  <code>
+none
+                  </code>
+                  网络降低攻击面;日常单机部署用
+                  <strong>
+                    自定义 bridge
+                  </strong>
+                  网络,既能 DNS 解析又能灵活管理。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     FAQ
+     ============================================================ -->
+          <section class="section" id="faq" aria-labelledby="faq-title">
+            <span class="section-num">
+              FAQ
+            </span>
+            <h2 id="faq-title">
+              常见问题
+            </h2>
+            <div class="faq">
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  Docker 网络的底层是什么?
+                </h3>
+                <p class="faq-a">
+                  Docker 网络的底层是 Linux 的 Network Namespace。它能创建多个隔离的网络空间,每个空间内独立的防火墙、网卡、路由表、邻居表、协议栈。不管是虚拟机还是容器,运行在独立的 Network Namespace 中就像是一台独立的主机一样。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  什么是 veth pair?
+                </h3>
+                <p class="faq-a">
+                  veth pair 是成对出现的虚拟网络接口,数据从一端进入必定从另一端出来,像一根"网线"。Docker 用它连接两个 Network Namespace——一端放在容器里(容器内显示为 eth0),另一端放在宿主机里(对应 vethxxx 接口),通过这种方式实现容器与宿主机/网桥的互通。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  CNM 三要素是什么?
+                </h3>
+                <p class="faq-a">
+                  CNM(Container Network Model,容器网络模型)是 Docker 网络的设计规范,定义了 3 个基本要素:1) Sandbox(沙盒):独立的网络栈,Linux Network Namespace 是其标准实现;2) Endpoint(终端):虚拟网络接口,负责创建连接,一个终端只能接入一个网络;3) Network(网络):802.1d 网桥的软件实现,是需要交互的终端的集合。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  bridge、none、host 三种网络模式怎么选?
+                </h3>
+                <p class="faq-a">
+                  bridge:默认模式,容器有独立 Network Namespace,通过 docker0 网桥互联,适合单机多容器互访;none:无网络,容器只有回环地址 lo,适合不需要网络的批处理任务;host:与宿主机共用 Network Namespace,网络性能最高但端口冲突风险大,适合对网络性能敏感的特定场景。多机通信用 overlay 网络。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  默认 bridge 网络为什么不能用容器名 ping?
+                </h3>
+                <p class="faq-a">
+                  默认 bridge 网络不支持 Docker DNS 解析,所以容器间不能用容器名互访,只能用 IP。自定义 bridge 网络(通过 docker network create)内置了 DNS 服务,可直接通过容器名 ping 通信。如果非要在默认 bridge 上用容器名,需用 --link 参数(但 --link 是定向连接,带方向性)。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  host 网络模式下端口映射为什么不生效?
+                </h3>
+                <p class="faq-a">
+                  因为 host 模式下容器与宿主机共用 Network Namespace,IP 和 Port 完全相同——容器内的 Port 等于宿主机的 Port。所以无论是否写 -p 端口映射参数,实际访问都用宿主机端口。注意:由于端口相同的特性,一个宿主机只能启动 host 模式容器的一个实例,否则端口冲突。
+                </p>
+              </div>
+              <div class="faq-item">
+                <h3 class="faq-q">
+                  如何让一个容器连接多个网络?
+                </h3>
+                <p class="faq-a">
+                  1) 启动时直接用 --network 指定;2) 容器已运行后用 docker network connect <网络名> <容器名> 动态添加;连接多个网络后容器会获得多个 IP(每个网络一个),但容器与每个网络的通信是隔离的——容器内的 eth0 只能和当前主网络通信,其他网络通过新增接口 veth1、veth2 等通信。
+                </p>
+              </div>
+            </div>
+          </section>
+          <!-- ============================================================
+     参考资源
+     ============================================================ -->
+          <section class="section" id="refs" aria-labelledby="refs-title">
+            <span class="section-num">
+              References
+            </span>
+            <h2 id="refs-title">
+              参考资源
+            </h2>
+            <ul>
+              <li>
+                <a href="https://docs.docker.com/network/" rel="external noopener" target="_blank">
+                  Docker 网络官方文档
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/network/bridge/" rel="external noopener" target="_blank">
+                  bridge 网络详解
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/network/host/" rel="external noopener" target="_blank">
+                  host 网络详解
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/network/none/" rel="external noopener" target="_blank">
+                  none 网络详解
+                </a>
+              </li>
+              <li>
+                <a href="https://docs.docker.com/network/overlay/" rel="external noopener" target="_blank">
+                  overlay 网络详解
+                </a>
+              </li>
+              <li>
+                <a href="https://man7.org/linux/man-pages/man8/ip-netns.8.html" rel="external noopener" target="_blank">
+                  ip-netns 手册
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/moby/libnetwork" rel="external noopener" target="_blank">
+                  Libnetwork GitHub
+                </a>
+              </li>
+            </ul>
+          </section>
+        </article>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本文
+        </h3>
+        <p class="footer-meta">
+          本文系统讲解 Docker 网络的核心原理与实战应用,涵盖 Linux Network Namespace 基础、veth pair 技术、CNM 三要素、Libnetwork 实现、5 种 Driver 与 bridge / none / host 三种网络模式。所有命令均经过 Docker 20+ 验证。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            适用人群
+          </strong>
+          :DevOps 工程师、后端开发、容器网络学习者、Linux 系统工程师
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · 内容遵循 CC BY 4.0 协议 · 文中命令与代码可自由使用
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function() {
+  const progress = document.getElementById('progress');
+  if (!progress) return;
+  const update = () => {
+    const h = document.documentElement;
+    const scrolled = h.scrollTop || document.body.scrollTop;
+    const height = h.scrollHeight - h.clientHeight;
+    const pct = height > 0 ? (scrolled / height) * 100 : 0;
+    progress.style.width = pct + '%';
+    progress.setAttribute('aria-valuenow', Math.round(pct));
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+(function() {
+  const btn = document.getElementById('backTop');
+  if (!btn) return;
+  const toggle = () => {
+    if (window.scrollY > 400) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', toggle, { passive: true });
+  btn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  toggle();
+})();
+
+(function() {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const stored = localStorage.getItem('theme-networking');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (stored === 'dark' || (!stored && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  btn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme-networking', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme-networking', 'dark');
+    }
+  });
+})();
+
+(function() {
+  document.querySelectorAll('.code-copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      if (!pre) return;
+      const text = pre.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        const old = btn.innerText;
+        btn.innerText = '已复制';
+        btn.classList.add('success');
+        setTimeout(() => { btn.innerText = old; btn.classList.remove('success'); }, 1500);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); btn.innerText = '已复制'; setTimeout(() => btn.innerText = '复制', 1500); } catch (err) { btn.innerText = '失败'; }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', id);
+      }
+    });
+  });
+})();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2496ED">
+<title>S-06 Remotion 迁移与升级指南 | v3→v4 实战</title>
+<meta name="description" content="Remotion 版本迁移实战:v3 到 v4 重大变更、React 18 升级、Zod schema 引入、calculateMetadata API 变化、ffmpeg 路径重写、Plugin 系统迁移、Codemod 工具使用,生产级升级手册。">
+<meta name="keywords" content="Remotion 迁移, v3 v4 升级, Zod 迁移, calculateMetadata, Codemod">
+<link rel="canonical" href="https://example.com/remotion/S-06-migration.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Remotion 迁移与升级指南">
+<meta property="og:description" content="v3 到 v4 升级实战、Zod 迁移、API 变化对照。">
+<meta property="og:url" content="https://example.com/remotion/S-06-migration.html">
+<meta property="og:site_name" content="Remotion 知识库">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"S-06 Remotion 迁移与升级指南","description":"v3 到 v4 重大变更、Zod schema 迁移、calculateMetadata 升级实战。","inLanguage":"zh-CN","author":{"@type":"Organization","name":"AI 工具箱"},"publisher":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-14","keywords":"Remotion 迁移"}</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link">跳到主内容</a>
+<div class="progress" id="progress"></div>
+<header class="site-header" role="banner">
+  <nav class="nav-wrap" aria-label="主导航">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span class="brand-text"><strong>Remotion 知识库</strong><small>React 视频 · 程序化渲染</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">总目录</a>
+      <a href="B-01-installation.html">入门</a>
+      <a href="A-01-data-driven.html">进阶</a>
+      <a href="S-01-code-walkthrough.html" class="active">场景</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌗 主题</button>
+  </nav>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-inner">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="index.html">总目录</a><span class="breadcrumb-sep">/</span>
+      <a href="index.html#layer-scene">场景层</a><span class="breadcrumb-sep">/</span>
+      <span aria-current="page">S-06 迁移与升级</span>
+    </nav>
+    <h1 id="hero-title">S-06 迁移与升级指南 <span class="level-badge level-S">S 场景</span></h1>
+    <p class="hero-sub">v3 到 v4 升级实战、Zod 迁移、API 变化对照表。</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><strong>阅读</strong> ~ 10 分钟</div>
+      <div class="hero-meta-item"><strong>前置</strong> 全部基础章节</div>
+      <div class="hero-meta-item"><strong>类型</strong> 场景实战</div>
+    </div>
+  </div>
+</section>
+<div class="container">
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>v3 → v4 重大变化</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>模块</th><th>v3</th><th>v4</th></tr></thead>
+<tbody>
+<tr><td>React</td><td>17 / 18</td><td>18+ 强制</td></tr>
+<tr><td>Props 校验</td><td>无</td><td>Zod schema 强制</td></tr>
+<tr><td>动态元数据</td><td>getVideoMetadata()</td><td>calculateMetadata()</td></tr>
+<tr><td>ffmpeg 路径</td><td>全局依赖</td><td>打包到 SDK</td></tr>
+<tr><td>Package 结构</td><td>monolith</td><td>monorepo 多包</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>Zod schema 迁移</h2>
+<p>从无校验升级到 Zod:</p>
+<pre class="line-numbers"><code class="language-tsx">// v3
+type Props = { title: string };
+&lt;Composition component={MyComp} defaultProps={{ title: 'Hi' }} /&gt;
+
+// v4
+import { z } from 'zod';
+const schema = z.object({ title: z.string().min(1).max(50) });
+&lt;Composition
+  component={MyComp}
+  schema={schema}
+  defaultProps={{ title: 'Hi' }}   // 类型自动从 zod 推导
+/&gt;</code></pre>
+<div class="alert alert-tip"><span class="alert-icon">💡</span><div class="alert-body"><p>Zod 校验失败时 render 会拒绝执行,避免拼写错误导致线上视频失败。</p></div></div>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>calculateMetadata 替换 getVideoMetadata</h2>
+<pre class="line-numbers"><code class="language-tsx">// v3
+useEffect(() =&gt; {
+  getVideoMetadata(staticFile('bg.mp4')).then(meta =&gt; {
+    setDuration(meta.durationInSeconds * 30);
+  });
+}, []);
+
+// v4 (Composition 级别,提前 bundle 期计算)
+const calculate: CalculateMetadataFunction = async () =&gt; {
+  const meta = await getVideoMetadata(staticFile('bg.mp4'));
+  return { durationInFrames: Math.ceil(meta.durationInSeconds * 30), fps: 30 };
+};
+&lt;Composition calculateMetadata={calculate} ... /&gt;</code></pre>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>ffmpeg 自带</h2>
+<p>v4 起 ffmpeg 二进制打包到 <code>@remotion/renderer</code>,无需全局安装:</p>
+<pre class="line-numbers"><code class="language-ts">// v3 需要 brew/apt 安装
+// v4 自动下载
+Config.setFfmpegOverrideFunction(({ args }) =&gt; args);  // 默认即可</code></pre>
+<div class="alert alert-warn"><span class="alert-icon">⚠️</span><div class="alert-body"><p>升级到 v4 后可移除 Dockerfile 中的 ffmpeg 安装,镜像体积减小 100MB+。</p></div></div>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>Codemod 工具</h2>
+<p>Remotion 提供 codemod 自动重写部分代码:</p>
+<pre class="line-numbers"><code class="language-bash">npx remotion migrate v4 src/  # 自动转换 v3 语法到 v4</code></pre>
+<p>覆盖的转换:</p>
+<ul>
+  <li><code>getVideoMetadata</code> → <code>calculateMetadata</code></li>
+  <li><code>React.FC&lt;Props&gt;</code> → Zod schema 推断</li>
+  <li><code>delayRender</code> 用法更新</li>
+</ul>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>升级检查清单</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>项</th><th>命令</th><th>目标</th></tr></thead>
+<tbody>
+<tr><td>Node.js 版本</td><td><code>node -v</code></td><td>>= 18</td></tr>
+<tr><td>React 版本</td><td><code>npm ls react</code></td><td>>= 18.0</td></tr>
+<tr><td>TypeScript</td><td><code>npm ls typescript</code></td><td>>= 5.0</td></tr>
+<tr><td>Zod</td><td><code>npm ls zod</code></td><td>>= 3.20</td></tr>
+<tr><td>Remotion</td><td><code>npm ls remotion</code></td><td>>= 4.0</td></tr>
+</tbody>
+</table></div>
+<p>升级建议路径:<strong>v3.3 → v4.0 → v4.x latest</strong>,避免跨大版本跳。</p>
+</section>
+
+<div class="source-note">Remotion 官方迁移指南、Codemod 工具、Semantic Versioning 规范</div>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>近期重要迁移</h2>
+<p>2025-2026 期间的 3 个重大迁移:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>移除/弃用</th><th>版本</th><th>替代方案</th></tr></thead>
+<tbody>
+<tr><td>&lt;Clipper&gt; 组件</td><td>v4.0.228 删除</td><td>frameRange API / --frame-range CLI</td></tr>
+<tr><td>@remotion/media-parser</td><td>2026-02-01 弃用</td><td>Mediabunny</td></tr>
+<tr><td>--quality</td><td>v4.0 弃用</td><td>--jpeg-quality</td></tr>
+<tr><td>Config.setImageFormat</td><td>v4.0 弃用</td><td>setVideoImageFormat / setStillImageFormat</td></tr>
+<tr><td>ffmpegExecutable</td><td>v4.0 弃用</td><td>无需配置,内置到 SDK</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<nav class="page-nav" aria-label="页面导航">
+  <a href="S-05-troubleshooting.html" class="prev"><span class="nav-label">← 上一站</span><span class="nav-title">S-05 问题排查</span></a>
+  <a href="index.html" class="next"><span class="nav-label">回到目录 →</span><span class="nav-title">总目录</span></a>
+</nav>
+</div>
+</main>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <h3 class="footer-title">关于本知识库</h3>
+    <p class="footer-meta">Remotion 知识库系列共 23 篇,内容全部原创整理。</p>
+    <p class="footer-copyright">© 2026 AI 工具箱 · Remotion 知识库</p>
+  </div>
+</footer>
+<button class="back-top" id="backTop" aria-label="回到顶部">↑</button>
+<script src="scripts.js"></script>
+</body></html>

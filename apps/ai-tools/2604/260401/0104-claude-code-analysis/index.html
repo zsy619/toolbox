@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code 技术深度解析 | 揭开 AI 编程助手的技术内幕</title>
+  <meta name="description" content="深入剖析 Claude Code 的核心技术：Agent 架构设计、系统安全机制、MCP 协议、工具调用原理。了解 AI 编程助手的内部工作方式。">
+  
+  <meta property="og:title" content="Claude Code 技术深度解析">
+  <meta property="og:description" content="深入剖析 Claude Code 的核心技术：Agent 架构、安全机制、工具调用原理。">
+  <meta property="og:image" content="./assets/cover.png">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="zh_CN">
+  
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Claude Code 技术深度解析">
+  <meta name="twitter:description" content="揭开 AI 编程助手的技术内幕。">
+  <meta name="twitter:image" content="./assets/cover.png">
+  
+  <link rel="canonical" href="./index.html">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#DC2626',
+            secondary: '#B91C1C',
+            accent: '#D97706',
+            dark: '#0C0A09',
+            darker: '#1C1917'
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+      background-color: #0C0A09;
+      color: #FFFFFF;
+      line-height: 1.6;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #FFFFFF 0%, #A8A29E 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .card-base {
+      background-color: #1C1917;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card-base:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(220, 38, 38, 0.15);
+    }
+    
+    .code-block {
+      background-color: #0C0A09;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      font-family: Monaco, Consolas, 'SF Mono', monospace;
+      font-size: 0.875rem;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+    
+    .code-keyword { color: #DC2626; font-weight: bold; }
+    .code-string { color: #22C55E; }
+    .code-comment { color: #737373; }
+    .code-function { color: #3B82F6; }
+    .code-variable { color: #F59E0B; }
+    
+    .hero-bg {
+      background: linear-gradient(180deg, #0C0A09 0%, #1C1917 100%);
+    }
+    
+    .section-bg-alt {
+      background-color: #1C1917;
+    }
+    
+    .illustration-wrapper {
+      background: linear-gradient(145deg, #1C1917, #292524);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .illustration-wrapper img {
+      width: 100%;
+      height: auto;
+      border-radius: 0.75rem;
+    }
+    
+    .nav-fixed {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background-color: rgba(12, 10, 9, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #DC2626, #B91C1C);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+    }
+    
+    .btn-secondary {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    .feature-icon {
+      width: 4rem;
+      height: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 1rem;
+      font-size: 1.5rem;
+    }
+    
+    .stat-card {
+      background-color: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+    
+    .tool-card {
+      background-color: #0C0A09;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: border-color 0.3s ease;
+    }
+    
+    .tool-card:hover {
+      border-color: rgba(220, 38, 38, 0.5);
+    }
+    
+    .security-card {
+      background-color: #1C1917;
+      border-radius: 1.5rem;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem !important;
+      }
+      
+      .section-title {
+        font-size: 2rem !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- Navigation -->
+  <nav class="nav-fixed">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+            <i class="fas fa-code text-white text-lg"></i>
+          </div>
+          <span class="font-bold text-xl">Claude Code Analysis</span>
+        </div>
+        
+        <div class="hidden md:flex items-center gap-6">
+          <a href="#overview" class="text-gray-400 hover:text-white transition-colors">概述</a>
+          <a href="#architecture" class="text-gray-400 hover:text-white transition-colors">架构</a>
+          <a href="#agents" class="text-gray-400 hover:text-white transition-colors">代理</a>
+          <a href="#security" class="text-gray-400 hover:text-white transition-colors">安全</a>
+          <a href="#mcp" class="text-gray-400 hover:text-white transition-colors">MCP</a>
+        </div>
+        
+        <a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank" class="btn-primary text-sm py-2 px-4">
+          官方文档
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-bg min-h-screen flex items-center pt-16 pb-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        
+        <!-- Left Content -->
+        <div>
+          <div class="inline-flex items-center gap-2 bg-primary/20 border border-primary/30 rounded-full px-4 py-2 mb-6">
+            <i class="fas fa-microscope text-primary"></i>
+            <span class="text-sm font-medium">技术深度解析</span>
+          </div>
+          
+          <h1 class="hero-title text-5xl sm:text-6xl lg:text-7xl font-black mb-6 gradient-text">
+            Claude Code
+          </h1>
+          
+          <p class="text-xl sm:text-2xl text-gray-400 mb-8 leading-relaxed">
+            深入剖析 AI 编程助手的<br>
+            <span class="text-white font-semibold">核心技术架构与安全机制</span>
+          </p>
+          
+          <div class="flex flex-col sm:flex-row gap-4 mb-10">
+            <a href="#architecture" class="btn-primary text-lg">
+              <i class="fas fa-layer-group"></i>
+              开始探索
+            </a>
+            <a href="https://github.com/anthropics/claude-code" target="_blank" class="btn-secondary text-lg">
+              <i class="fab fa-github"></i>
+              GitHub
+            </a>
+          </div>
+          
+          <!-- Quick Stats -->
+          <div class="grid grid-cols-3 gap-4">
+            <div class="stat-card">
+              <div class="text-3xl font-black text-primary mb-1">60+</div>
+              <div class="text-gray-400 text-xs">工具集成</div>
+            </div>
+            <div class="stat-card">
+              <div class="text-3xl font-black text-secondary mb-1">MCP</div>
+              <div class="text-gray-400 text-xs">协议支持</div>
+            </div>
+            <div class="stat-card">
+              <div class="text-3xl font-black text-accent mb-1">200K</div>
+              <div class="text-gray-400 text-xs">上下文限制</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Image -->
+        <div class="relative">
+          <img src="./assets/cover.png" alt="Claude Code" class="w-full rounded-2xl shadow-2xl border border-white/10">
+          <div class="absolute -bottom-4 -right-4 bg-primary/20 backdrop-blur-sm rounded-xl px-4 py-2 border border-primary/30">
+            <span class="text-primary text-sm font-semibold">Anthropic 官方</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Overview Section -->
+  <section id="overview" class="section-bg-alt py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">什么是 Claude Code？</h2>
+        <p class="text-gray-400 text-xl max-w-3xl mx-auto">
+          Anthropic 官方推出的命令行工具，为 Claude AI 模型提供强大的编程能力
+        </p>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="card-base text-center">
+          <div class="feature-icon bg-blue-500/20 text-blue-400 mx-auto mb-4">
+            <i class="fas fa-terminal"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3">命令行工具</h3>
+          <p class="text-gray-400 leading-relaxed">通过终端直接与 Claude 交互，执行复杂的编程任务，支持管道和脚本集成</p>
+        </div>
+        
+        <div class="card-base text-center">
+          <div class="feature-icon bg-green-500/20 text-green-400 mx-auto mb-4">
+            <i class="fas fa-brain"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3">智能代理</h3>
+          <p class="text-gray-400 leading-relaxed">理解复杂需求，自动规划并执行多步骤编程任务，具备自我纠错能力</p>
+        </div>
+        
+        <div class="card-base text-center">
+          <div class="feature-icon bg-purple-500/20 text-purple-400 mx-auto mb-4">
+            <i class="fas fa-plug"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3">工具生态</h3>
+          <p class="text-gray-400 leading-relaxed">内置文件操作、Git 命令、网络搜索等丰富工具，支持 MCP 扩展协议</p>
+        </div>
+        
+        <div class="card-base text-center">
+          <div class="feature-icon bg-orange-500/20 text-orange-400 mx-auto mb-4">
+            <i class="fas fa-shield-halved"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3">安全可控</h3>
+          <p class="text-gray-400 leading-relaxed">多层安全机制，操作确认系统，危险命令拦截，完整的操作审计日志</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture Section -->
+  <section id="architecture" class="py-20" style="background-color: #0C0A09;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 bg-blue-500/20 text-blue-400 px-4 py-2 rounded-full mb-4">
+          <i class="fas fa-layer-group"></i>
+          <span class="text-sm font-medium">System Architecture</span>
+        </div>
+        <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">系统架构</h2>
+        <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+          理解 Claude Code 如何协调各个组件完成复杂任务
+        </p>
+      </div>
+      
+      <div class="illustration-wrapper mb-12">
+        <img src="./assets/illustration-arch.png" alt="Claude Code Architecture" onerror="this.style.display='none'">
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="card-base">
+          <div class="w-14 h-14 rounded-xl bg-blue-500/20 flex items-center justify-center mb-5">
+            <i class="fas fa-play text-blue-400 text-xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">任务解析层</h3>
+          <p class="text-gray-400 leading-relaxed mb-4">接收用户指令，理解自然语言需求，提取关键信息和约束条件。</p>
+          <ul class="space-y-2 text-sm text-gray-500">
+            <li><i class="fas fa-check text-green-400 mr-2"></i>自然语言理解</li>
+            <li><i class="fas fa-check text-green-400 mr-2"></i>意图识别</li>
+            <li><i class="fas fa-check text-green-400 mr-2"></i>任务分解</li>
+          </ul>
+        </div>
+        
+        <div class="card-base">
+          <div class="w-14 h-14 rounded-xl bg-green-500/20 flex items-center justify-center mb-5">
+            <i class="fas fa-route text-green-400 text-xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">任务规划层</h3>
+          <p class="text-gray-400 leading-relaxed mb-4">构建任务执行图，确定步骤顺序，处理任务依赖关系和回滚策略。</p>
+          <ul class="space-y-2 text-sm text-gray-500">
+            <li><i class="fas fa-check text-green-400 mr-2"></i>执行计划生成</li>
+            <li><i class="fas fa-check text-green-400 mr-2"></i>依赖关系管理</li>
+            <li><i class="fas fa-check text-green-400 mr-2"></i>错误恢复</li>
+          </ul>
+        </div>
+        
+        <div class="card-base">
+          <div class="w-14 h-14 rounded-xl bg-purple-500/20 flex items-center justify-center mb-5">
+            <i class="fas fa-cogs text-purple-400 text-xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">工具执行层</h3>
+          <p class="text-gray-400 leading-relaxed mb-4">调用各类工具执行具体操作，结果反馈给 AI 进行下一步决策。</p>
+          <ul class="space-y-2 text-sm text-gray-500">
+            <li><i class="fas fa-check text-green-400 mr-2"></i>工具选择</li>
+            <li><i class="fas fa-check text-green-400 mr-2"></i>参数构造</li>
+            <li><i class="fas fa-check text-green-400 mr-2"></i>结果解析</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Agents Section -->
+  <section id="agents" class="section-bg-alt py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 bg-green-500/20 text-green-400 px-4 py-2 rounded-full mb-4">
+          <i class="fas fa-robot"></i>
+          <span class="text-sm font-medium">Agent System</span>
+        </div>
+        <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">代理系统</h2>
+        <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+          Claude Code 的核心代理机制如何实现智能编程
+        </p>
+      </div>
+      
+      <div class="illustration-wrapper mb-12">
+        <img src="./assets/illustration-agents.png" alt="Claude Code Agents" onerror="this.style.display='none'">
+      </div>
+      
+      <!-- Agent Workflow -->
+      <div class="card-base mb-12" style="padding: 2.5rem;">
+        <h3 class="text-2xl font-bold mb-8 flex items-center gap-3">
+          <i class="fas fa-flow-chart text-green-400"></i>
+          代理工作流程
+        </h3>
+        
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
+          <div class="text-center">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-blue-500/20 flex items-center justify-center mb-4">
+              <i class="fas fa-search text-blue-400 text-2xl"></i>
+            </div>
+            <h4 class="font-bold mb-2">环境感知</h4>
+            <p class="text-gray-500 text-sm">扫描项目结构</p>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-yellow-500/20 flex items-center justify-center mb-4">
+              <i class="fas fa-lightbulb text-yellow-400 text-2xl"></i>
+            </div>
+            <h4 class="font-bold mb-2">方案生成</h4>
+            <p class="text-gray-500 text-sm">制定实现计划</p>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-green-500/20 flex items-center justify-center mb-4">
+              <i class="fas fa-hammer text-green-400 text-2xl"></i>
+            </div>
+            <h4 class="font-bold mb-2">迭代执行</h4>
+            <p class="text-gray-500 text-sm">逐步执行验证</p>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-purple-500/20 flex items-center justify-center mb-4">
+              <i class="fas fa-check-double text-purple-400 text-2xl"></i>
+            </div>
+            <h4 class="font-bold mb-2">结果验证</h4>
+            <p class="text-gray-500 text-sm">测试验证</p>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
+              <i class="fas fa-sync-alt text-primary text-2xl"></i>
+            </div>
+            <h4 class="font-bold mb-2">自我优化</h4>
+            <p class="text-gray-500 text-sm">持续优化</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tools Grid -->
+      <div>
+        <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+          <i class="fas fa-toolbox text-blue-400"></i>
+          内置工具能力
+        </h3>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="tool-card">
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fas fa-file-code text-gray-400 text-xl"></i>
+              <span class="font-bold">文件操作</span>
+            </div>
+            <p class="text-gray-500 text-sm">读取、编辑、创建文件</p>
+          </div>
+          
+          <div class="tool-card">
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fas fa-code-branch text-gray-400 text-xl"></i>
+              <span class="font-bold">Git 操作</span>
+            </div>
+            <p class="text-gray-500 text-sm">提交、分支、合并</p>
+          </div>
+          
+          <div class="tool-card">
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fas fa-terminal text-gray-400 text-xl"></i>
+              <span class="font-bold">命令执行</span>
+            </div>
+            <p class="text-gray-500 text-sm">运行终端命令</p>
+          </div>
+          
+          <div class="tool-card">
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fas fa-globe text-gray-400 text-xl"></i>
+              <span class="font-bold">网络搜索</span>
+            </div>
+            <p class="text-gray-500 text-sm">查询在线资源</p>
+          </div>
+          
+          <div class="tool-card">
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fas fa-folder-tree text-gray-400 text-xl"></i>
+              <span class="font-bold">目录浏览</span>
+            </div>
+            <p class="text-gray-500 text-sm">探索项目结构</p>
+          </div>
+          
+          <div class="tool-card">
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fas fa-bug text-gray-400 text-xl"></i>
+              <span class="font-bold">测试运行</span>
+            </div>
+            <p class="text-gray-500 text-sm">执行测试用例</p>
+          </div>
+          
+          <div class="tool-card">
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fas fa-search text-gray-400 text-xl"></i>
+              <span class="font-bold">代码搜索</span>
+            </div>
+            <p class="text-gray-500 text-sm">Grep 正则搜索</p>
+          </div>
+          
+          <div class="tool-card">
+            <div class="flex items-center gap-3 mb-3">
+              <i class="fas fa-plug text-gray-400 text-xl"></i>
+              <span class="font-bold">MCP 扩展</span>
+            </div>
+            <p class="text-gray-500 text-sm">自定义工具集成</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Security Section -->
+  <section id="security" class="py-20" style="background-color: #0C0A09;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 bg-orange-500/20 text-orange-400 px-4 py-2 rounded-full mb-4">
+          <i class="fas fa-shield-halved"></i>
+          <span class="text-sm font-medium">Security & Safety</span>
+        </div>
+        <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">安全机制</h2>
+        <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+          Claude Code 如何在执行操作的同时保障系统安全
+        </p>
+      </div>
+      
+      <div class="illustration-wrapper mb-12">
+        <img src="./assets/illustration-security.png" alt="Claude Code Security" onerror="this.style.display='none'">
+      </div>
+      
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="security-card">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-14 h-14 rounded-xl bg-red-500/20 flex items-center justify-center">
+              <i class="fas fa-hand text-red-400 text-2xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold">操作确认</h3>
+              <p class="text-gray-500 text-sm">敏感操作需要用户授权</p>
+            </div>
+          </div>
+          <p class="text-gray-400 leading-relaxed mb-4">对于敏感操作（如删除文件、执行破坏性命令），Claude Code 会请求用户确认。</p>
+          <div class="code-block">
+<span class="code-comment">// 敏感操作需要确认</span>
+<span class="code-variable">Action:</span> <span class="code-string">Bash</span>
+<span class="code-variable">Confirm:</span> <span class="code-string">即将执行 rm -rf node_modules</span>
+<span class="code-keyword">等待用户输入 y/n</span></div>
+        </div>
+        
+        <div class="security-card">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-14 h-14 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+              <i class="fas fa-ban text-yellow-400 text-2xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold">危险命令拦截</h3>
+              <p class="text-gray-500 text-sm">自动识别并阻止危险操作</p>
+            </div>
+          </div>
+          <p class="text-gray-400 leading-relaxed mb-4">自动识别并阻止潜在的危险操作，如格式化磁盘、删除系统文件等。</p>
+          <div class="code-block">
+<span class="code-comment">// 自动拦截危险命令</span>
+<span class="code-function">BlockedCommandError</span>: 
+  <span class="code-string">"rm -rf /"</span> 
+  <span class="code-keyword">被安全系统拦截</span></div>
+        </div>
+        
+        <div class="security-card">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-14 h-14 rounded-xl bg-blue-500/20 flex items-center justify-center">
+              <i class="fas fa-eye text-blue-400 text-2xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold">操作审计</h3>
+              <p class="text-gray-500 text-sm">完整的操作记录和追踪</p>
+            </div>
+          </div>
+          <p class="text-gray-400 leading-relaxed mb-4">记录所有执行的操作，便于事后审查和问题排查。</p>
+          <div class="code-block">
+<span class="code-comment">// 操作日志</span>
+<span class="code-variable">[2024-01-15 10:23:45]</span> 
+<span class="code-function">Read</span>(<span class="code-string">"./src/index.ts"</span>)
+<span class="code-variable">[2024-01-15 10:23:47]</span> 
+<span class="code-function">Edit</span>(<span class="code-string">"line 15-20"</span>)</div>
+        </div>
+        
+        <div class="security-card">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-14 h-14 rounded-xl bg-green-500/20 flex items-center justify-center">
+              <i class="fas fa-lock text-green-400 text-2xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold">权限控制</h3>
+              <p class="text-gray-500 text-sm">细粒度的操作权限管理</p>
+            </div>
+          </div>
+          <p class="text-gray-400 leading-relaxed mb-4">支持配置允许和禁止的命令列表，细粒度控制 AI 的操作范围。</p>
+          <div class="code-block">
+<span class="code-comment">// .claude/settings.json</span>
+{
+  <span class="code-variable">"allowedCommands"</span>: [<span class="code-string">"git"</span>, <span class="code-string">"npm"</span>],
+  <span class="code-variable">"deniedCommands"</span>: [<span class="code-string">"rm -rf"</span>]
+}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MCP Section -->
+  <section id="mcp" class="section-bg-alt py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 bg-purple-500/20 text-purple-400 px-4 py-2 rounded-full mb-4">
+          <i class="fas fa-puzzle-piece"></i>
+          <span class="text-sm font-medium">Model Context Protocol</span>
+        </div>
+        <h2 class="section-title text-4xl sm:text-5xl font-bold mb-4">MCP 扩展协议</h2>
+        <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+          通过 Model Context Protocol 扩展 Claude Code 的能力边界
+        </p>
+      </div>
+      
+      <div class="card-base" style="padding: 2.5rem;">
+        <div class="grid md:grid-cols-2 gap-12">
+          <div>
+            <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+              <i class="fas fa-plus-circle text-primary"></i>
+              核心优势
+            </h3>
+            <div class="space-y-4">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                  <i class="fas fa-plug text-blue-400"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold mb-1">标准化接口</h4>
+                  <p class="text-gray-500 text-sm">统一的工具定义和调用方式，易于集成</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                  <i class="fas fa-shield-alt text-green-400"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold mb-1">安全沙箱</h4>
+                  <p class="text-gray-500 text-sm">隔离执行环境，保护系统安全</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                  <i class="fas fa-cubes text-purple-400"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold mb-1">生态丰富</h4>
+                  <p class="text-gray-500 text-sm">社区提供大量预置工具和服务器</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                  <i class="fas fa-tools text-orange-400"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold mb-1">自定义开发</h4>
+                  <p class="text-gray-500 text-sm">轻松构建自己的工具集和服务器</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+              <i class="fas fa-rocket text-secondary"></i>
+              快速开始
+            </h3>
+            <div class="space-y-6">
+              <div>
+                <p class="text-gray-400 text-sm mb-2">1. 安装 MCP 服务器</p>
+                <div class="code-block">
+<span class="code-function">npx</span> @anthropic/mcp-server-filesystem</div>
+              </div>
+              
+              <div>
+                <p class="text-gray-400 text-sm mb-2">2. 配置 .mcp.json</p>
+                <div class="code-block">
+{
+  <span class="code-variable">"mcpServers"</span>: {
+    <span class="code-string">"filesystem"</span>: {
+      <span class="code-variable">"command"</span>: <span class="code-string">"npx"</span>,
+      <span class="code-variable">"args"</span>: [<span class="code-string">"@anthropic/mcp-server-filesystem"</span>],
+      <span class="code-variable">"allowedDirectories"</span>: [<span class="code-string">"./"</span>]
+    }
+  }
+}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20" style="background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), #0C0A09, rgba(185, 28, 28, 0.2));">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="section-title text-4xl sm:text-5xl font-bold mb-6">深入了解 Claude Code</h2>
+      <p class="text-gray-400 text-2xl mb-10">开始使用 AI 驱动的智能编程助手</p>
+      <div class="flex flex-col sm:flex-row gap-6 justify-center">
+        <a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank" class="btn-primary text-xl px-12 py-5">
+          <i class="fas fa-book-open"></i>
+          官方文档
+        </a>
+        <a href="https://github.com/anthropics/claude-code" target="_blank" class="btn-secondary text-xl px-12 py-5">
+          <i class="fab fa-github"></i>
+          GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="section-bg-alt py-16 border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+            <i class="fas fa-code text-white text-xl"></i>
+          </div>
+          <div>
+            <span class="font-bold text-xl">Claude Code Analysis</span>
+            <p class="text-gray-500 text-sm">AI 编程助手技术深度解析</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-8 text-sm text-gray-400">
+          <a href="https://docs.anthropic.com/en/docs/claude-code/overview" target="_blank" class="hover:text-white transition-colors flex items-center gap-2">
+            <i class="fas fa-book"></i>
+            官方文档
+          </a>
+          <a href="https://github.com/anthropics/claude-code" target="_blank" class="hover:text-white transition-colors flex items-center gap-2">
+            <i class="fab fa-github"></i>
+            GitHub
+          </a>
+          <a href="https://www.anthropic.com" target="_blank" class="hover:text-white transition-colors flex items-center gap-2">
+            <i class="fas fa-globe"></i>
+            Anthropic
+          </a>
+        </div>
+      </div>
+      
+      <div class="mt-12 pt-8 border-t border-white/5 text-center">
+        <p class="text-gray-600">Claude Code 深度技术分析 | 揭开 AI 编程助手的技术内幕</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <button id="backToTop" class="fixed bottom-8 right-8 bg-primary hover:bg-secondary text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition opacity-0 invisible" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+  
+  <!-- Schema.org Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Claude Code 技术深度解析",
+    "description": "深入剖析 Claude Code 的核心技术：Agent 架构设计、系统安全机制、MCP 协议、工具调用原理。",
+    "image": "./assets/cover.png",
+    "author": {
+      "@type": "Organization",
+      "name": "AI Tools"
+    }
+  }
+  </script>
+
+  <script>
+    // Back to top button
+    const backToTopBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 500) {
+        backToTopBtn.classList.remove('opacity-0', 'invisible');
+        backToTopBtn.classList.add('opacity-100', 'visible');
+      } else {
+        backToTopBtn.classList.add('opacity-0', 'invisible');
+        backToTopBtn.classList.remove('opacity-100', 'visible');
+      }
+    });
+    
+    // Smooth scroll for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          const offsetTop = target.offsetTop - 80;
+          window.scrollTo({
+            top: offsetTop,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Remotion 基础:媒体工具函数与 Zod 校验完整速查 | Remotion 知识库</title>
+<meta name="description" content="详解 @remotion/media-utils 11 个 API + @remotion/zod-types(zColor/zTextarea/zMatrix) 完整参考 + @remotion/webcodecs 高级函数(getPartialAudioData/extractFrames) + @remotion/renderer 工具(extractAudio)。">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Remotion 媒体工具函数与 Zod 校验完整速查","description":"11 个 media-utils + zod-types 完整参考。","inLanguage":"zh-CN"}</script>
+</head><body>
+<header class="site-header"><nav class="nav-wrap">
+<a href="index.html" class="brand"><span class="brand-mark">R</span><span>Remotion 知识库</span></a>
+<div class="nav-links"><a href="index.html">总目录</a><a href="B-09-design-visual.html">← 设计视觉</a></div>
+</nav></header>
+<main class="container">
+<nav class="breadcrumb"><a href="index.html">首页</a> / <a href="index.html#basic">基础层</a> / 媒体工具 & Zod</nav>
+<h1>媒体工具函数与 Zod 校验完整速查</h1>
+<p class="hero-sub">@remotion/media-utils + zod-types + webcodecs + renderer 工具</p>
+<div class="alert alert-info"><span class="alert-icon">📚</span><div class="alert-body"><p>来源:Remotion 官方 @remotion/media-utils、zod-types、webcodecs、renderer 包 API 文档(2025-2026)。</p></div></div>
+
+<section class="section" id="s1">
+<span class="section-num">Chapter 01</span>
+<h2>@remotion/media-utils 11 个 API</h2>
+<p>音视频元数据 + 频谱分析全套工具:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>API</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>getAudioData(src)</code></td><td>异步获取音频元数据 + 频谱</td></tr>
+<tr><td><code>getAudioDurationInSeconds(src)</code></td><td>仅获取时长(快)</td></tr>
+<tr><td><code>getVideoMetadata(src)</code></td><td>视频元数据(width/height/fps/duration/audioCodec)</td></tr>
+<tr><td><code>getWaveformPortion({...})</code></td><td>音频波形的某段</td></tr>
+<tr><td><code>useAudioData(src)</code></td><td>getAudioData 的 hook 版(SSR 阻塞)</td></tr>
+<tr><td><code>useWindowedAudioData({...})</code></td><td>流式窗口加载,长录音优化</td></tr>
+<tr><td><code>visualizeAudio({...})</code></td><td>音乐频谱(返回每帧 32 段高度)</td></tr>
+<tr><td><code>visualizeAudioWaveform({...})</code></td><td>语音波形(返回浮点数组)</td></tr>
+<tr><td><code>audioBufferToDataUrl(buffer)</code></td><td>AudioBuffer → dataURL</td></tr>
+<tr><td><code>createSmoothSvgPath(points)</code></td><td>波形点 → 平滑 SVG path</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section class="section" id="s2">
+<span class="section-num">Chapter 02</span>
+<h2>getVideoMetadata 完整字段</h2>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">const meta = await getVideoMetadata('clip.mp4');
+// {
+//   durationInSeconds: 12.5,
+//   width: 1920, height: 1080,
+//   fps: 30, supportsSeeking: true,
+//   videoCodec: 'h264', audioCodec: 'aac',
+//   audioFileExtension: 'aac',
+//   tracks: [{ type: 'video', codec: 'h264', ... }, { type: 'audio', codec: 'aac' }],
+//   isHdr: false,
+//   rotation: 0,
+//   colorSpace: 'bt709',
+// }</code></pre></div>
+</section>
+
+<section class="section" id="s3">
+<span class="section-num">Chapter 03</span>
+<h2>visualizeAudio 完整模式</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">const bars = visualizeAudio({
+  fps, frame,
+  audioData,                    // 来自 useAudioData
+  numberOfSamples: 64,          // 频段数
+  optimizeFor: 'speed',         // 4.0.83+ 速度优化
+  smoothing: true,              // 帧间平滑
+});
+
+// 64 段频谱柱状图
+return bars.map((v, i) =&gt; &lt;div key={i} style={{ height: 1000 * v }} /&gt;);</code></pre></div>
+</section>
+
+<section class="section" id="s4">
+<span class="section-num">Chapter 04</span>
+<h2>@remotion/zod-types 完整 API</h2>
+<p>3 个核心类型 + 1 个 v3 兼容包:</p>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">import { zColor, zTextarea, zMatrix } from '@remotion/zod-types';
+import { z } from 'zod';
+
+const Schema = z.object({
+  brand: zColor(),                  // 颜色选择器
+  description: zTextarea(),         // 多行文本
+  position: zMatrix(),              // 2D 变换矩阵
+  title: z.string(),
+});</code></pre></div>
+<p>Studio 自动渲染对应可视化控件。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>类型</th><th>Studio 控件</th><th>返回值</th></tr></thead>
+<tbody>
+<tr><td><code>zColor()</code></td><td>拾色器</td><td>string(hex/rgba)</td></tr>
+<tr><td><code>zTextarea()</code></td><td>多行文本框</td><td>string(保留 
+)</td></tr>
+<tr><td><code>zMatrix()</code></td><td>2D 矩阵编辑器</td><td>number[6] (matrix2d)</td></tr>
+</tbody>
+</table></div>
+<p>Zod v3 用户:用 <code>@remotion/zod-types-v3</code>(同 API,Zod 3.22.3 输出)。</p>
+</section>
+
+<section class="section" id="s5">
+<span class="section-num">Chapter 05</span>
+<h2>@remotion/webcodecs 高级函数</h2>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">import {
+  getPartialAudioData,  // 4.0.328+ 抽某时间窗口的音频
+  createAudioDecoder,    // 创建音频解码器
+  convertAudioData,     // AudioData 转换
+  extractFrames,         // 视频抽帧
+  makeVideo,             // 帧数组 → 视频
+} from '@remotion/webcodecs';
+
+// 抽取 10~20s 音频
+const samples = await getPartialAudioData({
+  src: 'audio.wav',
+  fromSeconds: 10, toSeconds: 20,
+  channelIndex: 0,         // 0=左声道
+  signal: controller.signal,  // AbortSignal
+});</code></pre></div>
+</section>
+
+<section class="section" id="s6">
+<span class="section-num">Chapter 06</span>
+<h2>@remotion/renderer 工具函数</h2>
+<div class="code-block"><div class="code-block-header">ts</div><pre class="line-numbers"><code class="language-ts">import { extractAudio, getVideoMetadata, combineChunks } from '@remotion/renderer';
+
+// 从视频抽音轨
+const meta = await getVideoMetadata('video.mp4');
+await extractAudio({
+  videoSource: 'video.mp4',
+  audioOutput: `out.${meta.audioFileExtension}`,  // 用元数据确定扩展名
+  binariesDirectory: null,  // 默认从 node_modules
+});
+
+// 合并分块(SSR 集群渲染用)
+await combineChunks({
+  filelist: ['chunk1.webm', 'chunk2.webm', 'chunk3.webm'],
+  output: 'final.webm',
+});</code></pre></div>
+</section>
+
+<section class="section" id="s7">
+<span class="section-num">Chapter 07</span>
+<h2>完整工作流:动态视频编辑器</h2>
+<div class="code-block"><div class="code-block-header">tsx</div><pre class="line-numbers"><code class="language-tsx">// 用户上传视频 → 自动剪到 30s → 抽音轨 → 加字幕 → 渲染
+import { getVideoMetadata } from '@remotion/media-utils';
+import { extractAudio } from '@remotion/renderer';
+import { transcribe } from '@remotion/openai-whisper';
+
+async function processVideo(src: string) {
+  // 1. 元数据
+  const meta = await getVideoMetadata(src);
+  // 2. 抽音轨(给 Whisper)
+  await extractAudio({ videoSource: src, audioOutput: 'tmp.aac' });
+  // 3. Whisper 转录
+  const captions = await transcribe({ audio: 'tmp.aac', language: 'en' });
+  // 4. 用 calculateMetadata 动态调整时长
+  return { duration: meta.durationInSeconds, captions };
+}</code></pre></div>
+</section>
+
+<nav class="page-nav">
+<a href="B-09-design-visual.html" class="prev">← 上一页:设计视觉</a>
+<a href="index.html" class="next">回到总目录 →</a>
+</nav>
+</main>
+<footer class="site-footer"><p>© 2026 AI 工具箱 · Remotion 知识库 · 内容基于官方文档整理</p></footer>
+<script src="scripts.js"></script>
+</body></html>

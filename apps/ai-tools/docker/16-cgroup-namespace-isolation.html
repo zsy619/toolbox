@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2496ED" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>
+      容器资源限制与 cgroup 深入 | Docker 实战教程
+    </title>
+    <meta name="description" content="详解 Linux cgroup v1/v2 资源控制、namespace 6 种隔离、ulimit 系统资源限制;CPU shares/quotas、内存 limit/reservation、磁盘 IO blkio 完整配置。">
+    <meta name="keywords" content="Docker, 容器资源限制与 cgroup 深入, 容器化教程, AI 工具箱">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://tools.yy24365.com/ai-tools/docker/16-cgroup-namespace-isolation.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="容器资源限制与 cgroup 深入">
+    <meta property="og:description" content="详解 Linux cgroup v1/v2 资源控制、namespace 6 种隔离、ulimit 系统资源限制;CPU shares/quotas、内存 limit/reservation、磁盘 IO blkio 完整配置。">
+    <meta property="og:url" content="https://tools.yy24365.com/ai-tools/docker/16-cgroup-namespace-isolation.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="容器资源限制与 cgroup 深入">
+    <meta name="twitter:description" content="详解 Linux cgroup v1/v2 资源控制、namespace 6 种隔离、ulimit 系统资源限制;CPU shares/quotas、内存 limit/reservation、磁盘 IO blkio 完整配置。">
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"容器资源限制与 cgroup 深入","description":"详解 Linux cgroup v1/v2 资源控制、namespace 6 种隔离、ulimit 系统资源限制;CPU shares/quotas、内存 limit/reservation、磁盘 IO blkio 完整配置。","author":{"@type":"Organization","name":"AI 工具箱"},"datePublished":"2026-06-03","inLanguage":"zh-CN"}
+    </script>
+    <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://tools.yy24365.com/"},{"@type":"ListItem","position":2,"name":"AI 工具","item":"https://tools.yy24365.com/ai-tools/"},{"@type":"ListItem","position":3,"name":"Docker 教程","item":"https://tools.yy24365.com/ai-tools/docker/"},{"@type":"ListItem","position":4,"name":"容器资源限制与 cgroup 深入","item":"https://tools.yy24365.com/ai-tools/docker/16-cgroup-namespace-isolation.html"}]}
+    </script>
+    <link rel="stylesheet" href="docker-common.css">
+  </head>
+  <body>
+    <a href="#main" class="skip-link">
+      跳到主内容
+    </a>
+    <div class="progress" id="progress">
+    </div>
+    <header class="site-header" role="banner">
+      <nav class="nav-wrap" aria-label="主导航">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            D
+          </span>
+          <span>
+            AI 工具箱
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="../index.html">
+            AI 工具
+          </a>
+          <a href="index.html">
+            Docker 教程
+          </a>
+          <a href="#toc">
+            目录
+          </a>
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+          🌗 主题
+        </button>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <a href="/">
+              首页
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="../index.html">
+              AI 工具
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <a href="index.html">
+              Docker 教程
+            </a>
+            <span class="breadcrumb-sep">
+              /
+            </span>
+            <span aria-current="page">
+              容器资源限制与 cgroup 深入
+            </span>
+          </nav>
+          <h1 id="hero-title">
+            容器资源限制与 cgroup 深入
+          </h1>
+          <p class="hero-sub">
+            cgroup v1/v2 + namespace + ulimit + 隔离
+          </p>
+          <p class="hero-desc">
+            详解 Linux cgroup v1/v2 资源控制、namespace 6 种隔离、ulimit 系统资源限制;CPU shares/quotas、内存 limit/reservation、磁盘 IO blkio 完整配置。
+          </p>
+          <div class="hero-meta">
+            <div class="hero-meta-item">
+              <strong>
+                课程编号
+              </strong>
+              第 16 课
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                分类
+              </strong>
+              内核原理
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                难度
+              </strong>
+              高级
+            </div>
+            <div class="hero-meta-item">
+              <strong>
+                字数
+              </strong>
+              ~ 4000 字
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="container">
+        <nav class="toc" id="toc">
+          <h2 class="toc-title">
+            本文目录
+          </h2>
+          <ul class="toc-grid">
+            <li>
+              <a href="#s1">
+                <span class="toc-num">
+                  01
+                </span>
+                cgroup v1 与 v2 差异
+              </a>
+            </li>
+            <li>
+              <a href="#s2">
+                <span class="toc-num">
+                  02
+                </span>
+                namespace 6 种隔离
+              </a>
+            </li>
+            <li>
+              <a href="#s3">
+                <span class="toc-num">
+                  03
+                </span>
+                CPU 资源 4 限制
+              </a>
+            </li>
+            <li>
+              <a href="#s4">
+                <span class="toc-num">
+                  04
+                </span>
+                内存 4 限制
+              </a>
+            </li>
+            <li>
+              <a href="#s5">
+                <span class="toc-num">
+                  05
+                </span>
+                ulimit 系统级限制
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <section class="section" id="s1" aria-labelledby="s1-title">
+          <span class="section-num">
+            Chapter 01
+          </span>
+          <h2 id="s1-title">
+            cgroup v1 与 v2 差异
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  v1:每个资源独立层级,cpu/memory/blkio 分开
+                </li>
+                <li>
+                  v2:统一层级,所有资源统一管理
+                </li>
+                <li>
+                  cgroup namespace:容器内只看到自己的进程
+                </li>
+                <li>
+                  Docker 20.10+ 默认 v2(Kernel 5.8+ 推荐)
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s2" aria-labelledby="s2-title">
+          <span class="section-num">
+            Chapter 02
+          </span>
+          <h2 id="s2-title">
+            namespace 6 种隔离
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  PID:进程 ID 隔离(容器内 PID 1 是入口进程)
+                </li>
+                <li>
+                  Network:网络协议栈隔离(独立 IP/路由/防火墙)
+                </li>
+                <li>
+                  Mount:文件系统挂载点隔离(chroot 增强版)
+                </li>
+                <li>
+                  UTS:主机名/域名隔离
+                </li>
+                <li>
+                  IPC:进程间通信隔离(消息队列/信号量)
+                </li>
+                <li>
+                  User:用户/组 ID 隔离(root in container ≠ host root)
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s3" aria-labelledby="s3-title">
+          <span class="section-num">
+            Chapter 03
+          </span>
+          <h2 id="s3-title">
+            CPU 资源 4 限制
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  --cpus=1.5:最大使用 1.5 核(最直观)
+                </li>
+                <li>
+                  --cpu-shares=512:相对权重(默认 1024)
+                </li>
+                <li>
+                  --cpuset-cpus=0,1:绑核(避免跨核开销)
+                </li>
+                <li>
+                  --cpu-period + --cpu-quota:完全公平调度器(CFS)
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s4" aria-labelledby="s4-title">
+          <span class="section-num">
+            Chapter 04
+          </span>
+          <h2 id="s4-title">
+            内存 4 限制
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  --memory=512m:硬上限,超限 OOM Kill
+                </li>
+                <li>
+                  --memory-reservation=256m:软保证(系统压力时优先回收)
+                </li>
+                <li>
+                  --memory-swap=1g:总内存+swap(默认=memory,0 禁用 swap)
+                </li>
+                <li>
+                  --oom-kill-disable:禁用 OOM Kill(慎用,易拖垮宿主机)
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section class="section" id="s5" aria-labelledby="s5-title">
+          <span class="section-num">
+            Chapter 05
+          </span>
+          <h2 id="s5-title">
+            ulimit 系统级限制
+          </h2>
+          <div class="content-card">
+            <div class="content-card-body">
+              <ul>
+                <li>
+                  ulimit -n:文件描述符数(容器默认 1024,高并发需调大)
+                </li>
+                <li>
+                  ulimit -u:最大进程数(默认无限制,需显式设)
+                </li>
+                <li>
+                  ulimit -l:最大锁定内存(Redis/ES 内存锁必需)
+                </li>
+                <li>
+                  ulimit -c:core dump 大小(0 禁用)
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <div class="alert alert-tip">
+          <span class="alert-icon">
+            💡 检测 cgroup 版本
+          </span>
+          <div class="alert-body">
+            <p>
+              stat -fc %T /sys/fs/cgroup/  → tmpfs 是 v2,无输出是 v1
+            </p>
+          </div>
+        </div>
+        <div class="alert alert-warn">
+          <span class="alert-icon">
+            ⚠️ OOM 排查
+          </span>
+          <div class="alert-body">
+            <p>
+              dmesg | grep 'oom' 看容器是否被 OOM Killer 终止
+            </p>
+          </div>
+        </div>
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <span class="section-num">
+            FAQ
+          </span>
+          <h2 id="faq-title">
+            常见问题
+          </h2>
+          <div class="faq">
+            <div class="faq-item">
+              <h3 class="faq-q">
+                cgroup v1 与 v2 差异
+              </h3>
+              <p class="faq-a">
+                v1:每个资源独立层级,cpu/memory/blkio 分开
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                namespace 6 种隔离
+              </h3>
+              <p class="faq-a">
+                PID:进程 ID 隔离(容器内 PID 1 是入口进程)
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                CPU 资源 4 限制
+              </h3>
+              <p class="faq-a">
+                --cpus=1.5:最大使用 1.5 核(最直观)
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                内存 4 限制
+              </h3>
+              <p class="faq-a">
+                --memory=512m:硬上限,超限 OOM Kill
+              </p>
+            </div>
+            <div class="faq-item">
+              <h3 class="faq-q">
+                ulimit 系统级限制
+              </h3>
+              <p class="faq-a">
+                ulimit -n:文件描述符数(容器默认 1024,高并发需调大)
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer" role="contentinfo">
+      <div class="footer-inner">
+        <h3 class="footer-title">
+          关于本课程
+        </h3>
+        <p class="footer-meta">
+          容器资源限制与 cgroup 深入 · Docker 24 节系统化教程。所有代码均经过实测,可运行于 Docker 20+ / K8s 1.24+ 环境。
+        </p>
+        <p class="footer-meta">
+          <strong>
+            完整 24 节课
+          </strong>
+          :
+          <a href="index.html" style="color:#c4d1de">
+            回到索引
+          </a>
+          ·
+          <a href="https://docs.docker.com" style="color:#c4d1de">
+            Docker 官方
+          </a>
+        </p>
+        <p class="footer-copyright">
+          © 2026 AI 工具箱 · Docker 完整指南 · 内容遵循 CC BY 4.0 协议
+        </p>
+      </div>
+    </footer>
+    <button class="back-top" id="backTop" aria-label="回到顶部">
+      ↑
+    </button>
+    <script>
+
+(function(){
+  var p=document.getElementById('progress'),b=document.getElementById('backTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,s=h.scrollTop,sh=h.scrollHeight-h.clientHeight;
+    if(p) p.style.width=(sh>0?s/sh*100:0)+'%';
+    if(b){if(window.scrollY>400) b.classList.add('visible'); else b.classList.remove('visible')}
+  },{passive:true});
+  if(b) b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'})};
+  var t=document.getElementById('themeToggle'),k='theme-lesson-16';
+  var stored=localStorage.getItem(k),prefers=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if(stored==='dark'||(!stored&&prefers)) document.documentElement.setAttribute('data-theme','dark');
+  if(t) t.onclick=function(){
+    var d=document.documentElement.getAttribute('data-theme')==='dark';
+    if(d){document.documentElement.removeAttribute('data-theme');localStorage.setItem(k,'light')}
+    else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem(k,'dark')}
+  };
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.onclick=function(e){
+      var id=a.getAttribute('href');if(id.length<2) return;
+      var t=document.querySelector(id);
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});history.pushState(null,'',id)}
+    }
+  });
+})();
+    </script>
+  </body>
+</html>
