@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- 让 IE/Edge 用最新渲染引擎，避免兼容问题 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- 移动端视口，禁止缩放以保证排版稳定 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>从重复工作到可交付的 AI 员工</title>
+    <!-- SEO 基础 -->
+    <meta name="description" content="8 章方法论 · 4 小时课程 · 6 步搭出第一个可交付 Agent。从岗位卡、工作流、Profile、工具链到闭环验收，把一项重复工作交给一个 AI 员工。">
+    <meta name="keywords" content="Agent, AI 员工, Hermes, Codex, 飞书, Profile, 岗位卡, 工作流, 闭环, 复利, AI 落地, 自动化">
+    <meta name="author" content="Agent 搭建课程组">
+    <meta name="theme-color" content="#9333ea">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://tools.yy24365.com/apps/yitang/feishu/index.html">
+    <!-- Open Graph / 社交分享 -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Agent 搭建 · 从重复工作到可交付的 AI 员工">
+    <meta property="og:description" content="8 章方法论 · 4 小时课程 · 6 步搭出第一个可交付 Agent。">
+    <meta property="og:url" content="https://tools.yy24365.com/apps/yitang/feishu/index.html">
+    <meta property="og:site_name" content="Agent 搭建">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="从重复工作到可交付的 AI 员工">
+    <meta name="twitter:description" content="8 章方法论 · 4 小时课程 · 6 步搭出第一个可交付 Agent。">
+    <!-- 性能优化：Tailwind CDN 预连接 -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <!-- Tailwind CSS（CDN 演示用） -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // ============================================================
+        // Tailwind 主题扩展：定义品牌色、阴影、字体
+        // ============================================================
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // 品牌色：紫色（呼应"Agent 工作层"概念）
+                        brand: {
+                            50: '#faf5ff', 100: '#f3e8ff',
+                            500: '#a855f7', 600: '#9333ea',
+                            700: '#7e22ce', 900: '#581c87'
+                        }
+                    },
+                    fontFamily: {
+                        // 中英文混排，优先苹方/微软雅黑
+                        sans: ['"PingFang SC"', '"Microsoft YaHei"', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    boxShadow: {
+                        // 卡片基础阴影 + 悬停阴影
+                        'card': '0 2px 12px -2px rgba(168,85,247,0.08)',
+                        'hover': '0 12px 28px -8px rgba(168,85,247,0.25)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ============================================================
+           全局样式：卡片悬停动效、连接线、进度条、滚动条
+           ============================================================ */
+        .card-hover {
+            transition: all 0.25s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px -8px rgba(168, 85, 247, 0.25);
+        }
+
+        /* 桌面端学习路径连接线 */
+        .step-connector {
+            background: linear-gradient(to bottom, transparent, #a855f7 20%, #a855f7 80%, transparent);
+        }
+
+        /* 锚点跳转偏移：避免被 sticky 导航遮挡 */
+        section[id] {
+            scroll-margin-top: 80px;
+        }
+
+        /* 阅读进度条 */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #a855f7, #ec4899);
+            z-index: 100;
+            transition: width 0.1s ease-out;
+        }
+
+        /* 跳到主内容：可访问性优化，键盘 Tab 第一项 */
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            background: #9333ea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 0 0 8px 0;
+            font-weight: bold;
+        }
+
+        .skip-link:focus {
+            left: 0;
+        }
+
+        /* 暗色模式切换按钮 */
+        .theme-toggle {
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+        }
+
+        /* 打印样式：打印时隐藏导航/进度/返回顶部 */
+        @media print {
+
+            nav,
+            #progress-bar,
+            #back-to-top,
+            .no-print {
+                display: none !important;
+            }
+
+            section {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* 自定义滚动条（仅 webkit） */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* TOC 锚点导航高亮当前章节 */
+        .toc-link.active {
+            color: #9333ea;
+            border-color: #9333ea;
+            background: #faf5ff;
+        }
+
+        .dark .toc-link.active {
+            color: #c084fc;
+            border-color: #c084fc;
+            background: rgba(168, 85, 247, 0.1);
+        }
+    </style>
+</head>
+<!-- 主体类：自动暗色模式（prefers-color-scheme） -->
+
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased min-h-screen font-sans">
+    <!-- 跳到主内容链接（键盘可访问） -->
+    <a href="#main-content" class="skip-link">跳到主要内容</a>
+    <!-- 阅读进度条 -->
+    <div id="progress-bar" style="width: 0%;"></div>
+    <!-- ========== 顶部导航 ========== -->
+    <nav class="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700" aria-label="主导航">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-fuchsia-600 flex items-center justify-center text-white font-bold text-sm shadow-md" aria-hidden="true">A</div>
+                <div class="leading-tight">
+                    <div class="font-bold text-base text-slate-900 dark:text-slate-100">Agent 搭建</div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">从重复工作到可交付的 AI 员工</div>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-2 text-xs font-medium">
+                <span class="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">8 章 · 4 小时</span>
+                <span class="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">6 步法</span>
+                <span class="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">里程碑思维</span>
+            </div>
+            <!-- 暗色模式切换 -->
+            <button id="theme-toggle" class="theme-toggle ml-2 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="切换暗色模式">
+                <span class="dark:hidden">🌙</span>
+                <span class="hidden dark:inline">☀️</span>
+            </button>
+        </div>
+    </nav>
+    <!-- ========== 二级目录导航（桌面端，sticky） ========== -->
+    <nav class="sticky top-16 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm border-b border-slate-200/60 dark:border-slate-700/60 hidden lg:block" aria-label="目录导航">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <ul class="flex items-center justify-center gap-1 py-2 text-xs font-medium overflow-x-auto">
+                <li><a href="#hero" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">首页</a></li>
+                <li><a href="#story" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">真实案例</a></li>
+                <li><a href="#fit" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">适合谁</a></li>
+                <li><a href="#concepts" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">关键概念</a></li>
+                <li><a href="#metrics" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">核心数据</a></li>
+                <li><a href="#principles" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">三条心法</a></li>
+                <li><a href="#path" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">学习路径</a></li>
+                <li><a href="#chapters" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">章节详情</a></li>
+                <li><a href="#mindset" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">底层思维</a></li>
+                <li><a href="#tools" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">工具分工</a></li>
+                <li><a href="#quotes" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">金句精选</a></li>
+                <li><a href="#faq" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">常见误区</a></li>
+                <li><a href="#start" class="toc-link inline-block px-3 py-1.5 rounded-full border border-transparent hover:border-purple-300 transition">立即开始</a></li>
+            </ul>
+        </div>
+    </nav>
+    <!-- ========== Hero ========== -->
+    <header id="hero" class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 text-center">
+        <!-- 装饰背景：模糊光晕 -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-64 bg-gradient-to-b from-purple-100/60 via-fuchsia-50/30 to-transparent dark:from-purple-900/30 dark:via-fuchsia-900/10 dark:to-transparent blur-3xl -z-10"></div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-bold rounded-full mb-5">
+            <span aria-hidden="true">📚</span><span>知识库 · v2.0 · 2026 深度优化版</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 text-slate-900 dark:text-slate-100">
+            把一项<span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-fuchsia-500">重复工作</span>，<br class="md:hidden">交给一个 AI 员工
+        </h1>
+        <p class="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+            不是做一个万能 Agent，而是<span class="font-bold text-slate-700 dark:text-slate-200">搭一个 60 分的固定岗位</span>：明确的职责、稳定的流程、清楚的边界。任务丢给它，它自己知道怎么干、干成什么样、什么时候停下来问你。
+        </p>
+        <!-- 阅读时长提示 -->
+        <div class="flex items-center justify-center gap-4 mt-6 text-xs text-slate-400 dark:text-slate-500">
+            <span>📖 阅读时长 8 分钟</span>
+            <span aria-hidden="true">·</span>
+            <span>⏱ 实战 4 小时</span>
+            <span aria-hidden="true">·</span>
+            <span>🎯 8 章节</span>
+        </div>
+    </header>
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-20">
+        <!-- ========== 真实案例：酒店标签审核员 ========== -->
+        <section id="story" aria-labelledby="story-title">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-full mb-3">
+                    <span aria-hidden="true">📖</span><span>真实案例</span>
+                </div>
+                <h2 id="story-title" class="text-3xl font-bold text-slate-900 dark:text-slate-100">一个酒店标签审核员的诞生</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-2xl mx-auto">这一堂课的全部方法，藏在一个真实故事里。</p>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-card max-w-4xl mx-auto p-6 md:p-10">
+                <div class="space-y-4 text-sm md:text-base text-slate-700 dark:text-slate-300 leading-relaxed">
+                    <p class="text-base"><span class="font-bold text-purple-600 dark:text-purple-400">故事背景：</span>一位酒店行业的实践者，负责用户标签审核。系统给每家酒店打标签——"适合亲子""适合商务""高性价比"。但标签是机器打的，经常打错。"负向标签"和"中性标签"的边界尤其模糊，比如"<span class="font-bold">装修老</span>"到底是负面评价还是客观描述？这需要人工审核。</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 my-5">
+                        <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border-l-4 border-red-500">
+                            <div class="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider mb-1">问题 1</div>
+                            <p class="text-sm font-medium">任务量大：几千个标签要审</p>
+                        </div>
+                        <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border-l-4 border-amber-500">
+                            <div class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">问题 2</div>
+                            <p class="text-sm font-medium">标准在人脑里：老员工一眼看错，但说不出为什么</p>
+                        </div>
+                        <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border-l-4 border-blue-500">
+                            <div class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">问题 3</div>
+                            <p class="text-sm font-medium">新人学不会：问一句改一句，干了 3 个月还是糊涂</p>
+                        </div>
+                    </div>
+                    <p class="text-base"><span class="font-bold text-purple-600 dark:text-purple-400">解法：</span>她没有逼老员工写文档——逼也没用，老员工工作量饱和。她做了三件事：</p>
+                    <ol class="space-y-2 pl-5 list-decimal text-slate-700 dark:text-slate-300">
+                        <li><span class="font-bold">招一批完全不懂业务的外包</span>——因为不懂，所以天天问；因为天天问，老员工想不回答都不行。</li>
+                        <li><span class="font-bold">切断私下解答</span>——外包和老员工放在两个城市，所有问答强制走线上文档，问一句、答一句，全部自动留痕。知识自己就长出来了。</li>
+                        <li><span class="font-bold">打怪升级</span>——提问加分、解答加分，把"说出经验"变成一件有奖励的事。</li>
+                    </ol>
+                    <div class="bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500 p-5 rounded-r-xl mt-5">
+                        <p class="text-base font-bold text-purple-900 dark:text-purple-200">结果：</p>
+                        <p class="text-sm text-slate-700 dark:text-slate-300 mt-2">然后招了一个有一两年产品背景的年轻女生当"AI 翻译官"——把文档里积累的知识翻译成 AI 能懂的规则。她差点陷进"调模型、抠参数"的技术细节里。实践者一句话拉她回来：</p>
+                        <p class="text-lg font-bold text-purple-700 dark:text-purple-300 mt-3 italic">"别在技术细节里转了，跑出 60 分，先把流程跑通。"</p>
+                        <p class="text-sm text-slate-700 dark:text-slate-300 mt-3">AI 先以 60 分水平上岗。然后把每一次"AI 判错、人判对"的案例都收集起来，回流给 AI。几轮之后，这个"AI 标签审核员"已经能接手最烦的那部分重复工作了。</p>
+                    </div>
+                    <p class="text-base text-center font-bold text-slate-700 dark:text-slate-200 mt-5">这位实践者做的事，就是今天你要学的 6 步。她不是技术大牛，她做对的是方法。</p>
+                </div>
+            </div>
+        </section>
+        <!-- ========== 适合谁 / 不适合谁 ========== -->
+        <section id="fit" aria-labelledby="fit-title">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-full mb-3">
+                    <span aria-hidden="true">🎯</span><span>使用指南</span>
+                </div>
+                <h2 id="fit-title" class="text-3xl font-bold text-slate-900 dark:text-slate-100">这个知识库适合谁？</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-5xl mx-auto">
+                <!-- 适合 -->
+                <div class="bg-green-50 dark:bg-green-900/20 rounded-2xl p-6 border-l-4 border-green-500">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-2xl" aria-hidden="true">✅</span>
+                        <h3 class="text-lg font-bold text-green-900 dark:text-green-200">适合你，如果……</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-green-900 dark:text-green-200">
+                        <li class="flex gap-2"><span class="font-bold">▸</span><span>你<span class="font-bold">每周有重复 3 次以上</span>的工作（周报、纪要、整理、审核）</span></li>
+                        <li class="flex gap-2"><span class="font-bold">▸</span><span>你已经用过 AI 写文案、总结，但每次都要<span class="font-bold">重新解释背景</span></span></li>
+                        <li class="flex gap-2"><span class="font-bold">▸</span><span>你希望把"老员工脑子里的经验"<span class="font-bold">沉淀成可复用</span>的东西</span></li>
+                        <li class="flex gap-2"><span class="font-bold">▸</span><span>你能接受 AI <span class="font-bold">先 60 分</span>，再慢慢迭代到 80、90 分</span></li>
+                        <li class="flex gap-2"><span class="font-bold">▸</span><span>你愿意为每个任务花<span class="font-bold">一次</span>配置时间，换以后<span class="font-bold">无数次</span>复用</span></li>
+                    </ul>
+                </div>
+                <!-- 不适合 -->
+                <div class="bg-slate-100 dark:bg-slate-800/50 rounded-2xl p-6 border-l-4 border-slate-400">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-2xl" aria-hidden="true">⚠️</span>
+                        <h3 class="text-lg font-bold text-slate-700 dark:text-slate-300">暂时不适合，如果……</h3>
+                    </div>
+                    <ul class="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                        <li class="flex gap-2"><span class="font-bold">▸</span><span>你的任务<span class="font-bold">每次都完全不同</span>（一次性创意、不重复的探索）</span></li>
+                        <li class="flex gap-2"><span class="font-bold">▸</span><span>你的工作<span class="font-bold">涉及钱/安全/合规</span>的<span class="font-bold">低容错场景</span>（出错代价极大）</span></li>
+                        <li class="flex gap-2"><span class="font-bold">▸</span><span>你期待"<span class="font-bold">一步到位 90 分</span>"（本课程核心是 60 分闭环）</span></li>
+                        <li class="flex gap-2"><span class="font-bold">▸</span><span>你的数据<span class="font-bold">涉及客户隐私</span>且无法脱敏</span></li>
+                        <li class="flex gap-2"><span class="font-bold">▸</span><span>你不想花时间写<span class="font-bold">Profile 和工作流</span>（AI 不能凭空知道你的规则）</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <!-- ========== 关键概念快速卡（4 张） ========== -->
+        <section id="concepts" aria-labelledby="concepts-title">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-full mb-3">
+                    <span aria-hidden="true">🔑</span><span>关键概念</span>
+                </div>
+                <h2 id="concepts-title" class="text-3xl font-bold text-slate-900 dark:text-slate-100">先认识 4 个核心概念</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">后面所有章节都在围绕这 4 个概念展开</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+                <article class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border-t-4 border-purple-500 shadow-card">
+                    <div class="text-3xl mb-3" aria-hidden="true">📋</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">岗位卡</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">给 Agent 的"招聘启事"：输入、输出、边界、成功标准，缺一不可。</p>
+                    <p class="text-[11px] text-purple-600 dark:text-purple-400 font-bold">详见 → 第 2 章</p>
+                </article>
+                <article class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border-t-4 border-blue-500 shadow-card">
+                    <div class="text-3xl mb-3" aria-hidden="true">🧩</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">工作流</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">把脑中经验拆成 3~8 步：输入→判断→处理→检查→输出→人工确认。</p>
+                    <p class="text-[11px] text-blue-600 dark:text-blue-400 font-bold">详见 → 第 3 章</p>
+                </article>
+                <article class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border-t-4 border-emerald-500 shadow-card">
+                    <div class="text-3xl mb-3" aria-hidden="true">🧠</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">Profile</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">Hermes 上的"岗位说明书"：身份、规则、判断、事实边界。</p>
+                    <p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">详见 → 第 4 章</p>
+                </article>
+                <article class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border-t-4 border-amber-500 shadow-card">
+                    <div class="text-3xl mb-3" aria-hidden="true">🔄</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">闭环</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">跑→归因→改一个变量→复测，三类样例（正常/边界/异常）。</p>
+                    <p class="text-[11px] text-amber-600 dark:text-amber-400 font-bold">详见 → 第 6 章</p>
+                </article>
+            </div>
+        </section>
+        <!-- ========== 核心数据条 ========== -->
+        <section id="metrics" aria-labelledby="metrics-title">
+            <h2 id="metrics-title" class="sr-only">核心数据</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 text-center card-hover">
+                    <div class="text-3xl font-extrabold text-purple-600 dark:text-purple-400">8</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">章节</div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 text-center card-hover">
+                    <div class="text-3xl font-extrabold text-fuchsia-600 dark:text-fuchsia-400">245</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">分钟 · 4 小时</div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 text-center card-hover">
+                    <div class="text-3xl font-extrabold text-amber-600 dark:text-amber-400">6</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">步法 · Demo→闭环</div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 text-center card-hover">
+                    <div class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">3</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">种复利</div>
+                </div>
+            </div>
+        </section>
+        <!-- ========== 核心心法三条 ========== -->
+        <section id="principles" aria-labelledby="principles-title">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-full mb-3">
+                    <span aria-hidden="true">💎</span><span>核心心法</span>
+                </div>
+                <h2 id="principles-title" class="text-3xl font-bold text-slate-900 dark:text-slate-100">先记住三句话</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+                <div class="card-hover bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
+                    <div class="text-3xl mb-3" aria-hidden="true">①</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">先跑通，再优化</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">60 分的闭环，远胜 90 分的半成品。</p>
+                </div>
+                <div class="card-hover bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-2xl p-6 border border-emerald-200 dark:border-emerald-800">
+                    <div class="text-3xl mb-3" aria-hidden="true">②</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">每一步都留痕</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">你每一次修改、每一次判断，都是 Agent 未来的数据。</p>
+                </div>
+                <div class="card-hover bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/30 dark:to-pink-900/30 rounded-2xl p-6 border border-rose-300 dark:border-rose-800">
+                    <div class="text-3xl mb-3" aria-hidden="true">🚨</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">测试资料必须脱敏</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">真实姓名、手机号、身份证、薪资<span class="font-bold text-rose-600 dark:text-rose-400">严禁</span>直接喂给 AI。这是翻车级风险。</p>
+                </div>
+            </div>
+        </section>
+        <!-- ========== 学习路径 · 8 节点 ========== -->
+        <section id="path" aria-labelledby="path-title">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-full mb-3">
+                    <span aria-hidden="true">🗺️</span><span>完整路径</span>
+                </div>
+                <h2 id="path-title" class="text-3xl font-bold text-slate-900 dark:text-slate-100">6 步法 + 1 起点 + 1 结尾</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-2xl mx-auto">从工具准备到跑通闭环，再到把体验变成长期岗位。一一对应里程碑五步：<span class="font-bold">初步预判 → 可行性验证 → 拆解优化 → 稳定拿结果 → SOP 推广</span></p>
+            </div>
+            <!-- 桌面端：水平时间轴 -->
+            <div class="hidden lg:flex items-stretch max-w-6xl mx-auto gap-2">
+                <a href="00-tooling-setup.html" class="card-hover flex-1 bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-rose-400 dark:border-rose-600 shadow-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-rose-600 dark:text-rose-400">起点</span>
+                        <span class="text-2xl" aria-hidden="true">🛠️</span>
+                    </div>
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-slate-100 leading-snug mb-1">工具准备</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">25 min</p>
+                    <p class="text-[11px] text-rose-600 dark:text-rose-400 font-bold mt-1">必保留</p>
+                </a>
+                <div class="flex items-center text-slate-300 dark:text-slate-600 text-2xl" aria-hidden="true">→</div>
+                <a href="01-demo.html" class="card-hover flex-1 bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Step 1</span>
+                        <span class="text-2xl" aria-hidden="true">🚀</span>
+                    </div>
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-slate-100 leading-snug mb-1">跑通 Demo</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">30 min</p>
+                </a>
+                <div class="flex items-center text-slate-300 dark:text-slate-600 text-2xl" aria-hidden="true">→</div>
+                <a href="02-job-card.html" class="card-hover flex-1 bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Step 2</span>
+                        <span class="text-2xl" aria-hidden="true">📋</span>
+                    </div>
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-slate-100 leading-snug mb-1">定岗位</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">30 min</p>
+                </a>
+                <div class="flex items-center text-slate-300 dark:text-slate-600 text-2xl" aria-hidden="true">→</div>
+                <a href="03-workflow.html" class="card-hover flex-1 bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Step 3</span>
+                        <span class="text-2xl" aria-hidden="true">🧩</span>
+                    </div>
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-slate-100 leading-snug mb-1">拆工序</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">40 min</p>
+                </a>
+                <div class="flex items-center text-slate-300 dark:text-slate-600 text-2xl" aria-hidden="true">→</div>
+                <a href="04-profile.html" class="card-hover flex-1 bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Step 4</span>
+                        <span class="text-2xl" aria-hidden="true">🧠</span>
+                    </div>
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-slate-100 leading-snug mb-1">写大脑</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">40 min</p>
+                </a>
+                <div class="flex items-center text-slate-300 dark:text-slate-600 text-2xl" aria-hidden="true">→</div>
+                <a href="05-toolchain.html" class="card-hover flex-1 bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Step 5</span>
+                        <span class="text-2xl" aria-hidden="true">🔌</span>
+                    </div>
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-slate-100 leading-snug mb-1">接工具</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">30 min</p>
+                </a>
+                <div class="flex items-center text-slate-300 dark:text-slate-600 text-2xl" aria-hidden="true">→</div>
+                <a href="06-closed-loop.html" class="card-hover flex-1 bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Step 6</span>
+                        <span class="text-2xl" aria-hidden="true">🔄</span>
+                    </div>
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-slate-100 leading-snug mb-1">跑闭环</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">40 min</p>
+                </a>
+                <div class="flex items-center text-slate-300 dark:text-slate-600 text-2xl" aria-hidden="true">→</div>
+                <a href="07-long-term.html" class="card-hover flex-1 bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-emerald-400 dark:border-emerald-600 shadow-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">结尾</span>
+                        <span class="text-2xl" aria-hidden="true">🌱</span>
+                    </div>
+                    <h3 class="font-bold text-sm text-slate-900 dark:text-slate-100 leading-snug mb-1">长期岗位</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">10 min</p>
+                </a>
+            </div>
+            <!-- 移动端：垂直卡片 -->
+            <div class="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl mx-auto">
+                <a href="00-tooling-setup.html" class="card-hover bg-white dark:bg-slate-800 rounded-xl p-4 border-2 border-rose-400 dark:border-rose-600">
+                    <div class="flex items-center gap-3"><span class="text-2xl" aria-hidden="true">🛠️</span>
+                        <div>
+                            <div class="font-bold text-sm">工具准备</div>
+                            <div class="text-[11px] text-rose-600 dark:text-rose-400 font-bold">起点 · 25 min · 必保留</div>
+                        </div>
+                    </div>
+                </a>
+                <a href="01-demo.html" class="card-hover bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3"><span class="text-2xl" aria-hidden="true">🚀</span>
+                        <div>
+                            <div class="font-bold text-sm">Step 1 · 跑通 Demo</div>
+                            <div class="text-[11px] text-slate-500">30 min</div>
+                        </div>
+                    </div>
+                </a>
+                <a href="02-job-card.html" class="card-hover bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3"><span class="text-2xl" aria-hidden="true">📋</span>
+                        <div>
+                            <div class="font-bold text-sm">Step 2 · 定岗位</div>
+                            <div class="text-[11px] text-slate-500">30 min</div>
+                        </div>
+                    </div>
+                </a>
+                <a href="03-workflow.html" class="card-hover bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3"><span class="text-2xl" aria-hidden="true">🧩</span>
+                        <div>
+                            <div class="font-bold text-sm">Step 3 · 拆工序</div>
+                            <div class="text-[11px] text-slate-500">40 min</div>
+                        </div>
+                    </div>
+                </a>
+                <a href="04-profile.html" class="card-hover bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3"><span class="text-2xl" aria-hidden="true">🧠</span>
+                        <div>
+                            <div class="font-bold text-sm">Step 4 · 写大脑</div>
+                            <div class="text-[11px] text-slate-500">40 min</div>
+                        </div>
+                    </div>
+                </a>
+                <a href="05-toolchain.html" class="card-hover bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3"><span class="text-2xl" aria-hidden="true">🔌</span>
+                        <div>
+                            <div class="font-bold text-sm">Step 5 · 接工具</div>
+                            <div class="text-[11px] text-slate-500">30 min</div>
+                        </div>
+                    </div>
+                </a>
+                <a href="06-closed-loop.html" class="card-hover bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-3"><span class="text-2xl" aria-hidden="true">🔄</span>
+                        <div>
+                            <div class="font-bold text-sm">Step 6 · 跑闭环</div>
+                            <div class="text-[11px] text-slate-500">40 min</div>
+                        </div>
+                    </div>
+                </a>
+                <a href="07-long-term.html" class="card-hover bg-white dark:bg-slate-800 rounded-xl p-4 border-2 border-emerald-400 dark:border-emerald-600">
+                    <div class="flex items-center gap-3"><span class="text-2xl" aria-hidden="true">🌱</span>
+                        <div>
+                            <div class="font-bold text-sm">结尾 · 长期岗位</div>
+                            <div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">10 min</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+        <!-- ========== 章节卡片网格 ========== -->
+        <section id="chapters" aria-labelledby="chapters-title">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-full mb-3">
+                    <span aria-hidden="true">📖</span><span>章节详情</span>
+                </div>
+                <h2 id="chapters-title" class="text-3xl font-bold text-slate-900 dark:text-slate-100">从哪一章开始？</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a href="00-tooling-setup.html" class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-rose-200 dark:border-rose-800 shadow-card">
+                    <div class="text-3xl mb-3" aria-hidden="true">🛠️</div>
+                    <div class="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-1">起点 · 必保留</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">第 0 章 · 工具准备</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">Codex / 飞书 / Hermes 三件套的安装、授权、连接与一次完整任务验收。</p>
+                    <div class="text-[11px] text-rose-600 dark:text-rose-400 font-bold">⏱ 25 min · 不得删除</div>
+                </a>
+                <a href="01-demo.html" class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-card">
+                    <div class="text-3xl mb-3" aria-hidden="true">🚀</div>
+                    <div class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Step 1</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">第 1 章 · 跑通 Demo</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">先让 Agent 动起来，完成一次最简单的任务，建立信心。原点里程碑。</p>
+                    <div class="text-[11px] text-blue-600 dark:text-blue-400 font-bold">⏱ 30 min</div>
+                </a>
+                <a href="02-job-card.html" class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-card">
+                    <div class="text-3xl mb-3" aria-hidden="true">📋</div>
+                    <div class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Step 2</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">第 2 章 · 定岗位</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">像写招聘启事一样写岗位卡：输入、输出、边界、成功标准。</p>
+                    <div class="text-[11px] text-blue-600 dark:text-blue-400 font-bold">⏱ 30 min</div>
+                </a>
+                <a href="03-workflow.html" class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-card">
+                    <div class="text-3xl mb-3" aria-hidden="true">🧩</div>
+                    <div class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Step 3</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">第 3 章 · 拆工序</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">把脑中的经验拆成 3~8 步可执行流程，加法→减法→白纸提问法。</p>
+                    <div class="text-[11px] text-blue-600 dark:text-blue-400 font-bold">⏱ 40 min</div>
+                </a>
+                <a href="04-profile.html" class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-card">
+                    <div class="text-3xl mb-3" aria-hidden="true">🧠</div>
+                    <div class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Step 4</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">第 4 章 · 写大脑</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">把规则写进 Hermes Profile，配上过往正例/反例，避免幻觉。</p>
+                    <div class="text-[11px] text-blue-600 dark:text-blue-400 font-bold">⏱ 40 min</div>
+                </a>
+                <a href="05-toolchain.html" class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-card">
+                    <div class="text-3xl mb-3" aria-hidden="true">🔌</div>
+                    <div class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Step 5</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">第 5 章 · 接工具</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">把飞书、Hermes、Codex 接通，并设计成长档案做反馈闭环。</p>
+                    <div class="text-[11px] text-blue-600 dark:text-blue-400 font-bold">⏱ 30 min</div>
+                </a>
+                <a href="06-closed-loop.html" class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-card">
+                    <div class="text-3xl mb-3" aria-hidden="true">🔄</div>
+                    <div class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Step 6</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">第 6 章 · 跑闭环</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">三类样例（正常/边界/异常）+ 体感分 + 一次只改一个变量。</p>
+                    <div class="text-[11px] text-blue-600 dark:text-blue-400 font-bold">⏱ 40 min</div>
+                </a>
+                <a href="07-long-term.html" class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-emerald-200 dark:border-emerald-800 shadow-card">
+                    <div class="text-3xl mb-3" aria-hidden="true">🌱</div>
+                    <div class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">结尾</div>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-2">结尾 · 长期岗位</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">3 种复利（数据/Agent/团队） + 最小交付包 + 稳定跑 10 次。</p>
+                    <div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">⏱ 10 min</div>
+                </a>
+            </div>
+        </section>
+        <!-- ========== 里程碑思维对照 ========== -->
+        <section id="mindset" aria-labelledby="mindset-title">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-full mb-3">
+                    <span aria-hidden="true">🪜</span><span>底层思维</span>
+                </div>
+                <h2 id="mindset-title" class="text-3xl font-bold text-slate-900 dark:text-slate-100">6 步背后的里程碑思维</h2>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-card overflow-hidden max-w-5xl mx-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50 dark:bg-slate-900/50">
+                        <tr>
+                            <th class="px-5 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">里程碑五步</th>
+                            <th class="px-5 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">今天 6 步</th>
+                            <th class="px-5 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">大白话</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">初步预判</td>
+                            <td class="px-5 py-3 font-bold text-purple-600 dark:text-purple-400">定岗位</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">先想清楚要干什么</td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">可行性验证</td>
+                            <td class="px-5 py-3 font-bold text-purple-600 dark:text-purple-400">跑通 Demo</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">先试试能不能干</td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">稳定拿结果</td>
+                            <td class="px-5 py-3 font-bold text-purple-600 dark:text-purple-400">写大脑 + 跑闭环</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">让结果稳定下来</td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">拆解优化步骤</td>
+                            <td class="px-5 py-3 font-bold text-purple-600 dark:text-purple-400">拆工序 + 接工具</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">把干法拆开、接上工具</td>
+                        </tr>
+                        <tr>
+                            <td class="px-5 py-3 text-slate-700 dark:text-slate-300">SOP 推广执行</td>
+                            <td class="px-5 py-3 font-bold text-purple-600 dark:text-purple-400">结尾：复制第二个岗位</td>
+                            <td class="px-5 py-3 text-slate-600 dark:text-slate-400">跑顺了再复制</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-center text-sm text-slate-500 dark:text-slate-400 mt-5 max-w-2xl mx-auto">核心心法：<span class="font-bold text-slate-700 dark:text-slate-200">积小胜为大胜</span>。不是一次做出完美 Agent，而是先拿下第一个小胜利，再扩大战果。</p>
+        </section>
+        <!-- ========== 三个工具速记 ========== -->
+        <section id="tools" aria-labelledby="tools-title">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-full mb-3">
+                    <span aria-hidden="true">🧰</span><span>工具分工</span>
+                </div>
+                <h2 id="tools-title" class="text-3xl font-bold text-slate-900 dark:text-slate-100">资料在飞书 · 身份在 Hermes · 干活在 Codex</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+                <div class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-6 border-l-4 border-blue-500 shadow-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-lg text-slate-900 dark:text-slate-100">飞书</h3>
+                        <span class="text-2xl" aria-hidden="true">📄</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">你平时用的文档 / 表格工具</p>
+                    <p class="text-sm text-slate-700 dark:text-slate-300 font-medium">放资料的地方：Agent 从这里读资料，也把结果写到这里。</p>
+                </div>
+                <div class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-6 border-l-4 border-purple-500 shadow-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-lg text-slate-900 dark:text-slate-100">Hermes</h3>
+                        <span class="text-2xl" aria-hidden="true">🧠</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">AI 智能体平台</p>
+                    <p class="text-sm text-slate-700 dark:text-slate-300 font-medium">挂岗位的地方：Agent 的"岗位说明书"存在这里，让它有身份、有记忆。</p>
+                </div>
+                <div class="card-hover bg-white dark:bg-slate-800 rounded-2xl p-6 border-l-4 border-emerald-500 shadow-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-lg text-slate-900 dark:text-slate-100">Codex</h3>
+                        <span class="text-2xl" aria-hidden="true">⚙️</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">AI 编程 / 执行工具</p>
+                    <p class="text-sm text-slate-700 dark:text-slate-300 font-medium">干活的地方：负责执行任务、调用工具、检查结果。</p>
+                </div>
+            </div>
+        </section>
+        <!-- ========== 金句精选（8 章金句） ========== -->
+        <section id="quotes" aria-labelledby="quotes-title">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-full mb-3">
+                    <span aria-hidden="true">✨</span><span>金句精选</span>
+                </div>
+                <h2 id="quotes-title" class="text-3xl font-bold text-slate-900 dark:text-slate-100">每章一句话</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">这 8 句话，是这堂课的核心</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto">
+                <blockquote class="bg-white dark:bg-slate-800 rounded-2xl p-5 border-l-4 border-rose-400 shadow-card">
+                    <p class="text-sm md:text-base font-bold text-slate-800 dark:text-slate-200 italic">"别在技术细节里转了，跑出 60 分，先把流程跑通。"</p>
+                    <footer class="mt-2 text-xs text-rose-600 dark:text-rose-400 font-medium">— 酒店标签审核员实践者</footer>
+                </blockquote>
+                <blockquote class="bg-white dark:bg-slate-800 rounded-2xl p-5 border-l-4 border-blue-400 shadow-card">
+                    <p class="text-sm md:text-base font-bold text-slate-800 dark:text-slate-200 italic">"AI 化的第一步，不是挑最值钱的，是挑最小的。"</p>
+                    <footer class="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium">— 第 1 章金句</footer>
+                </blockquote>
+                <blockquote class="bg-white dark:bg-slate-800 rounded-2xl p-5 border-l-4 border-blue-400 shadow-card">
+                    <p class="text-sm md:text-base font-bold text-slate-800 dark:text-slate-200 italic">"一张没有边界的岗位卡，只是愿望清单。"</p>
+                    <footer class="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium">— 第 2 章金句</footer>
+                </blockquote>
+                <blockquote class="bg-white dark:bg-slate-800 rounded-2xl p-5 border-l-4 border-blue-400 shadow-card">
+                    <p class="text-sm md:text-base font-bold text-slate-800 dark:text-slate-200 italic">"你教不会 AI 的地方，恰恰是你自己也没想清楚的地方。"</p>
+                    <footer class="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium">— 第 3 章金句</footer>
+                </blockquote>
+                <blockquote class="bg-white dark:bg-slate-800 rounded-2xl p-5 border-l-4 border-blue-400 shadow-card">
+                    <p class="text-sm md:text-base font-bold text-slate-800 dark:text-slate-200 italic">"AI 不是不会干，是没人把'怎么干'写清楚。"</p>
+                    <footer class="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium">— 第 4 章金句</footer>
+                </blockquote>
+                <blockquote class="bg-white dark:bg-slate-800 rounded-2xl p-5 border-l-4 border-blue-400 shadow-card">
+                    <p class="text-sm md:text-base font-bold text-slate-800 dark:text-slate-200 italic">"每一步都留痕，Agent 才会越用越强；不留痕，第一天犯的错第一百天还会犯。"</p>
+                    <footer class="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium">— 第 5 章金句</footer>
+                </blockquote>
+                <blockquote class="bg-white dark:bg-slate-800 rounded-2xl p-5 border-l-4 border-blue-400 shadow-card">
+                    <p class="text-sm md:text-base font-bold text-slate-800 dark:text-slate-200 italic">"能跑通一次，只说明'它会做'；稳定跑十次，才说明'它能用'。"</p>
+                    <footer class="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium">— 第 6 章金句</footer>
+                </blockquote>
+                <blockquote class="bg-white dark:bg-slate-800 rounded-2xl p-5 border-l-4 border-emerald-400 shadow-card">
+                    <p class="text-sm md:text-base font-bold text-slate-800 dark:text-slate-200 italic">"一个人强不算强，能把能力复制给 AI 和团队，才是真的强。"</p>
+                    <footer class="mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">— 结尾金句</footer>
+                </blockquote>
+            </div>
+        </section>
+        <!-- ========== 常见误区 / FAQ ========== -->
+        <section id="faq" aria-labelledby="faq-title">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-full mb-3">
+                    <span aria-hidden="true">💡</span><span>常见误区</span>
+                </div>
+                <h2 id="faq-title" class="text-3xl font-bold text-slate-900 dark:text-slate-100">5 个最容易踩的坑</h2>
+            </div>
+            <div class="space-y-3 max-w-4xl mx-auto">
+                <details class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-card group">
+                    <summary class="cursor-pointer p-5 font-bold text-slate-900 dark:text-slate-100 flex items-center justify-between">
+                        <span><span class="text-rose-500 mr-2">❌</span>误区 1：先做最重要的岗位</span>
+                        <span class="text-slate-400 group-open:rotate-180 transition" aria-hidden="true">▼</span>
+                    </summary>
+                    <div class="px-5 pb-5 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        <p class="mb-2"><span class="font-bold text-emerald-600 dark:text-emerald-400">✅ 正确做法：</span>先挑最小的、最简单的。</p>
+                        <p>一位研发负责人一开始让最强工程师拆最复杂的模块，结果全军覆没。后来退回来，让 AI 做实习生负责的基础单元任务，反而跑通了。这叫<span class="font-bold">原点里程碑</span>：找最小、最简单、绕不开的起点。</p>
+                    </div>
+                </details>
+                <details class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-card group">
+                    <summary class="cursor-pointer p-5 font-bold text-slate-900 dark:text-slate-100 flex items-center justify-between">
+                        <span><span class="text-rose-500 mr-2">❌</span>误区 2：想让 AI 一次做到 90 分</span>
+                        <span class="text-slate-400 group-open:rotate-180 transition" aria-hidden="true">▼</span>
+                    </summary>
+                    <div class="px-5 pb-5 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        <p class="mb-2"><span class="font-bold text-emerald-600 dark:text-emerald-400">✅ 正确做法：</span>先 60 分闭环，再慢慢迭代。</p>
+                        <p>真正好的组织能力，就是新人也能照着 SOP 做到 60 分，老员工还能持续迭代到 80 分、90 分。<span class="font-bold">用体系对抗手感。</span>但<span class="font-bold text-rose-600 dark:text-rose-400">注意</span>：涉及钱、安全、合规的低容错场景，不能 60 分就上。</p>
+                    </div>
+                </details>
+                <details class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-card group">
+                    <summary class="cursor-pointer p-5 font-bold text-slate-900 dark:text-slate-100 flex items-center justify-between">
+                        <span><span class="text-rose-500 mr-2">❌</span>误区 3：把真实客户资料直接喂给 AI</span>
+                        <span class="text-slate-400 group-open:rotate-180 transition" aria-hidden="true">▼</span>
+                    </summary>
+                    <div class="px-5 pb-5 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        <p class="mb-2"><span class="font-bold text-emerald-600 dark:text-emerald-400">✅ 正确做法：</span>测试资料必须脱敏。</p>
+                        <p>不要直接把真实客户姓名、手机号、身份证、薪资投喂给 AI。<span class="font-bold text-rose-600 dark:text-rose-400">敏感数据一旦入库，后面 Agent 会照着错的批量输出，这是翻车级的风险。</span></p>
+                    </div>
+                </details>
+                <details class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-card group">
+                    <summary class="cursor-pointer p-5 font-bold text-slate-900 dark:text-slate-100 flex items-center justify-between">
+                        <span><span class="text-rose-500 mr-2">❌</span>误区 4：Profile 写得过长 / 像口号</span>
+                        <span class="text-slate-400 group-open:rotate-180 transition" aria-hidden="true">▼</span>
+                    </summary>
+                    <div class="px-5 pb-5 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        <p class="mb-2"><span class="font-bold text-emerald-600 dark:text-emerald-400">✅ 正确做法：</span>先覆盖主路径，真实运行后再补规则。</p>
+                        <p>把所有可能性都提前塞进去，会导致 Profile 过长、无法维护。正确顺序：覆盖主路径 → 跑起来 → 收集错误案例 → 补规则。判断标准：随便挑一条规则，能配上一个真实案例；配不出来，删掉或补案例。</p>
+                    </div>
+                </details>
+                <details class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-card group">
+                    <summary class="cursor-pointer p-5 font-bold text-slate-900 dark:text-slate-100 flex items-center justify-between">
+                        <span><span class="text-rose-500 mr-2">❌</span>误区 5：问题太多，一次全改</span>
+                        <span class="text-slate-400 group-open:rotate-180 transition" aria-hidden="true">▼</span>
+                    </summary>
+                    <div class="px-5 pb-5 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        <p class="mb-2"><span class="font-bold text-emerald-600 dark:text-emerald-400">✅ 正确做法：</span>一次只改一个变量。</p>
+                        <p>全改的结果就是你不知道哪个改动起了作用。闭环步骤：保存输入 → 运行 → 验收 → 体感分 → 记录问题 → <span class="font-bold">只改一个变量</span>（输入/流程/规则/权限/输出格式 五选一）→ 用同一样例复测 → 比较前后。</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+        <!-- ========== 立即开始 / CTA ========== -->
+        <section id="start" aria-labelledby="start-title">
+            <div class="bg-gradient-to-br from-purple-600 via-fuchsia-600 to-pink-600 rounded-2xl p-8 md:p-12 text-white text-center shadow-xl max-w-5xl mx-auto">
+                <div class="text-5xl mb-4" aria-hidden="true">🚀</div>
+                <h2 id="start-title" class="text-3xl md:text-4xl font-extrabold mb-3">现在就开始</h2>
+                <p class="text-base md:text-lg text-purple-100 max-w-2xl mx-auto leading-relaxed mb-8">一个 Agent 的起点，不是"我想让 AI 帮我做很多事"，而是"我愿意把哪一项重复工作，先交给它完成一次"。</p>
+                <!-- 三条起步路径 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
+                    <a href="00-tooling-setup.html" class="bg-white/10 hover:bg-white/20 backdrop-blur p-5 rounded-xl border border-white/30 transition text-left">
+                        <div class="text-xs font-bold text-pink-200 uppercase mb-1">路径 A · 推荐</div>
+                        <div class="font-bold text-lg mb-1">从工具开始</div>
+                        <div class="text-xs text-purple-100">先装好 Codex + 飞书 + Hermes，跑一次完整验收</div>
+                    </a>
+                    <a href="01-demo.html" class="bg-white/10 hover:bg-white/20 backdrop-blur p-5 rounded-xl border border-white/30 transition text-left">
+                        <div class="text-xs font-bold text-pink-200 uppercase mb-1">路径 B · 已有环境</div>
+                        <div class="font-bold text-lg mb-1">直接跑 Demo</div>
+                        <div class="text-xs text-purple-100">跳过安装，先让 Agent 动起来，建立信心</div>
+                    </a>
+                    <a href="07-long-term.html" class="bg-white/10 hover:bg-white/20 backdrop-blur p-5 rounded-xl border border-white/30 transition text-left">
+                        <div class="text-xs font-bold text-pink-200 uppercase mb-1">路径 C · 速览</div>
+                        <div class="font-bold text-lg mb-1">看结尾先</div>
+                        <div class="text-xs text-purple-100">先看完整 SOP 长什么样，再决定要不要做</div>
+                    </a>
+                </div>
+                <a href="00-tooling-setup.html" class="inline-flex items-center gap-2 px-8 py-3 bg-white text-purple-700 font-bold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition">
+                    <span>🛠️ 从第 0 章开始</span>
+                    <span aria-hidden="true">→</span>
+                </a>
+            </div>
+        </section>
+        <!-- ========== 原文出处与下载 ========== -->
+        <section aria-labelledby="source-title" class="no-print">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-card p-6 max-w-4xl mx-auto">
+                <div class="flex items-start gap-4">
+                    <div class="text-3xl shrink-0" aria-hidden="true">📄</div>
+                    <div class="flex-grow">
+                        <h3 id="source-title" class="text-base font-bold text-slate-900 dark:text-slate-100 mb-2">原文出处</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">本知识库基于 <span class="font-bold">《Agent 搭建：从重复工作到可交付的 AI 员工》</span> 整理，共 29 页，约 19,500 字符。</p>
+                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-2">原文 PDF 路径：<code class="bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded text-xs">apps/yitang/feishu/Agent 搭建：从重复工作到可交付的 AI 员工.pdf</code></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- ========== 页脚 ========== -->
+    <footer class="bg-slate-100 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-700 p-6 text-center">
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+            从重复工作到可交付的 AI 员工 · v2.0 · 2026 深度优化版 · 基于《Agent 搭建：从重复工作到可交付的 AI 员工》整理<br>
+            <span class="text-slate-400 dark:text-slate-500">每个 Agent 的起点，是"我愿意把哪一项重复工作，先交给它完成一次"。</span>
+        </p>
+        <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-2">
+            <a href="#hero" class="hover:text-purple-600 dark:hover:text-purple-400 transition">回到顶部</a>
+            <span aria-hidden="true"> · </span>
+            <span>适用浏览器：Chrome / Safari / Edge / Firefox</span>
+        </p>
+    </footer>
+    <!-- ========== 回到顶部按钮 ========== -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700 hover:scale-110 transition-all opacity-0 pointer-events-none" aria-label="回到顶部">
+        <span class="text-xl">↑</span>
+    </button>
+    <!-- ========== JSON-LD 结构化数据（SEO） ========== -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Course",
+        "name": "Agent 搭建",
+        "description": "8 章方法论 · 4 小时课程 · 6 步搭出第一个可交付 Agent。从岗位卡、工作流、Profile、工具链到闭环验收，把一项重复工作交给一个 AI 员工。",
+        "provider": {
+            "@type": "Organization",
+            "name": "Agent 搭建课程组",
+            "url": "https://tools.yy24365.com"
+        },
+        "educationalLevel": "Beginner to Intermediate",
+        "inLanguage": "zh-CN",
+        "timeRequired": "PT4H",
+        "totalTime": "PT245M",
+        "numberOfLessons": 8,
+        "hasCourseInstance": [
+            {"@type": "CourseInstance", "name": "第 0 章 · 工具准备", "url": "https://tools.yy24365.com/apps/yitang/feishu/agent-da-jian/00-tooling-setup.html", "timeRequired": "PT25M"},
+            {"@type": "CourseInstance", "name": "第 1 章 · 跑通 Demo", "url": "https://tools.yy24365.com/apps/yitang/feishu/agent-da-jian/01-demo.html", "timeRequired": "PT30M"},
+            {"@type": "CourseInstance", "name": "第 2 章 · 定岗位", "url": "https://tools.yy24365.com/apps/yitang/feishu/agent-da-jian/02-job-card.html", "timeRequired": "PT30M"},
+            {"@type": "CourseInstance", "name": "第 3 章 · 拆工序", "url": "https://tools.yy24365.com/apps/yitang/feishu/agent-da-jian/03-workflow.html", "timeRequired": "PT40M"},
+            {"@type": "CourseInstance", "name": "第 4 章 · 写大脑", "url": "https://tools.yy24365.com/apps/yitang/feishu/agent-da-jian/04-profile.html", "timeRequired": "PT40M"},
+            {"@type": "CourseInstance", "name": "第 5 章 · 接工具", "url": "https://tools.yy24365.com/apps/yitang/feishu/agent-da-jian/05-toolchain.html", "timeRequired": "PT30M"},
+            {"@type": "CourseInstance", "name": "第 6 章 · 跑闭环", "url": "https://tools.yy24365.com/apps/yitang/feishu/agent-da-jian/06-closed-loop.html", "timeRequired": "PT40M"},
+            {"@type": "CourseInstance", "name": "结尾 · 长期岗位", "url": "https://tools.yy24365.com/apps/yitang/feishu/agent-da-jian/07-long-term.html", "timeRequired": "PT10M"}
+        ],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "CNY",
+            "availability": "https://schema.org/InStock"
+        }
+    }
+    </script>
+    <!-- ========== FAQ 结构化数据 ========== -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "为什么先挑最小的任务？",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "一位研发负责人一开始让最强工程师拆最复杂的模块，结果全军覆没。后来退回来，让 AI 做实习生负责的基础单元任务，反而跑通了。这叫原点里程碑：找最小、最简单、绕不开的起点。"
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "测试资料为什么要脱敏？",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "不要直接把真实客户姓名、手机号、身份证、薪资投喂给 AI。敏感数据一旦入库，后面 Agent 会照着错的批量输出，这是翻车级的风险。"
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "一次只能改一个变量吗？",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "是的。闭环步骤：保存输入 → 运行 → 验收 → 体感分 → 记录问题 → 只改一个变量（输入/流程/规则/权限/输出格式 五选一）→ 用同一样例复测 → 比较前后。全改的结果就是你不知道哪个改动起了作用。"
+                }
+            }
+        ]
+    }
+    </script>
+    <!-- ========== 交互脚本 ========== -->
+    <script>
+            // ============================================================
+            // 1. 阅读进度条：监听滚动，更新顶部紫粉渐变进度条
+            // ============================================================
+            (function () {
+                const bar = document.getElementById('progress-bar');
+                function update() {
+                    const h = document.documentElement;
+                    const max = h.scrollHeight - h.clientHeight;
+                    const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+                    bar.style.width = pct + '%';
+                }
+                window.addEventListener('scroll', update, { passive: true });
+                update();
+            })();
+
+        // ============================================================
+        // 2. 回到顶部按钮：滚动超过 400px 显示
+        // ============================================================
+        (function () {
+            const btn = document.getElementById('back-to-top');
+            function toggle() {
+                if (window.scrollY > 400) {
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                } else {
+                    btn.style.opacity = '0';
+                    btn.style.pointerEvents = 'none';
+                }
+            }
+            btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+            window.addEventListener('scroll', toggle, { passive: true });
+            toggle();
+        })();
+
+        // ============================================================
+        // 3. 暗色模式切换：手动 toggle + 持久化到 localStorage
+        // ============================================================
+        (function () {
+            const btn = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            const STORAGE_KEY = 'agent-da-jian-theme';
+
+            // 读取偏好
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            }
+
+            btn.addEventListener('click', () => {
+                html.classList.toggle('dark');
+                localStorage.setItem(STORAGE_KEY, html.classList.contains('dark') ? 'dark' : 'light');
+            });
+        })();
+
+        // ============================================================
+        // 4. TOC 锚点高亮：滚动时高亮当前所在区段
+        // ============================================================
+        (function () {
+            const tocLinks = document.querySelectorAll('.toc-link');
+            const sections = Array.from(tocLinks).map(l => {
+                const id = l.getAttribute('href').slice(1);
+                return { link: l, target: document.getElementById(id) };
+            }).filter(s => s.target);
+
+            function update() {
+                const y = window.scrollY + 120;
+                let activeIdx = -1;
+                for (let i = 0; i < sections.length; i++) {
+                    if (sections[i].target.offsetTop <= y) activeIdx = i;
+                }
+                sections.forEach((s, i) => {
+                    if (i === activeIdx) s.link.classList.add('active');
+                    else s.link.classList.remove('active');
+                });
+            }
+            window.addEventListener('scroll', update, { passive: true });
+            update();
+        })();
+    </script>
+</body>
+
+</html>

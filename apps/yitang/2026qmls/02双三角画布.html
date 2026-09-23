@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>双三角模型 · 实战画布工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        human: { border: '#f59e0b', bg: '#fffbeb', text: '#b45309' },
+                        ai: { border: '#14b8a6', bg: '#f0fdfa', text: '#0f766e' }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'input-focus': '0 0 0 2px rgba(20, 184, 166, 0.2)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 基础样式与网格背景 */
+        body {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 隐藏滚动条但保持滚动功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 语音输入时的呼吸动画 */
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        .mic-active {
+            animation: pulse-red 1.5s infinite;
+            background-color: #ef4444 !important;
+            color: white !important;
+        }
+
+        /* 文本域自动高度过渡 */
+        textarea {
+            transition: height 0.1s ease;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+    <!-- 顶部导航与状态栏 -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white font-bold text-xl">△</div>
+                <span class="font-bold text-lg tracking-tight text-slate-800">双三角实战画布</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="saveStatus" class="text-xs font-medium text-slate-400 flex items-center gap-1 opacity-0 transition-opacity duration-300">
+                    <i data-lucide="check-circle" class="w-3 h-3 text-teal-500"></i> 已自动保存
+                </span>
+                <button onclick="exportData()" class="text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full transition flex items-center gap-1">
+                    <i data-lucide="download" class="w-3 h-3"></i> 导出
+                </button>
+                <button onclick="clearAll()" class="text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-full transition flex items-center gap-1">
+                    <i data-lucide="trash-2" class="w-3 h-3"></i> 清空
+                </button>
+            </div>
+        </div>
+    </nav>
+    <!-- 主画布区 -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <!-- 引导语 -->
+        <div class="text-center mb-10">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">构建你的科学因果框架</h1>
+            <p class="text-sm md:text-base text-slate-500 max-w-2xl mx-auto">
+                在下方输入框内填入你的实际情况。左侧修炼人类内功，右侧放大AI杠杆。支持语音输入，数据实时保存在浏览器本地。
+            </p>
+        </div>
+        <!-- 双三角布局容器 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-4 relative">
+            <!-- 中间飞轮 (仅桌面端显示) -->
+            <div class="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex-col items-center justify-center pointer-events-none">
+                <div class="w-16 h-16 rounded-full bg-white shadow-xl border-4 border-slate-50 flex items-center justify-center mb-2">
+                    <span class="text-2xl font-black text-slate-800">×</span>
+                </div>
+                <div class="bg-slate-900 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> 飞轮效应
+                </div>
+            </div>
+            <!-- 左侧：人类三角 -->
+            <div class="bg-gradient-to-br from-amber-50 to-white rounded-3xl p-6 md:p-8 border border-amber-100 shadow-soft relative">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-amber-400 to-amber-200 rounded-t-3xl"></div>
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="p-3 bg-amber-100 rounded-2xl text-amber-600"><i data-lucide="user" class="w-6 h-6"></i></div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">人类三角</h2>
+                        <p class="text-xs text-amber-600 font-medium">持续让自己变强 · 内功修炼</p>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <!-- 创造力 -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm focus-within:border-amber-300 focus-within:shadow-input-focus transition-all duration-300">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="flex items-center gap-2 font-bold text-slate-800 text-sm">
+                                <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500"></i> 创造力 <span class="text-xs font-normal text-slate-400 ml-1">(提出好问题、定义新方向)</span>
+                            </label>
+                            <button onclick="startSpeech('human-creativity', this)" class="p-2 rounded-full bg-slate-50 text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition tooltip" title="语音输入">
+                                <i data-lucide="mic" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <textarea id="human-creativity" rows="3" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-slate-700 placeholder-slate-300 resize-none no-scrollbar" placeholder="例如：我在业务中发现了哪些未被满足的深层需求？"></textarea>
+                    </div>
+                    <!-- 审美 -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm focus-within:border-amber-300 focus-within:shadow-input-focus transition-all duration-300">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="flex items-center gap-2 font-bold text-slate-800 text-sm">
+                                <i data-lucide="eye" class="w-4 h-4 text-amber-500"></i> 审美 <span class="text-xs font-normal text-slate-400 ml-1">(判断好坏、评价标准)</span>
+                            </label>
+                            <button onclick="startSpeech('human-aesthetics', this)" class="p-2 rounded-full bg-slate-50 text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition tooltip" title="语音输入">
+                                <i data-lucide="mic" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <textarea id="human-aesthetics" rows="3" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-slate-700 placeholder-slate-300 resize-none no-scrollbar" placeholder="例如：达到什么标准的产出才算优秀？谁来对标？"></textarea>
+                    </div>
+                    <!-- 体系 -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm focus-within:border-amber-300 focus-within:shadow-input-focus transition-all duration-300">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="flex items-center gap-2 font-bold text-slate-800 text-sm">
+                                <i data-lucide="layers" class="w-4 h-4 text-amber-500"></i> 体系 <span class="text-xs font-normal text-slate-400 ml-1">(SOP、思维模型、工作流)</span>
+                            </label>
+                            <button onclick="startSpeech('human-system', this)" class="p-2 rounded-full bg-slate-50 text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition tooltip" title="语音输入">
+                                <i data-lucide="mic" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <textarea id="human-system" rows="3" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-slate-700 placeholder-slate-300 resize-none no-scrollbar" placeholder="例如：我把哪项工作提炼成了可复用的标准作业程序（SOP）？"></textarea>
+                    </div>
+                </div>
+            </div>
+            <!-- 右侧：AI三角 -->
+            <div class="bg-gradient-to-bl from-teal-50 to-white rounded-3xl p-6 md:p-8 border border-teal-100 shadow-soft relative mt-8 lg:mt-0">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-l from-teal-400 to-teal-200 rounded-t-3xl"></div>
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="p-3 bg-teal-100 rounded-2xl text-teal-600"><i data-lucide="cpu" class="w-6 h-6"></i></div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">AI 三角</h2>
+                        <p class="text-xs text-teal-600 font-medium">持续使用AI更强 · 外功放大</p>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <!-- 场景 -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm focus-within:border-teal-300 focus-within:shadow-input-focus transition-all duration-300">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="flex items-center gap-2 font-bold text-slate-800 text-sm">
+                                <i data-lucide="crosshair" class="w-4 h-4 text-teal-500"></i> 场景 <span class="text-xs font-normal text-slate-400 ml-1">(业务落地、实际应用)</span>
+                            </label>
+                            <button onclick="startSpeech('ai-scenario', this)" class="p-2 rounded-full bg-slate-50 text-slate-400 hover:text-teal-600 hover:bg-teal-50 transition tooltip" title="语音输入">
+                                <i data-lucide="mic" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <textarea id="ai-scenario" rows="3" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-slate-700 placeholder-slate-300 resize-none no-scrollbar" placeholder="例如：我要用AI解决哪个具体业务环节的问题？"></textarea>
+                    </div>
+                    <!-- 基本功 -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm focus-within:border-teal-300 focus-within:shadow-input-focus transition-all duration-300">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="flex items-center gap-2 font-bold text-slate-800 text-sm">
+                                <i data-lucide="tool" class="w-4 h-4 text-teal-500"></i> 基本功 <span class="text-xs font-normal text-slate-400 ml-1">(Prompt、工具编排、智能体)</span>
+                            </label>
+                            <button onclick="startSpeech('ai-skills', this)" class="p-2 rounded-full bg-slate-50 text-slate-400 hover:text-teal-600 hover:bg-teal-50 transition tooltip" title="语音输入">
+                                <i data-lucide="mic" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <textarea id="ai-skills" rows="3" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-slate-700 placeholder-slate-300 resize-none no-scrollbar" placeholder="例如：我目前掌握了哪些AI工具流？需要补齐什么（如多Agent编排）？"></textarea>
+                    </div>
+                    <!-- 数据 -->
+                    <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm focus-within:border-teal-300 focus-within:shadow-input-focus transition-all duration-300">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="flex items-center gap-2 font-bold text-slate-800 text-sm">
+                                <i data-lucide="database" class="w-4 h-4 text-teal-500"></i> 数据 <span class="text-xs font-normal text-slate-400 ml-1">(知识库、业务语料、资产)</span>
+                            </label>
+                            <button onclick="startSpeech('ai-data', this)" class="p-2 rounded-full bg-slate-50 text-slate-400 hover:text-teal-600 hover:bg-teal-50 transition tooltip" title="语音输入">
+                                <i data-lucide="mic" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <textarea id="ai-data" rows="3" class="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-slate-700 placeholder-slate-300 resize-none no-scrollbar" placeholder="例如：我沉淀了哪些专有数据？是否有高质量的知识库可以喂给AI？"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 底部双向驱动提示 -->
+        <div class="mt-12 text-center">
+            <div class="inline-flex flex-col sm:flex-row items-center gap-4 bg-white px-6 py-4 rounded-full shadow-sm border border-slate-100 text-sm font-medium">
+                <span class="text-amber-600 flex items-center gap-1"><i data-lucide="arrow-up-right" class="w-4 h-4"></i> 人变强了，调教更强AI</span>
+                <span class="text-slate-300 hidden sm:block">⇄</span>
+                <span class="text-teal-600 flex items-center gap-1"><i data-lucide="arrow-down-left" class="w-4 h-4"></i> 有了强AI，辅助人变得更强</span>
+            </div>
+            <p class="mt-4 text-xs text-slate-400">结果不够好，怪不得AI也怪不得人，而是双三角不够强，拉满它。</p>
+        </div>
+    </main>
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400">
+            双三角模型工具 · 数据存储在您的浏览器本地 (localStorage) · 请放心填写
+        </div>
+    </footer>
+    <script>
+        // 数据键名
+        const STORAGE_KEY = 'double_triangle_canvas_data';
+        // 存储对象
+        let formData = {
+            'human-creativity': '',
+            'human-aesthetics': '',
+            'human-system': '',
+            'ai-scenario': '',
+            'ai-skills': '',
+            'ai-data': ''
+        };
+
+        // 1. 初始化：加载数据与自适应高度
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            loadData();
+            initTextareas();
+        });
+
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    for (const key in parsed) {
+                        const el = document.getElementById(key);
+                        if (el) {
+                            el.value = parsed[key];
+                            formData[key] = parsed[key];
+                        }
+                    }
+                } catch (e) {
+                    console.error('解析本地数据失败', e);
+                }
+            }
+
+            // 绑定输入事件
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.addEventListener('input', (e) => {
+                    const id = e.target.id;
+                    formData[id] = e.target.value;
+
+                    // 自适应高度
+                    e.target.style.height = 'auto';
+                    e.target.style.height = (e.target.scrollHeight) + 'px';
+
+                    // 触发防抖保存
+                    debouncedSave();
+                });
+            });
+        }
+
+        // 2. 防抖保存机制
+        let saveTimeout;
+        const saveStatusEl = document.getElementById('saveStatus');
+
+        function debouncedSave() {
+            clearTimeout(saveTimeout);
+            saveStatusEl.classList.remove('opacity-0');
+            saveStatusEl.innerHTML = '<i data-lucide="loader" class="w-3 h-3 text-slate-400 animate-spin"></i> 保存中...';
+            lucide.createIcons();
+
+            saveTimeout = setTimeout(() => {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+                saveStatusEl.innerHTML = '<i data-lucide="check-circle" class="w-3 h-3 text-teal-500"></i> 已自动保存';
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    saveStatusEl.classList.add('opacity-0');
+                }, 2000);
+            }, 800); // 800ms 防抖，避免频繁写入
+        }
+
+        // 3. 文本域自适应高度初始化
+        function initTextareas() {
+            document.querySelectorAll('textarea').forEach(el => {
+                el.style.height = 'auto';
+                el.style.height = (el.scrollHeight) + 'px';
+            });
+        }
+
+        // 4. 语音输入功能
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        function startSpeech(targetId, btnElement) {
+            if (!SpeechRecognition) {
+                alert('您的浏览器不支持语音输入功能，请尝试使用 Chrome 或 Edge 浏览器。');
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'zh-CN';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            // 界面状态更新
+            const originalContent = btnElement.innerHTML;
+            btnElement.classList.add('mic-active');
+            btnElement.innerHTML = '<i data-lucide="square" class="w-4 h-4"></i>';
+            lucide.createIcons();
+
+            recognition.start();
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                const textarea = document.getElementById(targetId);
+
+                // 如果已有内容，加个空格或换行再追加
+                if (textarea.value.trim() !== '') {
+                    textarea.value += '，' + transcript;
+                } else {
+                    textarea.value = transcript;
+                }
+
+                // 触发输入事件更新本地存储和高度
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            };
+
+            recognition.onerror = (event) => {
+                console.error('语音识别错误:', event.error);
+                if (event.error === 'not-allowed') {
+                    alert('请允许浏览器使用麦克风权限。');
+                }
+            };
+
+            recognition.onend = () => {
+                // 恢复按钮状态
+                btnElement.classList.remove('mic-active');
+                btnElement.innerHTML = originalContent;
+                lucide.createIcons();
+            };
+        }
+
+        // 5. 清空功能
+        function clearAll() {
+            if (confirm('确定要清空画布上的所有内容吗？此操作不可逆。')) {
+                localStorage.removeItem(STORAGE_KEY);
+                document.querySelectorAll('textarea').forEach(el => {
+                    el.value = '';
+                    formData[el.id] = '';
+                    el.style.height = 'auto';
+                });
+                saveStatusEl.classList.remove('opacity-0');
+                saveStatusEl.innerHTML = '<i data-lucide="check-circle" class="w-3 h-3 text-teal-500"></i> 已清空';
+                lucide.createIcons();
+                setTimeout(() => saveStatusEl.classList.add('opacity-0'), 2000);
+            }
+        }
+
+        // 6. 导出功能
+        function exportData() {
+            const dataStr = JSON.stringify(formData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `双三角画布_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="工具箱">
+    <title>一堂AI基本功 · Feature思维与周期律 V0.8 | 2026全民卖手</title>
+    <meta name="description" content="一堂AI基本功全景图：5 大流派（A原理/B工程/C工具/D教程/E模板）取长补短汇聚于 F.Feature派；5×4 周期律矩阵（L1基础模型→L2提示词→L3能力流程→L4 Agent工作→L5硅基组织），从角色到协作，从内部到外部。">
+    <meta name="keywords" content="Feature思维,AI周期律,原子化思维,Agent组织,提示词工程,Skill,Workflow,Coze,dify,n8n">
+    <!-- Canonical -->
+    <link rel="canonical" href="https://tools.yy24365.com/apps/yitang/2026qmls/04feature.html">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tools.yy24365.com/apps/yitang/2026qmls/04feature.html">
+    <meta property="og:title" content="一堂AI基本功 · Feature思维与周期律 V0.8">
+    <meta property="og:description" content="5 大流派汇聚 F.Feature派；5×4 周期律矩阵，从角色到协作。">
+    <meta property="og:locale" content="zh_CN">
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide 图标 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // ===== 主题：与系列课程（human/ai）统一 + 层级色 =====
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // 系列课程主色
+                        human: {
+                            DEFAULT: '#d97706',
+                            light: '#fffbeb',
+                            border: '#fde68a',
+                            dark: '#b45309',
+                        },
+                        ai: {
+                            DEFAULT: '#0d9488',
+                            light: '#f0fdfa',
+                            border: '#99f6e4',
+                            dark: '#0f766e',
+                        },
+                        // 层级色（L1→L5 由冷到暖）
+                        L1: { bg: '#f1f5f9', border: '#cbd5e1', text: '#475569', accent: '#64748b' },
+                        L2: { bg: '#eff6ff', border: '#bfdbfe', text: '#1d4ed8', accent: '#3b82f6' },
+                        L3: { bg: '#f0fdf4', border: '#bbf7d0', text: '#047857', accent: '#10b981' },
+                        L4: { bg: '#faf5ff', border: '#e9d5ff', text: '#7e22ce', accent: '#a855f7' },
+                        L5: { bg: '#fff7ed', border: '#fed7aa', text: '#c2410c', accent: '#ea580c' },
+                        // 流派色（全地图 A-E）
+                        fa: { bg: '#fef2f2', border: '#fecaca', text: '#b91c1c', accent: '#ef4444' }, // A 原理派 红
+                        fb: { bg: '#eff6ff', border: '#bfdbfe', text: '#1d4ed8', accent: '#3b82f6' }, // B 工程派 蓝
+                        fc: { bg: '#ecfeff', border: '#a5f3fc', text: '#0e7490', accent: '#06b6d4' }, // C 工具派 青
+                        fd: { bg: '#faf5ff', border: '#e9d5ff', text: '#7e22ce', accent: '#a855f7' }, // D 教程派 紫
+                        fe: { bg: '#fff7ed', border: '#fed7aa', text: '#c2410c', accent: '#f97316' }, // E 模板派 橙
+                        ff: { bg: '#fef9c3', border: '#fde047', text: '#854d0e', accent: '#eab308' }, // F Feature 派 黄
+                    },
+                    fontFamily: {
+                        sans: ['"PingFang SC"', '"Microsoft YaHei"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 24px -4px rgba(15, 23, 42, 0.08)',
+                        'card': '0 2px 8px -1px rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04)',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 周期律背景（化学元素表纹理感） */
+        body {
+            background-color: #fcfcfd;
+            background-image:
+                radial-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* 选中色 */
+        ::selection {
+            background: #fde68a;
+            color: #0f172a;
+        }
+
+        /* 矩阵单元格：层级色背景由 utility class 控制（bg-L*-bg/30），不在此写死 */
+        .cell-card {
+            position: relative;
+            border-radius: 0.75rem;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .cell-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px -6px rgba(15, 23, 42, 0.12);
+        }
+
+        /* 单元格层级条（左侧细色条），颜色取自 currentColor */
+        .cell-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.6rem;
+            bottom: 0.6rem;
+            width: 3px;
+            border-radius: 0 2px 2px 0;
+            background: currentColor;
+            opacity: 0.85;
+            pointer-events: none;
+        }
+
+        /* 上升箭头连接动画 */
+        @keyframes float-up {
+
+            0%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: translateY(-3px);
+                opacity: 1;
+            }
+        }
+
+        .arrow-up {
+            animation: float-up 2s ease-in-out infinite;
+        }
+
+        /* 曲线节点脉冲 */
+        @keyframes node-pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.08);
+            }
+        }
+
+        .node-pulse {
+            animation: node-pulse 3s ease-in-out infinite;
+        }
+
+        /* F 派黄色半圆：使用径向遮罩做半圆 */
+        .half-circle {
+            border-top-left-radius: 9999px;
+            border-top-right-radius: 9999px;
+        }
+
+        /* 隐藏滚动条但保留滚动 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 卡片悬浮光晕 */
+        .hover-glow {
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .hover-glow:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.15);
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+    <!-- ========== 顶部导航 ========== -->
+    <nav class="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-slate-200/70">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-human to-ai flex items-center justify-center text-white font-bold text-lg shadow-soft">一</div>
+                <div class="flex flex-col leading-tight">
+                    <span class="font-bold text-base sm:text-lg tracking-tight text-slate-900">AI 基本功 · Feature</span>
+                    <span class="text-[10px] sm:text-xs text-slate-500 font-medium">2026全民卖手训练营</span>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-500">
+                <a href="#map" class="hover:text-human-DEFAULT transition-colors">Feature 思维全地图</a>
+                <a href="#matrix" class="hover:text-human-DEFAULT transition-colors">Feature 周期律 V0.8</a>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 text-xs font-black text-human-dark bg-human-light border border-human-border rounded-full">
+                    V0.8 版
+                </span>
+                <a href="./index.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">返回目录</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+    <!-- ========== Hero ========== -->
+    <header class="relative overflow-hidden">
+        <!-- 装饰背景球 -->
+        <div class="absolute -top-32 -left-32 w-96 h-96 bg-human-light rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+        <div class="absolute -top-20 -right-32 w-96 h-96 bg-ai-light rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+        <div class="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 lg:pt-20 pb-8 text-center">
+            <!-- 顶部徽章 -->
+            <div class="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-xs font-bold tracking-wider text-slate-600 shadow-soft">
+                <i data-lucide="compass" class="w-3.5 h-3.5 text-human-DEFAULT"></i>
+                一堂 · AI 基本功全景图
+            </div>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight mb-5 text-slate-900 leading-tight">
+                一堂 AI 基本功
+                <span class="inline-block mx-1 sm:mx-2 text-transparent bg-clip-text bg-gradient-to-r from-human-DEFAULT to-ai-DEFAULT">·</span>
+                <br class="hidden sm:block" />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-human-DEFAULT to-ai-DEFAULT">Feature 周期律</span>
+                <span class="ml-2 align-middle text-base sm:text-lg lg:text-xl font-bold text-slate-400">V0.8</span>
+            </h1>
+            <p class="text-lg sm:text-xl font-bold text-slate-700 mb-3">
+                Feature：从角色到协作，从内部到外部
+            </p>
+            <p class="text-sm sm:text-base text-slate-500 max-w-3xl mx-auto font-light leading-relaxed px-2">
+                把有效、可控、可迁移的部分<span class="font-bold text-slate-800">全部拆出来</span>，
+                用 <span class="font-bold text-human-dark border-b-2 border-human border-human-border">"最小原子"</span> 思维做事。
+                Feature 思维是一个<span class="font-bold text-ai-dark">"原子化"</span>的科学工作方法。
+            </p>
+        </div>
+    </header>
+    <main class="flex-grow w-full">
+        <!-- ============================================================== -->
+        <!-- 第一部分：Feature 思维全地图（5 流派 → F 派）                    -->
+        <!-- ============================================================== -->
+        <section id="map" class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 scroll-mt-20">
+            <!-- 区块标题 -->
+            <div class="text-center mb-10 sm:mb-14">
+                <div class="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-slate-900 text-white text-xs font-bold tracking-wider shadow-soft">
+                    <i data-lucide="map" class="w-3.5 h-3.5"></i>
+                    PART 01 · 全地图
+                </div>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 mb-3">
+                    一堂 AI 基本功全地图：<span class="text-gradient-brand">Feature 思维</span>
+                </h2>
+                <p class="text-sm sm:text-base text-slate-500 max-w-2xl mx-auto">
+                    A–E 五大流派<span class="font-bold text-slate-700">取长补短</span>，汇聚于 F. Feature 派
+                </p>
+            </div>
+            <!-- ========== 桌面端：弧形曲线 + 5 流派节点 ========== -->
+            <div class="hidden lg:block relative max-w-6xl mx-auto h-[420px]">
+                <!-- 弧形 SVG 曲线：从左上到右下 -->
+                <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 420" preserveAspectRatio="none" aria-hidden="true">
+                    <!-- 主弧线 -->
+                    <path d="M 80 130 Q 600 30 1120 290" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,4" />
+                    <!-- 节点 1-5 的小圆点 -->
+                    <circle cx="120" cy="120" r="9" fill="#ef4444" />
+                    <circle cx="370" cy="68" r="9" fill="#3b82f6" />
+                    <circle cx="640" cy="68" r="9" fill="#06b6d4" />
+                    <circle cx="900" cy="170" r="9" fill="#a855f7" />
+                    <circle cx="1100" cy="280" r="9" fill="#f97316" />
+                    <!-- B→C 之间：双向箭头（取长↔补短） -->
+                    <g>
+                        <!-- 取长（蓝→青） -->
+                        <text x="505" y="40" text-anchor="middle" class="text-[11px] font-bold" fill="#3b82f6">支撑原理 · 取长</text>
+                        <path d="M 380 68 Q 480 30 560 55" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)" />
+                        <!-- 补短（青→蓝） -->
+                        <text x="505" y="100" text-anchor="middle" class="text-[11px] font-bold" fill="#06b6d4">实用落地 · 补短</text>
+                        <path d="M 560 80 Q 480 110 380 80" fill="none" stroke="#06b6d4" stroke-width="1.5" marker-end="url(#arrow-cyan)" />
+                    </g>
+                    <!-- C→D 之间：双向箭头 -->
+                    <g>
+                        <text x="770" y="100" text-anchor="middle" class="text-[11px] font-bold" fill="#06b6d4">拆解要素 · 取长</text>
+                        <path d="M 650 75 Q 720 110 810 145" fill="none" stroke="#06b6d4" stroke-width="1.5" marker-end="url(#arrow-cyan)" />
+                        <text x="770" y="155" text-anchor="middle" class="text-[11px] font-bold" fill="#a855f7">高效迁移 · 补短</text>
+                        <path d="M 810 175 Q 720 150 650 90" fill="none" stroke="#a855f7" stroke-width="1.5" marker-end="url(#arrow-purple)" />
+                    </g>
+                    <defs>
+                        <marker id="arrow-blue" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                            <polygon points="0 0, 6 3, 0 6" fill="#3b82f6" />
+                        </marker>
+                        <marker id="arrow-cyan" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                            <polygon points="0 0, 6 3, 0 6" fill="#06b6d4" />
+                        </marker>
+                        <marker id="arrow-purple" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                            <polygon points="0 0, 6 3, 0 6" fill="#a855f7" />
+                        </marker>
+                    </defs>
+                </svg>
+                <!-- 五个流派节点（绝对定位在曲线上） -->
+                <!-- A 原理派（左上） -->
+                <div class="absolute top-[100px] left-[2%] w-48 hover-glow">
+                    <div class="bg-white rounded-2xl p-4 border-2 border-red-200 shadow-soft">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center font-extrabold text-sm node-pulse">A</div>
+                            <h3 class="font-extrabold text-red-700 text-base">原理派</h3>
+                        </div>
+                        <div class="text-xs font-bold text-red-600 mb-2 flex items-center gap-1">
+                            <i data-lucide="cpu" class="w-3 h-3"></i>
+                            关注算法
+                        </div>
+                        <ul class="text-[11px] text-slate-600 space-y-0.5 mb-3 leading-relaxed">
+                            <li>· Transformer 原理</li>
+                            <li>· 神经网络</li>
+                            <li>· 注意力机制</li>
+                            <li>· 概率算法</li>
+                        </ul>
+                        <div class="space-y-0.5 text-[10px] font-bold border-t border-red-100 pt-2">
+                            <div class="text-red-500 flex items-center gap-1"><i data-lucide="thumbs-down" class="w-3 h-3"></i> 难上手</div>
+                            <div class="text-red-500 flex items-center gap-1"><i data-lucide="thumbs-down" class="w-3 h-3"></i> 不够实用</div>
+                            <div class="text-emerald-600 flex items-center gap-1"><i data-lucide="thumbs-up" class="w-3 h-3"></i> 很稳定</div>
+                            <div class="text-emerald-600 flex items-center gap-1"><i data-lucide="thumbs-up" class="w-3 h-3"></i> 容易迁移</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- B 工程派 -->
+                <div class="absolute top-[20px] left-[26%] w-48 hover-glow">
+                    <div class="bg-white rounded-2xl p-4 border-2 border-blue-200 shadow-soft">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-7 h-7 rounded-full bg-blue-500 text-white flex items-center justify-center font-extrabold text-sm node-pulse">B</div>
+                            <h3 class="font-extrabold text-blue-700 text-base">工程派</h3>
+                        </div>
+                        <div class="text-xs font-bold text-blue-600 mb-2 flex items-center gap-1">
+                            <i data-lucide="settings-2" class="w-3 h-3"></i>
+                            关注系统
+                        </div>
+                        <ul class="text-[11px] text-slate-600 space-y-0.5 mb-3 leading-relaxed">
+                            <li>· 提示词工程</li>
+                            <li>· 上下文工程</li>
+                            <li>· Harness 工程</li>
+                            <li>· Loop 工程</li>
+                        </ul>
+                        <div class="border-t border-blue-100 pt-2 text-center">
+                            <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">工程化思维</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- C 工具派 -->
+                <div class="absolute top-[20px] left-[50%] w-48 hover-glow">
+                    <div class="bg-white rounded-2xl p-4 border-2 border-cyan-200 shadow-soft">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-7 h-7 rounded-full bg-cyan-500 text-white flex items-center justify-center font-extrabold text-sm node-pulse">C</div>
+                            <h3 class="font-extrabold text-cyan-700 text-base">工具派</h3>
+                        </div>
+                        <div class="text-xs font-bold text-cyan-600 mb-2 flex items-center gap-1">
+                            <i data-lucide="wrench" class="w-3 h-3"></i>
+                            关注流行
+                        </div>
+                        <ul class="text-[11px] text-slate-600 space-y-0.5 mb-3 leading-relaxed">
+                            <li>· 新 Agent 工具</li>
+                            <li>· 新多模态模型</li>
+                            <li>· 新开源工具</li>
+                            <li>· 新流行框架</li>
+                        </ul>
+                        <div class="border-t border-cyan-100 pt-2 text-center">
+                            <span class="text-[10px] font-bold text-cyan-600 bg-cyan-50 px-2 py-0.5 rounded">工具敏感度</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- D 教程派 -->
+                <div class="absolute top-[140px] left-[68%] w-48 hover-glow">
+                    <div class="bg-white rounded-2xl p-4 border-2 border-purple-200 shadow-soft">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-7 h-7 rounded-full bg-purple-500 text-white flex items-center justify-center font-extrabold text-sm node-pulse">D</div>
+                            <h3 class="font-extrabold text-purple-700 text-base">教程派</h3>
+                        </div>
+                        <div class="text-xs font-bold text-purple-600 mb-2 flex items-center gap-1">
+                            <i data-lucide="graduation-cap" class="w-3 h-3"></i>
+                            关注场景
+                        </div>
+                        <ul class="text-[11px] text-slate-600 space-y-0.5 mb-3 leading-relaxed">
+                            <li>· AIPPT 教程</li>
+                            <li>· 工业化短剧教程</li>
+                            <li>· AI 落地 SOP 工作流</li>
+                            <li>· 知识管理自动化</li>
+                        </ul>
+                        <div class="border-t border-purple-100 pt-2 text-center">
+                            <span class="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded">场景落地</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- E 模板派 -->
+                <div class="absolute top-[240px] left-[82%] w-48 hover-glow">
+                    <div class="bg-white rounded-2xl p-4 border-2 border-orange-200 shadow-soft">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center font-extrabold text-sm node-pulse">E</div>
+                            <h3 class="font-extrabold text-orange-700 text-base">模板派</h3>
+                        </div>
+                        <div class="text-xs font-bold text-orange-600 mb-2 flex items-center gap-1">
+                            <i data-lucide="copy" class="w-3 h-3"></i>
+                            关注粘贴
+                        </div>
+                        <ul class="text-[11px] text-slate-600 space-y-0.5 mb-3 leading-relaxed">
+                            <li>· 反谄媚提示词</li>
+                            <li>· 小红书 Skill</li>
+                            <li>· 现成的 Agent 配置</li>
+                            <li>· 神级提示词</li>
+                        </ul>
+                        <div class="space-y-0.5 text-[10px] font-bold border-t border-orange-100 pt-2">
+                            <div class="text-emerald-600 flex items-center gap-1"><i data-lucide="thumbs-up" class="w-3 h-3"></i> 好上手</div>
+                            <div class="text-emerald-600 flex items-center gap-1"><i data-lucide="thumbs-up" class="w-3 h-3"></i> 非常实用</div>
+                            <div class="text-red-500 flex items-center gap-1"><i data-lucide="thumbs-down" class="w-3 h-3"></i> 不稳定</div>
+                            <div class="text-red-500 flex items-center gap-1"><i data-lucide="thumbs-down" class="w-3 h-3"></i> 难以迁移</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ========== 移动端 / 平板：五流派卡片网格 ========== -->
+            <div class="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                <!-- A -->
+                <div class="bg-white rounded-2xl p-4 border-2 border-red-200 shadow-card">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center font-extrabold">A</div>
+                        <h3 class="font-extrabold text-red-700">原理派 · 关注算法</h3>
+                    </div>
+                    <ul class="text-xs text-slate-600 space-y-0.5 mb-3 leading-relaxed">
+                        <li>· Transformer 原理</li>
+                        <li>· 神经网络 / 注意力机制</li>
+                        <li>· 概率算法</li>
+                    </ul>
+                    <div class="grid grid-cols-2 gap-1 text-[10px] font-bold border-t border-red-100 pt-2">
+                        <div class="text-red-500 flex items-center gap-1"><i data-lucide="thumbs-down" class="w-3 h-3"></i> 难上手</div>
+                        <div class="text-red-500 flex items-center gap-1"><i data-lucide="thumbs-down" class="w-3 h-3"></i> 不够实用</div>
+                        <div class="text-emerald-600 flex items-center gap-1"><i data-lucide="thumbs-up" class="w-3 h-3"></i> 很稳定</div>
+                        <div class="text-emerald-600 flex items-center gap-1"><i data-lucide="thumbs-up" class="w-3 h-3"></i> 容易迁移</div>
+                    </div>
+                </div>
+                <!-- B -->
+                <div class="bg-white rounded-2xl p-4 border-2 border-blue-200 shadow-card">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-extrabold">B</div>
+                        <h3 class="font-extrabold text-blue-700">工程派 · 关注系统</h3>
+                    </div>
+                    <ul class="text-xs text-slate-600 space-y-0.5 mb-3 leading-relaxed">
+                        <li>· 提示词工程 / 上下文工程</li>
+                        <li>· Harness 工程 / Loop 工程</li>
+                    </ul>
+                    <div class="border-t border-blue-100 pt-2 text-center">
+                        <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded inline-block mb-1">支撑原理 · 取长</span>
+                        <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded inline-block">实用落地 · 补短</span>
+                    </div>
+                </div>
+                <!-- C -->
+                <div class="bg-white rounded-2xl p-4 border-2 border-cyan-200 shadow-card">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500 text-white flex items-center justify-center font-extrabold">C</div>
+                        <h3 class="font-extrabold text-cyan-700">工具派 · 关注流行</h3>
+                    </div>
+                    <ul class="text-xs text-slate-600 space-y-0.5 mb-3 leading-relaxed">
+                        <li>· 新 Agent 工具 / 多模态模型</li>
+                        <li>· 新开源工具 / 流行框架</li>
+                    </ul>
+                    <div class="border-t border-cyan-100 pt-2 text-center">
+                        <span class="text-[10px] font-bold text-cyan-600 bg-cyan-50 px-2 py-0.5 rounded inline-block mb-1">拆解要素 · 取长</span>
+                        <span class="text-[10px] font-bold text-cyan-600 bg-cyan-50 px-2 py-0.5 rounded inline-block">高效迁移 · 补短</span>
+                    </div>
+                </div>
+                <!-- D -->
+                <div class="bg-white rounded-2xl p-4 border-2 border-purple-200 shadow-card">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center font-extrabold">D</div>
+                        <h3 class="font-extrabold text-purple-700">教程派 · 关注场景</h3>
+                    </div>
+                    <ul class="text-xs text-slate-600 space-y-0.5 mb-3 leading-relaxed">
+                        <li>· AIPPT / 工业化短剧教程</li>
+                        <li>· AI 落地 SOP / 知识管理自动化</li>
+                    </ul>
+                    <div class="border-t border-purple-100 pt-2 text-center">
+                        <span class="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded inline-block">场景落地</span>
+                    </div>
+                </div>
+                <!-- E -->
+                <div class="bg-white rounded-2xl p-4 border-2 border-orange-200 shadow-card md:col-span-2">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-extrabold">E</div>
+                        <h3 class="font-extrabold text-orange-700">模板派 · 关注粘贴</h3>
+                    </div>
+                    <ul class="text-xs text-slate-600 space-y-0.5 mb-3 leading-relaxed">
+                        <li>· 反谄媚提示词 / 小红书 Skill / 现成 Agent 配置 / 神级提示词</li>
+                    </ul>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-1 text-[10px] font-bold border-t border-orange-100 pt-2">
+                        <div class="text-emerald-600 flex items-center gap-1"><i data-lucide="thumbs-up" class="w-3 h-3"></i> 好上手</div>
+                        <div class="text-emerald-600 flex items-center gap-1"><i data-lucide="thumbs-up" class="w-3 h-3"></i> 非常实用</div>
+                        <div class="text-red-500 flex items-center gap-1"><i data-lucide="thumbs-down" class="w-3 h-3"></i> 不稳定</div>
+                        <div class="text-red-500 flex items-center gap-1"><i data-lucide="thumbs-down" class="w-3 h-3"></i> 难以迁移</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 汇聚箭头 -->
+            <div class="flex justify-center my-6 sm:my-8">
+                <div class="flex flex-col items-center text-slate-400">
+                    <svg class="w-8 h-8 animate-bounce" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                    </svg>
+                    <span class="text-[10px] font-bold tracking-widest mt-1 text-slate-400">CONVERGE</span>
+                </div>
+            </div>
+            <!-- ========== F. Feature 派（黄色半圆托盘） ========== -->
+            <div class="relative max-w-4xl mx-auto">
+                <!-- 上半部：黄色半圆（视觉托盘/地基） -->
+                <div class="relative overflow-hidden" style="height: 240px;">
+                    <!-- 半圆背景（用 border-radius 实现上半圆） -->
+                    <div class="absolute left-1/2 -translate-x-1/2 bottom-0 w-[200%] h-[100%] bg-gradient-to-b from-yellow-300 via-yellow-200 to-yellow-100 border-t-4 border-yellow-400" style="border-top-left-radius: 50%; border-top-right-radius: 50%;"></div>
+                    <!-- 内容层 -->
+                    <div class="relative h-full flex flex-col items-center justify-end pb-8 text-center px-4">
+                        <div class="inline-flex items-center gap-2 mb-3 px-4 py-1.5 bg-white rounded-full shadow-soft border-2 border-yellow-400">
+                            <span class="w-7 h-7 rounded-full bg-yellow-500 text-white flex items-center justify-center font-black text-sm">F</span>
+                            <span class="text-xs font-extrabold tracking-widest text-yellow-800">FEATURE 派</span>
+                        </div>
+                        <h3 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 mb-3">
+                            把有效、可控、可迁移的部分<span class="text-yellow-700">全部拆出来</span>
+                        </h3>
+                        <p class="text-base sm:text-lg lg:text-xl text-slate-700 font-bold">
+                            用 <span class="text-yellow-700 border-b-4 border-yellow-400 px-1">"最小原子"</span> 思维做事
+                        </p>
+                    </div>
+                </div>
+                <!-- 下半部：金句区 -->
+                <div class="bg-slate-900 rounded-b-3xl px-6 sm:px-10 py-6 sm:py-8 text-center text-white">
+                    <div class="flex items-center justify-center gap-2 mb-3">
+                        <i data-lucide="quote" class="w-4 h-4 text-yellow-300"></i>
+                        <span class="text-xs font-bold tracking-widest text-yellow-300">KEY TAKEAWAY</span>
+                    </div>
+                    <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl mx-auto">
+                        跳出工具，在 <span class="font-bold text-yellow-300">Feature 层面工作</span> 会获得显著的
+                        <span class="font-extrabold text-yellow-300">10 年 AI 成长复利</span>。
+                    </p>
+                </div>
+            </div>
+        </section>
+        <!-- ============================================================== -->
+        <!-- 第二部分：Feature 周期律 V0.8 矩阵                                -->
+        <!-- ============================================================== -->
+        <section id="matrix" class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 scroll-mt-20">
+            <!-- 区块标题 -->
+            <div class="text-center mb-8 sm:mb-12">
+                <div class="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-slate-900 text-white text-xs font-bold tracking-wider shadow-soft">
+                    <i data-lucide="grid-3x3" class="w-3.5 h-3.5"></i>
+                    PART 02 · 周期律
+                </div>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 mb-3">
+                    一堂 AI 基本功 · <span class="text-gradient-brand">Feature 周期律 V0.8</span>
+                </h2>
+                <p class="text-sm sm:text-base text-slate-500 max-w-2xl mx-auto">
+                    5 层级 × 4 模块 = 20 个能力象限，从角色到协作，从内部到外部
+                </p>
+            </div>
+            <!-- ========================================================== -->
+            <!-- 桌面端：完整矩阵（L5 在上 / L1 在下，左侧纵轴，底部横轴）       -->
+            <!-- ========================================================== -->
+            <div class="hidden lg:block">
+                <!-- 顶部列名 + 纵轴标题 -->
+                <div class="grid grid-cols-[140px_1fr_1fr_1fr_1fr_180px] gap-3 mb-2">
+                    <!-- 左上：纵轴标题（旋转） -->
+                    <div class="flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="flex items-center justify-center gap-1 text-xs font-bold text-slate-600">
+                                <i data-lucide="arrow-up" class="w-3 h-3 arrow-up"></i>
+                                打好地基
+                            </div>
+                            <div class="text-[10px] text-slate-500 mt-0.5">螺旋上升</div>
+                        </div>
+                    </div>
+                    <!-- A B C D 列名 -->
+                    <div class="text-center font-extrabold text-base py-2 px-2 rounded-lg bg-red-50 text-red-700 border border-red-200">
+                        A. 角色身份
+                    </div>
+                    <div class="text-center font-extrabold text-base py-2 px-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        B. 上下文资源
+                    </div>
+                    <div class="text-center font-extrabold text-base py-2 px-2 rounded-lg bg-green-50 text-green-700 border border-green-200">
+                        C. 能力环境
+                    </div>
+                    <div class="text-center font-extrabold text-base py-2 px-2 rounded-lg bg-sky-50 text-sky-700 border border-sky-200">
+                        D. 任务协作
+                    </div>
+                    <!-- 右上：核心描述 / 工具 -->
+                    <div class="flex items-center justify-center text-xs font-bold text-slate-500">
+                        核心描述 / 工具
+                    </div>
+                </div>
+                <!-- ============ L5 硅基组织层（顶部） ============ -->
+                <div class="grid grid-cols-[140px_1fr_1fr_1fr_1fr_180px] gap-3 mb-2">
+                    <!-- L5 Label -->
+                    <div class="flex flex-col items-center justify-center bg-L5-bg border border-L5-border rounded-xl p-3 text-L5-text">
+                        <div class="text-2xl font-black text-L5-accent">L5</div>
+                        <div class="text-xs font-bold mt-1 text-center">硅基组织层</div>
+                        <div class="text-[10px] mt-1 text-center opacity-80">从单一角色<br>到组织协同</div>
+                    </div>
+                    <!-- 5A 角色分工 -->
+                    <div class="cell-card p-4 text-orange-700 border-L5-border bg-L5-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L5-accent bg-white px-1.5 py-0.5 rounded border border-L5-border">5A</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                            角色分工
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 角色分工</li>
+                            <li>· 能力主工</li>
+                            <li>· 组织体系设计</li>
+                        </ul>
+                    </div>
+                    <!-- 5B 共享资源 -->
+                    <div class="cell-card p-4 text-orange-700 border-L5-border bg-L5-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L5-accent bg-white px-1.5 py-0.5 rounded border border-L5-border">5B</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="database" class="w-3.5 h-3.5"></i>
+                            共享资源
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 共享资产</li>
+                            <li>· 共享技能</li>
+                            <li>· 共享知识库</li>
+                        </ul>
+                        <div class="mt-2 pt-2 border-t border-orange-200 text-[10px] font-bold text-orange-700 italic">
+                            Feature 思维是一个"原子化"的科学工作方法。
+                        </div>
+                    </div>
+                    <!-- 5C 权限分层 -->
+                    <div class="cell-card p-4 text-orange-700 border-L5-border bg-L5-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L5-accent bg-white px-1.5 py-0.5 rounded border border-L5-border">5C</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                            权限分层
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 系统权限</li>
+                            <li>· 工具权限</li>
+                        </ul>
+                    </div>
+                    <!-- 5D 彼此协作 -->
+                    <div class="cell-card p-4 text-orange-700 border-L5-border bg-L5-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L5-accent bg-white px-1.5 py-0.5 rounded border border-L5-border">5D</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="git-fork" class="w-3.5 h-3.5"></i>
+                            彼此协作
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 任务路由</li>
+                            <li>· Agent 调用</li>
+                            <li>· 交叉验证，反方评审</li>
+                        </ul>
+                    </div>
+                    <!-- 右侧：核心描述 -->
+                    <div class="bg-L5-bg border border-L5-border rounded-xl p-3 flex flex-col items-center justify-center text-center text-xs font-bold text-orange-800">
+                        Agent 组织设计<br>Agent 编排、分工
+                    </div>
+                </div>
+                <!-- 上升箭头 1 -->
+                <div class="flex justify-center my-1 text-L5-accent">
+                    <i data-lucide="chevron-up" class="w-4 h-4 arrow-up"></i>
+                </div>
+                <!-- ============ L4 Agent 工作层 ============ -->
+                <div class="grid grid-cols-[140px_1fr_1fr_1fr_1fr_180px] gap-3 mb-2">
+                    <div class="flex flex-col items-center justify-center bg-L4-bg border border-L4-border rounded-xl p-3 text-L4-text">
+                        <div class="text-2xl font-black text-L4-accent">L4</div>
+                        <div class="text-xs font-bold mt-1 text-center">Agent 工作层</div>
+                        <div class="text-[10px] mt-1 text-center opacity-80">从简单对话<br>到员工工作</div>
+                    </div>
+                    <!-- 4A 角色配置 -->
+                    <div class="cell-card p-4 text-purple-700 border-L4-border bg-L4-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L4-accent bg-white px-1.5 py-0.5 rounded border border-L4-border">4A</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="user-cog" class="w-3.5 h-3.5"></i>
+                            角色配置
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 用户画像</li>
+                            <li>· 角色身份配置</li>
+                            <li>· 专业岗位设定</li>
+                            <li>· 工作边界指定</li>
+                        </ul>
+                    </div>
+                    <!-- 4B 长期记忆 -->
+                    <div class="cell-card p-4 text-purple-700 border-L4-border bg-L4-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L4-accent bg-white px-1.5 py-0.5 rounded border border-L4-border">4B</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="brain" class="w-3.5 h-3.5"></i>
+                            长期记忆
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 长期记忆</li>
+                            <li>· 自动进化，记忆收录</li>
+                            <li>· 上下文压缩、自动判断</li>
+                        </ul>
+                        <div class="mt-2 pt-2 border-t border-purple-200 text-[10px] font-bold text-purple-700 italic">
+                            跳出工具，在 Feature 层面工作会获得显著的 10 年 AI 成长复利
+                        </div>
+                    </div>
+                    <!-- 4C 运行环境 -->
+                    <div class="cell-card p-4 text-purple-700 border-L4-border bg-L4-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L4-accent bg-white px-1.5 py-0.5 rounded border border-L4-border">4C</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="monitor" class="w-3.5 h-3.5"></i>
+                            运行环境
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· ComputerUse 权限</li>
+                            <li>· 终端、文件系统、浏览器</li>
+                            <li>· 心跳机制 / 日志</li>
+                            <li>· 定时任务 / 沙箱</li>
+                        </ul>
+                    </div>
+                    <!-- 4D 自主执行 + 工具协作 -->
+                    <div class="cell-card p-4 text-purple-700 border-L4-border bg-L4-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L4-accent bg-white px-1.5 py-0.5 rounded border border-L4-border">4D</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+                            自主执行
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· ReAct、子任务</li>
+                            <li>· 结果检查、失败恢复</li>
+                            <li>· 持续跟进 Goal、主动汇报</li>
+                        </ul>
+                        <div class="mt-2 pt-2 border-t border-purple-200">
+                            <h5 class="text-[11px] font-bold text-purple-700 mb-1 flex items-center gap-1">
+                                <i data-lucide="link-2" class="w-3 h-3"></i>
+                                工具协作
+                            </h5>
+                            <ul class="text-[11px] text-slate-600 space-y-0.5">
+                                <li>· IM / 网关机制</li>
+                                <li>· 跨工具协同</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="bg-L4-bg border border-L4-border rounded-xl p-3 flex flex-col items-center justify-center text-center text-xs font-bold text-purple-800">
+                        WorkBuddy<br>
+                        <span class="text-[10px] font-normal">OpenClaw · Hermes</span><br>
+                        <span class="text-[10px] font-normal">Codex · ClaudeCode</span>
+                    </div>
+                </div>
+                <!-- 上升箭头 2 -->
+                <div class="flex justify-center my-1 text-L4-accent">
+                    <i data-lucide="chevron-up" class="w-4 h-4 arrow-up"></i>
+                </div>
+                <!-- ============ L3 能力流程层 ============ -->
+                <div class="grid grid-cols-[140px_1fr_1fr_1fr_1fr_180px] gap-3 mb-2">
+                    <div class="flex flex-col items-center justify-center bg-L3-bg border border-L3-border rounded-xl p-3 text-L3-text">
+                        <div class="text-2xl font-black text-L3-accent">L3</div>
+                        <div class="text-xs font-bold mt-1 text-center">能力流程层</div>
+                        <div class="text-[10px] mt-1 text-center opacity-80">从临时对话<br>到重复流程</div>
+                    </div>
+                    <!-- 3A 技能定位 -->
+                    <div class="cell-card p-4 text-emerald-700 border-L3-border bg-L3-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L3-accent bg-white px-1.5 py-0.5 rounded border border-L3-border">3A</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+                            技能定位
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 能力命名</li>
+                            <li>· 触发条件</li>
+                        </ul>
+                    </div>
+                    <!-- 3B 外部存储 -->
+                    <div class="cell-card p-4 text-emerald-700 border-L3-border bg-L3-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L3-accent bg-white px-1.5 py-0.5 rounded border border-L3-border">3B</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
+                            外部存储
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 数据库</li>
+                            <li>· 多维表格</li>
+                        </ul>
+                    </div>
+                    <!-- 3C Skill + 外部工具 -->
+                    <div class="cell-card p-4 text-emerald-700 border-L3-border bg-L3-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L3-accent bg-white px-1.5 py-0.5 rounded border border-L3-border">3C</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="puzzle" class="w-3.5 h-3.5"></i>
+                            Skill
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 渐进式披露</li>
+                            <li>· 自动触发 / 执行脚本</li>
+                            <li>· 用自然语言封装</li>
+                            <li>· 信用技能市场</li>
+                        </ul>
+                        <div class="mt-2 pt-2 border-t border-emerald-200">
+                            <h5 class="text-[11px] font-bold text-emerald-700 mb-1 flex items-center gap-1">
+                                <i data-lucide="plug" class="w-3 h-3"></i>
+                                外部工具
+                            </h5>
+                            <ul class="text-[11px] text-slate-600 space-y-0.5">
+                                <li>· API / MCP / CLI</li>
+                                <li>· 插件调用</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- 3D Workflow -->
+                    <div class="cell-card p-4 text-emerald-700 border-L3-border bg-L3-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L3-accent bg-white px-1.5 py-0.5 rounded border border-L3-border">3D</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="workflow" class="w-3.5 h-3.5"></i>
+                            Workflow
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 设计工作流</li>
+                            <li>· 顺序、分支、循环</li>
+                            <li>· 人工评审 / AI 自动筛</li>
+                        </ul>
+                    </div>
+                    <div class="bg-L3-bg border border-L3-border rounded-xl p-3 flex flex-col items-center justify-center text-center text-xs font-bold text-emerald-800">
+                        Skill · Workflow<br>
+                        <span class="text-[10px] font-normal">Coze · dify · n8n</span><br>
+                        <span class="text-[10px] font-normal">ComfyUI</span>
+                    </div>
+                </div>
+                <!-- 上升箭头 3 -->
+                <div class="flex justify-center my-1 text-L3-accent">
+                    <i data-lucide="chevron-up" class="w-4 h-4 arrow-up"></i>
+                </div>
+                <!-- ============ L2 提示词层 ============ -->
+                <div class="grid grid-cols-[140px_1fr_1fr_1fr_1fr_180px] gap-3 mb-2">
+                    <div class="flex flex-col items-center justify-center bg-L2-bg border border-L2-border rounded-xl p-3 text-L2-text">
+                        <div class="text-2xl font-black text-L2-accent">L2</div>
+                        <div class="text-xs font-bold mt-1 text-center">提示词层</div>
+                        <div class="text-[10px] mt-1 text-center opacity-80">从简单聊天<br>到工程控制</div>
+                    </div>
+                    <!-- 2A 设定身份 + 高阶角色 -->
+                    <div class="cell-card p-4 text-blue-700 border-L2-border bg-L2-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L2-accent bg-white px-1.5 py-0.5 rounded border border-L2-border">2A</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="user-square" class="w-3.5 h-3.5"></i>
+                            设定身份
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 赋予角色</li>
+                            <li>· 用户身份</li>
+                            <li>· 各方协作身份</li>
+                        </ul>
+                        <div class="mt-2 pt-2 border-t border-blue-200">
+                            <h5 class="text-[11px] font-bold text-blue-700 mb-1 flex items-center gap-1">
+                                <i data-lucide="masks" class="w-3 h-3"></i>
+                                高阶角色
+                            </h5>
+                            <ul class="text-[11px] text-slate-600 space-y-0.5">
+                                <li>· 反向提示 / 反向技能</li>
+                                <li>· 反向采集 / 反向记录</li>
+                                <li>· 自我批评</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- 2B 上下文增强 + 生成标准 -->
+                    <div class="cell-card p-4 text-blue-700 border-L2-border bg-L2-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L2-accent bg-white px-1.5 py-0.5 rounded border border-L2-border">2B</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                            上下文增强
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· Few-shot 示例</li>
+                            <li>· 检索增强</li>
+                            <li>· 联网搜索</li>
+                            <li>· 给 DataPack，用 RAG</li>
+                        </ul>
+                        <div class="mt-2 pt-2 border-t border-blue-200">
+                            <h5 class="text-[11px] font-bold text-blue-700 mb-1 flex items-center gap-1">
+                                <i data-lucide="file-check-2" class="w-3 h-3"></i>
+                                生成标准
+                            </h5>
+                            <ul class="text-[11px] text-slate-600 space-y-0.5">
+                                <li>· 最终意图 / 澄清限制</li>
+                                <li>· 输出要求</li>
+                                <li>· 评测建模（SaC/逆函数）</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- 2C 强化能力 + 节奏控制 -->
+                    <div class="cell-card p-4 text-blue-700 border-L2-border bg-L2-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L2-accent bg-white px-1.5 py-0.5 rounded border border-L2-border">2C</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                            强化能力
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 语气风格</li>
+                            <li>· 优化语言</li>
+                            <li>· 指定能力</li>
+                        </ul>
+                        <div class="mt-2 pt-2 border-t border-blue-200">
+                            <h5 class="text-[11px] font-bold text-blue-700 mb-1 flex items-center gap-1">
+                                <i data-lucide="gauge" class="w-3 h-3"></i>
+                                节奏控制
+                            </h5>
+                            <ul class="text-[11px] text-slate-600 space-y-0.5">
+                                <li>· 新开窗口</li>
+                                <li>· 分步测试</li>
+                                <li>· Prompt 版本管理</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- 2D 拆分任务 -->
+                    <div class="cell-card p-4 text-blue-700 border-L2-border bg-L2-bg/30">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-L2-accent bg-white px-1.5 py-0.5 rounded border border-L2-border">2D</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="split" class="w-3.5 h-3.5"></i>
+                            拆分任务
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 剥离最小场景</li>
+                            <li>· 先澄清再执行、多轮对话</li>
+                            <li>· 用 CoT / CoV、用状态机</li>
+                        </ul>
+                    </div>
+                    <div class="bg-L2-bg border border-L2-border rounded-xl p-3 flex flex-col items-center justify-center text-center text-xs font-bold text-blue-800">
+                        人工写提示词<br>
+                        <span class="text-[10px] font-normal">口喷提示词</span><br>
+                        <span class="text-[10px] font-normal">AI 自动写提示词</span>
+                    </div>
+                </div>
+                <!-- 上升箭头 4 -->
+                <div class="flex justify-center my-1 text-L2-accent">
+                    <i data-lucide="chevron-up" class="w-4 h-4 arrow-up"></i>
+                </div>
+                <!-- ============ L1 基础模型层（底部） ============ -->
+                <div class="grid grid-cols-[140px_1fr_1fr_1fr_1fr_180px] gap-3 mb-2">
+                    <div class="flex flex-col items-center justify-center bg-L1-bg border border-L1-border rounded-xl p-3 text-L1-text">
+                        <div class="text-2xl font-black text-L1-accent">L1</div>
+                        <div class="text-xs font-bold mt-1 text-center">基础模型层</div>
+                        <div class="text-[10px] mt-1 text-center opacity-80">从单一模型<br>到组合参数</div>
+                    </div>
+                    <!-- 1A 切换 -->
+                    <div class="cell-card p-4 text-slate-700 border-slate-300 bg-slate-50/50">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-slate-600 bg-white px-1.5 py-0.5 rounded border border-slate-300">1A</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
+                            切换
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 换模型（找最好）</li>
+                            <li>· 换模型（找最快）</li>
+                            <li>· 换便宜模型（找最省）</li>
+                            <li>· 多模态 / 本地模型</li>
+                            <li>· 推理模型</li>
+                        </ul>
+                    </div>
+                    <!-- 1B 调优 -->
+                    <div class="cell-card p-4 text-slate-700 border-slate-300 bg-slate-50/50">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-slate-600 bg-white px-1.5 py-0.5 rounded border border-slate-300">1B</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+                            调优
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 最大上下文长度</li>
+                            <li>· 温度、Top-K、Top-P</li>
+                            <li>· 频率惩罚、随机种子</li>
+                        </ul>
+                    </div>
+                    <!-- 1C 组合 -->
+                    <div class="cell-card p-4 text-slate-700 border-slate-300 bg-slate-50/50">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-slate-600 bg-white px-1.5 py-0.5 rounded border border-slate-300">1C</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="combine" class="w-3.5 h-3.5"></i>
+                            组合
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 同时抽卡测试</li>
+                            <li>· 模型优势互补</li>
+                        </ul>
+                    </div>
+                    <!-- 1D 高阶 -->
+                    <div class="cell-card p-4 text-slate-700 border-slate-300 bg-slate-50/50">
+                        <div class="absolute top-2 right-2 text-[10px] font-bold text-slate-600 bg-white px-1.5 py-0.5 rounded border border-slate-300">1D</div>
+                        <h4 class="font-extrabold text-slate-900 text-sm mb-2 flex items-center gap-1">
+                            <i data-lucide="rocket" class="w-3.5 h-3.5"></i>
+                            高阶
+                        </h4>
+                        <ul class="text-xs text-slate-700 space-y-0.5 leading-relaxed">
+                            <li>· 模型微调</li>
+                            <li>· 训练</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-100 border border-slate-300 rounded-xl p-3 flex flex-col items-center justify-center text-center text-xs font-bold text-slate-700">
+                        模型选择<br>
+                        <span class="text-[10px] font-normal">模型组合</span><br>
+                        <span class="text-[10px] font-normal">模型调试</span>
+                    </div>
+                </div>
+                <!-- ============ 底部横轴 ============ -->
+                <div class="mt-6 relative h-16">
+                    <!-- 横线 -->
+                    <div class="absolute top-1/2 left-[5%] right-[5%] h-0.5 bg-gradient-to-r from-slate-300 via-blue-300 to-slate-300"></div>
+                    <!-- 左箭头 -->
+                    <div class="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        <i data-lucide="arrow-left" class="w-4 h-4 text-slate-500"></i>
+                        <span class="text-xs font-bold text-slate-600">更高追求</span>
+                    </div>
+                    <!-- 中央文字 -->
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 bg-white border border-slate-200 rounded-full shadow-soft">
+                        <span class="text-xs sm:text-sm font-extrabold text-slate-800">Feature：从角色到协作，从内部到外部</span>
+                    </div>
+                    <!-- 右箭头 -->
+                    <div class="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        <span class="text-xs font-bold text-slate-600">工作场景</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 text-slate-500"></i>
+                    </div>
+                </div>
+            </div>
+            <!-- ========================================================== -->
+            <!-- 移动端 / 平板：按层级分组展示                                  -->
+            <!-- ========================================================== -->
+            <div class="lg:hidden space-y-6">
+                <!-- L5 -->
+                <div class="bg-white rounded-2xl border-2 border-L5-border shadow-soft overflow-hidden">
+                    <div class="bg-L5-bg px-4 py-3 flex items-center gap-3 border-b border-L5-border">
+                        <div class="text-2xl font-black text-L5-accent">L5</div>
+                        <div>
+                            <div class="font-extrabold text-orange-800">硅基组织层</div>
+                            <div class="text-[10px] text-orange-600">从单一角色到组织协同</div>
+                        </div>
+                    </div>
+                    <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="cell-card p-3 text-orange-700 border-L5-border bg-L5-bg/30">
+                            <div class="text-[10px] font-bold text-L5-accent mb-1">5A</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">角色分工</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 角色分工 / 能力主工</li>
+                                <li>· 组织体系设计</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-orange-700 border-L5-border bg-L5-bg/30">
+                            <div class="text-[10px] font-bold text-L5-accent mb-1">5B</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">共享资源</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 共享资产 / 共享技能</li>
+                                <li>· 共享知识库</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-orange-700 border-L5-border bg-L5-bg/30">
+                            <div class="text-[10px] font-bold text-L5-accent mb-1">5C</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">权限分层</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 系统权限</li>
+                                <li>· 工具权限</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-orange-700 border-L5-border bg-L5-bg/30">
+                            <div class="text-[10px] font-bold text-L5-accent mb-1">5D</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">彼此协作</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 任务路由 / Agent 调用</li>
+                                <li>· 交叉验证、反方评审</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-4 text-[11px] font-bold text-orange-800 bg-orange-50/50 border-t border-orange-100">
+                        💡 Agent 组织设计 · Agent 编排、分工
+                    </div>
+                </div>
+                <!-- L4 -->
+                <div class="bg-white rounded-2xl border-2 border-L4-border shadow-soft overflow-hidden">
+                    <div class="bg-L4-bg px-4 py-3 flex items-center gap-3 border-b border-L4-border">
+                        <div class="text-2xl font-black text-L4-accent">L4</div>
+                        <div>
+                            <div class="font-extrabold text-purple-800">Agent 工作层</div>
+                            <div class="text-[10px] text-purple-600">从简单对话到员工工作</div>
+                        </div>
+                    </div>
+                    <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="cell-card p-3 text-purple-700 border-L4-border bg-L4-bg/30">
+                            <div class="text-[10px] font-bold text-L4-accent mb-1">4A</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">角色配置</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 用户画像 / 角色身份配置</li>
+                                <li>· 专业岗位设定 / 工作边界指定</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-purple-700 border-L4-border bg-L4-bg/30">
+                            <div class="text-[10px] font-bold text-L4-accent mb-1">4B</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">长期记忆</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 长期记忆 / 自动进化</li>
+                                <li>· 上下文压缩、自动判断</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-purple-700 border-L4-border bg-L4-bg/30">
+                            <div class="text-[10px] font-bold text-L4-accent mb-1">4C</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">运行环境</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· ComputerUse / 终端 / 文件系统</li>
+                                <li>· 心跳机制 / 日志 / 沙箱</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-purple-700 border-L4-border bg-L4-bg/30">
+                            <div class="text-[10px] font-bold text-L4-accent mb-1">4D</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">自主执行 + 工具协作</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· ReAct / 子任务 / Goal 跟进</li>
+                                <li>· IM / 网关 / 跨工具协同</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-4 text-[11px] font-bold text-purple-800 bg-purple-50/50 border-t border-purple-100">
+                        💡 WorkBuddy · OpenClaw · Hermes · Codex · ClaudeCode
+                    </div>
+                </div>
+                <!-- L3 -->
+                <div class="bg-white rounded-2xl border-2 border-L3-border shadow-soft overflow-hidden">
+                    <div class="bg-L3-bg px-4 py-3 flex items-center gap-3 border-b border-L3-border">
+                        <div class="text-2xl font-black text-L3-accent">L3</div>
+                        <div>
+                            <div class="font-extrabold text-emerald-800">能力流程层</div>
+                            <div class="text-[10px] text-emerald-600">从临时对话到重复流程</div>
+                        </div>
+                    </div>
+                    <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="cell-card p-3 text-emerald-700 border-L3-border bg-L3-bg/30">
+                            <div class="text-[10px] font-bold text-L3-accent mb-1">3A</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">技能定位</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 能力命名</li>
+                                <li>· 触发条件</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-emerald-700 border-L3-border bg-L3-bg/30">
+                            <div class="text-[10px] font-bold text-L3-accent mb-1">3B</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">外部存储</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 数据库</li>
+                                <li>· 多维表格</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-emerald-700 border-L3-border bg-L3-bg/30">
+                            <div class="text-[10px] font-bold text-L3-accent mb-1">3C</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">Skill + 外部工具</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 渐进式披露 / 自然语言封装</li>
+                                <li>· API / MCP / CLI / 插件</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-emerald-700 border-L3-border bg-L3-bg/30">
+                            <div class="text-[10px] font-bold text-L3-accent mb-1">3D</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">Workflow</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 顺序 / 分支 / 循环</li>
+                                <li>· 人工评审 / AI 自动筛</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-4 text-[11px] font-bold text-emerald-800 bg-emerald-50/50 border-t border-emerald-100">
+                        💡 Skill · Workflow · Coze · dify · n8n · ComfyUI
+                    </div>
+                </div>
+                <!-- L2 -->
+                <div class="bg-white rounded-2xl border-2 border-L2-border shadow-soft overflow-hidden">
+                    <div class="bg-L2-bg px-4 py-3 flex items-center gap-3 border-b border-L2-border">
+                        <div class="text-2xl font-black text-L2-accent">L2</div>
+                        <div>
+                            <div class="font-extrabold text-blue-800">提示词层</div>
+                            <div class="text-[10px] text-blue-600">从简单聊天到工程控制</div>
+                        </div>
+                    </div>
+                    <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="cell-card p-3 text-blue-700 border-L2-border bg-L2-bg/30">
+                            <div class="text-[10px] font-bold text-L2-accent mb-1">2A</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">设定身份 + 高阶角色</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 赋予角色 / 用户身份</li>
+                                <li>· 反向提示 / 自我批评</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-blue-700 border-L2-border bg-L2-bg/30">
+                            <div class="text-[10px] font-bold text-L2-accent mb-1">2B</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">上下文增强 + 生成标准</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· Few-shot / RAG / 联网搜索</li>
+                                <li>· 输出要求 / 评测建模</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-blue-700 border-L2-border bg-L2-bg/30">
+                            <div class="text-[10px] font-bold text-L2-accent mb-1">2C</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">强化能力 + 节奏控制</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 语气风格 / 指定能力</li>
+                                <li>· Prompt 版本管理</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-blue-700 border-L2-border bg-L2-bg/30">
+                            <div class="text-[10px] font-bold text-L2-accent mb-1">2D</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">拆分任务</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 剥离最小场景 / 多轮对话</li>
+                                <li>· CoT / CoV / 状态机</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-4 text-[11px] font-bold text-blue-800 bg-blue-50/50 border-t border-blue-100">
+                        💡 人工写提示词 · 口喷提示词 · AI 自动写提示词
+                    </div>
+                </div>
+                <!-- L1 -->
+                <div class="bg-white rounded-2xl border-2 border-L1-border shadow-soft overflow-hidden">
+                    <div class="bg-L1-bg px-4 py-3 flex items-center gap-3 border-b border-L1-border">
+                        <div class="text-2xl font-black text-L1-accent">L1</div>
+                        <div>
+                            <div class="font-extrabold text-slate-800">基础模型层</div>
+                            <div class="text-[10px] text-slate-500">从单一模型到组合参数</div>
+                        </div>
+                    </div>
+                    <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="cell-card p-3 text-slate-700 border-slate-300 bg-slate-50/50">
+                            <div class="text-[10px] font-bold text-slate-600 mb-1">1A</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">切换</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 换模型（找最好/最快/最省）</li>
+                                <li>· 多模态 / 本地 / 推理模型</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-slate-700 border-slate-300 bg-slate-50/50">
+                            <div class="text-[10px] font-bold text-slate-600 mb-1">1B</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">调优</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 最大上下文长度</li>
+                                <li>· 温度、Top-K、Top-P、频率惩罚</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-slate-700 border-slate-300 bg-slate-50/50">
+                            <div class="text-[10px] font-bold text-slate-600 mb-1">1C</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">组合</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 同时抽卡测试</li>
+                                <li>· 模型优势互补</li>
+                            </ul>
+                        </div>
+                        <div class="cell-card p-3 text-slate-700 border-slate-300 bg-slate-50/50">
+                            <div class="text-[10px] font-bold text-slate-600 mb-1">1D</div>
+                            <h4 class="font-extrabold text-slate-900 text-sm mb-1">高阶</h4>
+                            <ul class="text-xs text-slate-700 space-y-0.5">
+                                <li>· 模型微调</li>
+                                <li>· 训练</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-4 text-[11px] font-bold text-slate-700 bg-slate-100/80 border-t border-slate-200">
+                        💡 模型选择 · 模型组合 · 模型调试
+                    </div>
+                </div>
+                <!-- 底部横轴说明（移动端简化版） -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+                    <div class="flex items-center justify-center gap-3 text-xs font-bold text-slate-600 mb-2">
+                        <span class="flex items-center gap-1"><i data-lucide="arrow-up" class="w-3 h-3 arrow-up"></i> 更高追求</span>
+                        <span class="text-slate-300">·</span>
+                        <span class="flex items-center gap-1">工作场景 <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
+                    </div>
+                    <div class="text-sm font-extrabold text-slate-800">Feature：从角色到协作，从内部到外部</div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- ========== 页脚 ========== -->
+    <footer class="mt-12 border-t border-slate-200/70 bg-white/60 backdrop-blur-sm">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-center sm:text-left">
+                <div class="flex items-center gap-2 text-sm text-slate-500">
+                    <div class="w-6 h-6 rounded-md bg-gradient-to-br from-human to-ai flex items-center justify-center text-white font-bold text-xs">一</div>
+                    <span>一堂 · 2026全民卖手训练营</span>
+                </div>
+                <div class="flex items-center gap-3 text-xs text-slate-400">
+                    <span class="font-bold">Feature 周期律 V0.8</span>
+                    <span class="hidden sm:inline">·</span>
+                    <a href="./index.html" class="hover:text-ai-DEFAULT transition-colors font-medium">返回目录</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- ========== 脚本 ========== -->
+    <script>
+        // 初始化 Lucide 图标
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        // 平滑滚动到锚点
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const targetId = this.getAttribute('href');
+                if (targetId === '#' || targetId.length < 2) return;
+                const target = document.querySelector(targetId);
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

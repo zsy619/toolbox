@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>第 2 章 · 定一个 Agent 岗位 · Agent 搭建知识库</title>
+    <meta name="description" content="Agent 搭建第 2 章 · 定岗位：像写招聘启事一样写岗位卡，包含输入、输出、边界、成功标准。一张没有边界的岗位卡只是愿望清单。">
+    <meta name="keywords" content="Agent, AI 员工, Hermes, Codex, 飞书, Profile, 岗位卡, 工作流, 闭环, 第 2 章 · 定一个 Agent 岗位">
+    <meta name="author" content="Agent 搭建课程组">
+    <meta name="theme-color" content="#9333ea">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://tools.yy24365.com/apps/yitang/feishu/02-job-card.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="第 2 章 · 定一个 Agent 岗位 · Agent 搭建知识库">
+    <meta property="og:description" content="Agent 搭建第 2 章 · 定岗位：像写招聘启事一样写岗位卡，包含输入、输出、边界、成功标准。一张没有边界的岗位卡只是愿望清单。">
+    <meta property="og:url" content="https://tools.yy24365.com/apps/yitang/feishu/02-job-card.html">
+    <meta property="og:site_name" content="Agent 搭建知识库">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="第 2 章 · 定一个 Agent 岗位">
+    <meta name="twitter:description" content="Agent 搭建第 2 章 · 定岗位：像写招聘启事一样写岗位卡，包含输入、输出、边界、成功标准。一张没有边界的岗位卡只是愿望清单。">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#faf5ff', 100: '#f3e8ff',
+                            500: '#a855f7', 600: '#9333ea',
+                            700: '#7e22ce', 900: '#581c87'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"PingFang SC"', '"Microsoft YaHei"', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'card': '0 2px 12px -2px rgba(168,85,247,0.08)',
+                        'hover': '0 12px 28px -8px rgba(168,85,247,0.25)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-hover { transition: all 0.25s ease; }
+        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 24px -8px rgba(168,85,247,0.25); }
+        section[id] { scroll-margin-top: 80px; }
+        #progress-bar {
+            position: fixed; top: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, #a855f7, #ec4899);
+            z-index: 100; transition: width 0.1s ease-out;
+        }
+        .skip-link {
+            position: absolute; left: -9999px; top: 0;
+            background: #9333ea; color: white; padding: 8px 16px;
+            border-radius: 0 0 8px 0; font-weight: bold;
+        }
+        .skip-link:focus { left: 0; }
+        .theme-toggle { transition: transform 0.3s ease; }
+        .theme-toggle:hover { transform: rotate(20deg); }
+        @media print {
+            nav, #progress-bar, #back-to-top { display: none !important; }
+            section { page-break-inside: avoid; }
+        }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dark ::-webkit-scrollbar-track { background: #1e293b; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased min-h-screen flex flex-col font-sans">
+    <a href="#main-content" class="skip-link">跳到主内容</a>
+    <div id="progress-bar" style="width: 0%;"></div>
+
+    <nav class="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700" aria-label="主导航">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span aria-hidden="true">←</span><span class="hidden sm:inline">返回知识库</span>
+            </a>
+            <div class="flex items-center gap-2">
+                <div class="text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
+                    Step 2
+                </div>
+                <button id="theme-toggle" class="theme-toggle p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="切换暗色模式">
+                    <span class="dark:hidden" aria-hidden="true">🌙</span>
+                    <span class="hidden dark:inline" aria-hidden="true">☀️</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <a href="#main-content" class="skip-link">跳到主内容</a>
+    <div id="progress-bar" style="width: 0%;"></div>
+
+    
+
+    <a href="#main-content" class="skip-link">跳到主内容</a>
+    <div id="progress-bar" style="width: 0%;"></div>
+
+    
+
+
+        <header class="text-center">
+            <div class="text-6xl mb-4">📋</div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-full mb-3">⏱ 30 分钟 · Step 2 / 初步预判</div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 mb-3">第 2 章 · 定一个 Agent 岗位</h1>
+            <p class="text-base text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                想象你招一个新员工。你不会说"你来帮我做运营吧"——你会给他一个岗位：负责什么、每周做什么、交什么、什么情况请示。给 Agent 定岗，和招人一模一样。
+            </p>
+        </header>
+
+        <!-- 为什么不能万能 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">🚫 为什么不能只说"做一个万能 Agent"</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">"万能 Agent"听起来很强，实际上很难判断它该做什么，也很难知道做得好不好。</p>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">一个能长期使用的 Agent，首先应该像一个<span class="font-bold text-slate-900 dark:text-slate-100">岗位</span>：有明确职责、有固定输入、有稳定流程，也有清楚的边界。</p>
+            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                <p class="text-sm text-blue-900 dark:text-blue-200"><span class="font-bold">🎯 一个能长期使用的 Agent = 一个岗位</span>：明确职责 + 固定输入 + 稳定流程 + 清楚边界。</p>
+            </div>
+        </section>
+
+        <!-- 一张合格的岗位卡 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">📄 先看一张"合格"的岗位卡长什么样</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-5">直接看那位实践者那张真实的岗位卡：</p>
+            <div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 rounded-2xl p-6 border border-slate-300 dark:border-slate-700">
+                <table class="w-full text-sm">
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                        <tr><td class="py-2.5 text-slate-500 dark:text-slate-400 w-28 font-medium">项目</td><td class="py-2.5 font-bold text-slate-900 dark:text-slate-100">这位实践者的 AI 标签审核员</td></tr>
+                        <tr><td class="py-2.5 text-slate-500 dark:text-slate-400 font-medium">岗位名称</td><td class="py-2.5 text-slate-700 dark:text-slate-300">酒店标签审核员</td></tr>
+                        <tr><td class="py-2.5 text-slate-500 dark:text-slate-400 font-medium">收到什么</td><td class="py-2.5 text-slate-700 dark:text-slate-300">新标注的酒店标签（七级深度、几千个标签池）</td></tr>
+                        <tr><td class="py-2.5 text-slate-500 dark:text-slate-400 font-medium">做什么</td><td class="py-2.5 text-slate-700 dark:text-slate-300">判断标签归类是否正确，标注"负向/中性"的边界</td></tr>
+                        <tr><td class="py-2.5 text-slate-500 dark:text-slate-400 font-medium">交付什么</td><td class="py-2.5 text-slate-700 dark:text-slate-300">审核结论 + 与人工判断不一致的案例清单</td></tr>
+                        <tr><td class="py-2.5 text-slate-500 dark:text-slate-400 font-medium">什么时候不做</td><td class="py-2.5 font-bold text-rose-600 dark:text-rose-400">两套旧标签体系冲突、历史遗留标签不判，转人工</td></tr>
+                        <tr><td class="py-2.5 text-slate-500 dark:text-slate-400 font-medium">成功标准</td><td class="py-2.5 text-slate-700 dark:text-slate-300">与老员工判断一致率达标；不一致案例全部回流</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-5 bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500 p-4 rounded-r-xl">
+                <p class="text-sm text-purple-900 dark:text-purple-200 leading-relaxed">看出差距了吗？这张卡里最有价值的，不是"做什么"，而是"<span class="font-bold">什么时候不做</span>"和"<span class="font-bold">成功标准</span>"。</p>
+            </div>
+        </section>
+
+        <!-- 定岗位的关键 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">🔑 定岗位的关键</h2>
+            <div class="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-r-xl mb-5">
+                <p class="text-sm text-amber-900 dark:text-amber-200"><span class="font-bold">不要从"我想让 AI 帮我做什么"开始，而要从"这项工作最后要交付什么"开始。</span></p>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-5"><span class="font-bold text-slate-900 dark:text-slate-100">岗位越小，越容易跑通；岗位越具体，越容易验收。</span></p>
+            <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-3">选岗位之前，先做两个判断</h3>
+            <div class="space-y-3">
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-5 border border-blue-200 dark:border-blue-800">
+                    <div class="font-bold text-blue-900 dark:text-blue-200 mb-2">① 场景识别：这个任务适合 Agent 化吗？</div>
+                    <p class="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">不是所有重复工作都适合。判断标准是<span class="font-bold">"边界收敛、解法发散"</span>：</p>
+                    <ul class="mt-2 space-y-1 text-sm text-blue-800 dark:text-blue-300">
+                        <li>• 边界要小：不是"帮我做运营"，而是"把客户咨询记录整理成跟进建议"这种具体任务；</li>
+                        <li>• 解法要发散：有很多做法可以试。如果查教程就能解决的固定套路，Agent 价值不大。</li>
+                    </ul>
+                </div>
+                <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-5 border border-emerald-200 dark:border-emerald-800">
+                    <div class="font-bold text-emerald-900 dark:text-emerald-200 mb-2">② ROI 预判：值不值得做？</div>
+                    <p class="text-sm text-emerald-800 dark:text-emerald-300 leading-relaxed mb-2">算两笔账：</p>
+                    <ul class="space-y-1 text-sm text-emerald-800 dark:text-emerald-300">
+                        <li>• <span class="font-bold">成本侧</span>：搭建时间、Token 消耗、后续维护；</li>
+                        <li>• <span class="font-bold">收益侧</span>：每月省下的重复时间、不依赖某个人的稳定性、能不能复制给同事。</li>
+                    </ul>
+                    <p class="mt-3 text-sm font-bold text-emerald-900 dark:text-emerald-100">一句话：搭两小时，未来一个月省不回两小时，就换个岗位。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 优先选择的任务 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">⭐ 优先选择满足这些条件的任务</h2>
+            <ul class="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                <li class="flex gap-2"><span class="text-emerald-500 font-bold">✓</span><span>反复出现，而不是只做一次；</span></li>
+                <li class="flex gap-2"><span class="text-emerald-500 font-bold">✓</span><span>输入相对稳定，资料容易拿到；</span></li>
+                <li class="flex gap-2"><span class="text-emerald-500 font-bold">✓</span><span>步骤大致清楚，主要靠规则而不是临场灵感；</span></li>
+                <li class="flex gap-2"><span class="text-emerald-500 font-bold">✓</span><span>输出可以被检查和验收；</span></li>
+                <li class="flex gap-2"><span class="text-emerald-500 font-bold">✓</span><span>出错后可以由人接管，不会直接造成不可逆损失。</span></li>
+            </ul>
+            <div class="bg-rose-50 dark:bg-rose-900/20 border-l-4 border-rose-500 p-4 rounded-r-xl mt-5">
+                <p class="text-sm text-rose-900 dark:text-rose-200 leading-relaxed"><span class="font-bold">🚫 反例：</span>小到"每天把 A 表复制到 B 表"，ROI 不划算、维护成本还高。标准不是"小"，是<span class="font-bold">高频 + 规则稳定 + 可验收</span>。</p>
+            </div>
+            <div class="bg-slate-900 dark:bg-black rounded-xl p-5 mt-5">
+                <div class="text-[10px] font-bold text-slate-400 mb-2">🚫 本次工作坊以下三类任务不做</div>
+                <ol class="space-y-1 text-xs text-slate-100 font-mono leading-relaxed">
+                    <li>1. 需要 AI 独立做重大决策的（比如"决定是否给客户放贷"）；</li>
+                    <li>2. 信息极度不完整、需要大量主动猜测的；</li>
+                    <li>3. 输入来源不稳定的（别指望一次性和 AI 说"以后都归你"）。</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- 岗位卡模板 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">📝 岗位卡模板</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-5">请把你的 Agent 写成一张岗位卡：</p>
+            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-6 border border-slate-300 dark:border-slate-700">
+                <table class="w-full text-sm">
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                        <tr><td class="py-2 text-slate-500 dark:text-slate-400 w-32 font-medium">岗位名称</td><td class="py-2 text-slate-700 dark:text-slate-300">例如：客户咨询整理员</td></tr>
+                        <tr><td class="py-2 text-slate-500 dark:text-slate-400 font-medium">服务对象</td><td class="py-2 text-slate-700 dark:text-slate-300">谁会使用这个 Agent</td></tr>
+                        <tr><td class="py-2 text-slate-500 dark:text-slate-400 font-medium">工作目标</td><td class="py-2 text-slate-700 dark:text-slate-300">它要稳定交付什么</td></tr>
+                        <tr><td class="py-2 text-slate-500 dark:text-slate-400 font-medium">输入资料</td><td class="py-2 text-slate-700 dark:text-slate-300">文档、消息、表格、链接或其他资料</td></tr>
+                        <tr><td class="py-2 text-slate-500 dark:text-slate-400 font-medium">处理动作</td><td class="py-2 text-slate-700 dark:text-slate-300">Agent 需要完成的主要工作</td></tr>
+                        <tr><td class="py-2 text-slate-500 dark:text-slate-400 font-medium">输出结果</td><td class="py-2 text-slate-700 dark:text-slate-300">文档、表格、消息、清单或报告</td></tr>
+                        <tr><td class="py-2 text-slate-500 dark:text-slate-400 font-medium">成功标准</td><td class="py-2 text-slate-700 dark:text-slate-300">什么样的结果才算完成</td></tr>
+                        <tr><td class="py-2 text-slate-500 dark:text-slate-400 font-medium">人工兜底</td><td class="py-2 text-slate-700 dark:text-slate-300">哪些情况必须交给人判断</td></tr>
+                        <tr><td class="py-2 font-bold text-rose-600 dark:text-rose-400">本次不做</td><td class="py-2 font-bold text-rose-700 dark:text-rose-400">明确不处理的范围，越界必须转人工</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-5">这张岗位卡，就是这个 Agent 的<span class="font-bold">产品内核</span>：最小、可用、被需要的解决方案。内核越清晰，后面越稳。</p>
+            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-r-xl mt-5">
+                <p class="text-sm text-blue-900 dark:text-blue-200 leading-relaxed"><span class="font-bold">💡 填卡时再问一句：</span>这个岗位里最小的、绕不开的那个动作是什么？Agent 连这个都做不好，更复杂的肯定做不好。先从这个最小单元开始。</p>
+            </div>
+        </section>
+
+        <!-- 给 Codex 的提示词 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">💬 可以直接给 Codex 的提示词</h2>
+            <div class="bg-slate-900 dark:bg-black rounded-xl p-5">
+                <pre class="text-xs text-slate-100 font-mono leading-relaxed whitespace-pre-wrap">请根据下面的岗位卡，帮我检查这个 Agent 岗位是否足够具体。
+重点检查：输入是否明确、动作是否可执行、输出是否可验收、边界是否清楚、是否存在需要人工确认的情况。
+不要替我扩展成万能 Agent。如果范围过大，请帮我缩小到今天能完成一次真实交付的版本。</pre>
+            </div>
+        </section>
+
+        <!-- 过关标准 -->
+        <section class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-2xl p-6 md:p-8 border-2 border-emerald-300 dark:border-emerald-700">
+            <h2 class="text-2xl font-bold text-emerald-900 dark:text-emerald-100 mb-4 flex items-center gap-2">✅ 过关标准</h2>
+            <p class="text-sm text-emerald-800 dark:text-emerald-200 leading-relaxed mb-3">别人只看岗位卡，也能大致知道这个 Agent 收到什么、做什么、交付什么，以及什么时候不能自己决定。</p>
+            <p class="text-sm text-emerald-800 dark:text-emerald-200 leading-relaxed"><span class="font-bold">把你的岗位卡拿给旁边的人看，对方不看你的解释，能说出你收到什么、做什么、交付什么、什么时候不做——才算过关。</span></p>
+        </section>
+
+        <!-- 现在轮到你 -->
+        <section class="bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-900/30 dark:to-fuchsia-900/30 rounded-2xl p-6 md:p-8 border border-purple-200 dark:border-purple-800">
+            <h2 class="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">✍️ 现在轮到你</h2>
+            <p class="text-sm text-purple-900 dark:text-purple-200">用一句话写出自己的 Agent 岗位，再写出本次明确不做的三件事。</p>
+        </section>
+
+        <!-- 常见卡点 -->
+        <section class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-6 md:p-8 border border-amber-300 dark:border-amber-700">
+            <h2 class="text-2xl font-bold text-amber-900 dark:text-amber-100 mb-4 flex items-center gap-2">⚠️ 常见卡点</h2>
+            <ul class="space-y-3 text-sm text-amber-900 dark:text-amber-200">
+                <li class="flex gap-2"><span>•</span><span><span class="font-bold">岗位写得太宽</span>，比如"负责运营"。→ 用"最小绕不开的动作"缩小它，先收成一项能重复交付的工作。</span></li>
+                <li class="flex gap-2"><span>•</span><span><span class="font-bold">ROI 算下来不划算</span> → 换岗位，别硬做。简单但高频的任务才是最值得做的。</span></li>
+                <li class="flex gap-2"><span>•</span><span><span class="font-bold">找不到"什么时候不做"</span> → 边界本身就是岗位最重要的定义。<span class="font-bold">没有边界的 Agent 一定会越界</span>。</span></li>
+            </ul>
+        </section>
+
+        <!-- 金句 -->
+        <blockquote class="text-center py-6 px-8 bg-gradient-to-r from-purple-50 via-fuchsia-50 to-rose-50 dark:from-purple-900/20 dark:via-fuchsia-900/20 dark:to-rose-900/20 rounded-2xl border border-purple-200 dark:border-purple-800">
+            <p class="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-slate-100">
+                "一张没有边界的岗位卡，<br>只是愿望清单。"
+            </p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">—— 第 2 章金句</p>
+        </blockquote>
+
+    
+    <!-- 底部导航 -->
+    <footer class="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-6 mt-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+            <a href="01-demo.html" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span aria-hidden="true">←</span><span>上一章 · 跑通 Demo</span>
+            </a>
+            <a href="index.html" class="hidden sm:flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span>知识库首页</span>
+            </a>
+            <a href="03-workflow.html" class="flex items-center gap-2 text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition">
+                <span>下一章 · 拆工序</span><span aria-hidden="true">→</span>
+            </a>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 text-center">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500">
+                Agent 搭建知识库 · v2.0 · 基于《Agent 搭建：从重复工作到可交付的 AI 员工》整理
+            </p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700 hover:scale-110 transition-all opacity-0 pointer-events-none" aria-label="回到顶部">
+        <span class="text-xl" aria-hidden="true">↑</span>
+    </button>
+
+    <!-- ========== 章节交互脚本（与主页统一） ========== -->
+    
+
+    <!-- 底部导航 -->
+    <footer class="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-6 mt-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+            <a href="01-demo.html" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span aria-hidden="true">←</span><span>上一章 · 跑通 Demo</span>
+            </a>
+            <a href="index.html" class="hidden sm:flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span>知识库首页</span>
+            </a>
+            <a href="03-workflow.html" class="flex items-center gap-2 text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition">
+                <span>下一章 · 拆工序</span><span aria-hidden="true">→</span>
+            </a>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 text-center">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500">
+                Agent 搭建知识库 · v2.0 · 基于《Agent 搭建：从重复工作到可交付的 AI 员工》整理
+            </p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700 hover:scale-110 transition-all opacity-0 pointer-events-none" aria-label="回到顶部">
+        <span class="text-xl" aria-hidden="true">↑</span>
+    </button>
+
+    <!-- ========== 章节交互脚本（与主页统一） ========== -->
+    
+
+    <!-- 底部导航 -->
+    <footer class="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-6 mt-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+            <a href="01-demo.html" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span aria-hidden="true">←</span><span>上一章 · 跑通 Demo</span>
+            </a>
+            <a href="index.html" class="hidden sm:flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span>知识库首页</span>
+            </a>
+            <a href="03-workflow.html" class="flex items-center gap-2 text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition">
+                <span>下一章 · 拆工序</span><span aria-hidden="true">→</span>
+            </a>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 text-center">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500">
+                Agent 搭建知识库 · v2.0 · 基于《Agent 搭建：从重复工作到可交付的 AI 员工》整理
+            </p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700 hover:scale-110 transition-all opacity-0 pointer-events-none" aria-label="回到顶部">
+        <span class="text-xl" aria-hidden="true">↑</span>
+    </button>
+
+    <!-- ========== 章节交互脚本（与主页统一） ========== -->
+    <script>
+        // 1. 阅读进度条
+        (function() {
+            const bar = document.getElementById('progress-bar');
+            function update() {
+                const h = document.documentElement;
+                const max = h.scrollHeight - h.clientHeight;
+                const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+                bar.style.width = pct + '%';
+            }
+            window.addEventListener('scroll', update, { passive: true });
+            update();
+        })();
+
+        // 2. 回到顶部按钮
+        (function() {
+            const btn = document.getElementById('back-to-top');
+            function toggle() {
+                if (window.scrollY > 400) {
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                } else {
+                    btn.style.opacity = '0';
+                    btn.style.pointerEvents = 'none';
+                }
+            }
+            btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+            window.addEventListener('scroll', toggle, { passive: true });
+            toggle();
+        })();
+
+        // 3. 暗色模式切换（持久化）
+        (function() {
+            const btn = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            const STORAGE_KEY = 'agent-da-jian-theme';
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            }
+            btn.addEventListener('click', () => {
+                html.classList.toggle('dark');
+                localStorage.setItem(STORAGE_KEY, html.classList.contains('dark') ? 'dark' : 'light');
+            });
+        })();
+    </script>
+</body>
+</html>

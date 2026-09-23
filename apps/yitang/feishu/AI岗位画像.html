@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 标签审核员 - 岗位卡雷达图</title>
+    <!-- 引入 Tailwind CSS (演示用 CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        /* 自定义动画和细节 */
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans min-h-screen flex items-center justify-center p-4 transition-colors duration-300">
+    <div class="max-w-5xl w-full bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden card-hover border border-slate-100 dark:border-slate-700">
+        <!-- 头部区域 -->
+        <header class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 md:p-8 text-white">
+            <h1 class="text-2xl md:text-3xl font-bold flex items-center gap-3">
+                <span>🤖 AI 岗位画像</span>
+            </h1>
+            <p class="mt-2 text-blue-100 text-sm md:text-base opacity-90">
+                基于真实实践者岗位卡生成 · 酒店标签审核员
+            </p>
+        </header>
+        <!-- 主体内容：响应式网格布局 -->
+        <main class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 左侧：雷达图展示区 -->
+            <div class="flex flex-col items-center justify-center">
+                <h2 class="text-lg font-semibold mb-4 text-slate-700 dark:text-slate-300 w-full text-center lg:text-left">
+                    📊 岗位卡各维度清晰度评估 (1-5分)
+                </h2>
+                <!-- 图表容器：在移动端自适应高度 -->
+                <div id="radarChart" class="w-full h-[350px] md:h-[450px]"></div>
+                <p class="text-xs text-slate-400 mt-4 text-center">
+                    * 评分依据：根据原图“岗位卡边界与成功标准”的强调程度进行模拟评估
+                </p>
+            </div>
+            <!-- 右侧：岗位卡详情文本展示 -->
+            <div class="flex flex-col justify-center space-y-4">
+                <h2 class="text-lg font-semibold mb-2 text-slate-700 dark:text-slate-300">
+                    📋 岗位卡详情
+                </h2>
+                <!-- 列表项 -->
+                <div class="space-y-3">
+                    <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border-l-4 border-blue-500">
+                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">岗位名称</span>
+                        <p class="mt-1 text-sm font-medium">酒店标签审核员</p>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border-l-4 border-indigo-500">
+                        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">收到什么</span>
+                        <p class="mt-1 text-sm font-medium">新标注的酒店标签（七级深度、几千个标签池）</p>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border-l-4 border-purple-500">
+                        <span class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">做什么</span>
+                        <p class="mt-1 text-sm font-medium">判断标签归类是否正确，标注"负向/中性"的边界</p>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border-l-4 border-pink-500">
+                        <span class="text-xs font-bold text-pink-600 dark:text-pink-400 uppercase tracking-wider">交付什么</span>
+                        <p class="mt-1 text-sm font-medium">审核结论 + 与人工判断不一致的案例清单</p>
+                    </div>
+                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border-l-4 border-red-500 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-1 rounded-bl-lg font-bold">核心边界</div>
+                        <span class="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">什么时候不做</span>
+                        <p class="mt-1 text-sm font-medium">两套旧标签体系冲突、历史遗留标签不判，转人工</p>
+                    </div>
+                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border-l-4 border-red-500 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-1 rounded-bl-lg font-bold">核心指标</div>
+                        <span class="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">成功标准</span>
+                        <p class="mt-1 text-sm font-medium">与老员工判断一致率达标；不一致案例全部回流</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- 底部提示 -->
+        <footer class="bg-slate-100 dark:bg-slate-800/80 p-4 text-center border-t border-slate-200 dark:border-slate-700">
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+                ⚠️ 原图强调："一张没有边界的岗位卡，只是愿望清单。"
+            </p>
+        </footer>
+        <!-- ========== 参考资源：大厂 AI 智能体 & AI 岗位描述 ========== -->
+        <section class="bg-gradient-to-b from-slate-50 to-white dark:from-slate-900/40 dark:to-slate-800/40 p-4 md:p-8 border-t border-slate-200 dark:border-slate-700">
+            <div class="max-w-5xl mx-auto">
+                <!-- 区块标题 -->
+                <h2 class="text-base md:text-lg font-bold text-slate-700 dark:text-slate-300 mb-5 flex items-center gap-2">
+                    <span class="text-xl">🔗</span>
+                    <span>大厂参考 · AI 智能体构建描述</span>
+                </h2>
+                <!-- ① AI 智能体构建（具体文档/教程/详情页） -->
+                <div class="mb-6">
+                    <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <span class="text-base">🤖</span>
+                        <span>AI 智能体构建 · Agent Construction</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <!-- 百度 · 文心智能体 AgentBuilder 文档中心 -->
+                        <a href="https://agents.baidu.com/docs" target="_blank" rel="noopener noreferrer" class="card-hover block p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500">
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <span class="text-base font-bold text-slate-800 dark:text-slate-200">百度 · 文心智能体 AgentBuilder</span>
+                                <span class="text-xs text-slate-400 shrink-0">↗</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed"><span class="font-bold text-slate-600 dark:text-slate-300">构建文档：</span>智能体搭建步骤、知识库接入、插件配置、发布渠道——开发者手册具体章节。</p>
+                        </a>
+                        <!-- 阿里 · 通义大模型 Model Studio 智能体应用文档 -->
+                        <a href="https://help.aliyun.com/zh/model-studio/developer-reference/what-is-agent" target="_blank" rel="noopener noreferrer" class="card-hover block p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500">
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <span class="text-base font-bold text-slate-800 dark:text-slate-200">阿里 · 通义百炼 Model Studio</span>
+                                <span class="text-xs text-slate-400 shrink-0">↗</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed"><span class="font-bold text-slate-600 dark:text-slate-300">构建文档：</span>What is Agent？智能体调用、Function Calling、MCP 协议——通义智能体开发具体章节。</p>
+                        </a>
+                        <!-- 字节 · Coze 智能体开发指南 -->
+                        <a href="https://www.coze.cn/docs/guides/welcome" target="_blank" rel="noopener noreferrer" class="card-hover block p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-cyan-400 dark:hover:border-cyan-500">
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <span class="text-base font-bold text-slate-800 dark:text-slate-200">字节 · 扣子 Coze 开发者指南</span>
+                                <span class="text-xs text-slate-400 shrink-0">↗</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed"><span class="font-bold text-slate-600 dark:text-slate-300">构建文档：</span>智能体创建、插件/工作流/知识库编排、Bot 发布——Coze 入门与进阶具体章节。</p>
+                        </a>
+                        <!-- 腾讯 · 腾讯混元大模型智能体文档 -->
+                        <a href="https://cloud.tencent.com/document/product/1729" target="_blank" rel="noopener noreferrer" class="card-hover block p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500">
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <span class="text-base font-bold text-slate-800 dark:text-slate-200">腾讯 · 混元大模型文档</span>
+                                <span class="text-xs text-slate-400 shrink-0">↗</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed"><span class="font-bold text-slate-600 dark:text-slate-300">构建文档：</span>混元 API、智能体应用、插件调用、多轮对话——腾讯云产品文档具体章节。</p>
+                        </a>
+                        <!-- 华为 · 盘古大模型产品描述文档 -->
+                        <a href="https://support.huaweicloud.com/productdesc-pangu/zh-cn_topic_0000002278801561.html" target="_blank" rel="noopener noreferrer" class="card-hover block p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-red-400 dark:hover:border-red-500">
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <span class="text-base font-bold text-slate-800 dark:text-slate-200">华为 · 盘古大模型产品描述</span>
+                                <span class="text-xs text-slate-400 shrink-0">↗</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed"><span class="font-bold text-slate-600 dark:text-slate-300">构建文档：</span>NLP / 多模态 / 预测大模型能力清单 + Agent 行业解决方案——产品文档具体章节。</p>
+                        </a>
+                        <!-- 京东 · 言犀智能客服产品文档 -->
+                        <a href="https://yanxi.jd.com/help" target="_blank" rel="noopener noreferrer" class="card-hover block p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-red-400 dark:hover:border-red-500">
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <span class="text-base font-bold text-slate-800 dark:text-slate-200">京东 · 言犀智能客服文档</span>
+                                <span class="text-xs text-slate-400 shrink-0">↗</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed"><span class="font-bold text-slate-600 dark:text-slate-300">构建文档：</span>智能客服/营销 Agent 接入、知识库配置、行业模板——言犀帮助中心具体章节。</p>
+                        </a>
+                    </div>
+                </div>
+                <!-- 底部说明 -->
+                <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-5 text-center leading-relaxed">
+                    * 链接均为大厂官方入口的具体子页面（智能体平台开发文档），<br>
+                    仅用于参考大厂对 AI 智能体构建的具体描述。复制"岗位卡方法论"前，建议先读具体章节，再据此裁剪目标岗职责 / 边界 / 成功标准。
+                </p>
+            </div>
+        </section>
+    </div>
+    <!-- ECharts 初始化脚本 -->
+    <script>
+        // 根据设备宽度调整字体大小，适配多端
+        const isMobile = window.innerWidth < 768;
+        const fontSize = isMobile ? 10 : 12;
+
+        // 初始化 ECharts 实例
+        const chartDom = document.getElementById('radarChart');
+        const myChart = echarts.init(chartDom);
+
+        // 配置雷达图数据
+        const option = {
+            tooltip: {
+                trigger: 'item',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                textStyle: { color: '#333' },
+                borderWidth: 0,
+                shadowBlur: 10,
+                shadowColor: 'rgba(0, 0, 0, 0.1)'
+            },
+            radar: {
+                // 六个维度指标
+                indicator: [
+                    { name: '岗位名称', max: 5 },
+                    { name: '收到什么', max: 5 },
+                    { name: '做什么', max: 5 },
+                    { name: '交付什么', max: 5 },
+                    { name: '什么时候不做\n(边界)', max: 5 },
+                    { name: '成功标准', max: 5 }
+                ],
+                center: ['50%', '50%'],
+                radius: isMobile ? '60%' : '70%',
+                axisName: {
+                    color: '#64748b',
+                    fontSize: fontSize,
+                    lineHeight: 16,
+                    fontWeight: 500
+                },
+                splitArea: {
+                    areaStyle: {
+                        color: ['rgba(241, 245, 249, 0.5)', 'rgba(248, 250, 252, 0.5)']
+                    }
+                },
+                splitLine: {
+                    lineStyle: { color: '#e2e8f0' }
+                },
+                axisLine: {
+                    lineStyle: { color: '#cbd5e1' }
+                }
+            },
+            series: [{
+                name: '岗位卡清晰度',
+                type: 'radar',
+                // 模拟的评分数据：边界和标准给满分5，体现核心价值
+                data: [
+                    {
+                        value: [4, 4, 4.5, 4.5, 5, 5],
+                        name: '岗位卡完善度',
+                        areaStyle: {
+                            color: new echarts.graphic.RadialGradient(0.5, 0.5, 1, [
+                                { offset: 0, color: 'rgba(79, 70, 229, 0.3)' },
+                                { offset: 1, color: 'rgba(79, 70, 229, 0.1)' }
+                            ])
+                        },
+                        lineStyle: {
+                            color: '#4f46e5',
+                            width: 2
+                        },
+                        itemStyle: {
+                            color: '#4f46e5',
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        label: {
+                            show: true,
+                            formatter: function (params) {
+                                return params.value + '分';
+                            },
+                            fontSize: fontSize,
+                            color: '#4f46e5',
+                            fontWeight: 'bold'
+                        }
+                    }
+                ]
+            }]
+        };
+
+        // 渲染图表
+        myChart.setOption(option);
+
+        // 监听窗口变化，实现多端自适应
+        window.addEventListener('resize', function () {
+            const isMobileNow = window.innerWidth < 768;
+            myChart.setOption({
+                radar: {
+                    radius: isMobileNow ? '60%' : '70%',
+                    axisName: {
+                        fontSize: isMobileNow ? 10 : 12
+                    }
+                },
+                series: [{
+                    data: [{
+                        label: {
+                            fontSize: isMobileNow ? 10 : 12
+                        }
+                    }]
+                }]
+            });
+            myChart.resize();
+        });
+    </script>
+</body>
+
+</html>

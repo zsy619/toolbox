@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>第 3 章 · 拆出 Agent 的工作流 · Agent 搭建知识库</title>
+    <meta name="description" content="Agent 搭建第 3 章 · 拆工作流：把脑中的经验拆成 3~8 步可执行流程，加法→减法→白纸提问法，避免把模糊的经验直接交给 AI。">
+    <meta name="keywords" content="Agent, AI 员工, Hermes, Codex, 飞书, Profile, 岗位卡, 工作流, 闭环, 第 3 章 · 拆出 Agent 的工作流">
+    <meta name="author" content="Agent 搭建课程组">
+    <meta name="theme-color" content="#9333ea">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://tools.yy24365.com/apps/yitang/feishu/03-workflow.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="第 3 章 · 拆出 Agent 的工作流 · Agent 搭建知识库">
+    <meta property="og:description" content="Agent 搭建第 3 章 · 拆工作流：把脑中的经验拆成 3~8 步可执行流程，加法→减法→白纸提问法，避免把模糊的经验直接交给 AI。">
+    <meta property="og:url" content="https://tools.yy24365.com/apps/yitang/feishu/03-workflow.html">
+    <meta property="og:site_name" content="Agent 搭建知识库">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="第 3 章 · 拆出 Agent 的工作流">
+    <meta name="twitter:description" content="Agent 搭建第 3 章 · 拆工作流：把脑中的经验拆成 3~8 步可执行流程，加法→减法→白纸提问法，避免把模糊的经验直接交给 AI。">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#faf5ff', 100: '#f3e8ff',
+                            500: '#a855f7', 600: '#9333ea',
+                            700: '#7e22ce', 900: '#581c87'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"PingFang SC"', '"Microsoft YaHei"', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'card': '0 2px 12px -2px rgba(168,85,247,0.08)',
+                        'hover': '0 12px 28px -8px rgba(168,85,247,0.25)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-hover { transition: all 0.25s ease; }
+        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 24px -8px rgba(168,85,247,0.25); }
+        section[id] { scroll-margin-top: 80px; }
+        #progress-bar {
+            position: fixed; top: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, #a855f7, #ec4899);
+            z-index: 100; transition: width 0.1s ease-out;
+        }
+        .skip-link {
+            position: absolute; left: -9999px; top: 0;
+            background: #9333ea; color: white; padding: 8px 16px;
+            border-radius: 0 0 8px 0; font-weight: bold;
+        }
+        .skip-link:focus { left: 0; }
+        .theme-toggle { transition: transform 0.3s ease; }
+        .theme-toggle:hover { transform: rotate(20deg); }
+        @media print {
+            nav, #progress-bar, #back-to-top { display: none !important; }
+            section { page-break-inside: avoid; }
+        }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dark ::-webkit-scrollbar-track { background: #1e293b; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased min-h-screen flex flex-col font-sans">
+    <a href="#main-content" class="skip-link">跳到主内容</a>
+    <div id="progress-bar" style="width: 0%;"></div>
+
+    <nav class="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700" aria-label="主导航">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span aria-hidden="true">←</span><span class="hidden sm:inline">返回知识库</span>
+            </a>
+            <div class="flex items-center gap-2">
+                <div class="text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
+                    Step 3
+                </div>
+                <button id="theme-toggle" class="theme-toggle p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="切换暗色模式">
+                    <span class="dark:hidden" aria-hidden="true">🌙</span>
+                    <span class="hidden dark:inline" aria-hidden="true">☀️</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <a href="#main-content" class="skip-link">跳到主内容</a>
+    <div id="progress-bar" style="width: 0%;"></div>
+
+    
+
+    <a href="#main-content" class="skip-link">跳到主内容</a>
+    <div id="progress-bar" style="width: 0%;"></div>
+
+    
+
+
+        <header class="text-center">
+            <div class="text-6xl mb-4">🧩</div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-full mb-3">⏱ 40 分钟 · Step 3 / 拆解优化步骤</div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 mb-3">第 3 章 · 拆出 Agent 的工作流</h1>
+            <p class="text-base text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                岗位确定之后，下一步就是把你脑中的经验，变成一条<span class="font-bold">可执行</span>的工作流。
+            </p>
+        </header>
+
+        <!-- 为什么要拆工序 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">🤔 为什么要拆工序？</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-3">人可以凭经验跳过很多步骤，但 Agent 不行。Agent 需要知道：</p>
+            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400 mb-5">
+                <li class="flex gap-2"><span class="text-blue-500 font-bold">•</span><span>先做什么</span></li>
+                <li class="flex gap-2"><span class="text-blue-500 font-bold">•</span><span>遇到什么情况怎么判断</span></li>
+                <li class="flex gap-2"><span class="text-blue-500 font-bold">•</span><span>什么时候必须停下来问人</span></li>
+            </ul>
+            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                <p class="text-sm text-blue-900 dark:text-blue-200"><span class="font-bold">💡 思考题（先想 30 秒再看下面）：</span>如果你是那位实践者，老员工会干但说不出、硬逼着写又抵触，你会怎么办？</p>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-5">这位实践者的解法是<span class="font-bold text-blue-600 dark:text-blue-400">反着来的</span>：不逼会干的人写，而是招一群不会干的人来问。这就是"<span class="font-bold">白纸提问法</span>"，这一章会讲到。</p>
+        </section>
+
+        <!-- 加法→减法 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">➕➖ 第一步 · 先做加法，再做减法</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-5">拆流程分两步，顺序不能反：</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-5 border border-blue-300 dark:border-blue-700">
+                    <div class="font-bold text-blue-900 dark:text-blue-100 mb-2 flex items-center gap-2"><span class="text-2xl">①</span><span>加法</span></div>
+                    <p class="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">把你做这件事时的所有动作<span class="font-bold">全部列出来</span>，包括那些"我觉得不用说"的小动作——比如"打开飞书找到那份表""看一眼截止日期""把结果粘贴到文档里"。</p>
+                    <p class="mt-3 text-xs text-blue-700 dark:text-blue-400 font-bold">保底 10 个，争取 20 个，不要筛选。</p>
+                </div>
+                <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-5 border border-emerald-300 dark:border-emerald-700">
+                    <div class="font-bold text-emerald-900 dark:text-emerald-100 mb-2 flex items-center gap-2"><span class="text-2xl">②</span><span>减法</span></div>
+                    <p class="text-sm text-emerald-800 dark:text-emerald-200 leading-relaxed">合并同类项，收敛到 <span class="font-bold">3 到 8 个主步骤</span>。每步是一个完整的动作单元，不是微动作。</p>
+                    <p class="mt-3 text-xs text-emerald-700 dark:text-emerald-400 font-bold">判断标准：这一步的产出物，能不能被下一步直接使用？能，就是一步；不能，就是缺了中间步骤。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 通用模板 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">📐 工作流通用模板</h2>
+            <div class="bg-slate-900 dark:bg-black rounded-2xl p-4 mb-6 overflow-x-auto">
+                <div class="text-xs text-slate-100 font-mono leading-relaxed whitespace-nowrap">
+                    <span class="text-blue-400">输入</span> → <span class="text-purple-400">判断</span> → <span class="text-emerald-400">处理</span> → <span class="text-amber-400">检查</span> → <span class="text-rose-400">输出</span> → <span class="text-slate-400">人工确认</span>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">例如"客户咨询整理员"：</p>
+            <ol class="space-y-2 text-sm text-slate-600 dark:text-slate-400 list-decimal list-inside">
+                <li>获取客户的原始咨询记录。</li>
+                <li>判断是否包含姓名、联系方式、需求、预算和时间等关键信息。</li>
+                <li>提取并整理客户需求，去掉重复和无关内容。</li>
+                <li>根据预设规则判断客户意向等级。</li>
+                <li>生成下一步跟进建议。</li>
+                <li>检查是否存在缺失字段、明显误判或敏感信息。</li>
+                <li>写入飞书表格，并标记需要人工确认的记录。</li>
+            </ol>
+        </section>
+
+        <!-- 五字段工作流卡 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">📋 给每一步加上判断点 · 五字段工作流卡</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-5">为了让流程真正可执行，建议把每一个主步骤都写成一张五字段工作流卡。这五项能把"凭感觉做"变成"照规则做"。</p>
+            <div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 rounded-2xl p-5 border border-slate-300 dark:border-slate-700 mb-5">
+                <table class="w-full text-sm">
+                    <thead><tr class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase"><th class="py-2 text-left">字段</th><th class="py-2 text-left">要回答的问题</th></tr></thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                        <tr><td class="py-2.5 font-bold text-purple-600 dark:text-purple-400">输入</td><td class="py-2.5 text-slate-700 dark:text-slate-300">这一步必须拿到什么资料？格式和版本是什么？</td></tr>
+                        <tr><td class="py-2.5 font-bold text-purple-600 dark:text-purple-400">动作</td><td class="py-2.5 text-slate-700 dark:text-slate-300">Agent 具体要读取、判断、提取或生成什么？</td></tr>
+                        <tr><td class="py-2.5 font-bold text-purple-600 dark:text-purple-400">输出</td><td class="py-2.5 text-slate-700 dark:text-slate-300">下一步能直接使用的结果是什么？保存到哪里？</td></tr>
+                        <tr><td class="py-2.5 font-bold text-purple-600 dark:text-purple-400">检查</td><td class="py-2.5 text-slate-700 dark:text-slate-300">用什么标准判断这一步已经完成且结果可信？</td></tr>
+                        <tr><td class="py-2.5 font-bold text-purple-600 dark:text-purple-400">失败处理</td><td class="py-2.5 text-slate-700 dark:text-slate-300">缺资料、权限不足或规则冲突时，是补充、重试、退回还是转人工？</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="bg-emerald-50 dark:bg-emerald-900/20 border-l-4 border-emerald-500 p-4 rounded-r-xl mb-5">
+                <p class="text-sm text-emerald-900 dark:text-emerald-200"><span class="font-bold">✅ 写完后的自查：</span>如果去掉你的口头解释，另一个人仍能看懂这一步需要什么、产出什么、失败时怎么办，这张卡才算合格。</p>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-3">不要只写"分析资料""生成结果"这种大词。要继续追问：</p>
+            <ul class="space-y-1.5 text-sm text-slate-600 dark:text-slate-400">
+                <li class="flex gap-2"><span>•</span><span>什么情况下可以继续？</span></li>
+                <li class="flex gap-2"><span>•</span><span>什么情况下需要补资料？</span></li>
+                <li class="flex gap-2"><span>•</span><span>什么情况下必须停下来问人？</span></li>
+                <li class="flex gap-2"><span>•</span><span>什么结果需要再次检查？</span></li>
+                <li class="flex gap-2"><span>•</span><span>哪些信息不能由 Agent 自行猜测？</span></li>
+            </ul>
+        </section>
+
+        <!-- 白纸提问法 -->
+        <section class="bg-gradient-to-br from-fuchsia-50 to-purple-50 dark:from-fuchsia-900/30 dark:to-purple-900/30 rounded-2xl p-6 md:p-8 border-2 border-fuchsia-300 dark:border-fuchsia-700">
+            <h2 class="text-2xl font-bold text-fuchsia-900 dark:text-fuchsia-100 mb-4 flex items-center gap-2">📄 白纸提问法 · 把隐性判断逼出来</h2>
+            <p class="text-sm text-fuchsia-900 dark:text-fuchsia-200 leading-relaxed mb-5">如果发现自己"说不清自己怎么做的"，就用白纸提问法：</p>
+            <div class="bg-white/60 dark:bg-slate-900/30 rounded-xl p-4 mb-5">
+                <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">找一个<span class="font-bold">完全不懂你业务的人</span>，让他就你的流程不停地提问。他问到的那些"这也要说？"的地方，恰恰就是以后 Agent 最容易犯错的地方。</p>
+            </div>
+            <p class="text-sm text-fuchsia-900 dark:text-fuchsia-200 font-bold mb-3">这位实践者当时配了三个动作，才让这招生效：</p>
+            <ol class="space-y-2 text-sm text-fuchsia-900 dark:text-fuchsia-200 list-decimal list-inside">
+                <li><span class="font-bold">找真白纸</span>：招不懂业务的外包，而不是让现有同事——现有同事会"不好意思问"；</li>
+                <li><span class="font-bold">切断私下解答</span>：两个城市办公，强制线上文档交互，问答自动留痕；</li>
+                <li><span class="font-bold">打怪升级</span>：提问加分、解答加分，把"说出来"变成有奖励的事。</li>
+            </ol>
+            <div class="bg-slate-900 dark:bg-black rounded-xl p-5 mt-5">
+                <div class="text-[10px] font-bold text-slate-400 mb-2">💡 反例：没有新人可招怎么办？</div>
+                <pre class="text-xs text-slate-100 font-mono leading-relaxed whitespace-pre-wrap">请扮演一个完全不懂这件事的新人，就我的流程提出 20 个你会卡住的问题。</pre>
+            </div>
+            <p class="text-sm text-fuchsia-900 dark:text-fuchsia-200 mt-3">它问出来的问题，就是你流程里的隐性判断。</p>
+        </section>
+
+        <!-- 过关标准 -->
+        <section class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-2xl p-6 md:p-8 border-2 border-emerald-300 dark:border-emerald-700">
+            <h2 class="text-2xl font-bold text-emerald-900 dark:text-emerald-100 mb-4 flex items-center gap-2">✅ 过关标准</h2>
+            <p class="text-sm text-emerald-800 dark:text-emerald-200 leading-relaxed mb-2">另一个没有参与过这项工作的人，按照你的工作流，也能理解 Agent 应该如何从输入走到输出。</p>
+            <p class="text-sm text-emerald-900 dark:text-emerald-100 font-bold">再狠一点：你把工作流交给一个完全不懂业务的人，他能照着做出及格的结果，才算过关。</p>
+        </section>
+
+        <!-- 现在轮到你 -->
+        <section class="bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-900/30 dark:to-fuchsia-900/30 rounded-2xl p-6 md:p-8 border border-purple-200 dark:border-purple-800">
+            <h2 class="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">✍️ 现在轮到你</h2>
+            <p class="text-sm text-purple-900 dark:text-purple-200">把自己的岗位拆成一条 3 到 8 步的流程，并圈出其中最容易出错的一步。</p>
+        </section>
+
+        <!-- 常见卡点 -->
+        <section class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-6 md:p-8 border border-amber-300 dark:border-amber-700">
+            <h2 class="text-2xl font-bold text-amber-900 dark:text-amber-100 mb-4 flex items-center gap-2">⚠️ 常见卡点</h2>
+            <ul class="space-y-3 text-sm text-amber-900 dark:text-amber-200">
+                <li class="flex gap-2"><span>•</span><span><span class="font-bold">拆出来只有 2 步</span> → 加法没做够，回去把微动作全部列出来，至少 10 个再开始减法。</span></li>
+                <li class="flex gap-2"><span>•</span><span><span class="font-bold">拆出来 20 多步，砍不下来</span> → 按"产出物能不能被下一步直接用"合并。</span></li>
+                <li class="flex gap-2"><span>•</span><span><span class="font-bold">有些判断"只可意会"</span> → 白纸提问法。<span class="font-bold">写不出来的，Agent 以后也学不会</span>。</span></li>
+            </ul>
+        </section>
+
+        <!-- 金句 -->
+        <blockquote class="text-center py-6 px-8 bg-gradient-to-r from-purple-50 via-fuchsia-50 to-rose-50 dark:from-purple-900/20 dark:via-fuchsia-900/20 dark:to-rose-900/20 rounded-2xl border border-purple-200 dark:border-purple-800">
+            <p class="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-slate-100">
+                "你教不会 AI 的地方，<br>恰恰是你自己也没想清楚的地方。"
+            </p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">—— 第 3 章金句</p>
+        </blockquote>
+
+    
+    <!-- 底部导航 -->
+    <footer class="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-6 mt-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+            <a href="02-job-card.html" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span aria-hidden="true">←</span><span>上一章 · 定岗位</span>
+            </a>
+            <a href="index.html" class="hidden sm:flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span>知识库首页</span>
+            </a>
+            <a href="04-profile.html" class="flex items-center gap-2 text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition">
+                <span>下一章 · 写大脑</span><span aria-hidden="true">→</span>
+            </a>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 text-center">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500">
+                Agent 搭建知识库 · v2.0 · 基于《Agent 搭建：从重复工作到可交付的 AI 员工》整理
+            </p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700 hover:scale-110 transition-all opacity-0 pointer-events-none" aria-label="回到顶部">
+        <span class="text-xl" aria-hidden="true">↑</span>
+    </button>
+
+    <!-- ========== 章节交互脚本（与主页统一） ========== -->
+    
+
+    <!-- 底部导航 -->
+    <footer class="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-6 mt-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+            <a href="02-job-card.html" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span aria-hidden="true">←</span><span>上一章 · 定岗位</span>
+            </a>
+            <a href="index.html" class="hidden sm:flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span>知识库首页</span>
+            </a>
+            <a href="04-profile.html" class="flex items-center gap-2 text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition">
+                <span>下一章 · 写大脑</span><span aria-hidden="true">→</span>
+            </a>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 text-center">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500">
+                Agent 搭建知识库 · v2.0 · 基于《Agent 搭建：从重复工作到可交付的 AI 员工》整理
+            </p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700 hover:scale-110 transition-all opacity-0 pointer-events-none" aria-label="回到顶部">
+        <span class="text-xl" aria-hidden="true">↑</span>
+    </button>
+
+    <!-- ========== 章节交互脚本（与主页统一） ========== -->
+    
+
+    <!-- 底部导航 -->
+    <footer class="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-6 mt-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+            <a href="02-job-card.html" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span aria-hidden="true">←</span><span>上一章 · 定岗位</span>
+            </a>
+            <a href="index.html" class="hidden sm:flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span>知识库首页</span>
+            </a>
+            <a href="04-profile.html" class="flex items-center gap-2 text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition">
+                <span>下一章 · 写大脑</span><span aria-hidden="true">→</span>
+            </a>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 text-center">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500">
+                Agent 搭建知识库 · v2.0 · 基于《Agent 搭建：从重复工作到可交付的 AI 员工》整理
+            </p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700 hover:scale-110 transition-all opacity-0 pointer-events-none" aria-label="回到顶部">
+        <span class="text-xl" aria-hidden="true">↑</span>
+    </button>
+
+    <!-- ========== 章节交互脚本（与主页统一） ========== -->
+    <script>
+        // 1. 阅读进度条
+        (function() {
+            const bar = document.getElementById('progress-bar');
+            function update() {
+                const h = document.documentElement;
+                const max = h.scrollHeight - h.clientHeight;
+                const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+                bar.style.width = pct + '%';
+            }
+            window.addEventListener('scroll', update, { passive: true });
+            update();
+        })();
+
+        // 2. 回到顶部按钮
+        (function() {
+            const btn = document.getElementById('back-to-top');
+            function toggle() {
+                if (window.scrollY > 400) {
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                } else {
+                    btn.style.opacity = '0';
+                    btn.style.pointerEvents = 'none';
+                }
+            }
+            btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+            window.addEventListener('scroll', toggle, { passive: true });
+            toggle();
+        })();
+
+        // 3. 暗色模式切换（持久化）
+        (function() {
+            const btn = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            const STORAGE_KEY = 'agent-da-jian-theme';
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            }
+            btn.addEventListener('click', () => {
+                html.classList.toggle('dark');
+                localStorage.setItem(STORAGE_KEY, html.classList.contains('dark') ? 'dark' : 'light');
+            });
+        })();
+    </script>
+</body>
+</html>

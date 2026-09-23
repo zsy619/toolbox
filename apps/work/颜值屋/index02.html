@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>红棉花高端定制板材 - 技术方案</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ========== 微信收藏卡片 / SEO Meta ========== -->
+    <!-- 基础 SEO：被搜索引擎读取，也作为微信/QQ 抓取的摘要兜底 -->
+    <meta name="description" content="红棉花高端定制板材售后系统 技术方案：基于 Go + Hertz + GORM + MySQL + Vue3 + 小程序 技术栈，含系统架构、流程闭环、字段数据来源、开发注意事项。">
+    <meta name="keywords" content="颜之屋,全屋定制,售后系统,Go,Hertz,GORM,MySQL,Vue3,小程序,技术架构,字段数据来源">
+    <meta name="author" content="红棉花高端定制板材">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#3730a3">
+    <!-- Open Graph：微信 / QQ / 微博 / Facebook 通用（微信收藏卡片的核心） -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="红棉花高端定制板材 · 技术方案">
+    <meta property="og:description" content="基于 Go + Hertz + GORM + MySQL + Vue3 + 小程序 技术栈，含系统架构、流程闭环、字段数据来源、开发注意事项。">
+    <meta property="og:url" content="https://tools.yy24365.com/apps/work/%E9%A2%9C%E5%80%BC%E5%B1%8B/index02.html">
+    <meta property="og:site_name" content="红棉花高端定制板材">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="article:author" content="红棉花高端定制板材">
+    <meta property="article:section" content="技术架构">
+    <meta property="article:tag" content="Go">
+    <meta property="article:tag" content="Hertz">
+    <meta property="article:tag" content="Vue3">
+    <meta property="article:tag" content="小程序">
+    <!-- 微信收藏卡片缩略图（推荐 1:1 / 4:3，建议 ≥ 300×300） -->
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png" />
+    <meta property="og:image:secure_url" content="https://tools.yy24365.com/assets/images/dev-tools-og.png" />
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="1200">
+    <meta property="og:image:alt" content="红棉花高端定制板材售后系统  · 技术架构">
+    <meta property="og:image:type" content="image/png">
+    <!-- Twitter Card：补充自动渲染降级 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="红棉花高端定制板材 · 售后系统功能说明书（技术架构版）">
+    <meta name="twitter:description" content="基于 Go + Hertz + GORM + MySQL + Vue3 + 小程序 技术栈的售后系统架构说明。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta name="twitter:image:alt" content="红棉花高端定制板材售后系统  · 技术架构">
+    <!-- Schema.org JSON-LD：微信部分场景会抓取的结构化数据 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "红棉花高端定制板材 · 售后系统功能说明书",
+      "description": "基于 Go + Hertz + GORM + MySQL + Vue3 + 小程序 技术栈，含系统架构、流程闭环、字段数据来源、开发注意事项。",
+      "inLanguage": "zh-CN",
+      "author": { "@type": "Organization", "name": "红棉花高端定制板材" },
+      "publisher": { "@type": "Organization", "name": "红棉花高端定制板材" },
+      "url": "https://tools.yy24365.com/apps/work/%E9%A2%9C%E5%80%BC%E5%B1%8B/index02.html",
+      "image": "https://tools.yy24365.com/assets/images/dev-tools-og.png",
+      "about": ["全屋定制", "售后系统", "Go", "Hertz", "GORM", "Vue3", "小程序"]
+    }
+    </script>
+    <!-- canonical：避免外部转载导致的权重分散 -->
+    <link rel="canonical" href="https://tools.yy24365.com/apps/work/%E9%A2%9C%E5%80%BC%E5%B1%8B/index02.html">
+    <style>
+        /* 自定义时间轴样式 */
+        .timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 2.5rem;
+            bottom: -1rem;
+            width: 2px;
+            background-color: #e5e7eb;
+        }
+
+        @media (min-width: 768px) {
+            .timeline-item:not(:last-child)::after {
+                left: 1.25rem;
+            }
+        }
+
+        /* 表格横向滚动 */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
+    <!-- 顶部导航 -->
+    <header class="bg-gradient-to-r from-indigo-800 to-blue-700 text-white py-10 px-4 shadow-md">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-3xl md:text-4xl font-bold mb-3">红棉花高端定制板材售后系统 功能说明书</h1>
+            <p class="text-indigo-200 text-sm md:text-base mb-6">基于 Go + Hertz + GORM + MySQL + Vue3 + 小程序 技术栈</p>
+            <div class="inline-flex flex-wrap justify-center gap-3 text-xs md:text-sm bg-white/10 p-2 rounded-xl backdrop-blur-sm">
+                <span class="px-3 py-1.5 rounded-lg flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-green-400 mr-2"></span>选择项（系统带出/预设选择）</span>
+                <span class="px-3 py-1.5 rounded-lg flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-orange-400 mr-2"></span>填写项（客户/管理员手动输入）</span>
+                <span class="px-3 py-1.5 rounded-lg flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-purple-400 mr-2"></span>上传项（照片/视频多媒体凭证）</span>
+            </div>
+        </div>
+    </header>
+    <main class="max-w-6xl mx-auto px-4 py-10 space-y-16">
+        <!-- ================= 1. 系统架构概览 ================= -->
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <svg class="w-7 h-7 text-indigo-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+                系统架构与职责划分
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 小程序端 -->
+                <div class="bg-white rounded-2xl shadow-sm border-t-4 border-blue-500 p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                        <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        小程序端（客户端）
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-4">面向全屋定制客户，提供报备与报修入口，流程闭环的起点。</p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>售后安装完成报备单填写</li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>售后报单维修需求提交</li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>维修进度实时追踪与最终确认</li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-2">•</span>多媒体凭证（图片/视频）上传</li>
+                    </ul>
+                </div>
+                <!-- 管理后台 -->
+                <div class="bg-white rounded-2xl shadow-sm border-t-4 border-orange-500 p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                        <svg class="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        管理后台（Vue3）
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-4">面向总部管理员、客服，负责审核、派单与全局调度。</p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-start"><span class="text-orange-500 mr-2">•</span>报备单审核（通过/驳回）</li>
+                        <li class="flex items-start"><span class="text-orange-500 mr-2">•</span>维修工单受理与指派维修师傅</li>
+                        <li class="flex items-start"><span class="text-orange-500 mr-2">•</span>保外维修报价单审核</li>
+                        <li class="flex items-start"><span class="text-orange-500 mr-2">•</span>数据看板与服务质量考核</li>
+                    </ul>
+                </div>
+                <!-- 服务端 -->
+                <div class="bg-white rounded-2xl shadow-sm border-t-4 border-green-500 p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
+                        </svg>
+                        服务端（Go API）
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-4">基于 Go + Hertz + GORM + MySQL，负责核心业务逻辑与数据持久化。</p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-start"><span class="text-green-500 mr-2">•</span>API 路由、JWT 鉴权与参数校验</li>
+                        <li class="flex items-start"><span class="text-green-500 mr-2">•</span>工单状态机流转与事务管理</li>
+                        <li class="flex items-start"><span class="text-green-500 mr-2">•</span>微信服务通知推送</li>
+                        <li class="flex items-start"><span class="text-green-500 mr-2">•</span>OSS/COS 多媒体文件签名上传</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <!-- ================= 2. 核心业务流程 ================= -->
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <svg class="w-7 h-7 text-indigo-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                核心业务流程梳理
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- 流程一 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-blue-900">流程一：售后安装完成报备</h3>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">客户填报 → 管理员审核 → 交付</span>
+                    </div>
+                    <div class="relative pl-2">
+                        <div class="timeline-item relative pl-10 pb-8">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-blue-100 border-2 border-blue-500 flex items-center justify-center text-blue-700 font-bold text-xs">1</div>
+                            <h4 class="font-bold text-gray-800">客户填写提交报备</h4>
+                            <p class="text-sm text-gray-500 mt-1">客户在小程序选择订单与空间，填写安装完成日期，上传现场照片/视频，提交报备单。</p>
+                        </div>
+                        <div class="timeline-item relative pl-10 pb-8">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-blue-100 border-2 border-blue-500 flex items-center justify-center text-blue-700 font-bold text-xs">2</div>
+                            <h4 class="font-bold text-gray-800">后台管理员审核</h4>
+                            <p class="text-sm text-gray-500 mt-1">管理员在 Vue3 后台查看客户提交的图文资料，进行合规性审核。</p>
+                        </div>
+                        <div class="timeline-item relative pl-10 pb-4">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-blue-100 border-2 border-blue-500 flex items-center justify-center text-blue-700 font-bold text-xs">3</div>
+                            <h4 class="font-bold text-gray-800">审核结果处理</h4>
+                            <div class="text-sm text-gray-600 mt-2 space-y-2">
+                                <p><span class="font-semibold text-green-600">【通过】</span>系统自动生成交付档案，启动质保期。客户在小程序点击确认交付。</p>
+                                <p><span class="font-semibold text-red-600">【驳回】</span>管理员填写驳回原因，系统通知客户，客户修改后重新提交（回到步骤1）。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 流程二 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-orange-900">流程二：售后报单维修</h3>
+                        <span class="bg-orange-100 text-orange-800 text-xs px-3 py-1 rounded-full font-medium">客户报修 → 派单 → 上门 → 客户确认</span>
+                    </div>
+                    <div class="relative pl-2">
+                        <div class="timeline-item relative pl-10 pb-8">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-orange-100 border-2 border-orange-500 flex items-center justify-center text-orange-700 font-bold text-xs">1</div>
+                            <h4 class="font-bold text-gray-800">客户提交报修单</h4>
+                            <p class="text-sm text-gray-500 mt-1">客户选择空间/产品，填写故障描述，上传故障照片/视频，提交售后报单。</p>
+                        </div>
+                        <div class="timeline-item relative pl-10 pb-8">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-orange-100 border-2 border-orange-500 flex items-center justify-center text-orange-700 font-bold text-xs">2</div>
+                            <h4 class="font-bold text-gray-800">后台管理员受理与派单</h4>
+                            <p class="text-sm text-gray-500 mt-1">管理员查看报单，根据故障类型和区域指派维修师傅。</p>
+                        </div>
+                        <div class="timeline-item relative pl-10 pb-8">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-orange-100 border-2 border-orange-500 flex items-center justify-center text-orange-700 font-bold text-xs">3</div>
+                            <h4 class="font-bold text-gray-800">维修师傅联系客户</h4>
+                            <p class="text-sm text-gray-500 mt-1">师傅接单后电话联系客户，沟通上门时间及维修方案。</p>
+                        </div>
+                        <div class="timeline-item relative pl-10 pb-4">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-orange-100 border-2 border-orange-500 flex items-center justify-center text-orange-700 font-bold text-xs">4</div>
+                            <h4 class="font-bold text-gray-800">上门维修与客户最终确认</h4>
+                            <div class="text-sm text-gray-600 mt-2 space-y-2">
+                                <p>维修完成后，客户在小程序内查看维修结果，上传维修后照片。</p>
+                                <p><span class="font-semibold text-green-600">【客户点击确认】</span>工单关闭，服务记录归档，并可进行服务评价。</p>
+                                <p><span class="font-semibold text-red-600">【客户点击不确认】</span>客户填写原因，系统退回至管理员重新处理。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- ================= 3. 详细功能与字段数据来源 ================= -->
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <svg class="w-7 h-7 text-indigo-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                </svg>
+                详细功能与字段数据来源明细
+            </h2>
+            <!-- 3.1 小程序端功能 -->
+            <div class="mb-10">
+                <h3 class="text-xl font-semibold text-blue-800 mb-4 flex items-center">
+                    <span class="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>3.1 小程序端（客户端）功能与字段
+                </h3>
+                <div class="table-responsive bg-white rounded-xl shadow-sm border border-gray-100">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-100 text-xs text-gray-500 uppercase tracking-wider">
+                            <tr>
+                                <th class="px-4 py-3 w-1/6">功能模块</th>
+                                <th class="px-4 py-3 w-1/6">字段名称</th>
+                                <th class="px-4 py-3 w-1/12">类型</th>
+                                <th class="px-4 py-3 w-1/2">数据来源 / 说明</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <!-- 报备单字段 -->
+                            <tr class="bg-blue-50/30">
+                                <td class="px-4 py-4 font-medium text-gray-800" rowspan="7">售后安装<br>完成报备</td>
+                                <td class="px-4 py-3 font-medium text-gray-700">关联订单/产品</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：系统自动带出（基于当前登录客户的历史订单列表供客户勾选）</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">安装完成日期</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：客户通过日期选择器选择（默认今天）</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">安装地址</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：系统自动带出（CRM中的默认收货地址，客户可修改）</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">自检项目确认</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：系统预设验收清单（如柜门开合、五金等），客户逐项勾选“通过”或“异常”</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">验收照片/视频</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">上传</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：客户手机相册/相机拍摄上传（包含关键空间全景图及细节，作为交付凭证）</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">问题备注</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">填写</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：客户手动输入（非必填，若有异常项需在此说明）</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">交付确认</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：管理员审核通过后，客户在小程序点击“确认交付”</td>
+                            </tr>
+                            <!-- 报修单字段 -->
+                            <tr class="bg-orange-50/30 border-t-2 border-gray-200">
+                                <td class="px-4 py-4 font-medium text-gray-800" rowspan="8">售后报单<br>维修</td>
+                                <td class="px-4 py-3 font-medium text-gray-700">报修空间/产品</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：系统自动带出已交付的产品空间（如主卧衣柜、厨房橱柜）供客户选择</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">故障类型</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：系统预设下拉菜单（如：五金损坏、门板划痕、抽屉卡顿等）</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">期望上门时间</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：客户通过日期/时段选择器选择</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">联系人/电话</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：系统自动带出默认联系人，客户可切换或新增</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">故障描述</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">填写</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：客户手动输入具体问题描述（必填）</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">故障照片/视频</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">上传</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：客户手机相册/相机拍摄上传（辅助后台精准派单）</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">维修后照片</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">上传</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：客户确认维修效果后，拍照上传至小程序作为闭环凭证</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">维修结果确认</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：客户在小程序选择“确认”或“不确认”，若不确认需填写原因</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- 3.2 管理后台功能 -->
+            <div class="mb-10">
+                <h3 class="text-xl font-semibold text-orange-800 mb-4 flex items-center">
+                    <span class="w-3 h-3 bg-orange-500 rounded-full mr-3"></span>3.2 后端管理端（Vue3）功能与字段
+                </h3>
+                <div class="table-responsive bg-white rounded-xl shadow-sm border border-gray-100">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-100 text-xs text-gray-500 uppercase tracking-wider">
+                            <tr>
+                                <th class="px-4 py-3 w-1/6">功能模块</th>
+                                <th class="px-4 py-3 w-1/6">字段名称</th>
+                                <th class="px-4 py-3 w-1/12">类型</th>
+                                <th class="px-4 py-3 w-1/2">数据来源 / 说明</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr class="bg-blue-50/30">
+                                <td class="px-4 py-4 font-medium text-gray-800" rowspan="2">报备单审核</td>
+                                <td class="px-4 py-3 font-medium text-gray-700">审核状态</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：后端管理员操作（通过/驳回）</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">驳回原因</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">填写</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：后端管理员手动输入（仅当审核驳回时必填）</td>
+                            </tr>
+                            <tr class="bg-orange-50/30 border-t-2 border-gray-200">
+                                <td class="px-4 py-4 font-medium text-gray-800" rowspan="3">维修工单管理</td>
+                                <td class="px-4 py-3 font-medium text-gray-700">指派维修师傅</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：后端管理员根据区域和技能手动指派或系统智能派单</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">维修报价（保外）</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">填写</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：若为保外维修，由维修师傅/管理员在小程序填写费用明细，客户确认后进行维修</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-medium text-gray-700">工单状态流转</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">选择</span></td>
+                                <td class="px-4 py-3 text-gray-500">数据来源：后端系统状态机自动流转（待受理→已派单→维修中→待确认→已完成/已驳回）</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <!-- ================= 4. 开发注意事项与待确认业务规则 ================= -->
+        <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <svg class="w-7 h-7 text-indigo-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                开发注意事项与待确认业务规则
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600">
+                <div class="space-y-3">
+                    <h4 class="font-bold text-gray-800 text-base">1. 后端 (Go+Hertz+GORM) 开发注意</h4>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>状态机管理</strong>：建议引入状态机库（如 `looplab/fsm`）管理工单流转，避免代码中散落大量 `if-else` 状态判断。</li>
+                        <li><strong>事务处理</strong>：在“管理员审核通过”和“客户确认闭环”节点，必须使用 GORM 的 `Transaction`，确保状态更新、质保生成、通知发送的原子性。</li>
+                        <li><strong>文件上传</strong>：小程序端直接上传到 OSS/COS，后端只保存 URL 路径，降低 Go 服务器带宽压力。</li>
+                    </ul>
+                </div>
+                <div class="space-y-3">
+                    <h4 class="font-bold text-gray-800 text-base">2. 待确认的业务规则（需产品/运营介入）</h4>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>质保期起算日</strong>：从“客户提交报备日”、“管理员审核通过日”还是“实际安装完成日”开始计算？</li>
+                        <li><strong>补件类维修流转</strong>：若需工厂重新生产板件，系统如何与工厂生产系统对接？客户如何查看补件进度？</li>
+                        <li><strong>客户超时未确认</strong>：客户一直不点击“确认”也不点击“不确认”，工单是否设置“7天后系统自动确认”的兜底机制？</li>
+                        <li><strong>师傅空跑费</strong>：若保外维修客户拒绝支付报价，师傅空跑费如何界定与承担？</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="bg-gray-100 py-6 text-center text-xs text-gray-500 border-t border-gray-200">
+        <p>红棉花高端定制板材售后系统 功能说明书 · 技术栈：Go + Hertz + GORM + MySQL + Vue3 + 小程序</p>
+        <p class="mt-1">本说明涵盖后端、管理后台、小程序端三大系统功能，明确区分选择、填写、上传及数据来源</p>
+    </footer>
+</body>
+
+</html>

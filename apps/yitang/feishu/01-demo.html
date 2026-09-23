@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>第 1 章 · 跑通 Demo · Agent 搭建知识库</title>
+    <meta name="description" content="Agent 搭建第 1 章 · 跑通 Demo：先让 Agent 动起来，完成一次最简单的任务，建立信心。AI 化的第一步不是挑最值钱的，是挑最小的。">
+    <meta name="keywords" content="Agent, AI 员工, Hermes, Codex, 飞书, Profile, 岗位卡, 工作流, 闭环, 第 1 章 · 跑通 Demo">
+    <meta name="author" content="Agent 搭建课程组">
+    <meta name="theme-color" content="#9333ea">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://tools.yy24365.com/apps/yitang/feishu/01-demo.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="第 1 章 · 跑通 Demo · Agent 搭建知识库">
+    <meta property="og:description" content="Agent 搭建第 1 章 · 跑通 Demo：先让 Agent 动起来，完成一次最简单的任务，建立信心。AI 化的第一步不是挑最值钱的，是挑最小的。">
+    <meta property="og:url" content="https://tools.yy24365.com/apps/yitang/feishu/01-demo.html">
+    <meta property="og:site_name" content="Agent 搭建知识库">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="第 1 章 · 跑通 Demo">
+    <meta name="twitter:description" content="Agent 搭建第 1 章 · 跑通 Demo：先让 Agent 动起来，完成一次最简单的任务，建立信心。AI 化的第一步不是挑最值钱的，是挑最小的。">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#faf5ff', 100: '#f3e8ff',
+                            500: '#a855f7', 600: '#9333ea',
+                            700: '#7e22ce', 900: '#581c87'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"PingFang SC"', '"Microsoft YaHei"', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'card': '0 2px 12px -2px rgba(168,85,247,0.08)',
+                        'hover': '0 12px 28px -8px rgba(168,85,247,0.25)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-hover { transition: all 0.25s ease; }
+        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 24px -8px rgba(168,85,247,0.25); }
+        section[id] { scroll-margin-top: 80px; }
+        #progress-bar {
+            position: fixed; top: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, #a855f7, #ec4899);
+            z-index: 100; transition: width 0.1s ease-out;
+        }
+        .skip-link {
+            position: absolute; left: -9999px; top: 0;
+            background: #9333ea; color: white; padding: 8px 16px;
+            border-radius: 0 0 8px 0; font-weight: bold;
+        }
+        .skip-link:focus { left: 0; }
+        .theme-toggle { transition: transform 0.3s ease; }
+        .theme-toggle:hover { transform: rotate(20deg); }
+        @media print {
+            nav, #progress-bar, #back-to-top { display: none !important; }
+            section { page-break-inside: avoid; }
+        }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dark ::-webkit-scrollbar-track { background: #1e293b; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased min-h-screen flex flex-col font-sans">
+    <a href="#main-content" class="skip-link">跳到主内容</a>
+    <div id="progress-bar" style="width: 0%;"></div>
+
+    <nav class="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700" aria-label="主导航">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span aria-hidden="true">←</span><span class="hidden sm:inline">返回知识库</span>
+            </a>
+            <div class="flex items-center gap-2">
+                <div class="text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
+                    Step 1
+                </div>
+                <button id="theme-toggle" class="theme-toggle p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="切换暗色模式">
+                    <span class="dark:hidden" aria-hidden="true">🌙</span>
+                    <span class="hidden dark:inline" aria-hidden="true">☀️</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <a href="#main-content" class="skip-link">跳到主内容</a>
+    <div id="progress-bar" style="width: 0%;"></div>
+
+    
+
+    <a href="#main-content" class="skip-link">跳到主内容</a>
+    <div id="progress-bar" style="width: 0%;"></div>
+
+    
+
+
+        <header class="text-center">
+            <div class="text-6xl mb-4">🚀</div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-full mb-3">⏱ 30 分钟 · Step 1 / 可行性验证</div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 mb-3">第 1 章 · 先让 Agent 动起来</h1>
+            <p class="text-base text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                先跑出一个<span class="font-bold">能动</span>的东西。哪怕它又笨又慢，只要看到它"收到输入 → 做了一串动作 → 给出交付物"，就成功了。
+            </p>
+        </header>
+
+        <!-- 为什么要先跑 Demo -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">🧠 为什么要先跑一个 Demo？</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-5">先回答一个问题，凭直觉选：<span class="font-bold text-slate-900 dark:text-slate-100">AI 落地，应该先挑最重要的岗位做，还是先挑最简单的岗位做？</span></p>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-5">大多数人选"最重要的"。一位研发团队负责人一开始也这么选——让最强工程师直接用 AI 拆最复杂的功能模块，结果全军覆没。</p>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-5">后来他退回来，先让 AI 做实习生负责的基础单元任务，反而跑通了。这个变化说明：<span class="font-bold text-blue-600 dark:text-blue-400">先验证最小单元，比一开始挑战最复杂流程更容易建立稳定方法</span>。</p>
+            <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                <p class="text-sm text-blue-900 dark:text-blue-200"><span class="font-bold">🎯 原点里程碑：</span>找那个最小、最简单、绕不开的起点。AI 化的第一步，不是挑最值钱的，是挑最小的。</p>
+            </div>
+        </section>
+
+        <!-- 动手前看样例 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">👀 动手之前，先看一个样例</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">先花几分钟看一个跑通的 Demo 样例（助教现场演示或看录屏）：</p>
+            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400 mb-5">
+                <li class="flex gap-2"><span class="text-blue-500 font-bold">•</span><span><span class="font-bold">输入是什么</span>（比如一份飞书文档）；</span></li>
+                <li class="flex gap-2"><span class="text-blue-500 font-bold">•</span><span><span class="font-bold">Agent 中间做了什么</span>（读了文档、提炼了重点）；</span></li>
+                <li class="flex gap-2"><span class="text-blue-500 font-bold">•</span><span><span class="font-bold">最终交付物长什么样</span>（一份新的行动清单文档）。</span></li>
+            </ul>
+            <div class="bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500 p-4 rounded-r-xl">
+                <p class="text-sm text-purple-900 dark:text-purple-200 leading-relaxed">
+                    <span class="font-bold">💡 一个完整 Demo 的最小样子：</span>输入是一份包含背景、结论和待办的飞书文档；处理过程是读取资料、区分事实与建议、提取负责人和时间；输出是一份新的行动清单，并把缺失信息标为"待确认"。
+                </p>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-4">为什么要先看？因为你得先"看见"一个合格的交付长什么样，才知道自己跑出来的结果是 60 分还是 90 分。这在刻意练习里叫"<span class="font-bold">最佳实践池子</span>"——把自己的产出扔进标杆里看差距。</p>
+        </section>
+
+        <!-- 启动提示词 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">📝 第一次运行 · 最小 Demo 启动提示词</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">重点不是写得多，而是把输入、输出和停止条件说清楚。</p>
+            <div class="bg-slate-900 dark:bg-black rounded-xl p-5">
+                <pre class="text-xs text-slate-100 font-mono leading-relaxed whitespace-pre-wrap">请读取这份测试文档，并完成一次最小交付：
+1. 提炼 3—5 条关键信息；
+2. 整理成行动清单，字段包括行动项、负责人、截止时间、来源；
+3. 原文没有的信息一律标为"待确认"，不要补写；
+4. 将结果写入一份新的飞书文档，并返回文档链接。
+完成后说明：你读取了什么、做了什么、输出在哪里。</pre>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-4 italic">记住一句话：<span class="font-bold">你执行力的上限，不会超过你对最佳实践理解的上限</span>。没见过的，你想象不出来，也做不出来。</p>
+        </section>
+
+        <!-- 现场任务 + 手把手步骤 -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-card">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">🎯 现场任务 & 手把手步骤</h2>
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-5">
+                <div class="font-bold text-blue-900 dark:text-blue-200 mb-1">📋 默认任务</div>
+                <p class="text-sm text-blue-800 dark:text-blue-300">读取一份飞书文档，提炼重点，整理成行动清单，并输出到一份新的飞书文档。</p>
+                <p class="text-xs text-blue-700 dark:text-blue-400 mt-2">如果你的工作更适合其他任务，也可以替换成：整理客户咨询、生成会议待办、汇总销售线索、检查内容格式、制作项目日报等。</p>
+            </div>
+            <h3 class="font-bold text-slate-900 dark:text-slate-100 mb-3">手把手 5 步</h3>
+            <ol class="space-y-3 text-sm text-slate-600 dark:text-slate-400 list-decimal list-inside">
+                <li>选一份不敏感、内容不长的测试资料（第 0 章准备的那份就行）。</li>
+                <li>跟 Codex 说清楚<span class="font-bold text-slate-900 dark:text-slate-100">你希望它交付什么结果。说结果，不要说动作</span>。比如："提炼成一份行动清单，每条一个行动项"，而不是"帮我处理一下这份文档"。</li>
+                <li>让 Codex 先检查环境（第 0 章已经做过就不用重复了）。</li>
+                <li>运行一次最小任务，观察 Agent 能不能：拿到资料 → 完成处理 → 返回结果。</li>
+                <li><span class="font-bold text-rose-600 dark:text-rose-400">不急着优化。</span>先把"输入到输出"这条路走通。</li>
+            </ol>
+        </section>
+
+        <!-- 现在轮到你 -->
+        <section class="bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-900/30 dark:to-fuchsia-900/30 rounded-2xl p-6 md:p-8 border border-purple-200 dark:border-purple-800">
+            <h2 class="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">✍️ 现在轮到你</h2>
+            <p class="text-sm text-purple-900 dark:text-purple-200 leading-relaxed mb-3">写下一个你最近反复做过三次以上的小任务，并补上它的输入资料和最终输出。</p>
+            <div class="bg-white/60 dark:bg-slate-900/30 rounded-xl p-4 border border-purple-200 dark:border-purple-700">
+                <p class="text-xs text-purple-800 dark:text-purple-300 italic">比如："每周一整理销售周报"——输入是销售系统的原始数据，输出是一份周报文档。</p>
+            </div>
+        </section>
+
+        <!-- 过关标准 -->
+        <section class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-2xl p-6 md:p-8 border-2 border-emerald-300 dark:border-emerald-700">
+            <h2 class="text-2xl font-bold text-emerald-900 dark:text-emerald-100 mb-4 flex items-center gap-2">✅ 过关标准</h2>
+            <ul class="space-y-2 text-sm text-emerald-900 dark:text-emerald-100">
+                <li class="flex gap-2"><span>✓</span><span>能看到输入资料；</span></li>
+                <li class="flex gap-2"><span>✓</span><span>能看到 Agent 完成了一次处理；</span></li>
+                <li class="flex gap-2"><span>✓</span><span>能打开最终输出；</span></li>
+                <li class="flex gap-2"><span>✓</span><span>人工判断结果基本可用；</span></li>
+                <li class="flex gap-2"><span>✓</span><span><span class="font-bold">并且，你记录了至少 1 个它做得不好的地方——先记下来，不用修。</span></span></li>
+            </ul>
+        </section>
+
+        <!-- 常见卡点 -->
+        <section class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-6 md:p-8 border border-amber-300 dark:border-amber-700">
+            <h2 class="text-2xl font-bold text-amber-900 dark:text-amber-100 mb-4 flex items-center gap-2">⚠️ 常见卡点</h2>
+            <ul class="space-y-3 text-sm text-amber-900 dark:text-amber-200">
+                <li class="flex gap-2"><span>•</span><span><span class="font-bold">Agent 能聊天，但拿不到飞书资料</span> → 回第 0 章检查授权范围。</span></li>
+                <li class="flex gap-2"><span>•</span><span><span class="font-bold">拿到了资料，但输出混乱</span> → 任务目标和验收标准没说清。重说一遍"你希望它交付什么"，而不是只说"帮我处理一下"。</span></li>
+                <li class="flex gap-2"><span>•</span><span><span class="font-bold">每次都要重新解释背景</span> → 正常，岗位和 Profile 还没建立，后面章节会解决。</span></li>
+            </ul>
+        </section>
+
+        <!-- 金句 -->
+        <blockquote class="text-center py-6 px-8 bg-gradient-to-r from-purple-50 via-fuchsia-50 to-rose-50 dark:from-purple-900/20 dark:via-fuchsia-900/20 dark:to-rose-900/20 rounded-2xl border border-purple-200 dark:border-purple-800">
+            <p class="text-xl md:text-2xl font-extrabold text-slate-800 dark:text-slate-100 leading-relaxed">
+                "AI 化的第一步，不是挑最值钱的，<br>是挑最小的。"
+            </p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">—— 第 1 章金句</p>
+        </blockquote>
+
+    
+    <!-- 底部导航 -->
+    <footer class="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-6 mt-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+            <a href="00-tooling-setup.html" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span aria-hidden="true">←</span><span>上一章 · 工具准备</span>
+            </a>
+            <a href="index.html" class="hidden sm:flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span>知识库首页</span>
+            </a>
+            <a href="02-job-card.html" class="flex items-center gap-2 text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition">
+                <span>下一章 · 定岗位</span><span aria-hidden="true">→</span>
+            </a>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 text-center">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500">
+                Agent 搭建知识库 · v2.0 · 基于《Agent 搭建：从重复工作到可交付的 AI 员工》整理
+            </p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700 hover:scale-110 transition-all opacity-0 pointer-events-none" aria-label="回到顶部">
+        <span class="text-xl" aria-hidden="true">↑</span>
+    </button>
+
+    <!-- ========== 章节交互脚本（与主页统一） ========== -->
+    
+
+    <!-- 底部导航 -->
+    <footer class="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-6 mt-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+            <a href="00-tooling-setup.html" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span aria-hidden="true">←</span><span>上一章 · 工具准备</span>
+            </a>
+            <a href="index.html" class="hidden sm:flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span>知识库首页</span>
+            </a>
+            <a href="02-job-card.html" class="flex items-center gap-2 text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition">
+                <span>下一章 · 定岗位</span><span aria-hidden="true">→</span>
+            </a>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 text-center">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500">
+                Agent 搭建知识库 · v2.0 · 基于《Agent 搭建：从重复工作到可交付的 AI 员工》整理
+            </p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700 hover:scale-110 transition-all opacity-0 pointer-events-none" aria-label="回到顶部">
+        <span class="text-xl" aria-hidden="true">↑</span>
+    </button>
+
+    <!-- ========== 章节交互脚本（与主页统一） ========== -->
+    
+
+    <!-- 底部导航 -->
+    <footer class="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-6 mt-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+            <a href="00-tooling-setup.html" class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span aria-hidden="true">←</span><span>上一章 · 工具准备</span>
+            </a>
+            <a href="index.html" class="hidden sm:flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition">
+                <span>知识库首页</span>
+            </a>
+            <a href="02-job-card.html" class="flex items-center gap-2 text-sm font-bold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition">
+                <span>下一章 · 定岗位</span><span aria-hidden="true">→</span>
+            </a>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 text-center">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500">
+                Agent 搭建知识库 · v2.0 · 基于《Agent 搭建：从重复工作到可交付的 AI 员工》整理
+            </p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700 hover:scale-110 transition-all opacity-0 pointer-events-none" aria-label="回到顶部">
+        <span class="text-xl" aria-hidden="true">↑</span>
+    </button>
+
+    <!-- ========== 章节交互脚本（与主页统一） ========== -->
+    <script>
+        // 1. 阅读进度条
+        (function() {
+            const bar = document.getElementById('progress-bar');
+            function update() {
+                const h = document.documentElement;
+                const max = h.scrollHeight - h.clientHeight;
+                const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+                bar.style.width = pct + '%';
+            }
+            window.addEventListener('scroll', update, { passive: true });
+            update();
+        })();
+
+        // 2. 回到顶部按钮
+        (function() {
+            const btn = document.getElementById('back-to-top');
+            function toggle() {
+                if (window.scrollY > 400) {
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                } else {
+                    btn.style.opacity = '0';
+                    btn.style.pointerEvents = 'none';
+                }
+            }
+            btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+            window.addEventListener('scroll', toggle, { passive: true });
+            toggle();
+        })();
+
+        // 3. 暗色模式切换（持久化）
+        (function() {
+            const btn = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            const STORAGE_KEY = 'agent-da-jian-theme';
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            }
+            btn.addEventListener('click', () => {
+                html.classList.toggle('dark');
+                localStorage.setItem(STORAGE_KEY, html.classList.contains('dark') ? 'dark' : 'light');
+            });
+        })();
+    </script>
+</body>
+</html>
