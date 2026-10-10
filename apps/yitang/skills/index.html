@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark" itemscope itemtype="https://schema.org/WebPage">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- ============ Favicon（微信收藏图标兜底） ============ -->
+    <link rel="icon" type="image/png" href="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <link rel="apple-touch-icon" href="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <link rel="shortcut icon" href="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+
+    <!-- ============ 基础 SEO（微信收藏优先读取 title/description/keywords） ============ -->
+    <title>Skill 封装工作台 · 五阶段实战</title>
+    <meta name="description" content="封装你的第一个 Skill —— 五阶段工作台，把重复的工作变成 AI 可调用的能力。含场景定义、输入设计、步骤拆解、反例校验与测试用例，实时生成 SKILL.md。">
+    <meta name="keywords" content="Skill封装,AI Skill,Claude Skill,SKILL.md,提示词工程,AI Agent,自动化工作流,五阶段方法论,Prompt设计">
+    <meta name="author" content="开发者工具导航">
+
+    <!-- ============ 微信专用标签（Schema.org itemprop） ============
+         关键顺序约束：必须整块位于 OG 标签之前。
+         微信爬虫按文档顺序抓取，先命中 itemprop 才会采用，
+         若被 OG 标签抢先命中，会退化成普通网页分享卡片。 -->
+    <meta itemprop="name" content="Skill 封装工作台 · 五阶段实战">
+    <meta itemprop="description" content="封装你的第一个 Skill —— 五阶段工作台，把重复的工作变成 AI 可调用的能力。含场景定义、输入设计、步骤拆解、反例校验与测试用例，实时生成 SKILL.md。">
+    <meta itemprop="image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+
+    <!-- ============ Open Graph（微信分享卡片） ============
+         尺寸取 300×300 与站内 dev-tools-og.png 实际规格一致；
+         若换成 1200×630 横图，需同步修改 width/height，否则微信会裁切。 -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Skill 封装工作台">
+    <meta property="og:title" content="Skill 封装工作台 · 五阶段实战">
+    <meta property="og:url" content="https://tools.yy24365.com/apps/yitang/skills/index.html">
+    <meta property="og:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta property="og:image:secure_url" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="300">
+    <meta property="og:image:height" content="300">
+    <meta property="og:image:alt" content="Skill 封装工作台预览图">
+    <meta property="og:description" content="封装你的第一个 Skill —— 五阶段工作台，把重复的工作变成 AI 可调用的能力。含场景定义、输入设计、步骤拆解、反例校验与测试用例，实时生成 SKILL.md。">
+    <meta property="og:locale" content="zh_CN">
+
+    <!-- ============ Twitter Card（X 等平台） ============ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Skill 封装工作台 · 五阶段实战">
+    <meta name="twitter:description" content="封装你的第一个 Skill —— 五阶段工作台，把重复的工作变成 AI 可调用的能力。实时生成 SKILL.md。">
+    <meta name="twitter:image" content="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+
+    <!-- ============ 规范地址：告诉搜索引擎与微信哪个 URL 是正本 ============ -->
+    <link rel="canonical" href="https://tools.yy24365.com/apps/yitang/skills/index.html">
+
+    <!-- ============ 结构化数据（微信搜一搜 / Google 富媒体摘要） ============ -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Skill 封装工作台 · 五阶段实战",
+        "description": "封装你的第一个 Skill —— 五阶段工作台，把重复的工作变成 AI 可调用的能力。含场景定义、输入设计、步骤拆解、反例校验与测试用例，实时生成 SKILL.md。",
+        "url": "https://tools.yy24365.com/apps/yitang/skills/index.html",
+        "image": "https://tools.yy24365.com/assets/images/dev-tools-og.png",
+        "inLanguage": "zh-CN",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "isAccessibleForFree": true,
+        "browserRequirements": "Requires JavaScript",
+        "keywords": "Skill封装,AI Skill,SKILL.md,提示词工程,AI Agent,自动化工作流",
+        "description_zh": "通过场景、输入、步骤、反例、测试五个阶段，把重复工作封装成 AI 可调用的 Skill"
+    }
+    </script>
+
+    <script>
+        // 在首屏渲染前应用主题，避免闪白
+        (function () {
+            try {
+                var t = localStorage.getItem('skill-theme');
+                if (t === 'light' || t === 'dark') {
+                    document.documentElement.setAttribute('data-theme', t);
+                }
+            } catch (e) { }
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // ============================================================
+        // 主题令牌：把 CSS 变量接进 Tailwind 语义色。
+        //
+        // 时序要求（实测结论）：必须写在 CDN 脚本「之后」、
+        // 且位于 <style type="text/tailwindcss"> 之前。
+        // 写在 CDN 之前会让 Play CDN 读不到配置，@apply 整块静默失效；
+        // 写在 style 之后则同样来不及被首次扫描读到。
+        // ============================================================
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // ink 直接带上 --c-text-a，深浅主题透明度不同（.58 / .68）
+                        ink: 'rgb(var(--c-text) / var(--c-text-a))',
+                        // raw 为纯色，配合 /10 /[.04] 等透明度修饰符使用
+                        raw: 'rgb(var(--c-text) / <alpha-value>)',
+                        line: 'rgb(var(--c-border) / <alpha-value>)',
+                        surface: 'rgb(var(--c-surface) / var(--c-surface-a))',
+                        primary: 'rgb(var(--c-primary) / <alpha-value>)',
+                        accent: 'rgb(var(--c-accent) / <alpha-value>)',
+                        warn: 'rgb(var(--c-warn) / <alpha-value>)',
+                        danger: 'rgb(var(--c-danger) / <alpha-value>)',
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI',
+                            'sans-serif'],
+                        display: ['SF Pro Display', '-apple-system', 'PingFang SC', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '4xl': '1rem',
+                    },
+                    boxShadow: {
+                        card: 'var(--shadow-card)',
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        /* ============================================================
+           仅保留 Tailwind 工具类无法表达的部分：
+           1) 主题变量  2) details 标记  3) 滚动条  4) 动效偏好
+           其余样式全部走 Tailwind 工具类
+           ============================================================ */
+
+        /* ---------- 1. 主题变量（供 tailwind.config 读取） ---------- */
+        :root {
+            --c-bg: 8 12 22;
+            --c-surface: 255 255 255;
+            --c-surface-a: .045;
+            --c-border: 255 255 255;
+            --c-text: 255 255 255;
+            --c-text-a: .58;
+            --c-muted-a: .38;
+            --c-primary: 99 102 241;
+            --c-accent: 45 212 191;
+            --c-warn: 251 191 36;
+            --c-danger: 248 113 113;
+            --shadow-card: 0 18px 40px -24px rgb(0 0 0 / .8);
+        }
+
+        html[data-theme="light"] {
+            --c-bg: 248 250 252;
+            --c-surface: 255 255 255;
+            --c-surface-a: .9;
+            --c-border: 15 23 42;
+            --c-text: 15 23 42;
+            --c-text-a: .68;
+            --c-muted-a: .48;
+            --c-primary: 79 70 229;
+            --c-accent: 13 148 136;
+            --c-warn: 180 83 9;
+            --c-danger: 220 38 38;
+            --shadow-card: 0 14px 34px -22px rgb(15 23 42 / .28);
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ---------- 2. details 折叠面板标记（伪元素，Tailwind 无法处理） ---------- */
+        details.acc>summary {
+            list-style: none;
+        }
+
+        details.acc>summary::-webkit-details-marker {
+            display: none;
+        }
+
+        /* ---------- 3. 滚动条 ---------- */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgb(var(--c-text) / .16);
+            border-radius: 999px;
+        }
+
+        /* ---------- 4. 尊重动效偏好 ---------- */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+
+    <!--
+        组件层：把反复出现的工具类组合收敛成 @apply。
+
+        重要约束（实测结论）：
+        Tailwind Play CDN 下，只要 @apply 中引用了 tailwind.config 自定义颜色
+        （如 bg-primary、text-raw、border-line），整个 <style type="text/tailwindcss">
+        块会静默失效 —— 块内所有规则一起消失，页面完全失去样式。
+
+        因此这里的分工是：
+          · @apply 只负责布局、尺寸、字号、圆角、过渡等标准工具类；
+          · 所有颜色（语义色、透明底色、渐变）一律写在下面的普通 <style> 里，
+            通过 rgb(var(--c-*) / a) 直接引用主题变量。
+    -->
+    <style type="text/tailwindcss">
+        @layer components {
+
+            /* 卡片：只做形状，颜色见下方 .card */
+            .card {
+                @apply rounded-4xl border;
+            }
+
+            .card-hover {
+                @apply transition-all duration-300;
+            }
+
+            /* 小标签：eyebrow 全大写副标题 */
+            .eyebrow {
+                @apply text-[11px] uppercase tracking-[.16em];
+            }
+
+            /* 表单 */
+            .field-label {
+                @apply mb-[.4rem] flex items-center gap-1.5 text-xs font-semibold;
+            }
+
+            .field-num {
+                @apply grid h-[18px] w-[18px] shrink-0 place-items-center rounded-[5px] text-[10px] font-bold;
+            }
+
+            .inp {
+                @apply min-h-11 w-full resize-y rounded-[.625rem] border px-3 py-2.5 text-[13px] leading-[1.6] transition-colors;
+            }
+
+            /* 按钮：形状与排版，颜色见下方 .btn-* */
+            .btn {
+                @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-[.625rem] border border-transparent px-4 text-[13px] font-semibold transition active:scale-[.97];
+            }
+
+            .btn-sm {
+                @apply min-h-8 px-2.5 text-[11px];
+            }
+
+            /* 徽章 */
+            .badge {
+                @apply inline-flex items-center gap-1 whitespace-nowrap rounded-md border px-2 py-[.15rem] text-[10px] font-semibold tracking-[.03em];
+            }
+
+            /* 进度条 */
+            .prog-track {
+                @apply h-1.5 overflow-hidden rounded-full;
+            }
+
+            .prog-fill {
+                @apply h-full rounded-full transition-[width] duration-500;
+            }
+
+            /* 测试行 */
+            .test-row {
+                @apply rounded-xl border p-3.5;
+            }
+
+            /* 提示词 / 代码块 */
+            .prompt-box {
+                @apply overflow-x-auto whitespace-pre-wrap break-words rounded-xl border p-4 font-mono text-xs leading-7;
+            }
+
+            /* 折叠面板 */
+            details.acc {
+                @apply overflow-hidden rounded-[.875rem] border;
+            }
+
+            details.acc>summary {
+                @apply flex cursor-pointer items-center gap-3 p-4;
+            }
+
+            .chev {
+                @apply shrink-0 transition-transform duration-300;
+            }
+
+            /* 步骤条：圆点尺寸与连接线位置 */
+            .stage-dot {
+                @apply grid h-8 w-8 shrink-0 place-items-center rounded-[.6rem] border text-xs font-semibold transition-all duration-300;
+            }
+
+            .stage-rail {
+                @apply absolute left-[calc(50%+1.6rem)] right-[-50%+1.6rem] top-4 h-px;
+            }
+
+            @media (min-width: 1024px) {
+                .stage-rail {
+                    right: -50%;
+                }
+            }
+
+            /* Toast 位移与移动端菜单展开高度依赖状态类，放在普通 style 更稳妥 */
+            #toast {
+                /* z-[80] 而非 z-80：Tailwind v3 的 z-index 刻度最大只有 z-50，
+                   @apply 引用不存在的工具类会抛错并让整个 text/tailwindcss 块失效 */
+                @apply pointer-events-none fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 z-[80] -translate-x-1/2 px-4 transition-transform duration-300;
+            }
+
+            #mobileMenu {
+                @apply max-h-0 overflow-hidden transition-[max-height] duration-300;
+            }
+
+            .preview-pane {
+                @apply lg:sticky lg:top-20;
+            }
+        }
+    </style>
+
+    <style>
+        /* ============================================================
+           颜色层：主题语义色在这里落地。
+           Tailwind Play CDN 的 @apply 不支持自定义颜色，
+           因此所有颜色都用 rgb(var(--c-*)) 直接书写。
+           ============================================================ */
+
+        /* 卡片 */
+        .card {
+            background: rgb(var(--c-surface) / var(--c-surface-a));
+            border-color: rgb(var(--c-border) / .10);
+        }
+
+        html[data-theme="light"] .card {
+            background: #fff;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-3px);
+            border-color: rgb(var(--c-primary) / .4);
+            box-shadow: var(--shadow-card);
+        }
+
+        .eyebrow {
+            color: rgb(var(--c-text) / var(--c-muted-a));
+        }
+
+        /* 表单 */
+        .field-label {
+            color: rgb(var(--c-text) / .82);
+        }
+
+        .field-num {
+            background: rgb(var(--c-primary) / .16);
+            color: rgb(var(--c-primary));
+        }
+
+        .inp {
+            background: rgb(var(--c-text) / .04);
+            border-color: rgb(var(--c-border) / .12);
+            color: rgb(var(--c-text) / .92);
+        }
+
+        .inp::placeholder {
+            color: rgb(var(--c-text) / .28);
+        }
+
+        .inp:focus {
+            outline: none;
+            border-color: rgb(var(--c-primary) / .6);
+            background: rgb(var(--c-text) / .06);
+            box-shadow: 0 0 0 3px rgb(var(--c-primary) / .12);
+        }
+
+        /* 按钮 */
+        .btn-ghost {
+            background: rgb(var(--c-text) / .05);
+            border-color: rgb(var(--c-border) / .12);
+            color: rgb(var(--c-text) / .8);
+        }
+
+        .btn-ghost:hover {
+            background: rgb(var(--c-text) / .09);
+        }
+
+        .btn-primary {
+            background: rgb(var(--c-primary));
+            color: #fff;
+        }
+
+        .btn-danger {
+            color: rgb(var(--c-danger));
+        }
+
+        .btn-primary-text {
+            color: rgb(var(--c-primary));
+        }
+
+        /* 徽章 */
+        .badge-p {
+            background: rgb(var(--c-primary) / .14);
+            border-color: rgb(var(--c-primary) / .30);
+            color: rgb(var(--c-primary));
+        }
+
+        .badge-a {
+            background: rgb(var(--c-accent) / .14);
+            border-color: rgb(var(--c-accent) / .30);
+            color: rgb(var(--c-accent));
+        }
+
+        .badge-w {
+            background: rgb(var(--c-warn) / .14);
+            border-color: rgb(var(--c-warn) / .30);
+            color: rgb(var(--c-warn));
+        }
+
+        .badge-d {
+            background: rgb(var(--c-danger) / .14);
+            border-color: rgb(var(--c-danger) / .30);
+            color: rgb(var(--c-danger));
+        }
+
+        /* 进度条 */
+        .prog-track {
+            background: rgb(var(--c-text) / .09);
+        }
+
+        .prog-fill {
+            background: linear-gradient(90deg, rgb(var(--c-primary)), rgb(var(--c-accent)));
+        }
+
+        /* 测试行 */
+        .test-row {
+            background: rgb(var(--c-surface) / var(--c-surface-a));
+            border-color: rgb(var(--c-border) / .1);
+        }
+
+        /* 提示词块 */
+        .prompt-box {
+            background: rgb(0 0 0 / .28);
+            border-color: rgb(var(--c-border) / .12);
+            color: rgb(var(--c-text) / .8);
+        }
+
+        html[data-theme="light"] .prompt-box {
+            background: rgb(15 23 42 / .04);
+        }
+
+        /* 折叠面板 */
+        details.acc {
+            background: rgb(var(--c-surface) / var(--c-surface-a));
+            border-color: rgb(var(--c-border) / .1);
+        }
+
+        details.acc[open] {
+            border-color: rgb(var(--c-primary) / .3);
+        }
+
+        details.acc[open] .chev {
+            transform: rotate(90deg);
+        }
+
+        .chev {
+            color: rgb(var(--c-text) / .4);
+        }
+
+        /* 步骤条状态 */
+        .stage-dot {
+            border-color: rgb(var(--c-border) / .15);
+            color: rgb(var(--c-text) / .5);
+        }
+
+        .stage-rail {
+            background: rgb(var(--c-border) / .12);
+        }
+
+        .stage-item.is-done .stage-dot {
+            background: rgb(var(--c-accent));
+            border-color: rgb(var(--c-accent));
+            color: rgb(var(--c-bg));
+        }
+
+        .stage-item.is-done .stage-rail {
+            background: rgb(var(--c-accent) / .5);
+        }
+
+        .stage-item.is-active .stage-dot {
+            background: rgb(var(--c-primary));
+            border-color: rgb(var(--c-primary));
+            color: #fff;
+            box-shadow: 0 0 0 4px rgb(var(--c-primary) / .16);
+        }
+
+        /* Toast 弹出态（JS 加 .show） */
+        #toast {
+            transform: translate(-50%, 130%);
+        }
+
+        #toast.show {
+            transform: translate(-50%, 0);
+        }
+
+        /* 移动端菜单展开态（JS 加 .open） */
+        #mobileMenu.open {
+            max-height: 26rem;
+        }
+
+        /* 渐变文字：bg-clip-text 需在样式表声明 */
+        .grad {
+            background-image: linear-gradient(96deg, #6366f1 0%, #2dd4bf 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
+</head>
+
+<!-- body：主题底色 + 主题字色，全部走 Tailwind 语义色 -->
+<body class="min-h-screen overflow-x-hidden bg-[rgb(var(--c-bg))] font-sans text-ink antialiased transition-colors duration-300">
+
+    <!-- ===================== 顶部导航 ===================== -->
+    <header class="sticky top-0 z-50 border-b border-line/10 bg-[rgb(var(--c-bg)/.85)] backdrop-blur-xl">
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
+            <a href="#top" class="flex items-center gap-2.5 min-w-0">
+                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-teal-400 text-white">
+                    <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 3.5l2.2 5.1 5.3.5-4 3.6 1.2 5.3L12 15.4 7.3 18l1.2-5.3-4-3.6 5.3-.5L12 3.5z" />
+                    </svg>
+                </span>
+                <span class="min-w-0">
+                    <span class="block truncate font-display text-[15px] font-bold leading-tight">Skill 封装工作台</span>
+                    <span class="block truncate text-[11px] text-raw/38">五阶段 · 把经验变成能力</span>
+                </span>
+            </a>
+
+            <!-- 桌面导航 -->
+            <nav class="hidden items-center gap-0.5 text-[13px] lg:flex">
+                <a href="#tutorial" class="rounded-lg px-3 py-2 transition hover:bg-raw/06">五阶段教程</a>
+                <a href="#workbench" class="rounded-lg px-3 py-2 transition hover:bg-raw/06">六类规则</a>
+                <a href="#testing" class="rounded-lg px-3 py-2 transition hover:bg-raw/06">三类测试</a>
+                <a href="#prompts" class="rounded-lg px-3 py-2 transition hover:bg-raw/06">提示词库</a>
+                <a href="#cases" class="rounded-lg px-3 py-2 transition hover:bg-raw/06">案例库</a>
+            </nav>
+
+            <div class="flex shrink-0 items-center gap-2">
+                <button type="button" id="themeBtn"
+                    class="inline-flex h-9 min-h-9 items-center justify-center gap-1.5 rounded-lg border border-line/15 bg-raw/05 px-2.5 text-[13px] font-semibold text-raw/80 transition-colors hover:bg-raw/10 active:scale-[.97]"
+                    aria-label="切换主题">
+                    <svg class="h-4 w-4 dark-only" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M20.4 14.2A8.5 8.5 0 019.8 3.6a8.5 8.5 0 1010.6 10.6z" />
+                    </svg>
+                    <svg class="hidden h-4 w-4 light-only" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="4" />
+                        <path stroke-linecap="round"
+                            d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+                    </svg>
+                </button>
+                <button type="button" id="menuBtn"
+                    class="inline-flex h-9 min-h-9 items-center justify-center gap-1.5 rounded-lg border border-line/15 bg-raw/05 px-2.5 text-[13px] font-semibold text-raw/80 transition-colors hover:bg-raw/10 active:scale-[.97] lg:hidden"
+                    aria-label="打开菜单" aria-expanded="false">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端菜单：用 max-height 过渡展开（JS 切换 open 类） -->
+        <div id="mobileMenu"
+            class="max-h-0 overflow-hidden border-t border-line/10 transition-[max-height] duration-300 lg:hidden">
+            <nav class="mx-auto max-w-7xl space-y-1 px-4 py-3 text-sm">
+                <a href="#tutorial" class="mob-link block rounded-lg px-3 py-2.5 transition hover:bg-raw/06">五阶段教程</a>
+                <a href="#workbench" class="mob-link block rounded-lg px-3 py-2.5 transition hover:bg-raw/06">六类规则工作台</a>
+                <a href="#testing" class="mob-link block rounded-lg px-3 py-2.5 transition hover:bg-raw/06">三类测试验证</a>
+                <a href="#prompts" class="mob-link block rounded-lg px-3 py-2.5 transition hover:bg-raw/06">提示词库</a>
+                <a href="#cases" class="mob-link block rounded-lg px-3 py-2.5 transition hover:bg-raw/06">案例库</a>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" id="exportBtnMobile"
+                        class="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-line/15 bg-raw/05 px-4 text-xs font-semibold text-raw/80 transition-colors hover:bg-raw/10 active:scale-[.97]">导出数据</button>
+                    <button type="button" id="resetBtnMobile"
+                        class="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-line/15 bg-raw/05 px-4 text-xs font-semibold text-raw/80 transition-colors hover:bg-raw/10 active:scale-[.97]">清空重填</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main id="top">
+
+        <!-- ===================== Hero ===================== -->
+        <section class="relative overflow-hidden px-4 pb-10 pt-12 sm:pt-16">
+            <!-- 背景装饰光晕 -->
+            <div class="pointer-events-none absolute -left-20 -top-24 h-72 w-72 rounded-full bg-indigo-500/15 blur-3xl"></div>
+            <div class="pointer-events-none absolute -right-16 top-8 h-64 w-64 rounded-full bg-teal-400/12 blur-3xl"></div>
+
+            <div class="relative mx-auto max-w-4xl">
+                <span class="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3 py-1.5 text-[11px] font-medium text-accent">
+                    <span class="h-1.5 w-1.5 rounded-full bg-accent"></span>
+                    官方任务包 01 · 实战工作台
+                </span>
+
+                <h1 class="font-display mt-5 text-[30px] font-bold leading-[1.15] tracking-tight sm:text-[42px] lg:text-[52px]">
+                    封装你的第一个<br class="hidden sm:block" />
+                    <span class="grad">非常好用的 Skill</span>
+                </h1>
+
+                <p class="mt-5 max-w-2xl text-[14px] leading-relaxed sm:text-[15px]">
+                    有没有一件小事，你每周都在做，也总要向 AI 重新解释一遍要求？
+                    这次，从「找场景 → 做好一次 → 提炼规则 → 封装成 Skill → 换材料验证」五个阶段走完，
+                    把靠你提醒才做对的地方，变成下一次 AI 能直接执行的做法。
+                </p>
+
+                <div class="mt-7 flex flex-wrap gap-2.5">
+                    <a href="#workbench"
+                        class="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-[.625rem] border border-transparent bg-primary px-4 text-[13px] font-semibold text-white transition active:scale-[.97]">
+                        开始填写六类规则
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                    </a>
+                    <a href="#tutorial"
+                        class="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-[.625rem] border border-line/15 bg-raw/05 px-4 text-[13px] font-semibold text-raw/80 transition-colors hover:bg-raw/10 active:scale-[.97]">先看五阶段教程</a>
+                </div>
+
+                <dl class="mt-9 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                    <div class="rounded-4xl border border-line/10 bg-surface px-4 py-3">
+                        <dt class="eyebrow">阶段</dt>
+                        <dd class="font-display mt-1 text-xl font-bold">5 步</dd>
+                    </div>
+                    <div class="rounded-4xl border border-line/10 bg-surface px-4 py-3">
+                        <dt class="eyebrow">规则分类</dt>
+                        <dd class="font-display mt-1 text-xl font-bold">6 类</dd>
+                    </div>
+                    <div class="rounded-4xl border border-line/10 bg-surface px-4 py-3">
+                        <dt class="eyebrow">必做测试</dt>
+                        <dd class="font-display mt-1 text-xl font-bold">3 类</dd>
+                    </div>
+                    <div class="rounded-4xl border border-line/10 bg-surface px-4 py-3">
+                        <dt class="eyebrow">成品</dt>
+                        <dd class="font-display grad mt-1 text-xl font-bold">SKILL.md</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+
+        <!-- ===================== 五阶段步骤条 ===================== -->
+        <section class="px-4 py-8">
+            <div class="mx-auto max-w-6xl">
+                <div class="card px-4 py-5 sm:px-6">
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <p class="eyebrow">五阶段路线</p>
+                        <p class="text-[11px] text-raw/40">
+                            勾选阶段卡片即可更新进度
+                        </p>
+                    </div>
+
+                    <!-- 桌面：横向 5 步；移动：纵向 -->
+                    <ol class="grid gap-4 lg:grid-cols-5 lg:gap-0" id="stageList">
+                        <!-- 由 JS 渲染 -->
+                    </ol>
+
+                    <div class="mt-5 border-t border-line/10 pt-4">
+                        <div class="mb-2 flex items-center justify-between text-[11px]">
+                            <span class="text-raw/50">整体完成度</span>
+                            <span id="stagePct" class="font-display font-semibold">0%</span>
+                        </div>
+                        <div class="prog-track">
+                            <div id="stageFill" class="prog-fill" style="width:0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 五阶段教程 ===================== -->
+        <section id="tutorial" class="scroll-mt-20 px-4 py-8">
+            <div class="mx-auto max-w-5xl">
+                <div class="mb-6">
+                    <p class="eyebrow">Tutorial</p>
+                    <h2 class="font-display mt-2 text-2xl font-bold sm:text-3xl">五阶段完整教程</h2>
+                    <p class="mt-2.5 text-[13px] leading-relaxed">
+                        每个阶段都包含：<span class="text-raw/08">要回答的问题</span>、
+                        <span class="text-raw/08">参考示例</span>（模拟场景，非你的作业答案）、
+                        以及<span class="text-raw/08">可直接复制的提示词</span>。
+                        点击展开即可阅读。
+                    </p>
+                </div>
+
+                <div class="space-y-2.5" id="tutorialList">
+                    <!-- 由 JS 渲染 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 工作台 ===================== -->
+        <section id="workbench" class="scroll-mt-20 px-4 py-8">
+            <div class="mx-auto max-w-7xl">
+                <div class="mb-6">
+                    <p class="eyebrow">Workbench</p>
+                    <h2 class="font-display mt-2 text-2xl font-bold sm:text-3xl">六类规则工作台</h2>
+                    <p class="mt-2.5 text-[13px] leading-relaxed">
+                        左边填规则，右边实时生成 <code class="rounded bg-raw/07 px-1.5 py-0.5 text-[12px]">SKILL.md</code>。
+                        内容<span class="text-raw/08">自动存在本浏览器</span>，关掉页面也不会丢。
+                    </p>
+                </div>
+
+                <div class="grid gap-5 lg:grid-cols-12">
+                    <!-- ================= 左：表单 ================= -->
+                    <div class="space-y-4 lg:col-span-7">
+
+                        <!-- 基本信息 -->
+                        <div class="card p-4 sm:p-5">
+                            <div class="mb-4 flex items-center gap-2">
+                                <span class="badge badge-p">基本信息</span>
+                            </div>
+                            <div class="grid gap-3 sm:grid-cols-3">
+                                <div>
+                                    <label class="field-label" for="fName">我的姓名</label>
+                                    <input id="fName" data-k="name" class="inp" placeholder="朱书彦" />
+                                </div>
+                                <div>
+                                    <label class="field-label" for="fPath">练习路径</label>
+                                    <select id="fPath" data-k="path" class="inp">
+                                        <option value="">请选择</option>
+                                        <option value="真实业务">真实业务</option>
+                                        <option value="模拟案例">模拟案例</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="field-label" for="fTool">AI 工具</label>
+                                    <input id="fTool" data-k="tool" class="inp" placeholder="Claude Code / Codex…" />
+                                </div>
+                            </div>
+                            <p class="mt-3 text-[11px] leading-relaxed text-raw/42">
+                                选「模拟案例」时，整份作业需标注为练习，不要把示例写成真实成效。
+                            </p>
+                        </div>
+
+                        <!-- 第一阶段：场景与目标 -->
+                        <div class="card p-4 sm:p-5" data-sec="goal">
+                            <div class="mb-1 flex items-center justify-between gap-2">
+                                <span class="badge badge-p">第一阶段</span>
+                                <span class="text-[11px] text-raw/38">场景与目标</span>
+                            </div>
+                            <h3 class="font-display mt-2 text-[15px] font-semibold">先想清楚：什么值得封装</h3>
+
+                            <div class="mt-4 space-y-3.5">
+                                <div>
+                                    <label class="field-label" for="gScenes">我的重复场景（列 3–5 个）</label>
+                                    <textarea id="gScenes" data-k="scenes" rows="4" class="inp"
+                                        placeholder="场景 1：会议行动项整理 / 每周 / 反复核对负责人最费时&#10;场景 2：周报 / 每周 / 格式反复调整&#10;场景 3：一次性活动取名 / 偶尔 / 复用机会少"></textarea>
+                                </div>
+                                <div>
+                                    <label class="field-label" for="gPick">我选哪一个 & 为什么</label>
+                                    <textarea id="gPick" data-k="pickReason" rows="2" class="inp"
+                                        placeholder="选会议行动项：每周都用；有会议原文；可以逐条核对。&#10;一次性取名先不封装。"></textarea>
+                                </div>
+                                <div>
+                                    <label class="field-label" for="gSentence">一句话任务目标</label>
+                                    <input id="gSentence" data-k="goalSentence" class="inp"
+                                        placeholder="当【谁】遇到【场景】时，使用【输入】，按【方法】，产出【结果】。" />
+                                    <p class="mt-1.5 text-[11px] text-raw/40">
+                                        这句话会作为 SKILL.md 的开篇定义，建议先写完再往下填。
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="field-label" for="gCriteria">什么结果才算好（3 条可核对标准）</label>
+                                    <textarea id="gCriteria" data-k="criteria" rows="3" class="inp"
+                                        placeholder="标准 1：不把建议写成已决定&#10;标准 2：不编造负责人和日期&#10;标准 3：每条行动项能回到原文"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 第二阶段：把一次做好 -->
+                        <div class="card p-4 sm:p-5" data-sec="v0">
+                            <div class="mb-1 flex items-center justify-between gap-2">
+                                <span class="badge badge-a">第二阶段</span>
+                                <span class="text-[11px] text-raw/38">先把一次做好</span>
+                            </div>
+                            <h3 class="font-display mt-2 text-[15px] font-semibold">V0：这次做得对的样子</h3>
+                            <p class="mt-1.5 text-[12px] text-raw/46">
+                                先别急着生成 Skill。带上真实材料跑一次，把 AI 哪里不对、你怎么纠正记下来。
+                            </p>
+
+                            <div class="mt-4 space-y-3.5">
+                                <div>
+                                    <label class="field-label" for="vMaterial">这次交给 AI 的原材料</label>
+                                    <textarea id="vMaterial" data-k="material" rows="3" class="inp"
+                                        placeholder="粘贴会议记录原文，或写清上传的文件名"></textarea>
+                                </div>
+                                <div>
+                                    <label class="field-label" for="vWrong">AI 第一版哪里不对（原话 + 你的纠正）</label>
+                                    <textarea id="vWrong" data-k="wrongCase" rows="3" class="inp"
+                                        placeholder="原输出片段：若 AI 写「小周负责下周短视频试验」&#10;问题：原文只有建议，不能算已决定的任务&#10;我怎么纠正：改为建议区，并标注待确认"></textarea>
+                                </div>
+                                <div>
+                                    <label class="field-label" for="vV0">我认可的输出（V0）</label>
+                                    <textarea id="vV0" data-k="v0" rows="3" class="inp"
+                                        placeholder="粘贴你认可的结果，或写清它的结构"></textarea>
+                                </div>
+                                <div>
+                                    <label class="field-label" for="vTips">下次还会用到的提醒</label>
+                                    <textarea id="vTips" data-k="reminders" rows="3" class="inp"
+                                        placeholder="提醒 1：不把建议当决定&#10;提醒 2：未指定负责人就不补名字&#10;提醒 3：相对日期没参照时保留原文并注明待确认"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 第三阶段：六类规则（核心） -->
+                        <div class="card p-4 sm:p-5 lg:col-span-12" data-sec="rules">
+                            <div class="mb-1 flex items-center justify-between gap-2">
+                                <span class="badge badge-w">第三 + 四阶段</span>
+                                <span class="text-[11px] text-raw/38">提炼规则 · 核心</span>
+                            </div>
+                            <h3 class="font-display mt-2 text-[15px] font-semibold">六类规则</h3>
+                            <p class="mt-1.5 text-[12px] text-raw/46">
+                                这六类是 Skill 的骨架。填完右侧就会生成完整 SKILL.md。
+                            </p>
+
+                            <div class="mt-4 space-y-4">
+                                <!-- ① 场景 -->
+                                <div class="rounded-xl border border-line/10 p-3.5">
+                                    <label class="field-label" for="rUse">
+                                        <span class="field-num">1</span> 场景 · 什么时候用
+                                    </label>
+                                    <textarea id="rUse" data-k="rUse" rows="2" class="inp"
+                                        placeholder="用于根据会议记录提取行动项"></textarea>
+                                    <label class="field-label mt-3" for="rNotUse">
+                                        <span class="field-num">1</span> 场景 · 什么时候不用
+                                    </label>
+                                    <textarea id="rNotUse" data-k="rNotUse" rows="2" class="inp"
+                                        placeholder="不用于根据零散想法替团队制定决策"></textarea>
+                                </div>
+
+                                <!-- ② 输入 -->
+                                <div class="rounded-xl border border-line/10 p-3.5">
+                                    <label class="field-label" for="rInReq">
+                                        <span class="field-num">2</span> 输入 · 必需材料
+                                    </label>
+                                    <textarea id="rInReq" data-k="rInReq" rows="2" class="inp"
+                                        placeholder="必需会议记录"></textarea>
+                                    <label class="field-label mt-3" for="rInOpt">
+                                        <span class="field-num">2</span> 输入 · 可选材料
+                                    </label>
+                                    <textarea id="rInOpt" data-k="rInOpt" rows="2" class="inp"
+                                        placeholder="若要把「周五」转为日期，需会议日期"></textarea>
+                                    <label class="field-label mt-3" for="rInMiss">
+                                        <span class="field-num">2</span> 输入 · 缺少时怎么办
+                                    </label>
+                                    <textarea id="rInMiss" data-k="rInMiss" rows="2" class="inp"
+                                        placeholder="读不到原文先请用户补充，不要猜测"></textarea>
+                                </div>
+
+                                <!-- ③ 步骤 -->
+                                <div class="rounded-xl border border-line/10 p-3.5">
+                                    <label class="field-label" for="rSteps">
+                                        <span class="field-num">3</span> 步骤 · 能拆成哪些动作
+                                    </label>
+                                    <textarea id="rSteps" data-k="rSteps" rows="4" class="inp"
+                                        placeholder="1. 先找候选事项&#10;2. 区分决定、建议与待确认&#10;3. 提取责任人和时间&#10;4. 回查原文&#10;5. 按模板输出"></textarea>
+                                </div>
+
+                                <!-- ④ 标准 -->
+                                <div class="rounded-xl border border-line/10 p-3.5">
+                                    <label class="field-label" for="rStd">
+                                        <span class="field-num">4</span> 标准 · 可核对的质量线
+                                    </label>
+                                    <textarea id="rStd" data-k="rStd" rows="2" class="inp"
+                                        placeholder="每条判断都能找到原文依据"></textarea>
+                                    <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <label class="field-label text-accent" for="rPos">正例 ✓</label>
+                                            <textarea id="rPos" data-k="rPos" rows="2" class="inp"
+                                                placeholder="「建议下周试试」进入建议区"></textarea>
+                                        </div>
+                                        <div>
+                                            <label class="field-label text-danger" for="rNeg">反例 ✕</label>
+                                            <textarea id="rNeg" data-k="rNeg" rows="2" class="inp"
+                                                placeholder="把它直接写成已分配任务"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ⑤ 边界 -->
+                                <div class="rounded-xl border border-line/10 p-3.5">
+                                    <label class="field-label" for="rEdgeMiss">
+                                        <span class="field-num">5</span> 边界 · 缺信息
+                                    </label>
+                                    <textarea id="rEdgeMiss" data-k="rEdgeMiss" rows="2" class="inp"
+                                        placeholder="缺负责人就写「待确认」，不补名字"></textarea>
+                                    <label class="field-label mt-3" for="rEdgeConflict">
+                                        <span class="field-num">5</span> 边界 · 材料冲突
+                                    </label>
+                                    <textarea id="rEdgeConflict" data-k="rEdgeConflict" rows="2" class="inp"
+                                        placeholder="两处日期冲突就列出冲突并请用户确认"></textarea>
+                                    <label class="field-label mt-3" for="rEdgeOver">
+                                        <span class="field-num">5</span> 边界 · 超出范围
+                                    </label>
+                                    <textarea id="rEdgeOver" data-k="rEdgeOver" rows="2" class="inp"
+                                        placeholder="无会议记录时，不猜测决策，请用户先确认"></textarea>
+                                </div>
+
+                                <!-- ⑥ 输出 -->
+                                <div class="rounded-xl border border-line/10 p-3.5">
+                                    <label class="field-label" for="rOutStruct">
+                                        <span class="field-num">6</span> 输出 · 固定结构
+                                    </label>
+                                    <textarea id="rOutStruct" data-k="rOutStruct" rows="2" class="inp"
+                                        placeholder="行动清单：事项 / 负责人 / 截止时间 / 原文依据&#10;另列建议和待确认信息"></textarea>
+                                    <label class="field-label mt-3" for="rOutField">
+                                        <span class="field-num">6</span> 输出 · 必须包含的字段
+                                    </label>
+                                    <textarea id="rOutField" data-k="rOutField" rows="2" class="inp"
+                                        placeholder="每条行动项必须能回到原文；缺信息需标注「待确认」"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 第四阶段：封装信息 -->
+                        <div class="card p-4 sm:p-5" data-sec="package">
+                            <div class="mb-1 flex items-center justify-between gap-2">
+                                <span class="badge badge-p">第四阶段</span>
+                                <span class="text-[11px] text-raw/38">封装信息</span>
+                            </div>
+                            <h3 class="font-display mt-2 text-[15px] font-semibold">放进哪个工具、怎么调用</h3>
+
+                            <div class="mt-4 space-y-3.5">
+                                <div>
+                                    <label class="field-label" for="pMode">封装方式</label>
+                                    <select id="pMode" data-k="packMode" class="inp">
+                                        <option value="">请选择</option>
+                                        <option value="原生 Skill">原生 Skill（按工具规范保存并加载）</option>
+                                        <option value="标准指令">标准指令（保存完整正文，新对话粘贴）</option>
+                                    </select>
+                                </div>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <div>
+                                        <label class="field-label" for="pSkillName">技能名称</label>
+                                        <input id="pSkillName" data-k="skillName" class="inp" placeholder="会议行动项整理" />
+                                    </div>
+                                    <div>
+                                        <label class="field-label" for="pVersion">版本号</label>
+                                        <input id="pVersion" data-k="version" class="inp" placeholder="V1" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="field-label" for="pDesc">一句话用途</label>
+                                    <input id="pDesc" data-k="skillDesc" class="inp"
+                                        placeholder="从会议记录提取已确认行动项，分开列出建议和待确认信息" />
+                                </div>
+                                <div>
+                                    <label class="field-label" for="pCall">调用示例</label>
+                                    <textarea id="pCall" data-k="callExample" rows="2" class="inp"
+                                        placeholder="按会议行动项整理规则处理附件中的新会议记录。"></textarea>
+                                </div>
+                                <div>
+                                    <label class="field-label" for="pAssets">配套资料（没有就写「无」）</label>
+                                    <input id="pAssets" data-k="assets" class="inp"
+                                        placeholder="references/ 正反例.md、assets/ 输出模板.md" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= 右：实时预览 ================= -->
+                    <div class="lg:col-span-5">
+                        <div class="preview-pane space-y-3">
+                            <div class="card overflow-hidden">
+                                <div class="flex items-center justify-between gap-2 border-b border-line/08 px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="h-2 w-2 rounded-full bg-rose-400/70"></span>
+                                        <span class="h-2 w-2 rounded-full bg-amber-400/70"></span>
+                                        <span class="h-2 w-2 rounded-full bg-teal-400/70"></span>
+                                        <span class="ml-1 text-[12px] font-medium">SKILL.md</span>
+                                    </div>
+                                    <div class="flex gap-1.5">
+                                        <button type="button" id="copyMdBtn" class="btn btn-ghost btn-sm">
+                                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <rect x="9" y="9" width="11" height="11" rx="2" />
+                                                <path d="M5 15V6a2 2 0 012-2h8" />
+                                            </svg>
+                                            复制
+                                        </button>
+                                        <button type="button" id="downloadMdBtn" class="btn btn-ghost btn-sm">
+                                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M12 3v12m0 0l-4-4m4 4l4-4M5 19h14" />
+                                            </svg>
+                                            下载
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- 预览复用 prompt-box 的排版，但去掉内边距/边框/背景，改为撑满高度 -->
+                                <pre id="mdPreview"
+                                    class="max-h-[62vh] overflow-auto whitespace-pre-wrap break-words font-mono text-[11.5px] leading-relaxed text-raw/80"></pre>
+                            </div>
+
+                            <div class="card space-y-2 p-4">
+                                <div class="flex items-center justify-between text-[11px]">
+                                    <span class="text-raw/05">六类规则完整度</span>
+                                    <span id="rulePct" class="font-display font-semibold">0%</span>
+                                </div>
+                                <div class="prog-track">
+                                    <div id="ruleFill" class="prog-fill" style="width:0%"></div>
+                                </div>
+                                <p id="ruleHint" class="text-[11px] leading-relaxed text-raw/42">
+                                    填得越多，右边的 SKILL.md 越可直接用。建议先把六个「场景/输入/步骤/边界」填满。
+                                </p>
+                                <div class="flex flex-wrap gap-1.5 pt-1">
+                                    <button type="button" id="exportBtn" class="btn btn-ghost btn-sm flex-1">导出 JSON</button>
+                                    <button type="button" id="importBtn" class="btn btn-ghost btn-sm flex-1">导入</button>
+                                    <input type="file" id="importFile" accept="application/json,.json" class="hidden" />
+                                    <button type="button" id="resetBtn" class="btn btn-ghost btn-sm btn-danger">清空</button>
+                                </div>
+                                <button type="button" id="demoBtn"
+                                    class="btn btn-ghost btn-sm btn-primary-text w-full">
+                                    载入示例（会议行动项整理）
+                                </button>
+                                <p class="pt-1 text-center text-[10.5px] text-raw/30">
+                                    快捷键 Ctrl / ⌘ + S 导出 JSON
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 三类测试 ===================== -->
+        <section id="testing" class="scroll-mt-20 px-4 py-8">
+            <div class="mx-auto max-w-5xl">
+                <div class="mb-6">
+                    <p class="eyebrow">Verification</p>
+                    <h2 class="font-display mt-2 text-2xl font-bold sm:text-3xl">三类测试验证</h2>
+                    <p class="mt-2.5 text-[13px] leading-relaxed">
+                        <strong class="text-raw/85">换了新对话还能不能用，才是唯一标准。</strong>
+                        先确认 Skill 已加载，再喂新材料。不要重新口头补充整套方法——
+                        如果这样就做对了，说明规则真的写进去了。
+                    </p>
+                </div>
+
+                <div class="mb-4 flex flex-wrap gap-2 text-[11px]">
+                    <span class="badge badge-a">正常任务 · 信息完整</span>
+                    <span class="badge badge-w">信息不足 · 缺关键输入</span>
+                    <span class="badge badge-d">边界任务 · 越界请求</span>
+                </div>
+
+                <div class="space-y-3">
+                    <!-- 测试 1 -->
+                    <div class="test-row">
+                        <div class="mb-3 flex items-center justify-between">
+                            <p class="font-display text-[14px] font-semibold">① 正常任务</p>
+                            <label class="flex cursor-pointer items-center gap-2 text-[11px] text-raw/05">
+                                <input type="checkbox" data-test="normal" class="test-check h-4 w-4 accent-teal-500" />
+                                通过
+                            </label>
+                        </div>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="field-label" for="tnInput">新输入</label>
+                                <textarea id="tnInput" data-k="tnInput" rows="2" class="inp"
+                                    placeholder="10 月 6 日会议：小陈确认 10 月 9 日前交报名页；小李建议加抽奖，暂未决定"></textarea>
+                            </div>
+                            <div>
+                                <label class="field-label" for="tnExpect">预期输出</label>
+                                <textarea id="tnExpect" data-k="tnExpect" rows="2" class="inp"
+                                    placeholder="提取小陈任务，将抽奖单列为建议"></textarea>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="field-label" for="tnActual">实际输出与证据</label>
+                                <textarea id="tnActual" data-k="tnActual" rows="2" class="inp"
+                                    placeholder="粘贴 AI 输出，或写已保存的对话链接"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 测试 2 -->
+                    <div class="test-row">
+                        <div class="mb-3 flex items-center justify-between">
+                            <p class="font-display text-[14px] font-semibold">② 信息不足</p>
+                            <label class="flex cursor-pointer items-center gap-2 text-[11px] text-raw/05">
+                                <input type="checkbox" data-test="missing" class="test-check h-4 w-4 accent-amber-500" />
+                                通过
+                            </label>
+                        </div>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="field-label" for="tmMissing">缺了什么</label>
+                                <textarea id="tmMissing" data-k="tmMissing" rows="2" class="inp"
+                                    placeholder="只说「请整理会议行动项」，不提供会议记录"></textarea>
+                            </div>
+                            <div>
+                                <label class="field-label" for="tmExpect">预期行为</label>
+                                <textarea id="tmExpect" data-k="tmExpect" rows="2" class="inp"
+                                    placeholder="应先索要原文，不能编出一份清单"></textarea>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="field-label" for="tmActual">实际输出与证据</label>
+                                <textarea id="tmActual" data-k="tmActual" rows="2" class="inp" placeholder="粘贴实际表现"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 测试 3 -->
+                    <div class="test-row">
+                        <div class="mb-3 flex items-center justify-between">
+                            <p class="font-display text-[14px] font-semibold">③ 边界任务</p>
+                            <label class="flex cursor-pointer items-center gap-2 text-[11px] text-raw/05">
+                                <input type="checkbox" data-test="edge" class="test-check h-4 w-4 accent-rose-500" />
+                                通过
+                            </label>
+                        </div>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="field-label" for="teReq">越界请求</label>
+                                <textarea id="teReq" data-k="teReq" rows="2" class="inp"
+                                    placeholder="「没有会议记录，替我们决定下周谁做什么。」"></textarea>
+                            </div>
+                            <div>
+                                <label class="field-label" for="teExpect">预期行为</label>
+                                <textarea id="teExpect" data-k="teExpect" rows="2" class="inp"
+                                    placeholder="说明超出提取范围，请用户确认决策"></textarea>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="field-label" for="teActual">实际输出与证据</label>
+                                <textarea id="teActual" data-k="teActual" rows="2" class="inp" placeholder="粘贴实际表现"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 迭代记录 -->
+                    <div class="card p-4 sm:p-5">
+                        <p class="badge badge-w">迭代</p>
+                        <h3 class="font-display mt-2 text-[15px] font-semibold">V1 → V2 改了什么</h3>
+                        <p class="mt-1.5 text-[12px] text-raw/46">
+                            一次先改一类问题。没发现问题就如实记录「V1 已够用」，不必硬凑一次修改。
+                        </p>
+                        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="field-label" for="itIssue">最值得先改的问题</label>
+                                <textarea id="itIssue" data-k="itIssue" rows="3" class="inp"
+                                    placeholder="把建议当成了已决定任务（附证据片段）"></textarea>
+                            </div>
+                            <div>
+                                <label class="field-label" for="itRule">改的是哪条规则</label>
+                                <textarea id="itRule" data-k="itRule" rows="3" class="inp"
+                                    placeholder="补清决定与建议的判断标准，并加反例"></textarea>
+                            </div>
+                            <div>
+                                <label class="field-label" for="itRetest">复测结果</label>
+                                <textarea id="itRetest" data-k="itRetest" rows="3" class="inp"
+                                    placeholder="原失败案例已修正；正常案例未退步；新输入也适用"></textarea>
+                            </div>
+                            <div>
+                                <label class="field-label" for="itLimit">目前的限制</label>
+                                <textarea id="itLimit" data-k="itLimit" rows="3" class="inp"
+                                    placeholder="只支持单语言会议记录；跨语言暂未验证"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 实践结论 ===================== -->
+        <section id="conclusion" class="scroll-mt-20 px-4 py-8">
+            <div class="mx-auto max-w-5xl">
+                <div class="card p-5 sm:p-6">
+                    <p class="badge badge-a">实践结论</p>
+                    <h2 class="font-display mt-2 text-xl font-bold">用你自己的话写</h2>
+                    <p class="mt-1.5 text-[12px] text-raw/46">
+                        这一段是判断你是否真的学会了的关键。抄文档没用，写清自己的判断才有用。
+                    </p>
+                    <div class="mt-4 space-y-3.5">
+                        <div>
+                            <label class="field-label" for="ccScene">我选择的场景是</label>
+                            <input id="ccScene" data-k="ccScene" class="inp" placeholder="每周会议后的行动项整理" />
+                        </div>
+                        <div>
+                            <label class="field-label" for="ccWhy">值得长期复用的原因是</label>
+                            <textarea id="ccWhy" data-k="ccWhy" rows="2" class="inp"
+                                placeholder="每周固定发生，且结果好不好可以逐条核对"></textarea>
+                        </div>
+                        <div>
+                            <label class="field-label" for="ccMethod">这次我真正学会的封装方法是</label>
+                            <textarea id="ccMethod" data-k="ccMethod" rows="3" class="inp"
+                                placeholder="不是写更长的提示词，而是把「我凭什么这么判断」写成可逐条检查的标准"></textarea>
+                        </div>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="field-label" for="ccTransfer">它还可以迁移到</label>
+                                <input id="ccTransfer" data-k="ccTransfer" class="inp" placeholder="每周复盘会议的待办提取" />
+                            </div>
+                            <div>
+                                <label class="field-label" for="ccVerdict">新对话测试后的判断</label>
+                                <input id="ccVerdict" data-k="ccVerdict" class="inp" placeholder="可以再用 / 还需修改" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="field-label" for="ccNext">下次会在什么任务里继续用</label>
+                            <input id="ccNext" data-k="ccNext" class="inp" placeholder="客户需求评审会的纪要整理" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 提示词库 ===================== -->
+        <section id="prompts" class="scroll-mt-20 px-4 py-8">
+            <div class="mx-auto max-w-5xl">
+                <div class="mb-6">
+                    <p class="eyebrow">Prompt Library</p>
+                    <h2 class="font-display mt-2 text-2xl font-bold sm:text-3xl">提示词库</h2>
+                    <p class="mt-2.5 text-[13px] leading-relaxed">
+                        7 段可直接复制的提示词，覆盖从选题到迭代。点右上角图标复制。
+                    </p>
+                </div>
+                <div class="space-y-2.5" id="promptList">
+                    <!-- 由 JS 渲染 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 案例库 ===================== -->
+        <section id="cases" class="scroll-mt-20 px-4 py-8">
+            <div class="mx-auto max-w-5xl">
+                <div class="mb-6">
+                    <p class="eyebrow">Case Library</p>
+                    <h2 class="font-display mt-2 text-2xl font-bold sm:text-3xl">案例库</h2>
+                    <p class="mt-2.5 text-[13px] leading-relaxed">
+                        按当前卡点选读。重点看别人的<span class="text-raw/85">选题判断</span>与
+                        <span class="text-raw/85">验证过程</span>，再回到自己动手。
+                    </p>
+                </div>
+                <div id="caseGroups" class="space-y-5">
+                    <!-- 由 JS 渲染 -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===================== 页脚 ===================== -->
+    <footer class="mt-8 border-t border-line/08 px-4 py-8">
+        <div class="mx-auto max-w-5xl">
+            <div class="card p-5">
+                <p class="eyebrow">最后一句</p>
+                <p class="mt-2.5 text-[14px] leading-relaxed sm:text-[15px]">
+                    封装 Skill，本质上不是把提示词写长，而是
+                    <strong class="text-raw/09">把判断讲清</strong>。
+                </p>
+                <p class="mt-2 text-[13px] leading-relaxed text-raw/55">
+                    当你把一次做得不错的工作拆成场景、规则和测试，经验就不再只存在脑子里，
+                    而会变成下一次可以直接调用的能力。
+                </p>
+                <div class="mt-4 flex flex-wrap gap-2 text-[11px]">
+                    <a class="btn btn-ghost btn-sm"
+                        href="https://yitang.top/homework/Nkpa6ac1d4209aa8/edit" target="_blank"
+                        rel="noopener">
+                        航行作业 1 提交入口 ↗
+                    </a>
+                    <a class="btn btn-ghost btn-sm"
+                        href="https://yitanger.feishu.cn/wiki/EHKcwpcOJiAHASkct3ZcwLs5nzh" target="_blank"
+                        rel="noopener">
+                        原始任务包 ↗
+                    </a>
+                </div>
+            </div>
+            <p class="mt-6 text-center text-[11px] text-raw/32">
+                Skill 封装工作台 · 内容整理自官方任务包 01
+            </p>
+        </div>
+    </footer>
+
+    <!-- 数据与交互 -->
+    <script src="./data.js"></script>
+    <script src="./app.js"></script>
+
+    <!-- Toast：JS 通过给 #toast 加 show 类来弹出 -->
+    <div id="toast" class="pointer-events-none fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 z-80 -translate-x-1/2 translate-y-[130%] px-4 transition-transform duration-300">
+        <div class="rounded-xl bg-raw/92 px-4 py-2.5 text-center text-[13px] font-medium text-[rgb(var(--c-bg))] shadow-lg">
+            <span id="toastMsg"></span>
+        </div>
+    </div>
+
+</body>
+
+</html>

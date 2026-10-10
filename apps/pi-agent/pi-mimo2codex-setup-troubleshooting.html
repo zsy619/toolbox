@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth" itemscope itemtype="https://schema.org/WebPage">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="工具箱">
+
+    <!-- 站点图标：微信收藏时会展示 -->
+    <link rel="icon" type="image/png" href="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+    <link rel="apple-touch-icon" href="https://tools.yy24365.com/assets/images/dev-tools-og.png">
+
+    <title>Pi × mimo2codex 接入配置与排错完全指南 | 工具箱</title>
+    <meta name="description" content="Pi 接入 mimo2codex 完全指南：本地代理启动、自定义 Provider 配置、Server 模式鉴权、代理 Key 生成，以及三类典型报错的根因分析与解法。">
+    <meta name="keywords" content="Pi,mimo2codex,自定义Provider,Server模式,代理配置,Key生成,报错排查,AI编程工具,开发者工具,工具箱">
+
+    <!-- 微信专用标签（Schema.org）：必须置于 OG 标签之前，微信收藏优先读取 -->
+    <meta itemprop="name" content="Pi × mimo2codex 接入配置与排错完全指南">
+    <meta itemprop="description" content="Pi 接入 mimo2codex 完全指南：本地代理启动、自定义 Provider 配置、Server 模式鉴权、代理 Key 生成，以及三类典型报错的根因分析与解法。">
+    <meta itemprop="image" content="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=server%20proxy%20configuration%20diagram%20indigo%20violet%20gradient%20dark%20tech%20terminal%20clean&image_size=landscape_16_9">
+
+    <!-- Open Graph：微信分享、Facebook 等社交平台 -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="工具箱">
+    <meta property="og:title" content="Pi × mimo2codex 接入配置与排错完全指南">
+    <meta property="og:url" content="https://tools.yy24365.com/apps/pi-agent/pi-mimo2codex-setup-troubleshooting.html">
+    <meta property="og:image" content="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=server%20proxy%20configuration%20diagram%20indigo%20violet%20gradient%20dark%20tech%20terminal%20clean&image_size=landscape_16_9">
+    <meta property="og:image:secure_url" content="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=server%20proxy%20configuration%20diagram%20indigo%20violet%20gradient%20dark%20tech%20terminal%20clean&image_size=landscape_16_9">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Pi 接入 mimo2codex 配置与排错预览图">
+    <meta property="og:description" content="Pi 接入 mimo2codex 完全指南：本地代理启动、自定义 Provider 配置、Server 模式鉴权、代理 Key 生成，以及三类典型报错的根因分析与解法。">
+    <meta property="og:locale" content="zh_CN">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Pi × mimo2codex 接入配置与排错完全指南">
+    <meta name="twitter:description" content="Pi 接入 mimo2codex 完全指南：本地代理启动、自定义 Provider 配置、Server 模式鉴权、代理 Key 生成与典型报错解法。">
+    <meta name="twitter:image" content="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=server%20proxy%20configuration%20diagram%20indigo%20violet%20gradient%20dark%20tech%20terminal%20clean&image_size=landscape_16_9">
+
+    <!-- 微信分享自定义字段（部分环境的兜底方案） -->
+    <meta name="wechat-share-title" content="Pi × mimo2codex 接入配置与排错完全指南">
+    <meta name="wechat-share-desc" content="Pi 接入 mimo2codex 完全指南：本地代理启动、自定义 Provider 配置、Server 模式鉴权、代理 Key 生成与典型报错解法。">
+    <meta name="wechat-share-img" content="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=server%20proxy%20configuration%20diagram%20indigo%20violet%20gradient%20dark%20tech%20terminal%20clean&image_size=landscape_16_9">
+    <meta name="wechat-share-link" content="https://tools.yy24365.com/apps/pi-agent/pi-mimo2codex-setup-troubleshooting.html">
+
+    <link rel="canonical" href="https://tools.yy24365.com/apps/pi-agent/pi-mimo2codex-setup-troubleshooting.html">
+
+    <!-- JSON-LD 结构化数据：增强微信收藏与搜索引擎的信息抓取 -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "name": "Pi × mimo2codex 接入配置与排错完全指南",
+        "headline": "Pi × mimo2codex 接入配置与排错完全指南",
+        "description": "Pi 接入 mimo2codex 完全指南：本地代理启动、自定义 Provider 配置、Server 模式鉴权、代理 Key 生成，以及三类典型报错的根因分析与解法。",
+        "inLanguage": "zh-CN",
+        "url": "https://tools.yy24365.com/apps/pi-agent/pi-mimo2codex-setup-troubleshooting.html",
+        "image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=server%20proxy%20configuration%20diagram%20indigo%20violet%20gradient%20dark%20tech%20terminal%20clean&image_size=landscape_16_9",
+        "publisher": {
+            "@type": "Organization",
+            "name": "工具箱",
+            "url": "https://tools.yy24365.com/"
+        },
+        "keywords": "Pi, mimo2codex, 自定义 Provider, Server 模式, 报错排查"
+    }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                    },
+                    fontFamily: {
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 代码块 */
+        .code-shell {
+            background: #0b1120;
+            border-radius: .75rem;
+            overflow: hidden;
+            border: 1px solid #1e293b;
+        }
+
+        .code-shell pre {
+            margin: 0;
+            padding: 1rem 1.15rem;
+            overflow-x: auto;
+            font-size: .8125rem;
+            line-height: 1.7;
+            color: #e2e8f0;
+        }
+
+        .code-shell pre code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        .code-shell::-webkit-scrollbar,
+        .code-shell pre::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .code-shell pre::-webkit-scrollbar-track {
+            background: #0b1120;
+        }
+
+        .code-shell pre::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        .tok-c {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        /* 注释 */
+        .tok-k {
+            color: #f472b6;
+        }
+
+        /* 关键字 */
+        .tok-s {
+            color: #86efac;
+        }
+
+        /* 字符串 */
+        .tok-p {
+            color: #7dd3fc;
+        }
+
+        /* 属性 / 参数 */
+        .tok-n {
+            color: #fbbf24;
+        }
+
+        /* 数字 / 常量 */
+
+        /* 侧边导航激活态 */
+        .nav-link {
+            transition: all .18s ease;
+            border-left: 2px solid transparent;
+        }
+
+        .nav-link.nav-active {
+            color: #4f46e5;
+            background: #eef2ff;
+            border-left-color: #4f46e5;
+            font-weight: 600;
+        }
+
+        /* 折叠面板 */
+        details>summary {
+            list-style: none;
+            cursor: pointer;
+        }
+
+        details>summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details[open] .chev {
+            transform: rotate(90deg);
+        }
+
+        .chev {
+            transition: transform .2s ease;
+        }
+
+        /* 表格横向滚动 */
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        .table-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                scroll-behavior: auto !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- ============ 顶部导航 ============ -->
+    <header class="fixed top-0 inset-x-0 z-50 bg-white/85 backdrop-blur border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <button id="menu-btn" class="lg:hidden -ml-1 p-2 rounded-lg text-slate-600 hover:bg-slate-100" aria-label="打开目录">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0">
+                    <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-sm font-bold text-slate-900 leading-tight truncate">Pi × mimo2codex</p>
+                    <p class="text-[11px] text-slate-500 leading-tight truncate hidden sm:block">接入配置与排错完全指南</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>本地代理 · 零改码
+                </span>
+                <a href="#troubleshoot" class="text-xs font-semibold text-white bg-slate-900 hover:bg-slate-700 px-3.5 py-2 rounded-lg transition">排错速查</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ 移动端抽屉 ============ -->
+    <div id="drawer-overlay" class="hidden fixed inset-0 bg-slate-900/50 z-40 lg:hidden"></div>
+    <aside id="mobile-drawer" class="fixed top-0 left-0 h-full w-72 max-w-[82vw] bg-white z-50 -translate-x-full transition-transform duration-300 lg:hidden overflow-y-auto">
+        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-900">目录</span>
+            <button id="drawer-close" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100" aria-label="关闭">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <nav class="py-3 text-sm" id="mobile-nav">
+            <!-- JS 注入 -->
+        </nav>
+    </aside>
+
+    <!-- ============ 主体布局 ============ -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-14">
+        <div class="flex gap-8">
+
+            <!-- 桌面端侧边导航 -->
+            <aside class="hidden lg:block w-60 shrink-0">
+                <nav class="sticky top-20 py-8 text-[13px] space-y-0.5" id="desktop-nav">
+                    <!-- JS 注入 -->
+                </nav>
+            </aside>
+
+            <!-- 内容区 -->
+            <main class="flex-1 min-w-0 py-8 lg:py-10">
+
+                <!-- ===== Hero ===== -->
+                <section class="mb-12">
+                    <div class="inline-flex items-center gap-2 text-[11px] font-semibold tracking-wide text-brand-700 bg-brand-50 border border-brand-100 px-3 py-1 rounded-full mb-4">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <circle cx="10" cy="10" r="10" />
+                        </svg>
+                        Responses API → Chat Completions 协议桥接
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 leading-[1.15] mb-4">
+                        把 <span class="text-brand-600">Pi</span> 接入 <span class="text-brand-600">mimo2codex</span><br class="hidden sm:block">
+                        从配置到排错的完整链路
+                    </h1>
+                    <p class="text-slate-600 leading-relaxed max-w-2xl mb-6">
+                        本页汇总了从零配置到踩坑修复的全部技术点：本地代理启动、Pi 自定义 Provider 配置、
+                        Server 模式鉴权、代理 Key 生成，以及三类典型报错的根因分析与解法。
+                    </p>
+
+                    <!-- 架构图 -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">数据流向</p>
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2">
+
+                            <div class="flex-1 rounded-xl border-2 border-slate-200 bg-slate-50 p-3.5 text-center">
+                                <p class="text-sm font-bold text-slate-900">Pi CLI / pi-web</p>
+                                <p class="text-[11px] text-slate-500 mt-1 font-mono">models.json</p>
+                                <p class="text-[11px] text-slate-500 font-mono">auth.json</p>
+                            </div>
+
+                            <div class="flex sm:flex-col items-center justify-center gap-1 text-brand-500 shrink-0">
+                                <svg class="w-5 h-5 rotate-90 sm:rotate-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+                                </svg>
+                                <span class="text-[10px] font-mono text-slate-400 hidden sm:block">Bearer m2c_…</span>
+                            </div>
+
+                            <div class="flex-1 rounded-xl border-2 border-brand-300 bg-brand-50 p-3.5 text-center relative">
+                                <span class="absolute -top-2 left-1/2 -translate-x-1/2 text-[10px] font-bold bg-brand-600 text-white px-2 py-0.5 rounded-full whitespace-nowrap">协议翻译</span>
+                                <p class="text-sm font-bold text-brand-900 mt-1">mimo2codex</p>
+                                <p class="text-[11px] text-brand-700 mt-1 font-mono">127.0.0.1:8788/v1</p>
+                            </div>
+
+                            <div class="flex sm:flex-col items-center justify-center gap-1 text-slate-400 shrink-0">
+                                <svg class="w-5 h-5 rotate-90 sm:rotate-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+                                </svg>
+                                <span class="text-[10px] font-mono text-slate-400 hidden sm:block">sk-…</span>
+                            </div>
+
+                            <div class="flex-1 rounded-xl border-2 border-slate-200 bg-slate-50 p-3.5 text-center">
+                                <p class="text-sm font-bold text-slate-900">上游模型</p>
+                                <p class="text-[11px] text-slate-500 mt-1">MiMo / DeepSeek / MiniMax</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== 本文覆盖 ===== -->
+                <section id="overview" class="scroll-mt-20 mb-12">
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-5 flex items-center gap-2.5">
+                        <span class="w-1 h-6 bg-brand-600 rounded-full"></span>本文覆盖的技术点
+                    </h2>
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <div class="bg-white border border-slate-200 rounded-xl p-4 flex gap-3">
+                            <span class="text-brand-600 shrink-0 mt-0.5">◆</span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-900">mimo2codex 本地代理启动</p>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">CLI 全局安装 / Docker 部署两种方式，默认监听 <code class="font-mono text-[11px] bg-slate-100 px-1 rounded">127.0.0.1:8788</code></p>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-xl p-4 flex gap-3">
+                            <span class="text-brand-600 shrink-0 mt-0.5">◆</span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-900">Pi 自定义 Provider 配置</p>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed"><code class="font-mono text-[11px] bg-slate-100 px-1 rounded">~/.pi/agent/models.json</code> 全字段说明与兼容性开关</p>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-xl p-4 flex gap-3">
+                            <span class="text-brand-600 shrink-0 mt-0.5">◆</span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-900">上游 API Key 与代理 Key</p>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed"><code class="font-mono text-[11px] bg-slate-100 px-1 rounded">~/.mimo2codex/.env</code> 与 Server 模式 <code class="font-mono text-[11px] bg-slate-100 px-1 rounded">m2c_</code> 密钥生成</p>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-xl p-4 flex gap-3">
+                            <span class="text-brand-600 shrink-0 mt-0.5">◆</span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-900">三类典型报错根因与解法</p>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">模型不可选、缺少 apiKey、模型 ID 误解析为 Provider</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Step 1 ===== -->
+                <section id="step1" class="scroll-mt-20 mb-12">
+                    <div class="flex items-center gap-3 mb-5">
+                        <span class="w-8 h-8 rounded-lg bg-brand-600 text-white text-sm font-bold flex items-center justify-center shrink-0">1</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">启动 mimo2codex 本地代理</h2>
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-5">
+                        mimo2codex 是一个本地代理，负责把 Pi / Codex 发出的 <strong class="text-slate-900">Responses API</strong> 请求
+                        实时翻译成上游模型能理解的 <strong class="text-slate-900">Chat Completions</strong> 格式。
+                        无论用哪种方式启动，最终暴露的端点都是 <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-brand-700">http://127.0.0.1:8788/v1</code>。
+                    </p>
+
+                    <!-- Tabs -->
+                    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm" data-tabs>
+                        <div class="flex gap-1 p-2 bg-slate-100 border-b border-slate-200">
+                            <button data-tab-btn="cli" class="tab-btn flex-1 sm:flex-none px-4 py-2 text-xs font-semibold rounded-lg transition">CLI 安装（推荐）</button>
+                            <button data-tab-btn="docker" class="tab-btn flex-1 sm:flex-none px-4 py-2 text-xs font-semibold rounded-lg transition">Docker 部署</button>
+                        </div>
+
+                        <!-- CLI -->
+                        <div data-tab-panel="cli" class="p-4 sm:p-5">
+                            <p class="text-xs text-slate-500 mb-3">需要 <strong class="text-slate-700">Node ≥ 18</strong></p>
+                            <div class="relative group">
+                                <button data-copy="code-cli" class="copy-btn absolute top-2.5 right-2.5 z-10 text-[11px] font-medium text-slate-300 bg-slate-700/70 hover:bg-slate-600 px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 focus:opacity-100 transition">复制</button>
+                                <div class="code-shell">
+                                    <pre><code><span class="tok-c"># 1. 全局安装</span>
+npm install -g mimo2codex
+
+<span class="tok-c"># 2. 初始化配置（创建 ~/.mimo2codex 数据目录）</span>
+mimo2codex init
+
+<span class="tok-c"># 3. 编辑 ~/.mimo2codex/.env，填入至少一个 provider 的 API Key</span>
+<span class="tok-c">#    例如：MIMO_API_KEY=sk-xxxxxxxxxxxx</span>
+
+<span class="tok-c"># 4. 启动代理，默认监听 127.0.0.1:8788</span>
+mimo2codex</code></pre>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex gap-2.5 text-xs bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                <svg class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                                <p class="text-amber-800 leading-relaxed">启动后 mimo2codex 会打印 Codex 用的 <code class="font-mono bg-amber-100 px-1 rounded">config.toml</code> 与 <code class="font-mono bg-amber-100 px-1 rounded">auth.json</code> 片段，但 <strong>Pi 的配置方式不同</strong>，Pi 侧只需要端点地址。</p>
+                            </div>
+                        </div>
+
+                        <!-- Docker -->
+                        <div data-tab-panel="docker" class="hidden p-4 sm:p-5">
+                            <p class="text-xs text-slate-500 mb-3">适合内网共享 / 团队部署</p>
+                            <div class="relative group">
+                                <button data-copy="code-docker" class="copy-btn absolute top-2.5 right-2.5 z-10 text-[11px] font-medium text-slate-300 bg-slate-700/70 hover:bg-slate-600 px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 focus:opacity-100 transition">复制</button>
+                                <div class="code-shell">
+                                    <pre><code>docker run -d --name mimo2codex \
+  -p 8788:8788 \
+  --env-file ./.env \
+  -v ~/.mimo2codex:/data \
+  ghcr.io/7as0nch/mimo2codex:latest</code></pre>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex gap-2.5 text-xs bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                </svg>
+                                <p class="text-blue-800 leading-relaxed">该镜像<strong>默认已开启</strong> <code class="font-mono bg-blue-100 px-1 rounded">MIMO2CODEX_AUTH=on</code>，无需再手动设置 Server 模式。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex gap-2.5 text-xs bg-slate-100 border border-slate-200 rounded-lg p-3">
+                        <svg class="w-4 h-4 text-slate-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-slate-700 leading-relaxed"><strong>关键点：</strong>无论哪种方式，Pi 侧使用的 base URL 都是 <code class="font-mono bg-white px-1 rounded border border-slate-200">http://127.0.0.1:8788/v1</code>，末尾不要多加斜杠。</p>
+                    </div>
+                </section>
+
+                <!-- ===== Step 2 ===== -->
+                <section id="step2" class="scroll-mt-20 mb-12">
+                    <div class="flex items-center gap-3 mb-5">
+                        <span class="w-8 h-8 rounded-lg bg-brand-600 text-white text-sm font-bold flex items-center justify-center shrink-0">2</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">在 Pi 中配置自定义 Provider</h2>
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-5">
+                        Pi 通过 <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-brand-700">~/.pi/agent/models.json</code>
+                        添加 OpenAI 兼容服务商。注意：如果你设置了 <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">PI_CODING_AGENT_DIR</code> 环境变量，
+                        路径会变为 <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">$PI_CODING_AGENT_DIR/agent/models.json</code>。
+                    </p>
+
+                    <div class="relative group">
+                        <button data-copy="code-models" class="copy-btn absolute top-2.5 right-2.5 z-10 text-[11px] font-medium text-slate-300 bg-slate-700/70 hover:bg-slate-600 px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 focus:opacity-100 transition">复制</button>
+                        <div class="code-shell">
+                            <pre><code>{
+  <span class="tok-p">"providers"</span>: {
+    <span class="tok-p">"mimo2codex"</span>: {
+      <span class="tok-p">"baseUrl"</span>: <span class="tok-s">"http://127.0.0.1:8788/v1"</span>,
+      <span class="tok-p">"api"</span>: <span class="tok-s">"openai-completions"</span>,
+      <span class="tok-p">"apiKey"</span>: <span class="tok-s">"placeholder"</span>,
+      <span class="tok-p">"compat"</span>: {
+        <span class="tok-p">"supportsDeveloperRole"</span>: <span class="tok-n">false</span>
+      },
+      <span class="tok-p">"models"</span>: [
+        { <span class="tok-p">"id"</span>: <span class="tok-s">"mimo-v2.5-pro"</span>,       <span class="tok-p">"name"</span>: <span class="tok-s">"MiMo V2.5 Pro"</span> },
+        { <span class="tok-p">"id"</span>: <span class="tok-s">"minimax-m3.1-flash"</span>,   <span class="tok-p">"name"</span>: <span class="tok-s">"MiniMax M3.1 Flash"</span> }
+      ]
+    }
+  }
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- 字段说明表 -->
+                    <div class="mt-5 bg-white border border-slate-200 rounded-xl overflow-hidden">
+                        <div class="table-scroll">
+                            <table class="w-full text-xs min-w-[560px]">
+                                <thead class="bg-slate-50 border-b border-slate-200">
+                                    <tr>
+                                        <th class="text-left font-bold text-slate-700 px-4 py-3 whitespace-nowrap">字段</th>
+                                        <th class="text-left font-bold text-slate-700 px-4 py-3">值</th>
+                                        <th class="text-left font-bold text-slate-700 px-4 py-3">说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr class="hover:bg-slate-50/70">
+                                        <td class="px-4 py-3 font-mono text-brand-700 whitespace-nowrap">baseUrl</td>
+                                        <td class="px-4 py-3 font-mono text-slate-600 text-[11px]">http://127.0.0.1:8788/v1</td>
+                                        <td class="px-4 py-3 text-slate-600 leading-relaxed">指向 mimo2codex 的 /v1 端点，末尾不要多加 /</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50/70">
+                                        <td class="px-4 py-3 font-mono text-brand-700 whitespace-nowrap">api</td>
+                                        <td class="px-4 py-3 font-mono text-slate-600 text-[11px]">openai-completions</td>
+                                        <td class="px-4 py-3 text-slate-600 leading-relaxed">必须设为此值，是 Pi 中通用性最强的协议适配器</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50/70">
+                                        <td class="px-4 py-3 font-mono text-brand-700 whitespace-nowrap">apiKey</td>
+                                        <td class="px-4 py-3 font-mono text-slate-600 text-[11px]">任意非空字符串</td>
+                                        <td class="px-4 py-3 text-slate-600 leading-relaxed">Pi 强制要求该字段存在，仅用于通过加载校验</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50/70">
+                                        <td class="px-4 py-3 font-mono text-brand-700 whitespace-nowrap">models[].id</td>
+                                        <td class="px-4 py-3 font-mono text-slate-600 text-[11px]">与 mimo2codex 注册 ID 一致</td>
+                                        <td class="px-4 py-3 text-slate-600 leading-relaxed">避免斜杠，避免与已知 Provider 名称前缀冲突</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50/70">
+                                        <td class="px-4 py-3 font-mono text-brand-700 whitespace-nowrap">compat.<br>supportsDeveloperRole</td>
+                                        <td class="px-4 py-3 font-mono text-slate-600 text-[11px]">false</td>
+                                        <td class="px-4 py-3 text-slate-600 leading-relaxed">mimo2codex 不完全支持 OpenAI 的 developer 角色消息</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Step 3 ===== -->
+                <section id="step3" class="scroll-mt-20 mb-12">
+                    <div class="flex items-center gap-3 mb-5">
+                        <span class="w-8 h-8 rounded-lg bg-brand-600 text-white text-sm font-bold flex items-center justify-center shrink-0">3</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">设置 API 访问 Key（两端）</h2>
+                    </div>
+
+                    <!-- 鉴权模式对比 -->
+                    <div class="grid sm:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-white border border-slate-200 rounded-xl p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                                <p class="text-sm font-bold text-slate-900">本地模式（默认）</p>
+                            </div>
+                            <p class="text-xs font-mono text-slate-500 mb-2">authMode = off</p>
+                            <p class="text-xs text-slate-600 leading-relaxed">代理接口完全开放，不需要任何 Key。仅适合本机使用。</p>
+                        </div>
+                        <div class="bg-white border-2 border-brand-300 rounded-xl p-4 relative">
+                            <span class="absolute -top-2.5 right-3 text-[10px] font-bold bg-brand-600 text-white px-2 py-0.5 rounded-full">推荐</span>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <p class="text-sm font-bold text-slate-900">Server 模式</p>
+                            </div>
+                            <p class="text-xs font-mono text-slate-500 mb-2">authMode = on</p>
+                            <p class="text-xs text-slate-600 leading-relaxed">必须携带 <code class="font-mono bg-slate-100 px-1 rounded">Authorization: Bearer m2c_…</code>，适合内网共享与 Docker 部署。</p>
+                        </div>
+                    </div>
+
+                    <!-- 3.1 上游 Key -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-5 mb-5 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded bg-slate-900 text-white text-[10px] font-bold flex items-center justify-center">A</span>
+                            配置上游 API Key
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                            mimo2codex 需要上游大模型的 Key 才能转发请求。这些密钥通过<strong>环境变量</strong>管理，
+                            且<strong>只自动加载数据目录下的 <code class="font-mono bg-slate-100 px-1 rounded">~/.mimo2codex/.env</code></strong>——
+                            修改项目根目录的 .env 是无效的。
+                        </p>
+                        <div class="relative group">
+                            <button data-copy="code-env" class="copy-btn absolute top-2.5 right-2.5 z-10 text-[11px] font-medium text-slate-300 bg-slate-700/70 hover:bg-slate-600 px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 focus:opacity-100 transition">复制</button>
+                            <div class="code-shell">
+                                <pre><code><span class="tok-c"># 文件路径：~/.mimo2codex/.env</span>
+
+<span class="tok-c"># 小米 MiMo 的 API Key</span>
+MIMO_API_KEY=sk-xxxxxxxxxxxxxxxxxxxx
+
+<span class="tok-c"># 或 DeepSeek</span>
+<span class="tok-c"># DEEPSEEK_API_KEY=sk-xxxxxxxxxxxx</span>
+
+<span class="tok-c"># 开启 Server 模式（Docker 镜像已默认开启）</span>
+MIMO2CODEX_AUTH=on</code></pre>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-3 leading-relaxed">
+                            密钥以 <code class="font-mono bg-slate-100 px-1 rounded">sk-</code> 或 <code class="font-mono bg-slate-100 px-1 rounded">tp-</code> 开头时，
+                            mimo2codex 会自动识别并路由到正确的上游主机。保存后需重启代理。
+                        </p>
+                    </div>
+
+                    <!-- 3.2 生成代理 Key -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-5 mb-5 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded bg-slate-900 text-white text-[10px] font-bold flex items-center justify-center">B</span>
+                            生成代理访问 Key
+                        </h3>
+                        <ol class="space-y-3 text-xs text-slate-600">
+                            <li class="flex gap-3">
+                                <span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                                <p class="leading-relaxed">重启 mimo2codex，日志中出现 <code class="font-mono bg-slate-100 px-1 rounded text-emerald-700">INFO auth: on — admin login required</code> 说明 Server 模式已生效。</p>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                                <p class="leading-relaxed">浏览器打开 <code class="font-mono bg-slate-100 px-1 rounded">http://127.0.0.1:8788/admin/</code>（Docker 部署替换为对应主机地址），首次启动需按提示创建管理员账号。</p>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                                <p class="leading-relaxed">进入 <code class="font-mono bg-slate-100 px-1 rounded">/admin/account</code> 页面，找到「我的 API Key」卡片，点击「新建 Key」。</p>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-5 h-5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+                                <p class="leading-relaxed">输入名称（如 <code class="font-mono bg-slate-100 px-1 rounded">pi-agent</code>），确认后生成的 <code class="font-mono bg-slate-100 px-1 rounded text-brand-700">m2c_</code> 开头密钥<strong class="text-amber-700">仅显示一次</strong>，立即复制保存。</p>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <!-- 3.3 Pi 端认证 -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded bg-slate-900 text-white text-[10px] font-bold flex items-center justify-center">C</span>
+                            在 Pi 端使用这个代理 Key
+                        </h3>
+
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs font-bold text-slate-700 mb-2">方法一：<code class="font-mono bg-slate-100 px-1 rounded">/login</code> 命令（推荐）</p>
+                                <div class="relative group">
+                                    <button data-copy="code-login" class="copy-btn absolute top-2.5 right-2.5 z-10 text-[11px] font-medium text-slate-300 bg-slate-700/70 hover:bg-slate-600 px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 focus:opacity-100 transition">复制</button>
+                                    <div class="code-shell">
+                                        <pre><code><span class="tok-c"># 在 Pi 交互模式下运行</span>
+/login mimo2codex
+
+<span class="tok-c"># 选择 API Key 类型</span>
+<span class="tok-c"># 粘贴刚才生成的 m2c_... 密钥</span></code></pre>
+                                    </div>
+                                </div>
+                                <p class="text-[11px] text-slate-500 mt-2 leading-relaxed">凭证会安全写入 <code class="font-mono bg-slate-100 px-1 rounded">~/.pi/agent/auth.json</code>。</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-700 mb-2">方法二：手动编辑 auth.json</p>
+                                <div class="relative group">
+                                    <button data-copy="code-auth" class="copy-btn absolute top-2.5 right-2.5 z-10 text-[11px] font-medium text-slate-300 bg-slate-700/70 hover:bg-slate-600 px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 focus:opacity-100 transition">复制</button>
+                                    <div class="code-shell">
+                                        <pre><code>{
+  <span class="tok-p">"mimo2codex"</span>: {
+    <span class="tok-p">"type"</span>: <span class="tok-s">"api_key"</span>,
+    <span class="tok-p">"key"</span>: <span class="tok-s">"m2c_你的密钥"</span>
+  }
+}</code></pre>
+                                    </div>
+                                </div>
+                                <p class="text-[11px] text-slate-500 mt-2 leading-relaxed">此时 <code class="font-mono bg-slate-100 px-1 rounded">models.json</code> 的 apiKey 可保留为占位符。</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Step 4 ===== -->
+                <section id="step4" class="scroll-mt-20 mb-12">
+                    <div class="flex items-center gap-3 mb-5">
+                        <span class="w-8 h-8 rounded-lg bg-brand-600 text-white text-sm font-bold flex items-center justify-center shrink-0">4</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">验证与使用</h2>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                        <ol class="space-y-3 text-sm text-slate-600">
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                                <p class="leading-relaxed">在 Pi 中运行 <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">/model</code> 命令。</p>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center shrink-0">2</span>
+                                <p class="leading-relaxed">在 provider 列表中应能看到 <code class="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded">mimo2codex</code>，并带有你配置的模型 ID。</p>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center shrink-0">3</span>
+                                <p class="leading-relaxed">选择该模型，即可通过 mimo2codex 将请求转发到上游大模型。</p>
+                            </li>
+                        </ol>
+                        <div class="mt-4 flex gap-2.5 text-xs bg-slate-100 border border-slate-200 rounded-lg p-3">
+                            <svg class="w-4 h-4 text-slate-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="text-slate-700 leading-relaxed">保存 <code class="font-mono bg-white px-1 rounded border border-slate-200">models.json</code> 后，Pi CLI 无需重启——该文件在每次打开 <code class="font-mono bg-white px-1 rounded border border-slate-200">/model</code> 选择器时会自动重载。<strong>pi-web 可能需要完全重启服务并刷新浏览器。</strong></p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== 排错 ===== -->
+                <section id="troubleshoot" class="scroll-mt-20 mb-12">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="w-8 h-8 rounded-lg bg-rose-600 text-white text-sm font-bold flex items-center justify-center shrink-0">!</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">故障排查</h2>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-5">按报错信息定位根因。点击卡片展开详细解法。</p>
+
+                    <div class="space-y-3">
+
+                        <!-- 问题 1 -->
+                        <details class="group bg-white border border-slate-200 rounded-xl overflow-hidden" open>
+                            <summary class="flex items-start gap-3 p-4 hover:bg-slate-50 transition">
+                                <svg class="chev w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M7 5l6 5-6 5V5z" />
+                                </svg>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-bold text-slate-900">在 pi-web 中不能选择模型</p>
+                                    <p class="text-xs text-slate-500 mt-1">配置写好了，但模型列表里不出现</p>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded shrink-0">P0</span>
+                            </summary>
+                            <div class="px-4 pb-4 pt-1 border-t border-slate-100 space-y-3 text-xs text-slate-600">
+                                <div class="flex gap-3">
+                                    <span class="w-5 h-5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                                    <p class="leading-relaxed"><strong class="text-slate-800">检查文件路径与 JSON 语法。</strong>Pi 默认读取 <code class="font-mono bg-slate-100 px-1 rounded">~/.pi/agent/models.json</code>；若设置了 <code class="font-mono bg-slate-100 px-1 rounded">PI_CODING_AGENT_DIR</code>，则路径变为 <code
+                                            class="font-mono bg-slate-100 px-1 rounded">$PI_CODING_AGENT_DIR/agent/models.json</code>。多余的逗号或引号不匹配会导致整个文件被静默忽略。</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <span class="w-5 h-5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                                    <p class="leading-relaxed"><strong class="text-slate-800">重启 pi-web。</strong>Pi CLI 会自动重载 models.json，但 pi-web 可能缓存了模型列表——完全关闭并重启 pi-web 服务（或 Docker 容器），然后刷新浏览器。</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <span class="w-5 h-5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                                    <p class="leading-relaxed"><strong class="text-slate-800">用 CLI 交叉验证。</strong>运行 <code class="font-mono bg-slate-100 px-1 rounded">pi --list-models</code>，若自定义 provider 出现则问题在 Web 界面，否则在配置本身。</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <span class="w-5 h-5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">4</span>
+                                    <p class="leading-relaxed"><strong class="text-slate-800">核对模型 ID 与命名冲突。</strong>访问 <code class="font-mono bg-slate-100 px-1 rounded">http://127.0.0.1:8788/admin/</code> 确认 mimo2codex 实际注册的模型 ID；同时确保 provider 键名（如 <code class="font-mono bg-slate-100 px-1 rounded">mimo2codex</code>）没有被 Pi 内置 provider 占用。</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <span class="w-5 h-5 rounded bg-rose-100 text-rose-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">5</span>
+                                    <p class="leading-relaxed"><strong class="text-slate-800">排查扩展冲突。</strong>某些扩展（如 <code class="font-mono bg-slate-100 px-1 rounded">pi-provider-manager</code>）会注册自己的模型管理逻辑，可能覆盖 models.json。尝试暂时禁用近期安装的扩展后重启。</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <span class="w-5 h-5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">★</span>
+                                    <p class="leading-relaxed"><strong class="text-slate-800">备选方案：<code class="font-mono bg-slate-100 px-1 rounded">pi-openai-compat</code> 扩展。</strong>专用于把 OpenAI 兼容端点注册为 Pi 一等公民，可绕过 models.json 的部分验证限制。<br><code class="font-mono bg-slate-100 px-1 rounded">pi install npm:@billjr99/pi-openai-compat</code> → 在 Pi 中运行 <code
+                                            class="font-mono bg-slate-100 px-1 rounded">/compat-login</code> 按向导操作。</p>
+                                </div>
+                            </div>
+                        </details>
+
+                        <!-- 问题 2 -->
+                        <details class="group bg-white border border-slate-200 rounded-xl overflow-hidden">
+                            <summary class="flex items-start gap-3 p-4 hover:bg-slate-50 transition">
+                                <svg class="chev w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M7 5l6 5-6 5V5z" />
+                                </svg>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-bold text-slate-900">失败 · No API key found for "mimo2codex"</p>
+                                    <p class="text-xs text-slate-500 mt-1">Provider 加载阶段被拒绝</p>
+                                </div>
+                                <span class="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded shrink-0">P0</span>
+                            </summary>
+                            <div class="px-4 pb-4 pt-1 border-t border-slate-100 space-y-4 text-xs text-slate-600">
+                                <div class="bg-rose-50 border border-rose-200 rounded-lg p-3">
+                                    <p class="font-bold text-rose-800 mb-1">根因</p>
+                                    <p class="text-rose-700 leading-relaxed">Pi 在加载 models.json 中的自定义 provider 时，<strong>强制要求存在 <code class="font-mono bg-white/70 px-1 rounded">apiKey</code> 字段</strong>——即使真实密钥已在 auth.json 或环境变量中。验证逻辑不会去别处查找。</p>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-800 mb-2">解法：在 models.json 中添加占位符</p>
+                                    <div class="relative group">
+                                        <button data-copy="code-fix2" class="copy-btn absolute top-2.5 right-2.5 z-10 text-[11px] font-medium text-slate-300 bg-slate-700/70 hover:bg-slate-600 px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 focus:opacity-100 transition">复制</button>
+                                        <div class="code-shell">
+                                            <pre><code>{
+  <span class="tok-p">"providers"</span>: {
+    <span class="tok-p">"mimo2codex"</span>: {
+      <span class="tok-p">"baseUrl"</span>: <span class="tok-s">"http://127.0.0.1:8788/v1"</span>,
+      <span class="tok-p">"api"</span>: <span class="tok-s">"openai-completions"</span>,
+      <span class="tok-p">"apiKey"</span>: <span class="tok-s">"local"</span>,
+      <span class="tok-p">"models"</span>: [
+        { <span class="tok-p">"id"</span>: <span class="tok-s">"mimo-v2.5-pro"</span> }
+      ]
+    }
+  }
+}</code></pre>
+                                        </div>
+                                    </div>
+                                    <p class="text-slate-500 mt-2 leading-relaxed">本地代理通常不校验传入的 Key，所以占位符（<code class="font-mono bg-slate-100 px-1 rounded">"local"</code> / <code class="font-mono bg-slate-100 px-1 rounded">"placeholder"</code>）只需让 Pi 通过验证。实际请求时 Pi 会优先使用 auth.json 或环境变量中的真实密钥。</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <span class="w-5 h-5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">!</span>
+                                    <p class="leading-relaxed"><strong class="text-slate-800">附带检查：模型 ID 斜杠解析。</strong>若模型 ID 含斜杠（如 <code class="font-mono bg-slate-100 px-1 rounded">mimo/MiMo-V2.5-Pro</code>），Pi 可能把斜杠前的 <code class="font-mono bg-slate-100 px-1 rounded">mimo</code> 误解析为 provider 名，报出 <code
+                                            class="font-mono bg-slate-100 px-1 rounded">No API key found for "mimo"</code>。确保 id 是纯模型名。</p>
+                                </div>
+                            </div>
+                        </details>
+
+                        <!-- 问题 3 -->
+                        <details class="group bg-white border border-slate-200 rounded-xl overflow-hidden">
+                            <summary class="flex items-start gap-3 p-4 hover:bg-slate-50 transition">
+                                <svg class="chev w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M7 5l6 5-6 5V5z" />
+                                </svg>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-bold text-slate-900">Failed to switch model: No API key for mimo2codex/MiniMax-M3.1-Flash-Preview</p>
+                                    <p class="text-xs text-slate-500 mt-1">模型已识别，但运行时认证失败</p>
+                                </div>
+                                <span class="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded shrink-0">P0</span>
+                            </summary>
+                            <div class="px-4 pb-4 pt-1 border-t border-slate-100 space-y-4 text-xs text-slate-600">
+                                <div class="bg-rose-50 border border-rose-200 rounded-lg p-3">
+                                    <p class="font-bold text-rose-800 mb-1">根因（两层叠加）</p>
+                                    <ul class="text-rose-700 leading-relaxed space-y-1.5 list-disc list-inside">
+                                        <li>模型 ID 中的 <code class="font-mono bg-white/70 px-1 rounded">MiniMax</code> 前缀被 Pi 的解析器识别为一个 provider 标识，导致它去查找名为 MiniMax 的密钥，而非 mimo2codex 的。</li>
+                                        <li>即使解析正确，若密钥只写在 models.json 的 apiKey 字段而未经 <code class="font-mono bg-white/70 px-1 rounded">/login</code> 或 auth.json 配置，运行时认证仍会失败。</li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <p class="font-bold text-slate-800 mb-2">解法一：修改模型 ID 为不冲突的别名（最优先）</p>
+                                    <div class="relative group">
+                                        <button data-copy="code-fix3" class="copy-btn absolute top-2.5 right-2.5 z-10 text-[11px] font-medium text-slate-300 bg-slate-700/70 hover:bg-slate-600 px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 focus:opacity-100 transition">复制</button>
+                                        <div class="code-shell">
+                                            <pre><code>{
+  <span class="tok-p">"providers"</span>: {
+    <span class="tok-p">"mimo2codex"</span>: {
+      <span class="tok-p">"baseUrl"</span>: <span class="tok-s">"http://127.0.0.1:8788/v1"</span>,
+      <span class="tok-p">"api"</span>: <span class="tok-s">"openai-completions"</span>,
+      <span class="tok-p">"apiKey"</span>: <span class="tok-s">"placeholder"</span>,
+      <span class="tok-p">"models"</span>: [
+        {
+          <span class="tok-p">"id"</span>: <span class="tok-s">"minimax-m3.1-flash"</span>,
+          <span class="tok-p">"name"</span>: <span class="tok-s">"MiniMax M3.1 Flash"</span>
+        }
+      ]
+    }
+  }
+}</code></pre>
+                                        </div>
+                                    </div>
+                                    <p class="text-slate-500 mt-2 leading-relaxed">关键：让 <code class="font-mono bg-slate-100 px-1 rounded">id</code> 不与 <code class="font-mono bg-slate-100 px-1 rounded">MiniMax</code> 字符串关联，但通过 <code class="font-mono bg-slate-100 px-1 rounded">name</code> 字段保留可读显示名。保存后重新打开 <code
+                                            class="font-mono bg-slate-100 px-1 rounded">/model</code> 让 Pi 重载配置。</p>
+                                </div>
+
+                                <div>
+                                    <p class="font-bold text-slate-800 mb-2">解法二：通过 /login 保存正式凭证</p>
+                                    <div class="code-shell">
+                                        <pre><code><span class="tok-c"># 在 Pi 会话中运行</span>
+/login mimo2codex
+
+<span class="tok-c"># 选择 API Key 类型，输入任意非空字符串（如 local）</span>
+<span class="tok-c"># 凭证写入 ~/.pi/agent/auth.json</span></code></pre>
+                                    </div>
+                                    <p class="text-slate-500 mt-2 leading-relaxed">Pi 在切换模型时会优先从 auth.json 查找密钥。若已启用 Server 模式，这里应填入真实的 <code class="font-mono bg-slate-100 px-1 rounded">m2c_</code> 密钥。</p>
+                                </div>
+
+                                <div>
+                                    <p class="font-bold text-slate-800 mb-2">解法三：确认 mimo2codex 侧的模型 ID 映射</p>
+                                    <p class="leading-relaxed">访问 <code class="font-mono bg-slate-100 px-1 rounded">http://127.0.0.1:8788/admin/</code> 查看模型目录，确认代理期望接收的模型标识符。若 mimo2codex 期望 <code class="font-mono bg-slate-100 px-1 rounded">MiniMax-M2.7</code> 这样的格式，Pi 侧应使用完全一致的 id——但鉴于解析冲突，仍建议用别名 + name 字段映射。</p>
+                                </div>
+                            </div>
+                        </details>
+
+                        <!-- 问题 4 -->
+                        <details class="group bg-white border border-slate-200 rounded-xl overflow-hidden">
+                            <summary class="flex items-start gap-3 p-4 hover:bg-slate-50 transition">
+                                <svg class="chev w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M7 5l6 5-6 5V5z" />
+                                </svg>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-bold text-slate-900">supportsDeveloperRole 相关报错</p>
+                                    <p class="text-xs text-slate-500 mt-1">mimo2codex 不完整支持 developer 角色消息</p>
+                                </div>
+                                <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded shrink-0">P1</span>
+                            </summary>
+                            <div class="px-4 pb-4 pt-1 border-t border-slate-100 space-y-3 text-xs text-slate-600">
+                                <p class="leading-relaxed">在 provider 层级添加兼容性开关即可：</p>
+                                <div class="code-shell">
+                                    <pre><code>{
+  <span class="tok-p">"providers"</span>: {
+    <span class="tok-p">"mimo2codex"</span>: {
+      <span class="tok-p">"baseUrl"</span>: <span class="tok-s">"http://127.0.0.1:8788/v1"</span>,
+      <span class="tok-p">"api"</span>: <span class="tok-s">"openai-completions"</span>,
+      <span class="tok-p">"apiKey"</span>: <span class="tok-s">"local"</span>,
+      <span class="tok-p">"compat"</span>: {
+        <span class="tok-p">"supportsDeveloperRole"</span>: <span class="tok-n">false</span>
+      },
+      <span class="tok-p">"models"</span>: [ <span class="tok-c">/* ... */</span> ]
+    }
+  }
+}</code></pre>
+                                </div>
+                                <p class="leading-relaxed">若模型支持，也可按需在模型层级添加 <code class="font-mono bg-slate-100 px-1 rounded">"reasoning": true</code> 等字段。</p>
+                            </div>
+                        </details>
+
+                        <!-- 问题 5 -->
+                        <details class="group bg-white border border-slate-200 rounded-xl overflow-hidden">
+                            <summary class="flex items-start gap-3 p-4 hover:bg-slate-50 transition">
+                                <svg class="chev w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M7 5l6 5-6 5V5z" />
+                                </svg>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-bold text-slate-900">上游 Key 不生效 / 401 Unauthorized</p>
+                                    <p class="text-xs text-slate-500 mt-1">.env 改了但代理仍报鉴权失败</p>
+                                </div>
+                                <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded shrink-0">P1</span>
+                            </summary>
+                            <div class="px-4 pb-4 pt-1 border-t border-slate-100 space-y-3 text-xs text-slate-600">
+                                <p class="leading-relaxed"><strong class="text-slate-800">mimo2codex 只自动加载数据目录下的 <code class="font-mono bg-slate-100 px-1 rounded">~/.mimo2codex/.env</code></strong>，修改项目根目录的 .env 是无效的。Docker 部署时则通过 <code class="font-mono bg-slate-100 px-1 rounded">--env-file</code> 传入。</p>
+                                <p class="leading-relaxed">另外确认：</p>
+                                <ul class="space-y-1.5 list-disc list-inside text-slate-600">
+                                    <li>修改 .env 后<strong>必须重启</strong> mimo2codex 进程 / 容器。</li>
+                                    <li>Docker 场景下，宿主机的 <code class="font-mono bg-slate-100 px-1 rounded">127.0.0.1:8788</code> 与容器内地址不同，Pi 侧 baseUrl 要写宿主机可达的地址。</li>
+                                    <li>可在 <code class="font-mono bg-slate-100 px-1 rounded">/admin/</code> 后台确认各 provider 的 Key 是否已被识别。</li>
+                                </ul>
+                            </div>
+                        </details>
+
+                    </div>
+                </section>
+
+                <!-- ===== 速查 ===== -->
+                <section id="cheatsheet" class="scroll-mt-20 mb-12">
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-5 flex items-center gap-2.5">
+                        <span class="w-1 h-6 bg-brand-600 rounded-full"></span>速查表
+                    </h2>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <!-- 文件路径 -->
+                        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                                <p class="text-xs font-bold text-slate-700">关键文件路径</p>
+                            </div>
+                            <ul class="divide-y divide-slate-100 text-xs">
+                                <li class="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                                    <code class="font-mono text-brand-700 shrink-0">~/.pi/agent/models.json</code>
+                                    <span class="text-slate-500">Pi 自定义 Provider 配置</span>
+                                </li>
+                                <li class="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                                    <code class="font-mono text-brand-700 shrink-0">~/.pi/agent/auth.json</code>
+                                    <span class="text-slate-500">Pi 运行时凭证</span>
+                                </li>
+                                <li class="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                                    <code class="font-mono text-brand-700 shrink-0">~/.mimo2codex/.env</code>
+                                    <span class="text-slate-500">上游 Key + Server 模式开关</span>
+                                </li>
+                                <li class="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                                    <code class="font-mono text-brand-700 shrink-0">~/.mimo2codex/providers.json</code>
+                                    <span class="text-slate-500">多上游注册（Qwen / Kimi / Ollama）</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 端点 -->
+                        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                                <p class="text-xs font-bold text-slate-700">关键端点</p>
+                            </div>
+                            <ul class="divide-y divide-slate-100 text-xs">
+                                <li class="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                                    <code class="font-mono text-brand-700 shrink-0">127.0.0.1:8788/v1</code>
+                                    <span class="text-slate-500">OpenAI 兼容 API（Pi 使用）</span>
+                                </li>
+                                <li class="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                                    <code class="font-mono text-brand-700 shrink-0">127.0.0.1:8788/admin/</code>
+                                    <span class="text-slate-500">管理后台 / 模型目录</span>
+                                </li>
+                                <li class="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                                    <code class="font-mono text-brand-700 shrink-0">/admin/account</code>
+                                    <span class="text-slate-500">生成 m2c_ 代理密钥</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== 页脚 ===== -->
+                <footer class="border-t border-slate-200 pt-6 pb-10">
+                    <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white">
+                        <p class="text-sm font-bold mb-2">排查顺序建议</p>
+                        <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                            检查文件路径与 JSON 语法 → 重启 pi-web 服务 → 核对模型 ID 与兼容性设置 →
+                            检查扩展冲突 → 必要时启用 Server 模式并生成正式代理 Key。
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-[11px] font-medium bg-white/10 border border-white/15 px-2.5 py-1 rounded-full">models.json</span>
+                            <span class="text-[11px] font-medium bg-white/10 border border-white/15 px-2.5 py-1 rounded-full">auth.json</span>
+                            <span class="text-[11px] font-medium bg-white/10 border border-white/15 px-2.5 py-1 rounded-full">Server 模式</span>
+                            <span class="text-[11px] font-medium bg-white/10 border border-white/15 px-2.5 py-1 rounded-full">m2c_ 密钥</span>
+                            <span class="text-[11px] font-medium bg-white/10 border border-white/15 px-2.5 py-1 rounded-full">compat 开关</span>
+                        </div>
+                    </div>
+                    <p class="text-center text-[11px] text-slate-400 mt-6">
+                        Pi × mimo2codex 接入配置与排错完全指南 · 基于 Tailwind CSS 构建
+                    </p>
+                </footer>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- 回到顶部 -->
+    <button id="to-top" class="fixed bottom-5 right-5 z-40 w-10 h-10 rounded-full bg-slate-900 text-white shadow-lg items-center justify-center hidden hover:bg-slate-700 transition" aria-label="回到顶部">
+        <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+        </svg>
+    </button>
+
+    <script>
+            (function () {
+                'use strict';
+
+                /* ---------- 导航数据 ---------- */
+                var NAV = [
+                    { id: 'overview', label: '技术点概览' },
+                    { id: 'step1', label: '1 · 启动本地代理' },
+                    { id: 'step2', label: '2 · 配置 Provider' },
+                    { id: 'step3', label: '3 · 设置 API Key' },
+                    { id: 'step4', label: '4 · 验证与使用' },
+                    { id: 'troubleshoot', label: '故障排查' },
+                    { id: 'cheatsheet', label: '速查表' }
+                ];
+
+                var desktopNav = document.getElementById('desktop-nav');
+                var mobileNav = document.getElementById('mobile-nav');
+
+                NAV.forEach(function (item) {
+                    var a = document.createElement('a');
+                    a.href = '#' + item.id;
+                    a.textContent = item.label;
+                    a.className = 'nav-link block px-3 py-2 rounded-r-lg text-slate-600 hover:text-brand-600 hover:bg-brand-50/60';
+                    a.setAttribute('data-nav-link', item.id);
+                    desktopNav.appendChild(a);
+
+                    var b = document.createElement('a');
+                    b.href = '#' + item.id;
+                    b.textContent = item.label;
+                    b.className = 'block px-5 py-3 text-slate-700 hover:bg-slate-50 border-b border-slate-50';
+                    b.addEventListener('click', closeDrawer);
+                    mobileNav.appendChild(b);
+                });
+
+                /* ---------- 滚动高亮 ---------- */
+                var sections = document.querySelectorAll('main section[id]');
+                var links = document.querySelectorAll('[data-nav-link]');
+
+                if ('IntersectionObserver' in window) {
+                    var obs = new IntersectionObserver(function (entries) {
+                        entries.forEach(function (entry) {
+                            if (!entry.isIntersecting) return;
+                            var id = entry.target.id;
+                            links.forEach(function (l) {
+                                l.classList.toggle('nav-active', l.getAttribute('data-nav-link') === id);
+                            });
+                        });
+                    }, { rootMargin: '-72px 0px -65% 0px', threshold: 0 });
+
+                    sections.forEach(function (s) { obs.observe(s); });
+                }
+
+                /* ---------- 移动端抽屉 ---------- */
+                var drawer = document.getElementById('mobile-drawer');
+                var overlay = document.getElementById('drawer-overlay');
+
+                function openDrawer() {
+                    drawer.classList.remove('-translate-x-full');
+                    overlay.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                }
+                function closeDrawer() {
+                    drawer.classList.add('-translate-x-full');
+                    overlay.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
+
+                document.getElementById('menu-btn').addEventListener('click', openDrawer);
+                document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+                overlay.addEventListener('click', closeDrawer);
+                window.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape') closeDrawer();
+                });
+
+                /* ---------- 标签页 ---------- */
+                document.querySelectorAll('[data-tabs]').forEach(function (group) {
+                    var btns = group.querySelectorAll('[data-tab-btn]');
+                    var panels = group.querySelectorAll('[data-tab-panel]');
+
+                    function activate(key) {
+                        btns.forEach(function (b) {
+                            var on = b.getAttribute('data-tab-btn') === key;
+                            b.classList.toggle('bg-white', on);
+                            b.classList.toggle('text-brand-700', on);
+                            b.classList.toggle('shadow-sm', on);
+                            b.classList.toggle('text-slate-500', !on);
+                        });
+                        panels.forEach(function (p) {
+                            p.classList.toggle('hidden', p.getAttribute('data-tab-panel') !== key);
+                        });
+                    }
+
+                    btns.forEach(function (b) {
+                        b.addEventListener('click', function () {
+                            activate(b.getAttribute('data-tab-btn'));
+                        });
+                    });
+
+                    if (btns.length) activate(btns[0].getAttribute('data-tab-btn'));
+                });
+
+                /* ---------- 复制代码 ---------- */
+                document.querySelectorAll('.copy-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var id = btn.getAttribute('data-copy');
+                        var el = document.getElementById(id);
+                        if (!el) return;
+
+                        var text = el.innerText;
+
+                        function done() {
+                            var prev = btn.textContent;
+                            btn.textContent = '已复制 ✓';
+                            btn.classList.add('opacity-100', 'bg-emerald-600', 'text-white');
+                            setTimeout(function () {
+                                btn.textContent = prev;
+                                btn.classList.remove('bg-emerald-600', 'text-white');
+                            }, 1500);
+                        }
+
+                        if (navigator.clipboard && window.isSecureContext) {
+                            navigator.clipboard.writeText(text).then(done).catch(fallback);
+                        } else {
+                            fallback();
+                        }
+
+                        function fallback() {
+                            var ta = document.createElement('textarea');
+                            ta.value = text;
+                            ta.style.position = 'fixed';
+                            ta.style.opacity = '0';
+                            document.body.appendChild(ta);
+                            ta.select();
+                            try { document.execCommand('copy'); done(); } catch (e) { }
+                            document.body.removeChild(ta);
+                        }
+                    });
+                });
+
+                /* ---------- 回到顶部 ---------- */
+                var toTop = document.getElementById('to-top');
+                window.addEventListener('scroll', function () {
+                    var show = window.scrollY > 500;
+                    toTop.classList.toggle('hidden', !show);
+                    toTop.classList.toggle('flex', show);
+                }, { passive: true });
+
+                toTop.addEventListener('click', function () {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+            })();
+    </script>
+</body>
+
+</html>
